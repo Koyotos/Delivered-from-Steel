@@ -49,4 +49,5 @@ build/*
 .cache/*
 .vscode
 .vscode/*
+compile_commands.json
 

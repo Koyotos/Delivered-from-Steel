@@ -65,6 +65,13 @@ class Transform {
     void SetTranslation(const mat4&);
 
     /*
+    @brief Sets translation component of transform.
+    @param1 const vec& - position in a local coordinate space
+    @return void
+    */
+    void SetTranslation(const vec3&);
+
+    /*
     @brief Sets rotation component of transform.
     @param1 const mat4& - rotation matrix
     @return void
@@ -72,11 +79,25 @@ class Transform {
     void SetRotation(const mat4&);
 
     /*
+    @brief Sets rotation component of transform.
+    @param1 const mat4& - rotation vector in local coordinate space
+    @return void
+    */
+    void SetRotation(const vec3&);
+
+    /*
     @brief Sets scale component of transform.
     @param1 const mat4& - scale matrix
     @return void
     */
     void SetScale(const mat4&);
+
+    /*
+    @brief Sets scale component of transform.
+    @param1 const mat4& - scaleing vector
+    @return void
+    */
+    void SetScale(const vec3&);
 
     /*
     @brief Generic constructor. It creates transform with scale of 1, no rotation
