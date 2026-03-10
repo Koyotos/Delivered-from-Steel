@@ -1,4 +1,5 @@
 #include "include/Renderer/Model.hpp"
+#include "include/Renderer/Mesh.hpp"
 
 void Model::Draw(Shader& sh) {
     for(auto& k : meshes) {
@@ -23,27 +24,15 @@ Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
 
     for(GLuint i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
-        vec3 vector; 
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z; 
-        vertex.position = vector;
+        vertex.position = GLMVec(mesh->mVertices[i]);
         if(mesh->mNormals) {
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
-            vertex.normal = vector;
-        } else {
-            vertex.normal = {0,0,0};
+            vertex.normal = GLMVec(mesh->mNormals[i]);
         }
+
         if(mesh->mTextureCoords[0]) {
-            glm::vec2 vec;
-            vec.x = mesh->mTextureCoords[0][i].x; 
-            vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.uv = vec;
+            vertex.uv = GLMVec(mesh->mTextureCoords[0][i]);
         }
-        else
-            vertex.uv = vec2(0.0f, 0.0f); 
+
         vertices.push_back(vertex);
     }
 
@@ -126,4 +115,45 @@ vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type,
         texturesLoaded.push_back(texture);
     }
     return textures;
+}
+
+void Model::SetVertexBoneData(Vertex& vertex, int boneID, float weight) {
+    for (int i = 0; i < MAX_BONE_INFLUENCE; ++i) {
+        if (vertex.boneIDs[i] < 0) {
+            vertex.weights[i] = weight;
+            vertex.boneIDs[i] = boneID;
+            break;
+        }
+    }
+}
+
+void Model::ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {
+    for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
+        int boneID = -1;
+        std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+        if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
+            BoneInfo newBoneInfo;
+            newBoneInfo.id = boneCounter;
+            newBoneInfo.offset = GLMMat4(mesh->mBones[boneIndex]->mOffsetMatrix); 
+            boneInfoMap[boneName] = newBoneInfo;
+            boneID = boneCounter;
+            boneCounter++;
+        }
+        else {
+            boneID = boneInfoMap[boneName].id;
+        }
+        if(boneID==-1){
+            throw runtime_error("Invalid bone");
+        }
+        auto weights = mesh->mBones[boneIndex]->mWeights;
+        int numWeights = mesh->mBones[boneIndex]->mNumWeights;
+        for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex) {
+            int vertexId = weights[weightIndex].mVertexId;
+            float weight = weights[weightIndex].mWeight;
+            if(vertexId > vertices.size()) {
+                throw runtime_error("Invalid vertex id");
+            }
+            SetVertexBoneData(vertices[vertexId], boneID, weight);
+        }
+    }
 }
