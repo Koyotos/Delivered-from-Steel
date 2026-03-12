@@ -9,19 +9,13 @@
 
 using namespace glm;
 
-#define MAX_BONE_INFLUENCE 4
-
 struct Vertex {
     vec3 position;
     vec3 normal;
     vec2 uv;
-    vec3 tangent;
-    vec3 bitangent;
-    int boneIDs[MAX_BONE_INFLUENCE];
-    float weights[MAX_BONE_INFLUENCE];
 
     Vertex();
-    Vertex(const vec3&, const vec3&, const vec2&, const vec3&, const vec3&);
+    Vertex(const vec3&, const vec3&, const vec2&);
 };
 
 struct Texture {
@@ -30,11 +24,5 @@ struct Texture {
     std::string path;
 };
 
-struct BoneInfo {
-    int id;
-    mat4 offset;
-};
-
-inline mat4 GLMMat4(const aiMatrix4x4&);
 inline vec3 GLMVec(const aiVector3D& vec);
 inline vec2 GLMVec(const aiVector2D& vec);

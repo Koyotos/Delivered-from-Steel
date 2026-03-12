@@ -1,15 +1,29 @@
 #ifndef FE_SCENE
 #define FE_SCENE
 
-#include <vector>
+#include "include/Core/Node.hpp"
+#include "include/Renderer/Model.hpp"
+#include "include/Renderer/Shader.hpp"
+#include <memory>
 
 using namespace std;
 
+// Forward declarations
+class Renderer;
+class PhysicsManager;
+class IOManager;
+
 class Scene {
+    friend Renderer;
+    friend PhysicsManager;
+    friend IOManager;
+    
     private:
-    
+    shared_ptr<Node> root;
+    vector<shared_ptr<Model>> sceneModels;
+    vector<shared_ptr<Shader>> sceneShaders;
     public:
-    
+
 };
 
 #endif
