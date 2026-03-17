@@ -85,6 +85,12 @@ class Transform {
     void SetScale(const vec3&);
 
     /*
+    @brief Sets global transform to be equal to local
+    @return void
+    */
+    void ResetGlobal();
+
+    /*
     @brief Generic constructor. It creates transform with scale of 1, no rotation
     and position of 0,0,0.
     @return Transform

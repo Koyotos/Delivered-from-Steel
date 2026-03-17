@@ -48,6 +48,10 @@ void Transform::SetScale(const vec3& scale) {
     UpdateLocal();
 }
 
+void Transform::ResetGlobal() {
+    global = local;
+}
+
 Transform::Transform() {
     translation = vec3(0,0,0);
     rotation = quat(vec3(0,0,0));

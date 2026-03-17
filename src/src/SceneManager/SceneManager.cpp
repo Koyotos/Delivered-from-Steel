@@ -1,4 +1,5 @@
 #include "include/SceneManager/SceneManager.hpp"
+#include "include/Core/Object3D.hpp"
 #include <fstream>
 
 shared_ptr<Scene> SceneManager::GetActive() {
@@ -12,7 +13,7 @@ void SceneManager::TestScene() {
     testT.SetTranslation(vec3(0,-1,-5));
     testT.SetRotation(vec3(0,0.1,0));
     testT.SetScale(vec3(1,1,1));
-    shared_ptr<VisualNode> test = make_shared<VisualNode>();
+    shared_ptr<Object3D> test = make_shared<Object3D>();
     test->SetTransform(testT);
 
     const string vertCode = "#version 420 \n layout(location = 0) in vec3 vertexPosition; \n layout(location = 1) in vec3 normals; \n \
