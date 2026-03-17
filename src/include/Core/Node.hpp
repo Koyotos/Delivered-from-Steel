@@ -8,17 +8,17 @@
 using namespace std;
 
 class Node {
-    private:
-    uint8_t flags;
+    protected:
+    bool flags[6];
     vector<shared_ptr<Node>> children;
 
     public:
     // Internal stuff to communication between nodes and EngineController. This part is not needed anywhere else. Don't look here. Go away. //
     const uint8_t& GetFlags() const noexcept;
 
-    inline bool TestProcess() noexcept {return flags&0b00000001;} 
-    inline bool TestInput() noexcept {return flags&0b00000010;}
-    inline bool TestPhysics() noexcept {return flags&0b00000100;}
+    inline bool TestProcess() noexcept {return flags[0];} 
+    inline bool TestInput() noexcept {return flags[1];}
+    inline bool TestPhysics() noexcept {return flags[2];}
     virtual inline bool TestDraw() noexcept {return false;}
     virtual inline bool TestIgnoreParent() noexcept {return true;}
     virtual inline bool TestTransformChanged() noexcept {return false;};
@@ -36,21 +36,21 @@ class Node {
     @param1 const bool& - state to be set
     @return void
     */
-    inline void SetProcess(const bool& state) noexcept {flags|=(state&0b00000001);};
+    inline void SetProcess(const bool& state) noexcept {flags[0] = state;};
 
     /*
     @brief Sets Input flag state.
     @param1 const bool& - state to be set
     @return void
     */
-    inline void SetInput(const bool& state) noexcept {flags|=(state&0b00000010);};
+    inline void SetInput(const bool& state) noexcept {flags[1] = state;};
 
     /*
     @brief Sets Physics flag state.
     @param1 const bool& - state to be set
     @return void
     */
-    inline void SetPhysics(const bool& state) noexcept {flags|=(state&0b00000100);};
+    inline void SetPhysics(const bool& state) noexcept {flags[2] = state;};
 
     /*
     @brief Sets Draw flag state.

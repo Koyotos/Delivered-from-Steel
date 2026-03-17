@@ -21,6 +21,12 @@ class EngineController {
     shared_ptr<ResourceManager> rsm;
     shared_ptr<AudioManager> aum;
 
+    double currentTime;
+    double deltaTime;
+    double lastTime;
+
+    inline void EndFrame();
+
     public:
     void Init();
     void Run();

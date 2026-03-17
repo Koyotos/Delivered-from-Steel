@@ -49,7 +49,7 @@ void Shader::SetMat4(const string& name, const mat4x4& val) {
 }
 
 void Shader::Compile(string sources[4]) {
-    GLuint id = glCreateProgram();
+    id = glCreateProgram();
     GLuint types[4] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
     
     for(uint8_t i = 0; i < 4; i++) {

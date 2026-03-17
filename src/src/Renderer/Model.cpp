@@ -116,3 +116,16 @@ vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type,
     }
     return textures;
 }
+
+Model::Model(string path) {
+    Importer importer;
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
+    {
+        auto dupa = string(importer.GetErrorString());
+        throw runtime_error("ASSIMP ERROR : " + string(importer.GetErrorString()));
+    }
+    directory = path.substr(0, path.find_last_of('/'));
+
+    ProcessNode(scene->mRootNode, scene);
+}

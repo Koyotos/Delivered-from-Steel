@@ -10,6 +10,8 @@
 #include <map>
 #include <vector>
 
+using namespace Assimp;
+
 class Model {
     private:
     string directory;
@@ -23,7 +25,7 @@ class Model {
     vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
     
     public:
-    Model(char *path);
+    Model(string);
     void Draw(Shader &shader);	
 };
 

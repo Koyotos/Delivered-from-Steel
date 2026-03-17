@@ -24,5 +24,5 @@ struct Texture {
     std::string path;
 };
 
-inline vec3 GLMVec(const aiVector3D& vec);
-inline vec2 GLMVec(const aiVector2D& vec);
+vec3 GLMVec(const aiVector3D& vec);
+vec2 GLMVec(const aiVector2D& vec);

@@ -2,6 +2,7 @@
 #define FE_SCENE_MANAGER
 
 #include "include/Core/Scene.hpp"
+#include "include/Core/VisualNode.hpp"
 #include <cstdint>
 #include <vector>
 #include <memory>
@@ -15,6 +16,8 @@ class SceneManager {
 
     public:
     shared_ptr<Scene> GetActive();
+
+    void TestScene();
 };
 
 #endif

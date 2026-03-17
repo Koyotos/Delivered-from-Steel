@@ -1,6 +1,10 @@
 #ifndef FE_TRANSFORM
 #define FE_TRANSFORM
 
+#define GLM_ENABLE_EXPERIMENTAL
+
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/matrix.hpp>
 
 using namespace glm;
@@ -11,12 +15,14 @@ It holds every partial matrix as well as combined local and global.
 */
 class Transform {
     private:
-    mat4 translation;
-    mat4 rotation;
-    mat4 scale;
+    vec3 translation;
+    quat rotation;
+    vec3 scale;
 
     mat4 local;
     mat4 global;
+
+    inline void UpdateLocal();
 
     public:
 
@@ -41,60 +47,39 @@ class Transform {
 
     /*
     @brief Returns translation component of transform.
-    @return const mat4& - translation matrix
+    @return const vec3& - translation vector
     */
-    const mat4& GetTranslation() const;
+    const vec3& GetTranslation() const;
 
     /*
     @brief Returns rotation component of transform.
-    @return const mat4& - rotation matrix
+    @return const ve3& - rotation vector, in radians
     */
-    const mat4& GetRotation() const;
+    const vec3 GetRotation() const;
 
     /*
     @brief Returns scale component of transform.
-    @return const mat4& - scale matrix
+    @return const vec3& - scale vector
     */
-    const mat4& GetScale() const;
+    const vec3& GetScale() const;
 
     /*
     @brief Sets translation component of transform.
-    @param1 const mat4& - translation matrix
-    @return void
-    */
-    void SetTranslation(const mat4&);
-
-    /*
-    @brief Sets translation component of transform.
-    @param1 const vec& - position in a local coordinate space
+    @param1 const vec3& - position in a local coordinate space
     @return void
     */
     void SetTranslation(const vec3&);
 
     /*
     @brief Sets rotation component of transform.
-    @param1 const mat4& - rotation matrix
-    @return void
-    */
-    void SetRotation(const mat4&);
-
-    /*
-    @brief Sets rotation component of transform.
-    @param1 const mat4& - rotation vector in local coordinate space
+    @param1 const vec3& - rotation vector in local coordinate space in radians
     @return void
     */
     void SetRotation(const vec3&);
 
     /*
     @brief Sets scale component of transform.
-    @param1 const mat4& - scale matrix
-    @return void
-    */
-    void SetScale(const mat4&);
-
-    /*
-    @brief Sets scale component of transform.
-    @param1 const mat4& - scaleing vector
+    @param1 const vec3& - scaling vector
     @return void
     */
     void SetScale(const vec3&);
@@ -107,14 +92,14 @@ class Transform {
     Transform();
 
     /*
-    @brief Parametrized constructor. It creates transform with given component matrices
+    @brief Parametrized constructor. It creates transform with given component vectors
     and performs local matrix calculation.
-    @param1 const mat4& - translation matrix
-    @param2 const mat4& - rotation matrix
-    @param3 const mat4& - scale matrix
+    @param1 const vec3& - translation vector
+    @param2 const vec3& - rotation vector (radians)
+    @param3 const vec3& - scale vector
     @return Transform
     */
-    Transform(const mat4&, const mat4&, const mat4&);
+    Transform(const vec3&, const vec3&, const vec3&);
 
     /*
     @brief Generic destructor.

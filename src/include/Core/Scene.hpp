@@ -23,7 +23,7 @@ class Scene {
     vector<shared_ptr<Model>> sceneModels;
     vector<shared_ptr<Shader>> sceneShaders;
     public:
-
+    void SetRoot(shared_ptr<Node>);
 };
 
 #endif
