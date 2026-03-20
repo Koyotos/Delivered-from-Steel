@@ -1,9 +1,13 @@
 #ifndef FE_NODE
 #define FE_NODE
 
+#include <any>
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <vector>
+
+#define fromMap(type, key, jname) any_cast<type>(jname.find(key)->second)
 
 using namespace std;
 
@@ -108,6 +112,7 @@ class Node {
     virtual void Physics(const float&);
 
     Node();
+    Node(const unordered_map<string, any>&);
     virtual ~Node();
 
 };

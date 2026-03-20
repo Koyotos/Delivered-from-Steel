@@ -66,6 +66,20 @@ Transform::Transform(const vec3& translation, const vec3& rotation, const vec3& 
     UpdateLocal();
 }
 
+Transform::Transform(const vector<std::any>& data) {
+    translation.x = any_cast<float>(data[0]);
+    translation.y = any_cast<float>(data[1]);
+    translation.z = any_cast<float>(data[2]);
+
+    rotation.x = any_cast<float>(data[3]);
+    rotation.y = any_cast<float>(data[4]);
+    rotation.z = any_cast<float>(data[5]);
+
+    scale.x = any_cast<float>(data[6]);
+    scale.y = any_cast<float>(data[7]);
+    scale.z = any_cast<float>(data[8]);
+}
+
 Transform::~Transform() {
 
 }

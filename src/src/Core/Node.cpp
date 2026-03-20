@@ -28,6 +28,12 @@ Node::Node() {
 
 }
 
+Node::Node(const unordered_map<string, any>& data) {
+    flags[0] = fromMap(bool, "process", data);
+    flags[1] = fromMap(bool, "input", data);
+    flags[2] = fromMap(bool, "physics", data);
+}
+
 Node::~Node() {
     
 }

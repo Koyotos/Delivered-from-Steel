@@ -21,6 +21,7 @@ class Scene {
     friend ResourceManager;
     
     private:
+    string name;
     shared_ptr<Node> root;
     vector<shared_ptr<Model>> sceneModels;
     vector<shared_ptr<Shader>> sceneShaders;

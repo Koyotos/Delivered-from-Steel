@@ -12,3 +12,7 @@ shared_ptr<Model> Object3D::GetModel() {
 void Object3D::SetModel(shared_ptr<Model> model) {
     this->model = model;
 }
+
+Object3D::Object3D(const unordered_map<string, std::any>& data) : VisualNode(data) {
+    
+}

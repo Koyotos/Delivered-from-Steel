@@ -6,8 +6,11 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/matrix.hpp>
+#include <vector>
+#include <any>
 
 using namespace glm;
+using namespace std;
 
 /*
 @brief Transform is responsible for stoing all information realted to position.
@@ -106,6 +109,13 @@ class Transform {
     @return Transform
     */
     Transform(const vec3&, const vec3&, const vec3&);
+
+    /*
+    @brief Constructor from json files. It takes vector extracted from json.
+    @param1 const vector<std::any>& - data vector
+    @return Transform 
+    */
+    Transform(const vector<std::any>&);
 
     /*
     @brief Generic destructor.

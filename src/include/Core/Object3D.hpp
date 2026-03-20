@@ -1,6 +1,7 @@
 #ifndef FE_OBJECT_3D
 #define FE_OBJECT_3D
 
+#include "include/Core/Object2D.hpp"
 #include "include/Core/VisualNode.hpp"
 #include "include/PhysicsManager/PhysicsNode3D.hpp"
 
@@ -33,6 +34,8 @@ class Object3D : public VisualNode, public PhysicsNode3D {
     @return void
     */
     void SetModel(shared_ptr<Model>);
+
+    Object3D(const unordered_map<string, std::any>&);
 };
 
 #endif
