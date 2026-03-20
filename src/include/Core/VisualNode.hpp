@@ -14,7 +14,6 @@ class VisualNode : public Node {
     protected:
     Transform transform;
     shared_ptr<Shader> shader;
-    shared_ptr<Model> model;
 
     public:
     // Tests for engine purposes

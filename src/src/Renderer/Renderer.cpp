@@ -1,4 +1,6 @@
 #include "include/Renderer/Renderer.hpp"
+#include "include/Core/Object2D.hpp"
+#include "include/Core/VisualNode.hpp"
 
 void Renderer::Init() {
     if(!glfwInit()) {
@@ -22,13 +24,14 @@ void Renderer::Init() {
         throw runtime_error("GL loader eror");
     }
 
-    glEnable(GL_AUTO_NORMAL);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    glPolygonMode(GL_FRONT,GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     PrepareDraw(scene->root, Transform());
     Draw(scene->root);
 }
@@ -43,7 +46,7 @@ void Renderer::Draw(shared_ptr<Node> node) {
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
     if(node->TestDraw()) {
         shared_ptr<VisualNode> nodeCast = static_pointer_cast<VisualNode>(node);
-        ConfigureShader(nodeCast->GetShader());
+        ConfigureShader(nodeCast);
         if(!nodeCast->TestIgnoreParent()) {
             if(nodeCast->TestTransformChanged())
                 nodeCast->ApplyParentTransform(t);
@@ -57,8 +60,13 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
     }
 } 
 
-void Renderer::ConfigureShader(shared_ptr<Shader> shader) {
-    shader->SetMat4("VP", camera.GetVP());
+void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
+    shared_ptr<Shader> shader = node->GetShader();
+    if(const auto& cast2d = dynamic_pointer_cast<Object2D>(node)) { // Consider avoiding dynamic cast, possibly virtual type func
+        shader->SetMat4("VP", camera.GetVP(0));
+    } else {
+        shader->SetMat4("VP", camera.GetVP(1));
+    }   
 }
 
 void Renderer::EndFrame() {

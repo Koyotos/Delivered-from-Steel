@@ -12,11 +12,13 @@ using namespace std;
 class Renderer;
 class PhysicsManager;
 class IOManager;
+class ResourceManager;
 
 class Scene {
     friend Renderer;
     friend PhysicsManager;
     friend IOManager;
+    friend ResourceManager;
     
     private:
     shared_ptr<Node> root;

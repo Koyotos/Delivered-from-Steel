@@ -25,6 +25,7 @@ void Mesh::SetupMesh(const bool& drawFlag) {
 void Mesh::Draw(Shader& shader) {
     GLuint diffuseNr = 1;
     GLuint specularNr = 1;
+    shader.Use();
     for(unsigned int i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
@@ -39,7 +40,6 @@ void Mesh::Draw(Shader& shader) {
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
-
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -53,5 +53,7 @@ Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> text
 }
 
 Mesh::~Mesh() {
-
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 }

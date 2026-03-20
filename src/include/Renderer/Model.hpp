@@ -8,6 +8,7 @@
 #include <stb_image.h>
 #include <stdexcept>
 #include <map>
+#include <memory>
 #include <vector>
 
 using namespace Assimp;
@@ -15,13 +16,12 @@ using namespace Assimp;
 class Model {
     private:
     string directory;
-    vector<Mesh> meshes;
+    vector<shared_ptr<Mesh>> meshes;
     vector<Texture> texturesLoaded;
 
     void LoadModel(const string&);
     void ProcessNode(aiNode *node, const aiScene *scene);
-    Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
-    GLuint TextureFromFile(const char*, const char*);
+    shared_ptr<Mesh> ProcessMesh(aiMesh *mesh, const aiScene *scene);
     vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
     
     public:

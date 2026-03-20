@@ -3,7 +3,7 @@
 
 void Model::Draw(Shader& sh) {
     for(auto& k : meshes) {
-        k.Draw(sh);
+        k->Draw(sh);
     }
 }
 
@@ -17,7 +17,7 @@ void Model::ProcessNode(aiNode *node, const aiScene *scene) {
     }
 }
 
-Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
+shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
     vector<Vertex> vertices;
     vector<GLuint> indices;
     vector<Texture> textures;
@@ -52,45 +52,7 @@ Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
         }  
     }
 
-    return Mesh(vertices, indices, textures, false); // TODO
-}
-
-GLuint Model::TextureFromFile(const char* name, const char* dir) {
-    if(!name) {
-        throw invalid_argument("Name is null");
-    }
-    if(!dir) {
-        throw invalid_argument("Directory is null");
-    }
-    string path = string(dir) + "/" + string(name);
-    int w, h, c;
-    unsigned char* data = stbi_load(path.c_str(),&w,&h,&c,0);
-    if(!data) {
-        throw runtime_error("Can't read texture file");
-    }
-    GLenum format = GL_RGB;
-    switch (c) {
-        case 1: format = GL_RED; break;
-        case 3: format = GL_RGB; break;
-        case 4: format = GL_RGBA; break;
-        default: throw runtime_error("");
-    }
-    GLuint texID = 0;
-    glGenTextures(1,&texID);
-    glBindTexture(GL_TEXTURE_2D,texID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    stbi_image_free(data);
-    return texID;
+    return make_shared<Mesh>(vertices, indices, textures, false); // TODO
 }
 
 vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName) {

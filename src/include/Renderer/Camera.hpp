@@ -10,20 +10,14 @@
 
 using namespace glm;
 
-enum CameraMode {
-    CAM_MODE_PERSPECTIVE,
-    CAM_MODE_ORTHO
-};
-
 class Camera {
     private:
-    CameraMode mode = CAM_MODE_PERSPECTIVE;
     vec2 position;
     mat4 P = perspective(radians(45.0), 1920.0/1080.0 , 0.1, 200.0);
+    mat4 O = ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f); 
     
     public:
-    mat4 GetVP() const noexcept;
-    
+    mat4 GetVP(const bool&) const noexcept;
 };
 
 #endif

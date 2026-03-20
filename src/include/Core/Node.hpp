@@ -32,6 +32,11 @@ class Node {
     vector<shared_ptr<Node>> GetChildren();
 
     /*
+    
+    */
+    void AddChild(shared_ptr<Node>);
+
+    /*
     @brief Sets Process flag state.
     @param1 const bool& - state to be set
     @return void

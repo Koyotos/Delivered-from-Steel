@@ -1,5 +1,8 @@
 #include "include/SceneManager/SceneManager.hpp"
+#include "include/Core/Object2D.hpp"
 #include "include/Core/Object3D.hpp"
+#include "include/Core/Transform.hpp"
+#include "include/Renderer/Sprite.hpp"
 #include <fstream>
 
 shared_ptr<Scene> SceneManager::GetActive() {
@@ -8,7 +11,7 @@ shared_ptr<Scene> SceneManager::GetActive() {
 
 void SceneManager::TestScene() {
     shared_ptr<Scene> scene = make_shared<Scene>();
-    shared_ptr<Model> mdl = make_shared<Model>("res/house/house.obj");
+    shared_ptr<Model> mdl = make_shared<Model>("res/models/test/house.obj");
     Transform testT;
     testT.SetTranslation(vec3(0,-1,-5));
     testT.SetRotation(vec3(0,0.1,0));
@@ -28,6 +31,30 @@ void SceneManager::TestScene() {
     test->SetModel(mdl);
     test->SetShader(sh);
     test->SetDraw(true);
+
+    shared_ptr<Sprite> testSpr = make_shared<Sprite>("res/sprites/test");
+    shared_ptr<Object2D> test2d = make_shared<Object2D>();
+    test2d->SetSprite(testSpr);
+
+    const string vertCode2d = "#version 420 \n layout (location = 0) in vec2 aPos; \n layout (location = 1) in vec2 aUV; \n \
+    uniform mat4 M; \n uniform mat4 VP; \n out vec2 TexCoords; \n void main() { \n \
+    TexCoords = aUV; \n gl_Position = VP * M * vec4(aPos, 0.0, 1.0);}";
+
+    const string fragmentShader2d = "#version 420 \n in vec2 TexCoords; \n uniform sampler2D spriteTexture; \n out vec4 FragColor; \n \
+    void main(){ \n FragColor = texture(spriteTexture, TexCoords);}";
+
+    shared_ptr<Shader> sh2d = make_shared<Shader>(vertCode2d,"","",fragmentShader2d,"test2");
+
+    testT = Transform();
+    testT.SetTranslation(vec3(500,500,0));
+    testT.SetRotation(vec3(0,0,0));
+    testT.SetScale(vec3(1,1,1));
+
+    test2d->SetShader(sh2d);
+    test2d->SetTransform(testT);
+    test->AddChild(test2d);
+    test2d->SetDraw(true);
+
     scene->SetRoot(test);
     scenes.push_back(scene);
     activeIndex = 0;

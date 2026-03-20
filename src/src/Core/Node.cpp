@@ -4,6 +4,10 @@ vector<shared_ptr<Node>> Node::GetChildren() {
     return children;
 }
 
+void Node::AddChild(shared_ptr<Node> node) {
+    children.push_back(node);
+}
+
 void Node::Process() {
     return;
 }

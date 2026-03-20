@@ -25,7 +25,7 @@ class Renderer {
 
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void Draw(shared_ptr<Node>);
-    inline void ConfigureShader(shared_ptr<Shader>);
+    inline void ConfigureShader(shared_ptr<VisualNode>);
 
     public:
     void DrawScene(shared_ptr<Scene>);

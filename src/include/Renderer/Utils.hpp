@@ -6,8 +6,11 @@
 #include <glm/matrix.hpp>
 #include <glad/glad.h>
 #include <string>
+#include <stb_image.h>
+#include <stdexcept>
 
 using namespace glm;
+using namespace std;
 
 struct Vertex {
     vec3 position;
@@ -18,6 +21,11 @@ struct Vertex {
     Vertex(const vec3&, const vec3&, const vec2&);
 };
 
+struct Vertex2D {
+    vec2 position;
+    vec2 uv;
+};
+
 struct Texture {
     GLuint id;
     std::string type;
@@ -26,3 +34,5 @@ struct Texture {
 
 vec3 GLMVec(const aiVector3D& vec);
 vec2 GLMVec(const aiVector2D& vec);
+
+GLuint TextureFromFile(const char*, const char*);
