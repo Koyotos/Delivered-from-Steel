@@ -1,43 +1,65 @@
 #ifndef FE_NODE
 #define FE_NODE
 
+#include <any>
 #include <cstdint>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+#define fromMap(type, key, jname) any_cast<type>(jname.find(key)->second)
+
+using namespace std;
 
 class Node {
-    private:
-    uint8_t flags;
+    protected:
+    bool flags[6];
+    vector<shared_ptr<Node>> children;
 
     public:
     // Internal stuff to communication between nodes and EngineController. This part is not needed anywhere else. Don't look here. Go away. //
     const uint8_t& GetFlags() const noexcept;
 
-    inline bool TestProcess() noexcept {return flags&0b00000001;} 
-    inline bool TestInput() noexcept {return flags&0b00000010;}
-    inline bool TestPhysics() noexcept {return flags&0b00000100;}
+    inline bool TestProcess() noexcept {return flags[0];} 
+    inline bool TestInput() noexcept {return flags[1];}
+    inline bool TestPhysics() noexcept {return flags[2];}
     virtual inline bool TestDraw() noexcept {return false;}
+    virtual inline bool TestIgnoreParent() noexcept {return true;}
+    virtual inline bool TestTransformChanged() noexcept {return false;};
 
     // Normal part again 
+
+    /*
+    @brief Returns vector of pointers to all node's children.
+    @return vector<shared_ptr<Node>> - vector of children
+    */
+    vector<shared_ptr<Node>> GetChildren();
+
+    /*
+    
+    */
+    void AddChild(shared_ptr<Node>);
 
     /*
     @brief Sets Process flag state.
     @param1 const bool& - state to be set
     @return void
     */
-    inline void SetProcess(const bool& state) noexcept {flags|=(state&0b00000001);};
+    inline void SetProcess(const bool& state) noexcept {flags[0] = state;};
 
     /*
     @brief Sets Input flag state.
     @param1 const bool& - state to be set
     @return void
     */
-    inline void SetInput(const bool& state) noexcept {flags|=(state&0b00000010);};
+    inline void SetInput(const bool& state) noexcept {flags[1] = state;};
 
     /*
     @brief Sets Physics flag state.
     @param1 const bool& - state to be set
     @return void
     */
-    inline void SetPhysics(const bool& state) noexcept {flags|=(state&0b00000100);};
+    inline void SetPhysics(const bool& state) noexcept {flags[2] = state;};
 
     /*
     @brief Sets Draw flag state.
@@ -45,6 +67,20 @@ class Node {
     @return void
     */
     virtual inline void SetDraw(const bool& state) noexcept {return;};
+
+    /*
+    @brief Sets Ignore Parent flag state.
+    @param1 const bool& - state to be set
+    @return void
+    */
+    virtual inline void SetIgnoreParent(const bool& state) noexcept {return;};
+
+    /*
+    @brief Sets Transform Changed flag state.
+    @param1 const bool& - state to be set
+    @return void
+    */
+    virtual inline void SetTranformChanged(const bool& state) noexcept {return;};
 
     /*
     @brief General purpose method, called once every frame. This may contain code that is related
@@ -74,6 +110,10 @@ class Node {
     @return void
     */
     virtual void Physics(const float&);
+
+    Node();
+    Node(const unordered_map<string, any>&);
+    virtual ~Node();
 
 };
 

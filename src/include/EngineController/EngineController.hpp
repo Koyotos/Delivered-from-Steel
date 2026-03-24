@@ -21,9 +21,21 @@ class EngineController {
     shared_ptr<ResourceManager> rsm;
     shared_ptr<AudioManager> aum;
 
+    double currentTime;
+    double deltaTime; 
+    double lastTime;
+
+    inline void EndFrame();
+
     public:
+    // Engine API
+    
     void Init();
     void Run();
+
+    shared_ptr<Scene> LoadScene(const string&);
+    void SetActiveScene(shared_ptr<Scene>);
+    void SetActiveScene(const uint16_t&);
 
     EngineController(const EngineController&) = delete;
     EngineController(EngineController&&) = delete;
