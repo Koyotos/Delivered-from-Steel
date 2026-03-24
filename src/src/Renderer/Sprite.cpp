@@ -1,6 +1,10 @@
 #include "include/Renderer/Sprite.hpp"
 #include "include/Renderer/Mesh.hpp"
 
+const string& Sprite::GetDir() const noexcept {
+    return directory;
+}
+
 void Sprite::SetActiveTexture(const GLuint& index) {
     if (index < textures.size())
         active = index;

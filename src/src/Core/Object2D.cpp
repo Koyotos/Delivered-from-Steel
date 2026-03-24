@@ -12,3 +12,11 @@ shared_ptr<Sprite> Object2D::GetSprite() {
 void Object2D::SetSprite(shared_ptr<Sprite> sprite) {
     this->sprite = sprite;
 }
+
+Object2D::Object2D() {
+
+}
+
+Object2D::Object2D(const unordered_map<string, std::any>& data) : VisualNode(data) {
+    
+}

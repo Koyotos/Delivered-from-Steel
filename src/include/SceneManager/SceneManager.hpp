@@ -17,6 +17,11 @@ class SceneManager {
     public:
     shared_ptr<Scene> GetActive();
 
+    void SetActive(shared_ptr<Scene>);
+    void SetActive(const uint16_t&);
+
+    void AddScene(shared_ptr<Scene>);
+
     void TestScene();
 };
 

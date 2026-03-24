@@ -10,6 +10,7 @@ Transform VisualNode::GetTransform() const noexcept {
 
 void VisualNode::ApplyParentTransform(Transform t) {
     transform.Combine(t);
+    flags[5] = false;
 }
 
 void VisualNode::ResetGlobal() {
@@ -22,6 +23,10 @@ void VisualNode::SetShader(shared_ptr<Shader> sh) {
 
 void VisualNode::SetTransform(const Transform& transform) {
     this->transform = transform;
+}
+
+VisualNode::VisualNode() {
+
 }
 
 VisualNode::VisualNode(const unordered_map<string, std::any>& data) : Node(data) {

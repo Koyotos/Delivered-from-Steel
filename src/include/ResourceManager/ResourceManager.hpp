@@ -57,9 +57,9 @@ class ResourceManager {
     vector<shared_ptr<Scene>> scenes;
 
     // Asset loaders
-    inline shared_ptr<Model> LoadModel();
-    inline shared_ptr<Sprite> LoadSprite();
-    inline shared_ptr<Shader> LoadShader();
+    inline shared_ptr<Model> LoadModel(const string&);
+    inline shared_ptr<Sprite> LoadSprite(const string&);
+    inline shared_ptr<Shader> LoadShader(const string&);
 
     // Helper
     inline string LoadPlainText(const path&);
@@ -69,12 +69,13 @@ class ResourceManager {
     inline unordered_map<string, std::any> LoadJSON(const path&);
 
     // Node parser helpers
-    inline void ApplyAssets(shared_ptr<Node>);
-    inline vector<pair<shared_ptr<Node>, int64_t>> ParseNodes(unordered_map<string, std::any>&);
-    inline void LinkScene(vector<pair<shared_ptr<Node>, int64_t>>&, shared_ptr<Scene>);
+    inline void ApplyAssets(shared_ptr<Node>, unordered_map<string,std::any>);
+    inline vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ParseNodes(unordered_map<string, std::any>&);
+    inline void LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>&, shared_ptr<Scene>);
 
     public:
-    void LoadScene(const path&) noexcept;
+    shared_ptr<Scene> LoadScene(const path&) noexcept;
+    void ConfigurePaths();
 };
 
 #endif

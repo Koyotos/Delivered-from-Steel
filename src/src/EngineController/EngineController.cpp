@@ -21,7 +21,7 @@ void EngineController::Init() {
         aum = make_shared<AudioManager>();
 
         renderer->Init();
-        scm->TestScene();
+        rsm->ConfigurePaths();
 
     } catch(const exception& except) {
         globals->Log("Engine initialization error : " + string(except.what()));
@@ -44,6 +44,20 @@ void EngineController::Run() {
 
 void EngineController::EndFrame() {
     renderer->EndFrame();
+}
+
+shared_ptr<Scene> EngineController::LoadScene(const string& name) {
+    shared_ptr<Scene> scn = rsm->LoadScene(name);
+    scm->AddScene(scn);
+    return scn;
+}
+
+void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
+    scm->SetActive(scn);
+}
+
+void EngineController::SetActiveScene(const uint16_t& idx) {
+    scm->SetActive(idx);
 }
 
 EngineController::EngineController() {

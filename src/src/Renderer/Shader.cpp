@@ -51,7 +51,7 @@ void Shader::SetMat4(const string& name, const mat4x4& val) {
 void Shader::Compile(string sources[4]) {
     id = glCreateProgram();
     GLuint types[4] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER};
-    
+      int status;
     for(uint8_t i = 0; i < 4; i++) {
         if(sources[i]=="") {
             if(i==0 || i==3) {
@@ -64,7 +64,6 @@ void Shader::Compile(string sources[4]) {
         const char* src = sources[i].c_str();
         glShaderSource(part,1,&src,nullptr);
         glCompileShader(part);
-        int status;
         glGetShaderiv(part, GL_COMPILE_STATUS,&status);
         if(!status) {
             char buffer[512];
@@ -75,6 +74,12 @@ void Shader::Compile(string sources[4]) {
         glDeleteShader(part);
     }
     glLinkProgram(id);
+    glGetShaderiv(id, GL_LINK_STATUS,&status);
+    if(!status) {
+        char buffer[512];
+        glGetShaderInfoLog(id,512,nullptr,buffer);
+        throw runtime_error("Failed to link shader : " + string(buffer));
+    }
 }
 
 Shader::Shader(string sources[4], const string& name) {

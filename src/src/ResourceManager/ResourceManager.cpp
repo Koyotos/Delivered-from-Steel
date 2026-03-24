@@ -4,6 +4,14 @@
 #include <cstdint>
 #include <filesystem>
 
+void ResourceManager::ConfigurePaths() {
+    path pth = Globals::GetGlobals().GetExecDir()/"res";
+    modelsPath = pth/"models";
+    shadersPath = pth/"shaders";
+    spritesPath = pth/"sprites";
+    audioPath = pth/"audio";
+}
+
 string ResourceManager::LoadPlainText(const path& p) {
     resourceStream.open(p, ios::in);
     if(!resourceStream.good()) {
@@ -59,46 +67,111 @@ unordered_map<string, std::any> ResourceManager::LoadJSON(const path& jsonFile) 
     return result;
 }
 
-shared_ptr<Model> ResourceManager::LoadModel() {
-
+shared_ptr<Model> ResourceManager::LoadModel(const string& name) {
+    for(auto& loadedEntry : models) {
+        if(loadedEntry.model->GetDir() == modelsPath/name) {
+            loadedEntry.refCount++;
+            return loadedEntry.model;       
+        }
+    }
+    RefCountModel newRCM;
+    newRCM.model = make_shared<Model>(modelsPath/name/path(name+".obj"));
+    newRCM.refCount = 1;
+    models.push_back(newRCM);
+    return newRCM.model;
 }
 
-shared_ptr<Sprite> ResourceManager::LoadSprite() {
-
+shared_ptr<Sprite> ResourceManager::LoadSprite(const string& name) {
+    for(auto& loadedEntry : sprites) {
+        if(loadedEntry.sprite->GetDir() == spritesPath/name) {
+            loadedEntry.refCount++;
+            return loadedEntry.sprite;       
+        }
+    }
+    RefCountSprite newRCS;
+    newRCS.sprite = make_shared<Sprite>(spritesPath/name);
+    newRCS.refCount = 1;
+    sprites.push_back(newRCS);
+    return newRCS.sprite;
 }
 
-shared_ptr<Shader> ResourceManager::LoadShader() {
+shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
+    for(auto& loadedEntry : shaders) {
+        if(loadedEntry.shader->GetName() == shadersPath/name) {
+            loadedEntry.refCount++;
+            return loadedEntry.shader;       
+        }
+    }
 
+    string sources[4];
+    RefCountShader newRCS;
+
+    try {
+        sources[0] = LoadPlainText(shadersPath/name/path(name + ".vert"));
+        sources[1] = LoadPlainText(shadersPath/name/path(name + ".tes"));
+        sources[2] = LoadPlainText(shadersPath/name/path(name + ".geo"));
+        sources[3] = LoadPlainText(shadersPath/name/path(name + ".frag"));
+        newRCS.shader = make_shared<Shader>(sources,name);
+        newRCS.refCount = 1;
+        shaders.push_back(newRCS);
+        return newRCS.shader;
+    } catch(const exception& except) {
+        return nullptr;
+    }
 }
 
-void ResourceManager::ApplyAssets(shared_ptr<Node>) {
+void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,std::any> data) {
+    if(auto obj3d = dynamic_pointer_cast<Object3D>(node)) { // Think about casts, try to replace 
+        if(data.contains("model")) {
+            obj3d->SetModel(LoadModel(fromMap(string,"model",data)));
+        }
 
+        if(data.contains("shader")) {
+            obj3d->SetShader(LoadShader(fromMap(string,"shader",data)));
+        }
+    } else if(auto obj2d = dynamic_pointer_cast<Object2D>(node)) {
+        if(data.contains("sprite")) {
+            obj2d->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
+        }
+        if(data.contains("shader")) {
+            obj2d->SetShader(LoadShader(fromMap(string,"shader",data)));
+        }
+    }
 }
 
-vector<pair<shared_ptr<Node>, int64_t>> ResourceManager::ParseNodes(unordered_map<string, std::any>& data) {
-    vector<pair<shared_ptr<Node>, int64_t>> nodes;
+vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(unordered_map<string, std::any>& data) {
+    vector<tuple<shared_ptr<Node>, int64_t, int64_t>> nodes;
     for(auto& [name, val] : data) {
         auto objVarList = any_cast<unordered_map<string,std::any>>(val);
-        string currentType = fromMap(string,"name",objVarList);
+        string currentType = fromMap(string,"class",objVarList);
         for(auto& octEntry : objectClassTable) {
             if(currentType==octEntry.first) {
                 shared_ptr<Node> node = octEntry.second(objVarList);
-                ApplyAssets(node);
-                nodes.push_back({node, fromMap(int64_t, "parent", objVarList)});
+                ApplyAssets(node, objVarList);
+                nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }
     }   
     return nodes;
 }
 
-void ResourceManager::LinkScene(vector<pair<shared_ptr<Node>, int64_t>>& nodes, shared_ptr<Scene> scene) {
-    
+void ResourceManager::LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>& nodes, shared_ptr<Scene> scene) {
+    for(auto& n : nodes) {
+        for(auto& ppn : nodes) {
+            if(get<1>(n) == get<2>(ppn)) {
+                get<0>(ppn)->AddChild(get<0>(n));
+            }
+            if(get<1>(n) == 0) {
+                scene->SetRoot(get<0>(n));
+            }
+        }
+    }
 }
 
-void ResourceManager::LoadScene(const path& scenePath) noexcept {
+shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
     if(!exists(scenePath)) {
         Globals::GetGlobals().Log("Non existend scene");
-        return;
+        return nullptr;
     }
 
     shared_ptr<Scene> loadedScene = make_shared<Scene>();
@@ -110,7 +183,9 @@ void ResourceManager::LoadScene(const path& scenePath) noexcept {
         auto nodes = ParseNodes(sceneData);
         LinkScene(nodes, loadedScene);
         scenes.push_back(loadedScene);
+        return loadedScene;
     } catch(const exception& except) {
         Globals::GetGlobals().Log(string("Can't load scene : ") + except.what());
+        return nullptr;
     }
 }

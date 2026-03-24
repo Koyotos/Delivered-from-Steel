@@ -27,6 +27,7 @@ class Model {
     public:
     Model(string);
     void Draw(Shader &shader);	
+    const string& GetDir() const noexcept;
 };
 
 #endif

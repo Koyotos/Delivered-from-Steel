@@ -27,6 +27,7 @@ class Sprite {
     void SetActiveTexture(const string&);
 
     Texture& GetActiveTexture();
+    const string& GetDir() const noexcept;
     void Draw(Shader&);
 
     Sprite(const string&);

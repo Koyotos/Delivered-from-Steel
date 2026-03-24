@@ -33,6 +33,10 @@ class Object2D : public VisualNode, public PhysicsNode2D {
     @return void
     */
     void SetSprite(shared_ptr<Sprite>);
+
+    Object2D();
+
+    Object2D(const unordered_map<string, std::any>&);
 };
 
 #endif

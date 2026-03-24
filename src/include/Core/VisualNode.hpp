@@ -76,6 +76,8 @@ class VisualNode : public Node {
     */
     void ResetGlobal();
 
+    VisualNode();
+
     /*
     @brief Override of Node's constructor. It calls parent class and inits own components.
     @param1 const unordered_map<string, std::any>& - data to init

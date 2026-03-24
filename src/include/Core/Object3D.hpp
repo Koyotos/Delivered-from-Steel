@@ -35,6 +35,7 @@ class Object3D : public VisualNode, public PhysicsNode3D {
     */
     void SetModel(shared_ptr<Model>);
 
+    Object3D();
     Object3D(const unordered_map<string, std::any>&);
 };
 

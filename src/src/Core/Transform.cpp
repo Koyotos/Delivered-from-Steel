@@ -55,7 +55,7 @@ void Transform::ResetGlobal() {
 Transform::Transform() {
     translation = vec3(0,0,0);
     rotation = quat(vec3(0,0,0));
-    scale = vec3(0,0,0);
+    scale = vec3(1,1,1);
     UpdateLocal();
 }
 
@@ -71,13 +71,13 @@ Transform::Transform(const vector<std::any>& data) {
     translation.y = any_cast<float>(data[1]);
     translation.z = any_cast<float>(data[2]);
 
-    rotation.x = any_cast<float>(data[3]);
-    rotation.y = any_cast<float>(data[4]);
-    rotation.z = any_cast<float>(data[5]);
+    vec3 rot(any_cast<float>(data[3]), any_cast<float>(data[4]), any_cast<float>(data[5]));
+    rotation = quat(rot);
 
     scale.x = any_cast<float>(data[6]);
     scale.y = any_cast<float>(data[7]);
     scale.z = any_cast<float>(data[8]);
+    UpdateLocal();
 }
 
 Transform::~Transform() {

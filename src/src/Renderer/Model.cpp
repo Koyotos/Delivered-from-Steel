@@ -1,6 +1,10 @@
 #include "include/Renderer/Model.hpp"
 #include "include/Renderer/Mesh.hpp"
 
+const string& Model::GetDir() const noexcept {
+    return directory;
+}
+
 void Model::Draw(Shader& sh) {
     for(auto& k : meshes) {
         k->Draw(sh);

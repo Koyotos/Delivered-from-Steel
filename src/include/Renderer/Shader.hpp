@@ -8,9 +8,11 @@
 #include <glm/ext/vector_float4.hpp>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 using namespace std;
 using namespace glm;
+using namespace filesystem;
 
 /*
 Shader class is a wrapper aroung openGL shader. It is loaded from several shader codes.
