@@ -17,6 +17,12 @@ class Camera {
     mat4 O = ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f); 
     
     public:
+    /*
+    @brief Returns Vp matrix for perspective or orthogonal projection. If true is passed VP is perspective,
+    otherwise orthogonal.
+    @param1 const bool& - projection mode
+    @return mat4 - VP matrix
+    */
     mat4 GetVP(const bool&) const noexcept;
 };
 

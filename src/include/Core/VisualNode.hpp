@@ -76,6 +76,10 @@ class VisualNode : public Node {
     */
     void ResetGlobal();
 
+    /*
+    @brief Basic constructor. Creates empty VisualNode.
+    @return VisualNode
+    */
     VisualNode();
 
     /*

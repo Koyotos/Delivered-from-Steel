@@ -23,9 +23,17 @@ class Scene {
     private:
     string name;
     shared_ptr<Node> root;
-    vector<shared_ptr<Model>> sceneModels;
+    vector<shared_ptr<Model>> sceneModels; // TODO optimizations with unloading
     vector<shared_ptr<Shader>> sceneShaders;
+
     public:
+    
+    /*
+    @brief Sets scene root. Root will be used as startpoint for all 
+    per graph calls.
+    @param1 shared_ptr<Node> = new root
+    @return void
+    */
     void SetRoot(shared_ptr<Node>);
 };
 
