@@ -11,6 +11,11 @@
 
 using namespace std;
 
+/*
+@brief Base class for all in-game objects. Every object that is going to be used inside scene graphs
+has to inherit from this class. This will also provide basic functionality like flags for scene graph and
+children list.
+*/
 class Node {
     protected:
     bool flags[6];
@@ -36,7 +41,9 @@ class Node {
     vector<shared_ptr<Node>> GetChildren();
 
     /*
-    
+    @brief Adds new child to Node.
+    @param1 shared_ptr<Node> - child
+    @return void
     */
     void AddChild(shared_ptr<Node>);
 
@@ -111,8 +118,22 @@ class Node {
     */
     virtual void Physics(const float&);
 
+    /*
+    @brief Basic constructor. Creates empty Node.
+    @return Node
+    */
     Node();
+
+    /*
+    @brief Constructor from json. Takes data read from scene files and sets Node's fields.
+    @param1 const unordered_map<string, any>& - data from json
+    @return Node
+    */
     Node(const unordered_map<string, any>&);
+
+    /*
+    @brief Generic destructor.
+    */
     virtual ~Node();
 
 };

@@ -7,7 +7,7 @@
 
 
 /*
-@brief Base class for every game object. It combines physics and visuals. This class is on it's own
+@brief Base class for every 3D game object. It combines physics and visuals. This class is on it's own
 fully used by engine. It satisfies all requiements and allows to call every standard Node method.
 */
 class Object3D : public VisualNode, public PhysicsNode3D {
@@ -35,7 +35,18 @@ class Object3D : public VisualNode, public PhysicsNode3D {
     */
     void SetModel(shared_ptr<Model>);
 
+    /*
+    @brief Basic constructor. Creates empty Object3D.
+    @return Object3D
+    */
     Object3D();
+
+    /*
+    @brief Constructor from json data. Creates Object3D from input loaded in scene
+    specific format. 
+    @param1 const unordered_map<string, std::any>& - data from json
+    @return Object3D
+    */
     Object3D(const unordered_map<string, std::any>&);
 };
 

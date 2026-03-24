@@ -6,7 +6,7 @@
 #include "include/Renderer/Sprite.hpp"
 
 /*
-@brief Base class for every game object. It combines physics and visuals. This class is on it's own
+@brief Base class for every 2D game object. It combines physics and visuals. This class is on it's own
 fully used by engine. It satisfies all requiements and allows to call every standard Node method.
 */
 class Object2D : public VisualNode, public PhysicsNode2D {
@@ -34,8 +34,18 @@ class Object2D : public VisualNode, public PhysicsNode2D {
     */
     void SetSprite(shared_ptr<Sprite>);
 
+    /*
+    @brief Basic constructor. Creates empty Object2D.
+    @return Object2D
+    */
     Object2D();
 
+    /*
+    @brief Constructor from json data. Creates Object2D from input loaded in scene
+    specific format. 
+    @param1 const unordered_map<string, std::any>& - data from json
+    @return Object2D
+    */
     Object2D(const unordered_map<string, std::any>&);
 };
 
