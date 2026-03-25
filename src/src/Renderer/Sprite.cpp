@@ -65,7 +65,7 @@ void Sprite::SetupSprite() {
 void Sprite::LoadTextures() {
     for(const directory_entry& entry : directory_iterator(directory)) {
         Texture text;
-        text.id = TextureFromFile(entry.path().filename().c_str(), directory.c_str());
+        text.id = TextureFromFile(entry.path().filename().string().c_str(), directory.c_str());
         text.path = entry.path().string();
         text.type = entry.path().stem();
         textures.push_back(text);

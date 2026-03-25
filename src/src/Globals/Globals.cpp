@@ -11,11 +11,11 @@
         return path(pBuf);
     }
 #endif
-#ifdef __WIN32 // REQUIRES WINDOWS TESTS
+#ifdef __WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-    path Globals::GetExecPathInternal()() {
-        char pBuf[512]
+    path Globals::GetExecPathInternal() {
+        char pBuf[512];
         DWORD result = GetModuleFileNameA(NULL, pBuf, 512);
         if (result == 0 || result >= 512) {
             pBuf[0] = '\0';
