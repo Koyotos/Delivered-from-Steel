@@ -1,8 +1,81 @@
 #ifndef FE_RESOURCE_MANAGER
 #define FE_RESOURCE_MANAGER
 
-class ResourceManager {
+#include "include/Core/Object2D.hpp"
+#include "include/Core/Object3D.hpp"
+#include "include/Core/Scene.hpp"
+#include <nlohmann/json.hpp>
+#include <vector>
+#include <memory>
+#include <filesystem>
+#include <fstream>
 
+using namespace std;
+using namespace filesystem;
+using namespace nlohmann;
+
+template<typename T> pair<string,function<shared_ptr<Node>(const unordered_map<string,std::any>&)>> 
+    RegisterObjectType(const string& name) {
+        return {name,[](const unordered_map<string,std::any>& j)->shared_ptr<Node> 
+            {return make_shared<T>(j);}};
+}
+
+static const pair<string,function<shared_ptr<Node>(const unordered_map<string,std::any>&)>> objectClassTable[] = {
+    RegisterObjectType<Node>("Node"),
+    RegisterObjectType<VisualNode>("VisualNode"),
+    RegisterObjectType<Object3D>("Object3D"),
+    RegisterObjectType<Object2D>("Object2D"),
+};
+
+struct RefCountModel {
+    shared_ptr<Model> model = nullptr;
+    uint8_t refCount = 0;
+};
+
+struct RefCountShader {
+    shared_ptr<Shader> shader = nullptr;
+    uint8_t refCount = 0;
+};
+
+struct RefCountSprite {
+    shared_ptr<Sprite> sprite = nullptr;
+    uint8_t refCount = 0;
+};
+
+class ResourceManager {
+    private:
+    path modelsPath;
+    path spritesPath;
+    path audioPath;
+    path shadersPath;
+
+    fstream resourceStream;
+
+    vector<RefCountModel> models;
+    vector<RefCountSprite> sprites;
+    vector<RefCountShader> shaders;
+    vector<shared_ptr<Scene>> scenes;
+
+    // Asset loaders
+    inline shared_ptr<Model> LoadModel(const string&);
+    inline shared_ptr<Sprite> LoadSprite(const string&);
+    inline shared_ptr<Shader> LoadShader(const string&);
+
+    // Helper
+    inline string LoadPlainText(const path&);
+
+    // Json methods
+    inline std::any JSONtoAny(const json&);
+    inline unordered_map<string, std::any> LoadJSON(const path&);
+
+    // Node parser helpers
+    inline void ApplyAssets(shared_ptr<Node>, unordered_map<string,std::any>);
+    inline vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ParseNodes(unordered_map<string, std::any>&);
+    inline void LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>&, shared_ptr<Scene>);
+
+    public:
+    shared_ptr<Scene> LoadScene(const path&) noexcept;
+    void ConfigurePaths();
 };
 
 #endif
