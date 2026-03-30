@@ -32,6 +32,7 @@ void Renderer::Init() {
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    currentScene = scene;
     PrepareDraw(scene->root, Transform());
     Draw(scene->root);
 }
@@ -63,9 +64,9 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
 void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
     shared_ptr<Shader> shader = node->GetShader();
     if(const auto& cast2d = dynamic_pointer_cast<Object2D>(node)) { // Consider avoiding dynamic cast, possibly virtual type func
-        shader->SetMat4("VP", camera.GetVP(0));
+        shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
     } else {
-        shader->SetMat4("VP", camera.GetVP(1));
+        shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
     }   
 }
 

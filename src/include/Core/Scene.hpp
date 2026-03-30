@@ -2,6 +2,7 @@
 #define FE_SCENE
 
 #include "include/Core/Node.hpp"
+#include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Model.hpp"
 #include "include/Renderer/Shader.hpp"
 #include <memory>
@@ -23,8 +24,12 @@ class Scene {
     private:
     string name;
     shared_ptr<Node> root;
+    shared_ptr<Camera> sceneCam;
+
     vector<shared_ptr<Model>> sceneModels; // TODO optimizations with unloading
     vector<shared_ptr<Shader>> sceneShaders;
+
+    inline void FindCam(shared_ptr<Node>) noexcept;
 
     public:
     
@@ -35,6 +40,8 @@ class Scene {
     @return void
     */
     void SetRoot(shared_ptr<Node>);
+
+    shared_ptr<Node> GetRoot();
 };
 
 #endif
