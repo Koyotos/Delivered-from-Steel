@@ -21,7 +21,7 @@ class Renderer {
     uint16_t windowW;
     uint16_t windowH;
 
-    Camera camera;
+    shared_ptr<Scene> currentScene;
 
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void Draw(shared_ptr<Node>);

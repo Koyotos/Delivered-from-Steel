@@ -8,3 +8,22 @@ mat4 Camera::GetVP(const bool& prspv) const noexcept {
         return O*V;
     }
 }
+
+Camera::Camera() {
+    position = vec2(0);
+}
+
+Camera::Camera(const vec2& position) : Node() {
+    this->position = position;
+}
+
+Camera::Camera(unordered_map<string,std::any> data) : Node(data) {
+    vec2 jsonVec;
+    jsonVec.x = fromMap(int64_t,"x",data);
+    jsonVec.y = fromMap(int64_t,"y",data);
+    this->position = jsonVec;
+}
+
+Camera::~Camera() {
+
+}

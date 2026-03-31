@@ -1,9 +1,9 @@
 #include "include/EngineController/EngineController.hpp"
+#include "include/Game/Game.hpp"
 
 int main(int argc, char* argv[]) {
-    EngineController eng;
-    eng.Init();
-    eng.SetActiveScene(eng.LoadScene("res/scenes/test.json"));
-    eng.Run();
+    Game game;
+    game.Init();
+    game.Start();
     return 0;
 }
