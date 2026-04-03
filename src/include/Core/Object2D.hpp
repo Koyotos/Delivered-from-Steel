@@ -2,14 +2,14 @@
 #define FE_OBJECT_2D
 
 #include "include/Core/VisualNode.hpp"
-#include "include/PhysicsManager/PhysicsNode2D.hpp"
+#include "include/PhysicsManager/PhysicsNode.hpp"
 #include "include/Renderer/Sprite.hpp"
 
 /*
 @brief Base class for every 2D game object. It combines physics and visuals. This class is on it's own
 fully used by engine. It satisfies all requiements and allows to call every standard Node method.
 */
-class Object2D : public VisualNode, public PhysicsNode2D {
+class Object2D : public VisualNode, public PhysicsNode {
     private:
     shared_ptr<Sprite> sprite;
 
