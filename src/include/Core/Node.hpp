@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 #define fromMap(type, key, jname) any_cast<type>(jname.find(key)->second)
 
@@ -129,7 +130,7 @@ class Node {
     @param1 const unordered_map<string, any>& - data from json
     @return Node
     */
-    Node(const unordered_map<string, any>&);
+    Node(const unordered_map<string, std::any>&);
 
     /*
     @brief Generic destructor.

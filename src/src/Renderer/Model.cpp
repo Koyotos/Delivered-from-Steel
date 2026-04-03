@@ -91,7 +91,7 @@ Model::Model(string path) {
         auto dupa = string(importer.GetErrorString());
         throw runtime_error("ASSIMP ERROR : " + string(importer.GetErrorString()));
     }
-    directory = path.substr(0, path.find_last_of('/'));
+    directory = filesystem::path(path).parent_path().string();
 
     ProcessNode(scene->mRootNode, scene);
 }
