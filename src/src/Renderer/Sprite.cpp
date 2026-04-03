@@ -67,7 +67,7 @@ void Sprite::LoadTextures() {
         Texture text;
         text.id = TextureFromFile(entry.path().filename().string().c_str(), directory.c_str());
         text.path = entry.path().string();
-        text.type = entry.path().stem();
+        text.type = entry.path().stem().string();
         textures.push_back(text);
     }
 }

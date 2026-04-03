@@ -75,7 +75,7 @@ shared_ptr<Model> ResourceManager::LoadModel(const string& name) {
         }
     }
     RefCountModel newRCM;
-    newRCM.model = make_shared<Model>(modelsPath/name/path(name+".obj"));
+    newRCM.model = make_shared<Model>((modelsPath / name / path(name + ".obj")).string());
     newRCM.refCount = 1;
     models.push_back(newRCM);
     return newRCM.model;
@@ -89,7 +89,7 @@ shared_ptr<Sprite> ResourceManager::LoadSprite(const string& name) {
         }
     }
     RefCountSprite newRCS;
-    newRCS.sprite = make_shared<Sprite>(spritesPath/name);
+    newRCS.sprite = make_shared<Sprite>((spritesPath/name).string());
     newRCS.refCount = 1;
     sprites.push_back(newRCS);
     return newRCS.sprite;
@@ -156,16 +156,18 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
 }
 
 void ResourceManager::LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>& nodes, shared_ptr<Scene> scene) {
+	shared_ptr<Node> root = nullptr;
     for(auto& n : nodes) {
         for(auto& ppn : nodes) {
             if(get<1>(n) == get<2>(ppn)) {
                 get<0>(ppn)->AddChild(get<0>(n));
             }
             if(get<1>(n) == 0) {
-                scene->SetRoot(get<0>(n));
+				root = get<0>(n);
             }
         }
     }
+    scene->SetRoot(root);
 }
 
 shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
