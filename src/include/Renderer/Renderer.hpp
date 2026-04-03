@@ -31,6 +31,7 @@ class Renderer {
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();
     void Init();
+	GLFWwindow* GetWindow() const noexcept { return window; };
 };
 
 #endif

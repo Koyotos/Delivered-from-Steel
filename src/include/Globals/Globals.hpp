@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <unordered_map>
 
 using namespace std;
 using namespace filesystem;
@@ -21,6 +22,14 @@ class Globals {
     path userDir;
 
     inline path GetExecPathInternal();
+
+	std::unordered_map<int, bool> inputMap;
+    std::unordered_map<int, bool> mouseMap;
+	std::unordered_map<int, bool> gamepadBtnMap;
+	std::unordered_map<int, float> gamepadAxisMap;
+
+	float mouseX = 0.0f;
+	float mouseY = 0.0f;
 
     public:
     /*
@@ -52,6 +61,20 @@ class Globals {
     @return path - user directory path
     */
     path GetUserDir();
+
+	void SetKeyState(int key, bool isPressed);
+	bool GetKeyState(int key) const;
+
+	void SetMouseState(int button, bool isPressed);
+	bool GetMouseState(int button) const;
+	void SetMousePos(float x, float y);
+	float GetMouseX() const;
+	float GetMouseY() const;
+
+	void SetGamepadBtnState(int button, bool isPressed);
+	bool GetGamepadBtnState(int button) const;
+	void SetGamepadAxisState(int axis, float value);
+	float GetGamepadAxisState(int axis) const;
 
     Globals(const Globals&) = delete;
     Globals();
