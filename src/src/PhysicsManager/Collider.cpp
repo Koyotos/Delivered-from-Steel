@@ -20,3 +20,10 @@ glm::vec2 Collider::getGlobalPosition2D() const {
 bool Collider::getTrigger() const {
     return isTrigger;
 }
+
+
+float Collider::distanceSquared(const glm::vec2& a, const glm::vec2& b) const {
+    float dx = a.x - b.x;
+    float dy = a.y - b.y;
+    return dx * dx + dy * dy;
+}

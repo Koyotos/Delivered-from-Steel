@@ -15,7 +15,7 @@ public:
 
     CapsuleCollider();
 
-    bool checkCollision(const BoxCollider& other) override;
-    bool checkCollision(const CapsuleCollider& other) override;
+    bool checkCollision(const BoxCollider& other) const override;
+    bool checkCollision(const CapsuleCollider& other) const override;
 };
 #endif

@@ -24,14 +24,16 @@ public:
     Collider();
     virtual ~Collider() = default;
 
-    virtual bool checkCollision(const BoxCollider& other) = 0;
-    virtual bool checkCollision(const CapsuleCollider& other) = 0;
+    virtual bool checkCollision(const BoxCollider& other) const = 0;
+    virtual bool checkCollision(const CapsuleCollider& other) const = 0;
 
 	bool getTrigger() const;
 
     vector<shared_ptr<Collider>> getCurrentCollisions() const;
     vector<shared_ptr<Collider>> getPreviousCollisions() const;
     glm::vec2 getGlobalPosition2D() const;
+
+    float distanceSquared(const glm::vec2& a, const glm::vec2& b) const;
 };
 
 #endif
