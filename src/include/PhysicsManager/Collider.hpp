@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "include/Core/Node.hpp"
+#include "include/PhysicsManager/CollisionInfo.hpp"
 
 class BoxCollider;
 class CapsuleCollider;
@@ -26,6 +27,9 @@ public:
 
     virtual bool checkCollision(const BoxCollider& other) const = 0;
     virtual bool checkCollision(const CapsuleCollider& other) const = 0;
+
+    virtual CollisionInfo calculateCollisionInfo(const BoxCollider& other) const = 0;
+    virtual CollisionInfo calculateCollisionInfo(const CapsuleCollider& other) const = 0;
 
 	bool getTrigger() const;
 

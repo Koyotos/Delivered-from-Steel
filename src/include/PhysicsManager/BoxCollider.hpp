@@ -19,6 +19,9 @@ public:
 
     bool checkCollision(const BoxCollider& other) const override;
     bool checkCollision(const CapsuleCollider& other) const override;
+
+    CollisionInfo calculateCollisionInfo(const BoxCollider& other) const override;
+    CollisionInfo calculateCollisionInfo(const CapsuleCollider& other) const override;
 };
 
 #endif
