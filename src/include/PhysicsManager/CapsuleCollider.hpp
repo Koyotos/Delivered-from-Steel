@@ -8,6 +8,8 @@ class CapsuleCollider :
     public Collider
 {
 public:
+	glm::vec2 a; // one end of the capsule
+	glm::vec2 b; // other end of the capsule
     float radius;
     float height;
 

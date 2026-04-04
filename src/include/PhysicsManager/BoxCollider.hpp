@@ -7,6 +7,11 @@ class CapsuleCollider;
 class BoxCollider :
     public Collider
 {
+private:
+    glm::vec2 min;
+	glm::vec2 max;
+	glm::vec2 boxCenter;
+
 public:
     glm::vec2 size;
 
