@@ -1,5 +1,7 @@
 #include "include/PhysicsManager/PhysicsNode.hpp"
 #include <glm/glm.hpp>
+#include "include/PhysicsManager/CapsuleCollider.hpp"
+#include "include/PhysicsManager/BoxCollider.hpp"
 
 void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
     collider = col;
@@ -77,7 +79,37 @@ PhysicsNode::PhysicsNode() {
 }
 
 PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) : VisualNode(data) {
-    //isStatic = fromMap(bool, "static", data);
+    isStatic = fromMap(bool, "static", data);
 
-    //auto it = data.find("static");
+    auto it = data.find("colliderPosX");
+
+    float height;
+    float x = 0, y = 0;
+
+    auto posX = data.find("colliderPosX");
+    if (posX != data.end()) {
+		x = fromMap(float, "colliderPosX", data);
+    }
+
+    auto posY = data.find("colliderPosY");
+    if (posY != data.end()) {
+        y = fromMap(float, "colliderPosY", data);
+    }
+
+    auto radiusPom = data.find("radius");
+    if (radiusPom != data.end()) {
+        float radius = fromMap(float, "radius", data);
+        float height = fromMap(float, "height", data);
+
+		collider = std::make_shared<CapsuleCollider>(GetTransform(), x, y, radius, height);
+        
+    }
+
+    auto widthPom = data.find("width");
+    if (widthPom != data.end()) {
+        float width = fromMap(float, "width", data);
+        float height = fromMap(float, "height", data);
+
+        collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
+    }
 }
