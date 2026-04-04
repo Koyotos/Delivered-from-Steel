@@ -1,9 +1,29 @@
 #ifndef FE_PHYSICS_NODE
 #define FE_PHYSICS_NODE
 
+#include <memory>
+#include <glm/matrix.hpp>
+#include "include/PhysicsManager/Collider.hpp"
+#include "include/Core/Transform.hpp"
+
 class PhysicsNode
 {
+private:
+	bool isStatic = false;
 
+    std::shared_ptr<Collider> collider;
+    glm::vec2 velocity;
+
+public:
+    void SetCollider(std::shared_ptr<Collider> col);
+    std::shared_ptr<Collider> GetCollider() const;
+
+    void setStatic(bool value);
+    bool getStatic() const;
+
+	void Update(float dt);
+
+	void resolveCollision(const PhysicsNode& other);
 };
 
 #endif
