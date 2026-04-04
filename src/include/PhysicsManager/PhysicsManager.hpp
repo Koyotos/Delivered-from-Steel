@@ -11,7 +11,7 @@ private:
 	shared_ptr<Scene> currentScene;
 	vector<shared_ptr<PhysicsNode>> currentNodes;
 
-	void updateCurrentNodes();
+	void updateNode(shared_ptr<Node> node);
 
 public:
 	void Update(shared_ptr<Scene> scene, float dt);

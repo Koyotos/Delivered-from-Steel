@@ -1,11 +1,13 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 
+
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	// jesli scena sie zmienila to pobierz nowe PhysicsNode'y
 	if (currentScene != scene) {
 		currentScene = scene;
-		updateCurrentNodes();
+		currentNodes.clear();
+		updateNode(scene->root);
 	}
 
 	// ruch
@@ -19,12 +21,16 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
 		}
 	}
-
 	return;
 }
 
-void PhysicsManager::updateCurrentNodes() {
-	currentNodes.clear();
-	// pobierz z currentScene wszystkie PhysicsNode i zapisz je w currentNodes
-	return;
+void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
+	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
+	if (physicsNode) {
+		currentNodes.push_back(physicsNode);
+	}
+
+	for (const auto& child : node->GetChildren()) {
+		updateNode(child);
+	}	
 }
