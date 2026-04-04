@@ -66,7 +66,7 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
     //if (!other.isStatic) {
     //    other.applyForce(impulse);
     //}*/
-
+    return;
 }
 
 void PhysicsNode::applyForce(const glm::vec2& force) {
