@@ -4,9 +4,10 @@
 #include <memory>
 #include <glm/matrix.hpp>
 #include "include/PhysicsManager/Collider.hpp"
-#include "include/Core/Transform.hpp"
+#include "include/Core/VisualNode.hpp"
 
-class PhysicsNode
+
+class PhysicsNode : public VisualNode
 {
 private:
 	bool isStatic = false;
@@ -21,11 +22,15 @@ public:
     void setStatic(bool value);
     bool getStatic() const;
 
-	void Update(float dt);
+    void Update(float dt);
 
-	void resolveCollision(const PhysicsNode& other);
+    void resolveCollision(const PhysicsNode& other);
 
     void applyForce(const glm::vec2& force);
+
+    PhysicsNode();
+
+    PhysicsNode(const std::unordered_map<std::string, std::any>&);
 };
 
 #endif

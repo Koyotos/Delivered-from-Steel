@@ -9,7 +9,7 @@
 @brief Base class for every 2D game object. It combines physics and visuals. This class is on it's own
 fully used by engine. It satisfies all requiements and allows to call every standard Node method.
 */
-class Object2D : public VisualNode, public PhysicsNode {
+class Object2D : public PhysicsNode {
     private:
     shared_ptr<Sprite> sprite;
 

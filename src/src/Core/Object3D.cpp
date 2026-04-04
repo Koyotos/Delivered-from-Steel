@@ -17,6 +17,6 @@ Object3D::Object3D() {
 
 }
 
-Object3D::Object3D(const unordered_map<string, std::any>& data) : VisualNode(data) {
+Object3D::Object3D(const unordered_map<string, std::any>& data) : PhysicsNode(data) {
     
 }

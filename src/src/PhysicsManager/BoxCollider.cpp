@@ -2,7 +2,30 @@
 #include <algorithm>
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 
-BoxCollider::BoxCollider() : size({ 1.0f, 1.0f }) {}
+BoxCollider::BoxCollider(const Transform transform, float x, float y, float width, float height)
+    : size((width, height))
+{
+	this->transform = vec2(x, y);
+
+    updatePosition(transform);
+}
+
+
+void BoxCollider::updatePosition(const Transform transform)
+{
+    mat4 modelMatrix = transform.GetGlobal();
+
+    boxCenter = vec2(modelMatrix[3].x + this->transform.x, modelMatrix[3].y + this->transform.y);
+
+    float halfHeight = size.y / 2.0f;
+    float halfWidth = size.x / 2.0f;
+
+    vec2 direction = vec2(halfWidth, halfHeight);
+
+    this->max = boxCenter + direction;
+    this->min = boxCenter - direction;
+}
+
 
 bool BoxCollider::checkCollision(const BoxCollider& other) const {
     return calculateCollisionInfo(other).collided;
@@ -43,12 +66,12 @@ CollisionInfo BoxCollider::calculateCollisionInfo(const CapsuleCollider& other) 
 
     glm::vec2 closest = {
         other.a.x,
-        clamp(boxCenter.y, other.b.y, other.a.y)
+        std::clamp(boxCenter.y, other.b.y, other.a.y)
     };
 
     glm::vec2 closestOnBox = {
-        clamp(closest.x, min.x, max.x),
-        clamp(closest.y, min.y, max.y)
+        std::clamp(closest.x, min.x, max.x),
+        std::clamp(closest.y, min.y, max.y)
     };
 
     float distSq = distanceSquared(closest, closestOnBox);

@@ -2,7 +2,27 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include <algorithm>
 
-CapsuleCollider::CapsuleCollider() : radius(1.0f), height(2.0f) {}
+CapsuleCollider::CapsuleCollider(const Transform transform, float x, float y, float radius, float height)
+    : radius(radius), height(height)
+{
+	this->transform = vec2(x, y);
+
+    updatePosition(transform);
+}
+
+void CapsuleCollider::updatePosition(const Transform transform)
+{
+    mat4 modelMatrix = transform.GetGlobal();
+
+    vec2 center = vec2(modelMatrix[3].x + this->transform.x, modelMatrix[3].y + this->transform.y);
+
+    vec2 upDirection = vec2(0, 1);
+
+    float segmentHalfLength = height / 2.0f;
+
+    this->a = center + upDirection * segmentHalfLength;
+    this->b = center - upDirection * segmentHalfLength;
+}
 
 bool CapsuleCollider::checkCollision(const BoxCollider& other) const {
 	return other.checkCollision(*this);
@@ -21,12 +41,12 @@ CollisionInfo CapsuleCollider::calculateCollisionInfo(const CapsuleCollider& oth
 
 	glm::vec2 closestCapsule = {
 	   other.a.x,
-	   clamp(b.y, other.b.y, other.a.y)
+	   std::clamp(b.y, other.b.y, other.a.y)
 	};
 
 	glm::vec2 closestCapsuleOther = {
 	   a.x,
-	   clamp(closestCapsule.y, b.y, a.y)
+       std::clamp(closestCapsule.y, b.y, a.y)
 	};
 
 	float distSq = distanceSquared(closestCapsule, closestCapsuleOther);

@@ -15,7 +15,9 @@ private:
 public:
     glm::vec2 size;
 
-    BoxCollider();
+    BoxCollider(const Transform transform, float x, float y, float width, float height);
+
+	void updatePosition(const Transform transform) override;
 
     bool checkCollision(const BoxCollider& other) const override;
     bool checkCollision(const CapsuleCollider& other) const override;

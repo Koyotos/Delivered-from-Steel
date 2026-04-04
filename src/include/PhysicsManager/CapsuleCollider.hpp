@@ -13,7 +13,9 @@ public:
     float radius;
     float height;
 
-    CapsuleCollider();
+    CapsuleCollider(const Transform transform, float x, float y, float radius, float height);
+
+    void updatePosition(const Transform transform) override;
 
     bool checkCollision(const BoxCollider& other) const override;
     bool checkCollision(const CapsuleCollider& other) const override;

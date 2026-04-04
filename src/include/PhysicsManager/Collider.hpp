@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "include/Core/Node.hpp"
+#include "include/Core/Transform.hpp"
 #include "include/PhysicsManager/CollisionInfo.hpp"
 
 class BoxCollider;
@@ -11,7 +12,7 @@ class CapsuleCollider;
 
 class Collider
 {
-private:
+protected:
     glm::vec2 transform;
 
     bool isTrigger;
@@ -27,6 +28,8 @@ public:
 
     virtual bool checkCollision(const BoxCollider& other) const = 0;
     virtual bool checkCollision(const CapsuleCollider& other) const = 0;
+
+    virtual void updatePosition(const Transform transform) = 0;
 
     virtual CollisionInfo calculateCollisionInfo(const BoxCollider& other) const = 0;
     virtual CollisionInfo calculateCollisionInfo(const CapsuleCollider& other) const = 0;

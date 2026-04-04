@@ -71,3 +71,13 @@ void PhysicsNode::applyForce(const glm::vec2& force) {
     if (isStatic) return;
     velocity += force;
 }
+
+PhysicsNode::PhysicsNode() {
+
+}
+
+PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) : VisualNode(data) {
+    //isStatic = fromMap(bool, "static", data);
+
+    //auto it = data.find("static");
+}
