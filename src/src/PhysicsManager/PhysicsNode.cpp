@@ -31,12 +31,20 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
 
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
     
-    //info = collider->calculateCollisionInfo(other.collider);
+	if (!collider || !other.collider) return;
+
+    if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(other.collider)) {
+        info = collider->calculateCollisionInfo(capsule);
+    }
+    else if (auto box = std::dynamic_pointer_cast<BoxCollider>(other.collider)) {
+        info = collider->calculateCollisionInfo(box);
+    }
 
     if (!info->collided) return;
+
 	collider->getCurrentCollisions().push_back(other.collider);
 
-    if (this->isStatic && other.isStatic) return;
+    if (this->isStatic) return;
 
 
     if (!info->collided) return;
@@ -49,9 +57,6 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
         if (!this->isStatic) {
             // Przesuñ Transform
         }
-        //if (!other.isStatic) {
-        //    // Przesuñ Transform
-        //}
     }
 
     glm::vec2 relativeVelocity = other.velocity - this->velocity;
@@ -70,9 +75,6 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
     if (!this->isStatic) {
         this->applyForce(impulse);
     }
-    //if (!other.isStatic) {
-    //    other.applyForce(impulse);
-    //}*/
     return;
 }
 
