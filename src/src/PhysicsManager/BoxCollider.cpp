@@ -61,7 +61,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
 }
 
 std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
-    std::shared_ptr<CollisionInfo> info;
+    std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     glm::vec2 closest = {
         other->a.x,
