@@ -26,6 +26,9 @@ class Camera : public Node {
     */
     mat4 GetVP(const bool&) const noexcept;
 
+    vec2 GetPos();
+    void SetPos(const vec2&);
+
     Camera();
     Camera(const vec2&);
     Camera(unordered_map<string,std::any>);

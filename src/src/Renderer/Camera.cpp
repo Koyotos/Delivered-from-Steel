@@ -9,6 +9,14 @@ mat4 Camera::GetVP(const bool& prspv) const noexcept {
     }
 }
 
+vec2 Camera::GetPos() {
+    return position;
+}
+
+void Camera::SetPos(const vec2& pos) {
+    position = pos;
+}
+
 Camera::Camera() {
     position = vec2(0);
 }

@@ -7,6 +7,7 @@
 
 #include "GLFW/glfw3.h"
 #include "include/Renderer/Camera.hpp"
+#include "include/Renderer/Light.hpp"
 
 #define GL_VERSION_MAJOR 4
 #define GL_VERSION_MINOR 6
@@ -23,9 +24,13 @@ class Renderer {
 
     shared_ptr<Scene> currentScene;
 
+    vector<pair<shared_ptr<Light>,float>> lightsPos;
+
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void Draw(shared_ptr<Node>);
     inline void ConfigureShader(shared_ptr<VisualNode>);
+    inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
+    inline void PrepareLights();
 
     public:
     void DrawScene(shared_ptr<Scene>);
