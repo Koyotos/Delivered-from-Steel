@@ -74,6 +74,7 @@ void Sprite::LoadTextures() {
     
 Sprite::Sprite(const string& path) {
     directory = path;
+	active = 0;
     LoadTextures();
     SetupSprite();
 }

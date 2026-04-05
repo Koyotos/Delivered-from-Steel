@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include "include/IOManager/InputEvent.hpp"
 
 #define fromMap(type, key, jname) any_cast<type>(jname.find(key)->second)
 
@@ -103,7 +104,7 @@ class Node {
     @param1 const InputEvent& - event to test
     @return bool - was the event handled
     */
-    virtual bool Input();
+    virtual bool Input(InputEvent& event);
 
     /*
     @brief Method that draws object's model. Called inside renderer.

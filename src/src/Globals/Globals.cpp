@@ -45,6 +45,67 @@ path Globals::GetUserDir() {
     return path();
 }
 
+void Globals::SetKeyState(int key, bool isPressed) {
+    inputMap[key] = isPressed;
+}
+
+bool Globals::GetKeyState(int key) const {
+    auto it = inputMap.find(key);
+    if (it != inputMap.end()) {
+        return it->second;
+    }
+    return false;
+}
+
+void Globals::SetMouseState(int button, bool isPressed) {
+    mouseMap[button] = isPressed;
+}
+
+bool Globals::GetMouseState(int button) const {
+    auto it = mouseMap.find(button);
+    if (it != mouseMap.end()) {
+        return it->second;
+    }
+    return false;
+}
+
+void Globals::SetMousePos(float x, float y) {
+    mouseX = x;
+    mouseY = y;
+}
+
+float Globals::GetMouseX() const {
+    return mouseX;
+}
+
+float Globals::GetMouseY() const {
+    return mouseY;
+}
+
+void Globals::SetGamepadBtnState(int button, bool isPressed) {
+    gamepadBtnMap[button] = isPressed;
+}
+
+bool Globals::GetGamepadBtnState(int button) const {
+    auto it = gamepadBtnMap.find(button);
+    if (it != gamepadBtnMap.end()) {
+        return it->second;
+    }
+    return false;
+}
+
+void Globals::SetGamepadAxisState(int axis, float value) {
+    gamepadAxisMap[axis] = value;
+}
+
+float Globals::GetGamepadAxisState(int axis) const {
+    auto it = gamepadAxisMap.find(axis);
+    if (it != gamepadAxisMap.end()) {
+        return it->second;
+    }
+    return 0.0f;
+}
+
 Globals::Globals() {
 
     execPath = GetExecPathInternal();

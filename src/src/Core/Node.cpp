@@ -12,7 +12,7 @@ void Node::Process() {
     return;
 }
 
-bool Node::Input() {
+bool Node::Input(InputEvent& event) {
     return false;
 }
 
