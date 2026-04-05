@@ -26,7 +26,7 @@ void PhysicsNode::Update(float dt)
     // testowa symulacja grawitacji
     velocity.y = std::min(velocity.y + 0.001f * dt, 0.001f);
     Transform t = this->GetTransform(); 
-    t.SetTranslation(t.GetTranslation() - glm::vec3(0.0f, velocity.y, 0.0f));
+    t.SetTranslation(t.GetTranslation() - glm::vec3(velocity.x, velocity.y, 0.0f));
 
 
 	this->SetTransform(t);
@@ -95,6 +95,7 @@ PhysicsNode::PhysicsNode() {
 
 PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) : VisualNode(data) {
     isStatic = fromMap(bool, "static", data);
+    velocity = glm::vec2(0.0f, 0.0f);
 
     auto it = data.find("colliderPosX");
 
