@@ -4,6 +4,7 @@
 #include "include/Core/Object2D.hpp"
 #include "include/Core/Object3D.hpp"
 #include "include/Core/Scene.hpp"
+#include "include/Game/Objects/Player.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include <nlohmann/json.hpp>
@@ -28,7 +29,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Object3D>("Object3D"),
     RegisterObjectType<Object2D>("Object2D"),
     RegisterObjectType<Camera>("Camera"),
-    RegisterObjectType<Light>("Light")
+    RegisterObjectType<Light>("Light"),
+    RegisterObjectType<Player>("Player")
 };
 
 struct RefCountModel {

@@ -1,4 +1,5 @@
 #include "include/Game/Objects/Player.hpp"
+#include "include/Core/Object2D.hpp"
 #include "include/Globals/Globals.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
@@ -7,6 +8,10 @@ Player::Player() : Object2D() {
 	SetProcess(true);
 	SetInput(true);
 	SetDraw(true);
+}
+
+Player::Player(unordered_map<string, std::any> data) : Object2D(data) {
+
 }
 
 void Player::Process() {

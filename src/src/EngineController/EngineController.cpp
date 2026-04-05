@@ -30,7 +30,7 @@ void EngineController::Init() {
     }
 }
 
-void ProcessGraph(shared_ptr<Node> node) {
+void EngineController::ProcessNode(shared_ptr<Node> node) {
 	if (!node) return;
 
     if (node->TestProcess()) {
@@ -38,7 +38,7 @@ void ProcessGraph(shared_ptr<Node> node) {
 	}
 
     for (auto& child : node->GetChildren()) {
-        ProcessGraph(child);
+        ProcessNode(child);
 	}
 }
 
@@ -52,7 +52,7 @@ void EngineController::Run() {
 		iom->PollGamepad();
         if (active) {
 		    iom->ProcessInput(active->GetRoot());
-            ProcessGraph(active->GetRoot());
+            ProcessNode(active->GetRoot());
         }
 		iom->ClearQueue();
 

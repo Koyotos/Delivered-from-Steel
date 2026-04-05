@@ -26,6 +26,7 @@ void Renderer::Init() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
     glDepthFunc(GL_LESS);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 }
@@ -44,7 +45,6 @@ void Renderer::Draw(shared_ptr<Node> node) {
     if (node->TestDraw()) {
         node->Draw();
     }
-    //node->Draw();
     for(auto& k : node->GetChildren()) {
         Draw(k);
     }
