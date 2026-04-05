@@ -29,7 +29,7 @@ void PhysicsNode::Update(float dt)
 void PhysicsNode::resolveCollision(const PhysicsNode& other)
 {
 
-    shared_ptr<CollisionInfo> info;
+    shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
     
     //info = collider->calculateCollisionInfo(other.collider);
 
