@@ -41,7 +41,10 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 }
 
 void Renderer::Draw(shared_ptr<Node> node) {
-    node->Draw();
+    if (node->TestDraw()) {
+        node->Draw();
+    }
+    //node->Draw();
     for(auto& k : node->GetChildren()) {
         Draw(k);
     }

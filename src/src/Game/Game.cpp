@@ -1,4 +1,5 @@
 #include "include/Game/Game.hpp"
+#include "include/Game/Objects/Player.hpp"
 
 void Game::Init() {
     engine.Init();

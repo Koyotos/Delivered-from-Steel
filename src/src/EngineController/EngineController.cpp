@@ -21,6 +21,7 @@ void EngineController::Init() {
         aum = make_shared<AudioManager>();
 
         renderer->Init();
+		iom->Init(renderer->GetWindow());
         rsm->ConfigurePaths();
 
     } catch(const exception& except) {
@@ -29,11 +30,31 @@ void EngineController::Init() {
     }
 }
 
+void ProcessGraph(shared_ptr<Node> node) {
+	if (!node) return;
+
+    if (node->TestProcess()) {
+        node->Process();
+	}
+
+    for (auto& child : node->GetChildren()) {
+        ProcessGraph(child);
+	}
+}
+
 void EngineController::Run() {
-    while(1) {
+    while(!glfwWindowShouldClose(renderer->GetWindow())) {
         currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         shared_ptr<Scene> active = scm->GetActive();
+
+		glfwPollEvents();
+		iom->PollGamepad();
+        if (active) {
+		    iom->ProcessInput(active->GetRoot());
+            ProcessGraph(active->GetRoot());
+        }
+		iom->ClearQueue();
 
         renderer->DrawScene(active);
 
