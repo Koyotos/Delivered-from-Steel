@@ -52,8 +52,6 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 	collider->getCurrentCollisions().push_back(other.collider);
     other.collider->getCurrentCollisions().push_back(collider);
 
-    if (isStatic) return;
-
 
     float totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
 

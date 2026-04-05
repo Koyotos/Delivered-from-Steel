@@ -54,12 +54,12 @@ std::shared_ptr<CollisionInfo> CapsuleCollider::calculateCollisionInfo(std::shar
 
 	float distSq = distanceSquared(closestCapsule, closestCapsuleOther);
 
-    if (distSq <= (other->radius + radius) * (other->radius + radius)) {
+    if (distSq < (other->radius + radius) * (other->radius + radius)) {
         info->collided = true;
         float dist = sqrt(distSq);
         info->depth = (other->radius + radius) - dist;
         if (dist > 0) {
-            info->normal = (closestCapsule - closestCapsuleOther) / dist;
+            info->normal = -(closestCapsule - closestCapsuleOther) / dist;
         }
         else {
             info->normal = glm::vec2(0, 1);
