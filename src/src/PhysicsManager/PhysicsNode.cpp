@@ -23,7 +23,13 @@ void PhysicsNode::Update(float dt)
 {
     if (isStatic) return;
 
-    // co robiæ jak nie static
+    // testowa symulacja grawitacji
+    velocity.y = std::min(velocity.y + 0.001f * dt, 0.001f);
+    Transform t = this->GetTransform(); 
+    t.SetTranslation(t.GetTranslation() - glm::vec3(0.0f, velocity.y, 0.0f));
+
+
+	this->SetTransform(t);
 }
 
 void PhysicsNode::resolveCollision(const PhysicsNode& other)
