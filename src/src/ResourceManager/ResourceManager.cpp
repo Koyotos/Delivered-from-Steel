@@ -97,7 +97,7 @@ shared_ptr<Sprite> ResourceManager::LoadSprite(const string& name) {
 
 shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
     for(auto& loadedEntry : shaders) {
-        if(loadedEntry.shader->GetName() == shadersPath/name) {
+        if(loadedEntry.shader->GetName() == name) {
             loadedEntry.refCount++;
             return loadedEntry.shader;       
         }
@@ -132,6 +132,7 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
     } else if(auto obj2d = dynamic_pointer_cast<Object2D>(node)) {
         if(data.contains("sprite")) {
             obj2d->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
+            obj2d->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
         }
         if(data.contains("shader")) {
             obj2d->SetShader(LoadShader(fromMap(string,"shader",data)));
