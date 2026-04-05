@@ -3,7 +3,7 @@
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 
 BoxCollider::BoxCollider(const Transform transform, float x, float y, float width, float height)
-    : size((width, height))
+    : Collider(), size((width, height))
 {
 	this->transform = vec2(x, y);
 
@@ -27,46 +27,45 @@ void BoxCollider::updatePosition(const Transform transform)
 }
 
 
-bool BoxCollider::checkCollision(const BoxCollider& other) const {
-    return calculateCollisionInfo(other).collided;
+bool BoxCollider::checkCollision(std::shared_ptr<BoxCollider> other) const {
+    return calculateCollisionInfo(other)->collided;
 }
 
-bool BoxCollider::checkCollision(const CapsuleCollider& other) const {
-    return calculateCollisionInfo(other).collided;
+bool BoxCollider::checkCollision(std::shared_ptr<CapsuleCollider> other) const {
+    return calculateCollisionInfo(other)->collided;
 }
 
+std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
+    std::shared_ptr<CollisionInfo> info;
 
-CollisionInfo BoxCollider::calculateCollisionInfo(const BoxCollider& other) const {
-    CollisionInfo info;
-
-    float overlapX = std::min(max.x, other.max.x) - std::max(min.x, other.min.x);
-    float overlapY = std::min(max.y, other.max.y) - std::max(min.y, other.min.y);
+    float overlapX = std::min(max.x, other->max.x) - std::max(min.x, other->min.x);
+    float overlapY = std::min(max.y, other->max.y) - std::max(min.y, other->min.y);
 
     if (overlapX <= 0 || overlapY <= 0) {
-        info.collided = false;
+        info->collided = false;
         return info;
     }
 
-    info.collided = true;
+    info->collided = true;
 
     if (overlapX < overlapY) {
-        info.depth = overlapX;
-        info.normal = (boxCenter.x < other.boxCenter.x) ? glm::vec2(-1, 0) : glm::vec2(1, 0);
+        info->depth = overlapX;
+        info->normal = (boxCenter.x < other->boxCenter.x) ? glm::vec2(-1, 0) : glm::vec2(1, 0);
     }
     else {
-        info.depth = overlapY;
-        info.normal = (boxCenter.y < other.boxCenter.y) ? glm::vec2(0, -1) : glm::vec2(0, 1);
+        info->depth = overlapY;
+        info->normal = (boxCenter.y < other->boxCenter.y) ? glm::vec2(0, -1) : glm::vec2(0, 1);
     }
-
+    info->Collider = other;
     return info;
 }
 
-CollisionInfo BoxCollider::calculateCollisionInfo(const CapsuleCollider& other) const {
-    CollisionInfo info;
+std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
+    std::shared_ptr<CollisionInfo> info;
 
     glm::vec2 closest = {
-        other.a.x,
-        std::clamp(boxCenter.y, other.b.y, other.a.y)
+        other->a.x,
+        std::clamp(boxCenter.y, other->b.y, other->a.y)
     };
 
     glm::vec2 closestOnBox = {
@@ -76,20 +75,21 @@ CollisionInfo BoxCollider::calculateCollisionInfo(const CapsuleCollider& other) 
 
     float distSq = distanceSquared(closest, closestOnBox);
 
-    if (distSq <= other.radius * other.radius) {
-        info.collided = true;
+    if (distSq <= other->radius * other->radius) {
+        info->collided = true;
         float dist = sqrt(distSq);
-        info.depth = other.radius - dist;
+        info->depth = other->radius - dist;
         if (dist > 0) {
-            info.normal = (closest - closestOnBox) / dist;
+            info->normal = (closest - closestOnBox) / dist;
         }
         else {
-            info.normal = glm::vec2(0, 1);
+            info->normal = glm::vec2(0, 1);
         }
+        info->Collider = other;
 		return info;
     }
     else {
-        info.collided = false;
+        info->collided = false;
 		return info;
     }
 }

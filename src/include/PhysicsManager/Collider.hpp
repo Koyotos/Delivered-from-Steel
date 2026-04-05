@@ -19,25 +19,31 @@ protected:
     bool enabled;
     std::shared_ptr<Node> owner;
 
+private:
     vector<shared_ptr<Collider>> currentCollisions;
     vector<shared_ptr<Collider>> previousCollisions;
-
+    void clearCurrentCollisions();
 public:
     Collider();
     virtual ~Collider() = default;
 
-    virtual bool checkCollision(const BoxCollider& other) const = 0;
-    virtual bool checkCollision(const CapsuleCollider& other) const = 0;
+    virtual bool checkCollision(std::shared_ptr<BoxCollider> other) const = 0;
+    virtual bool checkCollision(std::shared_ptr<CapsuleCollider> other) const = 0;
 
     virtual void updatePosition(const Transform transform) = 0;
 
-    virtual CollisionInfo calculateCollisionInfo(const BoxCollider& other) const = 0;
-    virtual CollisionInfo calculateCollisionInfo(const CapsuleCollider& other) const = 0;
+    virtual std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const = 0;
+    virtual std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const = 0;
 
 	bool getTrigger() const;
 
     vector<shared_ptr<Collider>> getCurrentCollisions() const;
     vector<shared_ptr<Collider>> getPreviousCollisions() const;
+
+
+    void addToCurrentCollisions(shared_ptr<Collider>);
+    void setCurrentToPrevious();
+
     glm::vec2 getGlobalPosition2D() const;
 
     float distanceSquared(const glm::vec2& a, const glm::vec2& b) const;

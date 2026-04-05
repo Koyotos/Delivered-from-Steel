@@ -7,7 +7,7 @@ void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
     collider = col;
 }
 
-std::shared_ptr<Collider> PhysicsNode::GetCollider() const {
+std::shared_ptr<Collider> PhysicsNode::GetCollider() {
     return collider;
 }
 
@@ -28,16 +28,23 @@ void PhysicsNode::Update(float dt)
 
 void PhysicsNode::resolveCollision(const PhysicsNode& other)
 {
-    /*if (this->isStatic && other.isStatic) return;
 
-    CollisionInfo info = this->GetCollider()->getCollisionData(other.collider.get()); // to inaczej jakoœ bedzie
+    shared_ptr<CollisionInfo> info;
+    
+    //info = collider->calculateCollisionInfo(other.collider);
 
-    if (!info.collided) return;
+    if (!info->collided) return;
+	collider->getCurrentCollisions().push_back(other.collider);
+
+    if (this->isStatic && other.isStatic) return;
+
+
+    if (!info->collided) return;
 
     float totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
 
     if (totalInverseMass > 0) {
-        glm::vec2 separation = info.normal * (info.depth / totalInverseMass);
+        glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
 
         if (!this->isStatic) {
             // Przesuñ Transform
@@ -49,7 +56,7 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
 
     glm::vec2 relativeVelocity = other.velocity - this->velocity;
 
-    float velocityAlongNormal = glm::dot(relativeVelocity, info.normal);
+    float velocityAlongNormal = glm::dot(relativeVelocity, info->normal);
 
     if (velocityAlongNormal > 0) return;
 
@@ -58,7 +65,7 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
     float j = -(1.0f + e) * velocityAlongNormal;
     j /= totalInverseMass;
 
-    glm::vec2 impulse = j * info.normal;
+    glm::vec2 impulse = j * info->normal;
 
     if (!this->isStatic) {
         this->applyForce(impulse);

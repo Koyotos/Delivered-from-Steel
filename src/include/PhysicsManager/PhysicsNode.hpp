@@ -17,7 +17,7 @@ private:
 
 public:
     void SetCollider(std::shared_ptr<Collider> col);
-    std::shared_ptr<Collider> GetCollider() const;
+    std::shared_ptr<Collider> GetCollider();
 
     void setStatic(bool value);
     bool getStatic() const;

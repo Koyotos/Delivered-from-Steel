@@ -5,7 +5,7 @@
 class BoxCollider;
 
 class CapsuleCollider :
-    public Collider
+    public Collider, public std::enable_shared_from_this<CapsuleCollider>
 {
 public:
 	glm::vec2 a; // one end of the capsule
@@ -17,10 +17,10 @@ public:
 
     void updatePosition(const Transform transform) override;
 
-    bool checkCollision(const BoxCollider& other) const override;
-    bool checkCollision(const CapsuleCollider& other) const override;
+    bool checkCollision(std::shared_ptr<CapsuleCollider> other) const override;
+    bool checkCollision(std::shared_ptr<BoxCollider> other) const override;
 
-    CollisionInfo calculateCollisionInfo(const BoxCollider& other) const override;
-    CollisionInfo calculateCollisionInfo(const CapsuleCollider& other) const override;
+    std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const override;
+    std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const override;
 };
 #endif
