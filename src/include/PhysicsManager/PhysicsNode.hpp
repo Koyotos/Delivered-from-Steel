@@ -16,6 +16,8 @@ private:
     glm::vec2 velocity;
 
 public:
+	float maxFallSpeed = 5.0f;
+
     void SetCollider(std::shared_ptr<Collider> col);
     std::shared_ptr<Collider> GetCollider();
 

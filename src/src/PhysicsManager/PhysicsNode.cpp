@@ -24,10 +24,12 @@ void PhysicsNode::Update(float dt)
 {
     if (isStatic) return;
 
+	float deltaTime = std::min(dt, 0.016f);
+
     // testowa symulacja grawitacji
-    velocity.y = std::min(velocity.y + 0.001f * dt, 0.001f);
+    velocity.y = std::clamp(velocity.y - 0.1f, -maxFallSpeed, maxFallSpeed);
     Transform t = this->GetTransform(); 
-    t.SetTranslation(t.GetTranslation() - glm::vec3(velocity.x, velocity.y, 0.0f));
+    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * deltaTime, 0.0f));
 
 
 	this->SetTransform(t);
