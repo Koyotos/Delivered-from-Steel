@@ -17,7 +17,11 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	// kolizje
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		//currentNodes[i]->GetCollider()->setCurrentToPrevious();
+		if (auto col = currentNodes[i]->GetCollider()) {
+
+			col->setCurrentToPrevious();
+		}
+
 
 		for (size_t j = i + 1; j < currentNodes.size(); ++j) {
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
