@@ -67,7 +67,7 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 
             this->SetTransform(t);
         }
-        if (!this->isStatic) {
+        if (!other.isStatic) {
             Transform t = other.GetTransform();
             t.SetTranslation(t.GetTranslation() - glm::vec3(separation.x, separation.y, 0.0f));
 
