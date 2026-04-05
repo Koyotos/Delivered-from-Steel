@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 #include "include/PhysicsManager/BoxCollider.hpp"
+#include <iostream>
 
 void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
     collider = col;
@@ -32,7 +33,7 @@ void PhysicsNode::Update(float dt)
 	this->SetTransform(t);
 }
 
-void PhysicsNode::resolveCollision(const PhysicsNode& other)
+void PhysicsNode::resolveCollision(PhysicsNode& other)
 {
 
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
@@ -49,19 +50,30 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
     if (!info->collided) return;
 
 	collider->getCurrentCollisions().push_back(other.collider);
+    other.collider->getCurrentCollisions().push_back(collider);
 
-    if (this->isStatic) return;
+    if (isStatic) return;
 
-
-    if (!info->collided) return;
 
     float totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
 
     if (totalInverseMass > 0) {
         glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
 
+        std::cout << "Separation: x=" << separation.x
+            << ", y=" << separation.y << std::endl;
+
         if (!this->isStatic) {
-            // Przesuñ Transform
+            Transform t = this->GetTransform();
+            t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
+
+            this->SetTransform(t);
+        }
+        if (!this->isStatic) {
+            Transform t = other.GetTransform();
+            t.SetTranslation(t.GetTranslation() - glm::vec3(separation.x, separation.y, 0.0f));
+
+            other.SetTransform(t);
         }
     }
 
@@ -80,6 +92,9 @@ void PhysicsNode::resolveCollision(const PhysicsNode& other)
 
     if (!this->isStatic) {
         this->applyForce(impulse);
+    }
+    if (!other.isStatic) {
+        other.applyForce(impulse);
     }
     return;
 }

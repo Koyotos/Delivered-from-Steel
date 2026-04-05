@@ -24,7 +24,7 @@ public:
 
     void Update(float dt);
 
-    void resolveCollision(const PhysicsNode& other);
+    void resolveCollision(PhysicsNode& other);
 
     void applyForce(const glm::vec2& force);
 

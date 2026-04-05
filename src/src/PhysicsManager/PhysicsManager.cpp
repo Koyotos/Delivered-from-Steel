@@ -20,6 +20,9 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 		if (auto col = currentNodes[i]->GetCollider()) {
 
 			col->setCurrentToPrevious();
+			if (!currentNodes[i]->getStatic()) {
+				col->updatePosition(currentNodes[i]->GetTransform());
+			}
 		}
 
 
