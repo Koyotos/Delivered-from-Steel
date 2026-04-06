@@ -151,7 +151,7 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
 }
 
 void PhysicsNode::drawDebug() {
-    #if define(DEBUG)
+    #if defined(DEBUG)
     if (collider) {
         debugShader->Use();
         debugShader->SetMat4("M", GetTransform().GetGlobal());
