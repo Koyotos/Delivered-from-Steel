@@ -27,6 +27,8 @@ class Renderer {
     inline void Draw(shared_ptr<Node>);
     inline void ConfigureShader(shared_ptr<VisualNode>);
 
+    inline void DrawDebug(shared_ptr<Node> node);
+
     public:
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();

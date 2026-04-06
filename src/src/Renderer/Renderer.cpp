@@ -35,6 +35,10 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     currentScene = scene;
     PrepareDraw(scene->root, Transform());
     Draw(scene->root);
+
+    #if define(DEBUG)
+    DrawDebug(scene->root);
+    #endif
 }
 
 void Renderer::Draw(shared_ptr<Node> node) {
@@ -60,6 +64,13 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         PrepareDraw(k, t);
     }
 } 
+
+void Renderer::DrawDebug(shared_ptr<Node> node) {
+    node->DrawDebug();
+    for (auto& k : node->GetChildren()) {
+        Draw(k);
+    }
+}
 
 void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
     shared_ptr<Shader> shader = node->GetShader();

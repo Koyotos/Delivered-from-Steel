@@ -143,4 +143,32 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
 
         collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
     }
+
+    #if define(DEBUG)
+	shader = make_shared<Shader>("res/shaders/debug/line.vert", "res/shaders/debug/line.vert");
+    #endif 
+
+}
+
+void PhysicsNode::drawDebug() {
+    #if define(DEBUG)
+    if (collider) {
+        debugShader->Use();
+        debugShader->SetMat4("M", GetTransform().GetGlobal());
+        if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(collider)) {
+            drawCapsule();
+        }
+        else if (auto box = std::dynamic_pointer_cast<BoxCollider>(collider)) {
+            drawBox();
+        }
+    }
+    #endif
+}
+
+void PhysicsNode::drawCapsule() {
+    return;
+}
+
+void PhysicsNode::drawBox() {
+    return;
 }

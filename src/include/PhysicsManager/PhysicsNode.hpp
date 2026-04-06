@@ -15,6 +15,8 @@ private:
     std::shared_ptr<Collider> collider;
     glm::vec2 velocity;
 
+	std::shared_ptr<Shader> debugShader;
+
 public:
 	float maxFallSpeed = 5.0f;
 
@@ -29,6 +31,10 @@ public:
     void resolveCollision(PhysicsNode& other);
 
     void applyForce(const glm::vec2& force);
+
+	void drawDebug();
+    void drawBox();
+    void drawCapsule();
 
     PhysicsNode();
 
