@@ -36,6 +36,8 @@ public:
     void drawBox();
     void drawCapsule();
 
+	void setDebugShader(std::shared_ptr<Shader> shader);
+
     PhysicsNode();
 
     PhysicsNode(const std::unordered_map<std::string, std::any>&);

@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 #include "include/PhysicsManager/BoxCollider.hpp"
+#include "include/ResourceManager/ResourceManager.hpp"
 #include <iostream>
 
 void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
@@ -144,8 +145,8 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
         collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
     }
 
-    #if define(DEBUG)
-	shader = make_shared<Shader>("res/shaders/debug/line.vert", "res/shaders/debug/line.vert");
+    #if defined(DEBUG)
+	// debugShader = ResourceManager::GetShader("debug");
     #endif 
 
 }
@@ -155,6 +156,7 @@ void PhysicsNode::drawDebug() {
     if (collider) {
         debugShader->Use();
         debugShader->SetMat4("M", GetTransform().GetGlobal());
+        // debugShader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
         if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(collider)) {
             drawCapsule();
         }
@@ -163,6 +165,10 @@ void PhysicsNode::drawDebug() {
         }
     }
     #endif
+}
+
+void PhysicsNode::setDebugShader(std::shared_ptr<Shader> shader) {
+    debugShader = shader;
 }
 
 void PhysicsNode::drawCapsule() {

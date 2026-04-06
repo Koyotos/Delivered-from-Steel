@@ -13,6 +13,7 @@ private:
 
 	void updateNode(shared_ptr<Node> node);
 
+
 public:
 	void Update(shared_ptr<Scene> scene, float dt);
 };

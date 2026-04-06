@@ -36,7 +36,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     PrepareDraw(scene->root, Transform());
     Draw(scene->root);
 
-    #if define(DEBUG)
+    #if defined(DEBUG)
     DrawDebug(scene->root);
     #endif
 }
@@ -68,7 +68,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
 void Renderer::DrawDebug(shared_ptr<Node> node) {
     node->DrawDebug();
     for (auto& k : node->GetChildren()) {
-        Draw(k);
+        DrawDebug(k);
     }
 }
 
