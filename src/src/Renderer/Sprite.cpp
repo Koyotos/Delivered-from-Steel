@@ -23,6 +23,10 @@ Texture& Sprite::GetActiveTexture() {
     return textures[active];
 }
 
+vec2 Sprite::GetSize() {
+    return size;
+}
+
 void Sprite::Draw(Shader& shader) {
     shader.Use();
     glActiveTexture(GL_TEXTURE0);
@@ -39,6 +43,7 @@ void Sprite::SetupSprite() {
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
     glBindTexture(GL_TEXTURE_2D,0);
 
+    size = vec2(w,h);
     vertices = {
         {{0.0f, 0.0f}, {0.0f, 0.0f}},
         {{float(w), 0.0f}, {1.0f, 0.0f}},

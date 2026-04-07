@@ -2,6 +2,9 @@
 
 void Object2D::Draw() {
     shader->SetMat4("M", transform.GetGlobal());
+    if(reqPerspecive) {
+        shader->SetVec2("spriteSize", sprite->GetSize());
+    }
     sprite->Draw(*shader);
 }
 

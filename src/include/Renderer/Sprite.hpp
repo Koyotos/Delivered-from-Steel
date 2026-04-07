@@ -14,6 +14,7 @@ class Sprite {
     string directory;
     GLuint VAO, VBO, EBO;
     GLuint active;
+    vec2 size;
 
     vector<Vertex2D> vertices;
     vector<GLuint> indices;
@@ -25,6 +26,8 @@ class Sprite {
     public:
     void SetActiveTexture(const GLuint&);
     void SetActiveTexture(const string&);
+
+    vec2 GetSize();
 
     Texture& GetActiveTexture();
     const string& GetDir() const noexcept;
