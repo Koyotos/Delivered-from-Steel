@@ -37,6 +37,9 @@ class Renderer {
     void EndFrame();
     void Init();
 	GLFWwindow* GetWindow() const noexcept { return window; };
+
+    Renderer(uint16_t windowW = DEF_WIN_W, uint16_t windowH = DEF_WIN_H);
+    ~Renderer();
 };
 
 #endif

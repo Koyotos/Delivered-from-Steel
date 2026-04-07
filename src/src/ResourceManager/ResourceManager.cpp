@@ -192,3 +192,11 @@ shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
         return nullptr;
     }
 }
+
+ResourceManager::ResourceManager() {
+
+}
+
+ResourceManager::~ResourceManager() {
+    resourceStream.close();
+}

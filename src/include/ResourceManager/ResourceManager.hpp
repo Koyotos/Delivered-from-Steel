@@ -82,6 +82,9 @@ class ResourceManager {
     public:
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void ConfigurePaths();
+
+    ResourceManager();
+    ~ResourceManager();
 };
 
 #endif

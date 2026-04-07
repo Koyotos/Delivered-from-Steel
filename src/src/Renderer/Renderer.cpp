@@ -118,3 +118,13 @@ void Renderer::EndFrame() {
     glfwMakeContextCurrent(window);
     glfwSwapBuffers(window);
 }
+
+Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
+    this->windowW = windowW;
+    this->windowH = windowH;
+    Init();
+}
+
+Renderer::~Renderer() {
+    glfwDestroyWindow(window);
+}
