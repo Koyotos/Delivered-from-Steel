@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 
+
 void ResourceManager::ConfigurePaths() {
     path pth = Globals::GetGlobals().GetExecDir()/"res";
     modelsPath = pth/"models";
@@ -140,7 +141,8 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
     #if defined(DEBUG)
     if(auto physNode = dynamic_pointer_cast<PhysicsNode>(node)) {
         if(data.contains("debugShader")) {
-            physNode->setDebugShader(LoadShader(fromMap(string,"debugShader",data)));
+            auto sh = LoadShader(fromMap(string, "debugShader", data));
+            physNode->setDebugShader(sh);
         }
 	}
     #endif

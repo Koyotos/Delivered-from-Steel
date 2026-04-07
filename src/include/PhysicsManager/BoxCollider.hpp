@@ -15,6 +15,9 @@ private:
 public:
     glm::vec2 size;
 
+	glm::vec2 getMin() const { return min; }
+	glm::vec2 getMax() const { return max; }
+
     BoxCollider(const Transform transform, float x, float y, float width, float height);
 
 	void updatePosition(const Transform transform) override;

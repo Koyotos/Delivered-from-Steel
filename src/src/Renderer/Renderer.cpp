@@ -37,7 +37,9 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     Draw(scene->root);
 
     #if defined(DEBUG)
+    glDisable(GL_DEPTH_TEST);
     DrawDebug(scene->root);
+    glEnable(GL_DEPTH_TEST);
     #endif
 }
 
@@ -66,7 +68,14 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
 } 
 
 void Renderer::DrawDebug(shared_ptr<Node> node) {
-    node->DrawDebug();
+	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
+    if (physicsNode) {
+        auto shader = physicsNode->getDebugShader();
+        if (shader) {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+            physicsNode->drawDebug();
+        }
+    }
     for (auto& k : node->GetChildren()) {
         DrawDebug(k);
     }

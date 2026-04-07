@@ -37,6 +37,7 @@ public:
     void drawCapsule();
 
 	void setDebugShader(std::shared_ptr<Shader> shader);
+    std::shared_ptr<Shader> getDebugShader() const { return debugShader; };
 
     PhysicsNode();
 
