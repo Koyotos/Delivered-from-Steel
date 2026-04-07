@@ -9,7 +9,18 @@
 #include <string>
 #include "include/IOManager/InputEvent.hpp"
 
-#define fromMap(type, key, jname) any_cast<type>(jname.find(key)->second)
+#define fromMap(type,key,data) FromMap<type>(data,key)
+
+template<typename T>
+T FromMap(const std::unordered_map<std::string, std::any>& data, const std::string& key) {
+    auto it = data.find(key);
+
+    if (it == data.end()) {
+        throw std::runtime_error("Missing key: " + key);
+    }
+
+    return std::any_cast<T>(it->second);
+}
 
 using namespace std;
 

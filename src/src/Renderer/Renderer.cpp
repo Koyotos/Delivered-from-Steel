@@ -100,7 +100,11 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
 void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
     shared_ptr<Shader> shader = node->GetShader();
     if(const auto& cast2d = dynamic_pointer_cast<Object2D>(node)) { // Consider avoiding dynamic cast, possibly virtual type func
-        shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        if(cast2d->GetReqPerspective()) {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
+        } else {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        }
     } else {
         shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
         shader->SetVec3("viewPos",vec3(currentScene->sceneCam->GetPos(),0));
