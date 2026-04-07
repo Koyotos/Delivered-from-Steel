@@ -137,6 +137,13 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
             obj2d->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
     }
+    #if defined(DEBUG)
+    if(auto physNode = dynamic_pointer_cast<PhysicsNode>(node)) {
+        if(data.contains("debugShader")) {
+            physNode->setDebugShader(LoadShader(fromMap(string,"debugShader",data)));
+        }
+	}
+    #endif
 }
 
 vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(unordered_map<string, std::any>& data) {

@@ -145,15 +145,11 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
         collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
     }
 
-    #if defined(DEBUG)
-	// debugShader = ResourceManager::GetShader("debug");
-    #endif 
-
 }
 
 void PhysicsNode::drawDebug() {
     #if defined(DEBUG)
-    if (collider) {
+    if (collider && debugShader) {
         debugShader->Use();
         debugShader->SetMat4("M", GetTransform().GetGlobal());
         // debugShader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
