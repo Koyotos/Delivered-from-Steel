@@ -17,6 +17,10 @@ const mat4& Transform::GetGlobal() const {
     return global;
 }
 
+void Transform::SetGlobal(mat4 g) {
+    global = g;
+}
+
 void Transform::Combine(const Transform& parent) {
     global = parent.global*local;
 }

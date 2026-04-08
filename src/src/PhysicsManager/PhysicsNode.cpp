@@ -30,7 +30,10 @@ void PhysicsNode::Update(float dt)
     // testowa symulacja grawitacji
     velocity.y = std::clamp(velocity.y - 0.1f, -maxFallSpeed, maxFallSpeed);
     Transform t = this->GetTransform(); 
+
+    mat4 global = GetTransform().GetGlobal();
     t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * deltaTime, 0.0f));
+    t.SetGlobal(global);
 
 
 	this->SetTransform(t);
@@ -61,8 +64,8 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
     if (totalInverseMass > 0) {
         glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
 
-        std::cout << "Separation: x=" << separation.x
-            << ", y=" << separation.y << std::endl;
+        //std::cout << "Separation: x=" << separation.x
+        //    << ", y=" << separation.y << std::endl;
 
         if (!this->isStatic) {
             Transform t = this->GetTransform();

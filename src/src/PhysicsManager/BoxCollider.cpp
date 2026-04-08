@@ -13,13 +13,9 @@ BoxCollider::BoxCollider(const Transform transform, float x, float y, float widt
 
 void BoxCollider::updatePosition(const Transform transform)
 {
-    //mat4 modelMatrix = transform.GetGlobal();
+    mat4 modelMatrix = transform.GetGlobal();
 
-    //boxCenter = vec2(modelMatrix[3].x + this->transform.x, modelMatrix[3].y + this->transform.y);
-
-    vec3 modelMatrix = transform.GetTranslation();
-
-    boxCenter = vec2(modelMatrix.x + this->transform.x, modelMatrix.y + this->transform.y);
+    boxCenter = vec2(modelMatrix[3].x + this->transform.x, modelMatrix[3].y + this->transform.y);
 
     float halfHeight = size.y / 2.0f;
     float halfWidth = size.x / 2.0f;
