@@ -70,11 +70,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
 void Renderer::DrawDebug(shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
     if (physicsNode) {
-        auto shader = physicsNode->getDebugShader();
-        if (shader) {
-            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
-            physicsNode->drawDebug();
-        }
+        physicsNode->drawDebug();
     }
     for (auto& k : node->GetChildren()) {
         DrawDebug(k);
