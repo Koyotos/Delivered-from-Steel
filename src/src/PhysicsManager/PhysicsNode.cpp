@@ -152,15 +152,17 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
 
 void PhysicsNode::drawDebug() {
     #if defined(DEBUG)
-    if (collider && debugShader) {
-        shader->SetMat4("M", this->GetTransform().GetGlobal());
+    if (collider) {
 		shader->Use();
+        shader->SetBool("isDebug", true);
         if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(collider)) {
             drawCapsule();
         }
         else if (auto box = std::dynamic_pointer_cast<BoxCollider>(collider)) {
             drawBox();
         }
+		shader->SetBool("isDebug", false);
+
     }
     #endif
 }
