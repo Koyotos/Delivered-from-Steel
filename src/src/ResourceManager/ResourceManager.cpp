@@ -1,6 +1,7 @@
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Core/Node.hpp"
 #include "include/Globals/Globals.hpp"
+#include "include/Renderer/TextNode.hpp"
 #include <cstdint>
 #include <filesystem>
 
@@ -136,6 +137,10 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
         }
         if(data.contains("shader")) {
             obj2d->SetShader(LoadShader(fromMap(string,"shader",data)));
+        }
+    } else if(auto textNode = dynamic_pointer_cast<TextNode>(node)) {
+        if(data.contains("shader")) {
+            textNode->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
     }
 }

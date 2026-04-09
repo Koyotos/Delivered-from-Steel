@@ -1,3 +1,6 @@
+#ifndef FE_UTILS
+#define FE_UTILS
+
 #include <assimp/matrix4x4.h>
 #include <assimp/vector3.h>
 #include <assimp/vector2.h>
@@ -36,3 +39,5 @@ vec3 GLMVec(const aiVector3D& vec);
 vec2 GLMVec(const aiVector2D& vec);
 
 GLuint TextureFromFile(const char*, const char*);
+
+#endif

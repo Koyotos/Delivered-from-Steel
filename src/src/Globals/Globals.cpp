@@ -45,6 +45,14 @@ path Globals::GetUserDir() {
     return path();
 }
 
+Font& Globals::GetGameFont() noexcept {
+    return gameFont;
+}
+
+void Globals::SetGameFont(Font f) {
+    gameFont = f;
+}
+
 void Globals::SetKeyState(int key, bool isPressed) {
     inputMap[key] = isPressed;
 }

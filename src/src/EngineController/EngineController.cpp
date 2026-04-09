@@ -11,6 +11,7 @@ void EngineController::Init() {
     }
 
     globals->Log("Globals OK");
+    globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
 
     try {
         scm = make_shared<SceneManager>();

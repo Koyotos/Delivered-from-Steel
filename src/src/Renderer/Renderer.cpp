@@ -2,6 +2,7 @@
 #include "include/Core/Object2D.hpp"
 #include "include/Core/VisualNode.hpp"
 #include "include/Renderer/Light.hpp"
+#include "include/Renderer/TextNode.hpp"
 
 void Renderer::Init() {
     if(!glfwInit()) {
@@ -27,6 +28,7 @@ void Renderer::Init() {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
     glDepthFunc(GL_LESS);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 }
@@ -105,7 +107,10 @@ void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
         } else {
             shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
         }
-    } else {
+    } else if(const auto& castNode = dynamic_pointer_cast<TextNode>(node)){
+        shader->SetMat4("VP",currentScene->sceneCam->GetVP(0) );
+    } 
+    else {
         shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
         shader->SetVec3("viewPos",vec3(currentScene->sceneCam->GetPos(),0));
         for(int8_t i = 0; i < (lightsPos.size()>20 ? 20 : lightsPos.size()); i++) {
