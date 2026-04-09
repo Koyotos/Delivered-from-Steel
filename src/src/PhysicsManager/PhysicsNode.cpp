@@ -31,17 +31,13 @@ void PhysicsNode::Update(float dt)
     velocity.y = std::clamp(velocity.y - 0.1f, -maxFallSpeed, maxFallSpeed);
     Transform t = this->GetTransform(); 
 
-    mat4 global = GetTransform().GetGlobal();
     t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * deltaTime, 0.0f));
-    t.SetGlobal(global);
-
 
 	this->SetTransform(t);
 }
 
 void PhysicsNode::resolveCollision(PhysicsNode& other)
 {
-
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
     
 	if (!collider || !other.collider) return;
@@ -54,38 +50,34 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
     }
 
     if (!info->collided) return;
+    if (this->isStatic) return;
 
 	collider->getCurrentCollisions().push_back(other.collider);
-    other.collider->getCurrentCollisions().push_back(collider);
+
+    float totalInverseMass = 1;
+    //totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
 
 
-    float totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
+    glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
 
-    if (totalInverseMass > 0) {
-        glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
+    if (!this->isStatic) {
+        Transform t = this->GetTransform();
+        t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
 
-        //std::cout << "Separation: x=" << separation.x
-        //    << ", y=" << separation.y << std::endl;
-
-        if (!this->isStatic) {
-            Transform t = this->GetTransform();
-            t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
-
-            this->SetTransform(t);
-        }
-        if (!other.isStatic) {
-            Transform t = other.GetTransform();
-            t.SetTranslation(t.GetTranslation() - glm::vec3(separation.x, separation.y, 0.0f));
-
-            other.SetTransform(t);
-        }
+        this->SetTransform(t);
     }
+    //if (!other.isStatic) {
+    //    Transform t = other.GetTransform();
+    //    t.SetTranslation(t.GetTranslation() - glm::vec3(separation.x, separation.y, 0.0f));
+
+    //    other.SetTransform(t);
+    //}
+    
 
     glm::vec2 relativeVelocity = other.velocity - this->velocity;
 
     float velocityAlongNormal = glm::dot(relativeVelocity, info->normal);
 
-    if (velocityAlongNormal > 0) return;
 
     float e = 0.0f;
 
@@ -95,11 +87,11 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
     glm::vec2 impulse = j * info->normal;
 
     if (!this->isStatic) {
-        this->applyForce(impulse);
+        this->applyForce(-impulse);
     }
-    if (!other.isStatic) {
-        other.applyForce(impulse);
-    }
+    //if (!other.isStatic) {
+    //    other.applyForce(impulse);
+    //}
     return;
 }
 
@@ -118,7 +110,6 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
 
     auto it = data.find("colliderPosX");
 
-    float height;
     float x = 0, y = 0;
 
     auto posX = data.find("colliderPosX");

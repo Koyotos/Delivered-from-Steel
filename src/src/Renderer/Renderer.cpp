@@ -55,8 +55,10 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         shared_ptr<VisualNode> nodeCast = static_pointer_cast<VisualNode>(node);
         ConfigureShader(nodeCast);
         if(!nodeCast->TestIgnoreParent()) {
-            if(nodeCast->TestTransformChanged())
+            if (nodeCast->TestTransformChanged()) {
                 nodeCast->ApplyParentTransform(t);
+
+            }
         } else {
             nodeCast->ResetGlobal();
         }

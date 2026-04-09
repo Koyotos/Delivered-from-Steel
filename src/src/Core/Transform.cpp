@@ -6,7 +6,6 @@ void Transform::UpdateLocal() {
     mat4 S = glm::scale(mat4(1.0f), scale);
 
     local = T * R * S;
-    global = local;
 }
 
 const mat4& Transform::GetLocal() const {
@@ -61,6 +60,7 @@ Transform::Transform() {
     rotation = quat(vec3(0,0,0));
     scale = vec3(1,1,1);
     UpdateLocal();
+    ResetGlobal();
 }
 
 Transform::Transform(const vec3& translation, const vec3& rotation, const vec3& scale) {
@@ -68,6 +68,7 @@ Transform::Transform(const vec3& translation, const vec3& rotation, const vec3& 
     this->rotation = quat(rotation);
     this->scale = scale;
     UpdateLocal();
+    ResetGlobal();
 }
 
 Transform::Transform(const vector<std::any>& data) {
@@ -82,6 +83,7 @@ Transform::Transform(const vector<std::any>& data) {
     scale.y = any_cast<float>(data[7]);
     scale.z = any_cast<float>(data[8]);
     UpdateLocal();
+    ResetGlobal();
 }
 
 Transform::~Transform() {
