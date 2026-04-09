@@ -18,7 +18,7 @@ private:
 	std::shared_ptr<Shader> debugShader;
 
 public:
-	float maxFallSpeed = 5.0f;
+	float maxFallSpeed = 50.0f;
 
     void SetCollider(std::shared_ptr<Collider> col);
     std::shared_ptr<Collider> GetCollider();

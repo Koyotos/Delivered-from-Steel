@@ -53,7 +53,7 @@ Globals::Globals() {
 
     log.open(execDir/path("log.txt"), ios::out);
     if(!log.good()) {
-        //throw runtime_error("Can't open log.");
+        throw runtime_error("Can't open log.");
     }
 }
 
