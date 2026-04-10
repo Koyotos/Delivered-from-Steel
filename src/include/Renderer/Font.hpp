@@ -4,12 +4,7 @@
 #include <map>
 #include <vector>
 
-#ifdef __linux__
-#include "freetype2/ft2build.h"
-#endif
-#ifdef _WIN32
 #include "ft2build.h"
-#endif
 
 #include FT_FREETYPE_H
 
