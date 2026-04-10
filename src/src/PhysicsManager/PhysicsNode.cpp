@@ -1,0 +1,198 @@
+#include "include/PhysicsManager/PhysicsNode.hpp"
+#include <glm/glm.hpp>
+#include "include/PhysicsManager/CapsuleCollider.hpp"
+#include "include/PhysicsManager/BoxCollider.hpp"
+#include "include/ResourceManager/ResourceManager.hpp"
+#include <iostream>
+
+void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
+    collider = col;
+}
+
+std::shared_ptr<Collider> PhysicsNode::GetCollider() {
+    return collider;
+}
+
+void PhysicsNode::setStatic(bool value) {
+    isStatic = value;
+}
+
+bool PhysicsNode::getStatic() const {
+    return isStatic;
+}
+
+void PhysicsNode::Update(float dt)
+{
+    if (isStatic) return;
+
+	float deltaTime = std::min(dt, 0.016f);
+
+    // testowa symulacja grawitacji
+    velocity.y = std::clamp(velocity.y - 10.0f * deltaTime, -maxFallSpeed, maxFallSpeed);
+    Transform t = this->GetTransform(); 
+
+    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * deltaTime, 0.0f));
+
+	this->SetTransform(t);
+}
+
+void PhysicsNode::resolveCollision(PhysicsNode& other)
+{
+    shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
+    
+	if (!collider || !other.collider) return;
+
+    if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(other.collider)) {
+        info = collider->calculateCollisionInfo(capsule);
+    }
+    else if (auto box = std::dynamic_pointer_cast<BoxCollider>(other.collider)) {
+        info = collider->calculateCollisionInfo(box);
+    }
+
+    if (!info->collided) return;
+    if (this->isStatic) return;
+
+	collider->getCurrentCollisions().push_back(other.collider);
+
+    float totalInverseMass = 1;
+    //totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
+
+
+    glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
+
+    if (!this->isStatic) {
+        Transform t = this->GetTransform();
+        t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
+
+        this->SetTransform(t);
+    }
+    //if (!other.isStatic) {
+    //    Transform t = other.GetTransform();
+    //    t.SetTranslation(t.GetTranslation() - glm::vec3(separation.x, separation.y, 0.0f));
+
+    //    other.SetTransform(t);
+    //}
+    
+
+    glm::vec2 relativeVelocity = other.velocity - this->velocity;
+
+    float velocityAlongNormal = glm::dot(relativeVelocity, info->normal);
+
+
+    float e = 0.0f;
+
+    float j = -(1.0f + e) * velocityAlongNormal;
+    j /= totalInverseMass;
+
+    glm::vec2 impulse = j * info->normal;
+
+    if (!this->isStatic) {
+        this->applyForce(-impulse);
+    }
+    //if (!other.isStatic) {
+    //    other.applyForce(impulse);
+    //}
+    return;
+}
+
+void PhysicsNode::applyForce(const glm::vec2& force) {
+    if (isStatic) return;
+    velocity += force;
+}
+
+PhysicsNode::PhysicsNode() {
+
+}
+
+PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) : VisualNode(data) {
+    isStatic = fromMap(bool, "static", data);
+    velocity = glm::vec2(0.0f, 0.0f);
+
+    auto it = data.find("colliderPosX");
+
+    float x = 0, y = 0;
+
+    auto posX = data.find("colliderPosX");
+    if (posX != data.end()) {
+		x = fromMap(float, "colliderPosX", data);
+    }
+
+    auto posY = data.find("colliderPosY");
+    if (posY != data.end()) {
+        y = fromMap(float, "colliderPosY", data);
+    }
+
+    auto radiusPom = data.find("radius");
+    if (radiusPom != data.end()) {
+        float radius = fromMap(float, "radius", data);
+        float height = fromMap(float, "height", data);
+
+		collider = std::make_shared<CapsuleCollider>(GetTransform(), x, y, radius, height);
+        
+    }
+
+    auto widthPom = data.find("width");
+    if (widthPom != data.end()) {
+        float width = fromMap(float, "width", data);
+        float height = fromMap(float, "height", data);
+
+        collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
+    }
+
+}
+
+void PhysicsNode::drawDebug() {
+    #if defined(DEBUG)
+    if (collider) {
+		shader->Use();
+        shader->SetBool("isDebug", true);
+        if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(collider)) {
+            drawCapsule();
+        }
+        else if (auto box = std::dynamic_pointer_cast<BoxCollider>(collider)) {
+            drawBox();
+        }
+		shader->SetBool("isDebug", false);
+
+    }
+    #endif
+}
+
+void PhysicsNode::setDebugShader(std::shared_ptr<Shader> shader) {
+    debugShader = shader;
+}
+
+void PhysicsNode::drawCapsule() {
+    return;
+}
+
+void PhysicsNode::drawBox() {
+    auto box = std::dynamic_pointer_cast<BoxCollider>(collider);
+    if (!box) return;
+
+    float halfW = box->size.x / 2.0f;
+    float halfH = box->size.y / 2.0f;
+    float vertices[] = {
+        -halfW, -halfH,  halfW, -halfH,
+         halfW, -halfH,  halfW,  halfH,
+         halfW,  halfH, -halfW,  halfH,
+        -halfW,  halfH, -halfW, -halfH
+    };
+
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+	glLineWidth(2.0f);
+    glDrawArrays(GL_LINES, 0, 8);
+
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+}

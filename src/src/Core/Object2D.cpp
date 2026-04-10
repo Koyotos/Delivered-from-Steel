@@ -17,6 +17,6 @@ Object2D::Object2D() {
 
 }
 
-Object2D::Object2D(const unordered_map<string, std::any>& data) : VisualNode(data) {
+Object2D::Object2D(const unordered_map<string, std::any>& data) : PhysicsNode(data) {
     
 }

@@ -48,6 +48,7 @@ void EngineController::Run() {
         deltaTime = currentTime - lastTime;
         shared_ptr<Scene> active = scm->GetActive();
 
+		psm->Update(active, deltaTime);
 		glfwPollEvents();
 		iom->PollGamepad();
         if (active) {

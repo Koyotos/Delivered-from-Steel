@@ -41,6 +41,7 @@ class Transform {
     */
     const mat4& GetGlobal() const;
 
+    void SetGlobal(mat4);
     /*
     @brief Combines global matrix of parent with local matrix.
     @param1 const mat4& - parent global matrix
