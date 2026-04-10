@@ -2,6 +2,7 @@
 #define FE_SCENE
 
 #include "include/Core/Node.hpp"
+#include "include/Game/Objects/Player.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/Model.hpp"
@@ -26,11 +27,13 @@ class Scene {
     string name;
     shared_ptr<Node> root;
     shared_ptr<Camera> sceneCam;
+    shared_ptr<Player> scenePlayer;
 
     vector<shared_ptr<Model>> sceneModels; // TODO optimizations with unloading
     vector<shared_ptr<Shader>> sceneShaders;
 
     inline void FindCam(shared_ptr<Node>) noexcept;
+    inline void FindPlayer(shared_ptr<Node>) noexcept;
 
     public:
     

@@ -9,6 +9,10 @@ mat4 Camera::GetVP(const bool& prspv) const noexcept {
     }
 }
 
+vec2 Camera::ToWorldCoords(const vec2& coords) const noexcept {
+    return coords - position;
+}
+
 vec2 Camera::GetPos() {
     return position;
 }

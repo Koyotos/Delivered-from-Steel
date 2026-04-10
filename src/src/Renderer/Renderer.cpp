@@ -1,7 +1,9 @@
 #include "include/Renderer/Renderer.hpp"
 #include "include/Core/Object2D.hpp"
+#include "include/Core/Object3D.hpp"
 #include "include/Core/VisualNode.hpp"
 #include "include/Renderer/Light.hpp"
+#include "include/Renderer/TextNode.hpp"
 
 void Renderer::Init() {
     if(!glfwInit()) {
@@ -27,6 +29,7 @@ void Renderer::Init() {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
     glDepthFunc(GL_LESS);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 }
@@ -64,19 +67,21 @@ void Renderer::PrepareLights() {
 }
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
+    bool childTransformState = false;
     if(node->TestDraw()) {
         shared_ptr<VisualNode> nodeCast = static_pointer_cast<VisualNode>(node);
         ConfigureShader(nodeCast);
         if(!nodeCast->TestIgnoreParent()) {
-            if (nodeCast->TestTransformChanged()) {
+            if(nodeCast->TestTransformChanged()) {
                 nodeCast->ApplyParentTransform(t);
-
+                childTransformState = true;
             }
         } else {
             nodeCast->ResetGlobal();
         }
         t = nodeCast->GetTransform();
-    } else if(shared_ptr<Light> cast = dynamic_pointer_cast<Light>(node)) {
+    } else if(node->Type() == "Light") {
+        shared_ptr<Light> cast = static_pointer_cast<Light>(node);
         if(cast->type == LIGHT_DIRECTIONAL) {
             lightsPos.push_back({cast,0});
         } else{
@@ -86,12 +91,16 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         }
     }
     for(auto& k : node->GetChildren()) {
+        k->SetTransformChanged(childTransformState);
         PrepareDraw(k, t);
     }
 } 
 
 void Renderer::DrawDebug(shared_ptr<Node> node) {
-	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
+    if(node->Type() != "PhysicsNode") {
+        return;
+    }
+	auto physicsNode = static_pointer_cast<PhysicsNode>(node);
     if (physicsNode) {
         physicsNode->drawDebug();
     }
@@ -114,11 +123,23 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     shader->SetVec3("lights["+to_string(index)+"].colorSpecular", light->colorSpecular);
 }
 
-void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
-    shared_ptr<Shader> shader = node->GetShader();
-    if(const auto& cast2d = dynamic_pointer_cast<Object2D>(node)) { // Consider avoiding dynamic cast, possibly virtual type func
-        shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
-    } else {
+void Renderer::ConfigureShader(shared_ptr<Node> node) {
+    if(node->Type() == "Object2D") {
+        shared_ptr<Object2D> obj2d = static_pointer_cast<Object2D>(node);
+        shared_ptr<Shader> shader = obj2d->GetShader();
+        if(obj2d->GetReqPerspective()) {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
+        } else {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        }
+    } else if(node->Type() == "TextNode"){
+        shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
+        shared_ptr<Shader> shader = textNode->GetShader();
+        shader->SetMat4("VP",currentScene->sceneCam->GetVP(0) );
+    } 
+    else if(node->Type() == "Object3D") {
+        shared_ptr<Object3D> obj3d = static_pointer_cast<Object3D>(node);
+        shared_ptr<Shader> shader = obj3d->GetShader();
         shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
         shader->SetVec3("viewPos",vec3(currentScene->sceneCam->GetPos(),0));
         for(int8_t i = 0; i < (lightsPos.size()>20 ? 20 : lightsPos.size()); i++) {
@@ -130,4 +151,14 @@ void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
 void Renderer::EndFrame() {
     glfwMakeContextCurrent(window);
     glfwSwapBuffers(window);
+}
+
+Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
+    this->windowW = windowW;
+    this->windowH = windowH;
+    Init();
+}
+
+Renderer::~Renderer() {
+    glfwDestroyWindow(window);
 }

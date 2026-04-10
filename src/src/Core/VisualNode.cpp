@@ -8,6 +8,10 @@ Transform VisualNode::GetTransform() const noexcept {
     return transform;
 }
 
+string VisualNode::Type() {
+    return "VisualNode";
+}
+
 void VisualNode::ApplyParentTransform(Transform t) {
     transform.Combine(t);
     flags[5] = false;

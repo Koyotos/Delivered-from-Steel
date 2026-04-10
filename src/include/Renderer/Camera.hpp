@@ -26,6 +26,8 @@ class Camera : public Node {
     */
     mat4 GetVP(const bool&) const noexcept;
 
+    vec2 ToWorldCoords(const vec2&) const noexcept;
+
     vec2 GetPos();
     void SetPos(const vec2&);
 

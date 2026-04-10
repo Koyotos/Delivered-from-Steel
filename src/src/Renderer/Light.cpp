@@ -4,6 +4,10 @@ Light::Light() {
 
 }
 
+string Light::Type() {
+    return "Light";
+}
+
 Light::Light(unordered_map<string,any> data) : Node(data) {
 
     type = LightType(fromMap(int64_t,"type",data));

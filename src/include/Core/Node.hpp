@@ -9,7 +9,18 @@
 #include <string>
 #include "include/IOManager/InputEvent.hpp"
 
-#define fromMap(type, key, jname) any_cast<type>(jname.find(key)->second)
+#define fromMap(type,key,data) FromMap<type>(data,key)
+
+template<typename T>
+T FromMap(const std::unordered_map<std::string, std::any>& data, const std::string& key) {
+    auto it = data.find(key);
+
+    if (it == data.end()) {
+        throw std::runtime_error("Missing key: " + key);
+    }
+
+    return std::any_cast<T>(it->second);
+}
 
 using namespace std;
 
@@ -92,7 +103,7 @@ class Node {
     @param1 const bool& - state to be set
     @return void
     */
-    virtual inline void SetTranformChanged(const bool& state) noexcept {return;};
+    virtual inline void SetTransformChanged(const bool& state) noexcept {return;};
 
     /*
     @brief General purpose method, called once every frame. This may contain code that is related
@@ -122,6 +133,12 @@ class Node {
     @return void
     */
     virtual void Physics(const float&);
+
+    /*
+    @brief Returns nod type as string.
+    @return string - type
+    */
+    virtual string Type();
 
     /*
     @brief Basic constructor. Creates empty Node.

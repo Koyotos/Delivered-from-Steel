@@ -12,14 +12,30 @@ fully used by engine. It satisfies all requiements and allows to call every stan
 class Object2D : public PhysicsNode {
     private:
     shared_ptr<Sprite> sprite;
+    bool reqPerspecive;
 
     public:
+
+    string Type() override;
+
+    /*
+    @brief Sets flag that informs renderer to use perspective matrix instead of orthogonal.
+    @param1 const bool& - flag state
+    @return void
+    */
+    void SetReqPerspective(const bool&);
+
+    /*
+    @brief Returns flag that informs renderer to use perspective matrix instead of orthogonal.
+    @return void
+    */
+    const bool& GetReqPerspective();
 
     /*
     @brief Override of Draw() function. It renders object's sprite with given shader.
     @return void
     */
-    void Draw() override final;
+    void Draw() override;
 
     /*
     @brief Returns sprite used by object.

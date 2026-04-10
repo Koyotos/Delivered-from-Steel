@@ -22,6 +22,8 @@ class Object3D : public PhysicsNode {
     */
     void Draw() override final;
 
+    string Type() override;
+
     /*
     @brief Returns model used by object.
     @return shared_ptr<Model> - object's model

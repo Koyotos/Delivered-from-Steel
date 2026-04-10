@@ -1,6 +1,7 @@
 #ifndef FE_GLOBALS
 #define FE_GLOBALS
 
+#include "include/Renderer/Font.hpp"
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -21,7 +22,7 @@ class Globals {
     path execDir;
     path userDir;
 
-    inline path GetExecPathInternal();
+    Font gameFont;
 
 	std::unordered_map<int, bool> inputMap;
     std::unordered_map<int, bool> mouseMap;
@@ -30,6 +31,8 @@ class Globals {
 
 	float mouseX = 0.0f;
 	float mouseY = 0.0f;
+
+    inline path GetExecPathInternal();
 
     public:
     /*
@@ -61,6 +64,19 @@ class Globals {
     @return path - user directory path
     */
     path GetUserDir();
+
+    /*
+    @brief Returns font used by engine.
+    @return const Font& - font
+    */
+    Font& GetGameFont() noexcept;
+
+    /*
+    @brief Sets font used by engine.
+    @param1 const Font& - font
+    @return void
+    */
+    void SetGameFont(Font);
 
 	void SetKeyState(int key, bool isPressed);
 	bool GetKeyState(int key) const;

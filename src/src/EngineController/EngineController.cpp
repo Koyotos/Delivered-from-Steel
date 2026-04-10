@@ -20,9 +20,9 @@ void EngineController::Init() {
         rsm = make_shared<ResourceManager>();
         aum = make_shared<AudioManager>();
 
-        renderer->Init();
 		iom->Init(renderer->GetWindow());
         rsm->ConfigurePaths();
+        globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
 
     } catch(const exception& except) {
         globals->Log("Engine initialization error : " + string(except.what()));

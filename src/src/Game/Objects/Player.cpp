@@ -10,14 +10,18 @@ Player::Player() : Object2D() {
 	SetDraw(true);
 }
 
-Player::Player(unordered_map<string, std::any> data) : Object2D(data) {
+Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
 
+}
+
+void Player::SetCamera(shared_ptr<Camera> cam) {
+	camera = cam;
 }
 
 void Player::Process() {
 	Transform t = GetTransform();
 	vec3 pos = t.GetTranslation();
-	float speed = 1.0f;
+	float speed = 0.025f;
 
 	//float leftXM = Globals::GetGlobals().GetMouseX();
 	//float leftYM = Globals::GetGlobals().GetMouseY();
@@ -25,8 +29,8 @@ void Player::Process() {
 	//pos.x = leftXM;
 	//pos.y = leftYM;
 
-	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_W)) pos.y -= speed;
-	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_S)) pos.y += speed;
+	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_W)) pos.y += speed;
+	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_S)) pos.y -= speed;
 	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_A)) pos.x -= speed;
 	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_D)) pos.x += speed;
 
@@ -43,6 +47,7 @@ void Player::Process() {
 
 	t.SetTranslation(pos);
 	SetTransform(t);
+	camera->SetPos(pos);
 }
 
 bool Player::Input(InputEvent& event) {

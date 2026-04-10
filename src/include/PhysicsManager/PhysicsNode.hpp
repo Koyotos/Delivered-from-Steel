@@ -20,6 +20,8 @@ private:
 public:
 	float maxFallSpeed = 50.0f;
 
+    string Type() override;
+
     void SetCollider(std::shared_ptr<Collider> col);
     std::shared_ptr<Collider> GetCollider();
 
