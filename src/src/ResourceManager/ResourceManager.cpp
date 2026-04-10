@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <filesystem>
 
+
 void ResourceManager::ConfigurePaths() {
     path pth = Globals::GetGlobals().GetExecDir()/"res";
     modelsPath = pth/"models";

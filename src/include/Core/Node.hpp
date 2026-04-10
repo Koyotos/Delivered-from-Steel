@@ -45,6 +45,9 @@ class Node {
     virtual inline bool TestIgnoreParent() noexcept {return true;}
     virtual inline bool TestTransformChanged() noexcept {return false;};
 
+    // debug purpose only
+    inline void DrawDebug() { return;  }
+
     // Normal part again 
 
     /*

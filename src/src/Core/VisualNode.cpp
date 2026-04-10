@@ -23,6 +23,7 @@ void VisualNode::SetShader(shared_ptr<Shader> sh) {
 
 void VisualNode::SetTransform(const Transform& transform) {
     this->transform = transform;
+	flags[5] = true;
 }
 
 VisualNode::VisualNode() {

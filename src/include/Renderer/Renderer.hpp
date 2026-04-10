@@ -32,6 +32,8 @@ class Renderer {
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
     inline void PrepareLights();
 
+    inline void DrawDebug(shared_ptr<Node> node);
+
     public:
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();

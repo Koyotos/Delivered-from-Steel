@@ -1,4 +1,5 @@
 #include "include/Core/Object2D.hpp"
+#include "include/PhysicsManager/PhysicsNode.hpp"
 
 void Object2D::Draw() {
     shader->SetMat4("M", transform.GetGlobal());
@@ -28,6 +29,6 @@ Object2D::Object2D() {
     reqPerspecive = false;
 }
 
-Object2D::Object2D(const unordered_map<string, std::any>& data) : VisualNode(data) {
+Object2D::Object2D(const unordered_map<string, std::any>& data) : PhysicsNode(data) {
     reqPerspecive = fromMap(bool,"reqPerspective",data);
 }
