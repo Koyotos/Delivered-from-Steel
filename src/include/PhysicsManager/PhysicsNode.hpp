@@ -1,6 +1,5 @@
 #ifndef FE_PHYSICS_NODE
 #define FE_PHYSICS_NODE
-
 #include <memory>
 #include <glm/matrix.hpp>
 #include "include/PhysicsManager/Collider.hpp"
@@ -40,6 +39,12 @@ public:
 
 	void setDebugShader(std::shared_ptr<Shader> shader);
     std::shared_ptr<Shader> getDebugShader() const { return debugShader; };
+
+    virtual void OnCollisionEnter(std::shared_ptr<Collider> other) {}
+    virtual void OnCollisionStay(std::shared_ptr<Collider> other) {}
+    virtual void OnCollisionExit(std::shared_ptr<Collider> other) {}
+
+    void processCollisions();
 
     PhysicsNode();
 

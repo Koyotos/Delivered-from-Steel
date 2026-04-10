@@ -56,7 +56,8 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
     if (!info->collided) return;
     if (this->isStatic) return;
 
-	collider->getCurrentCollisions().push_back(other.collider);
+	collider->getCurrentCollisions().insert(other.collider);
+	other.collider->getCurrentCollisions().insert(collider);
 
     float totalInverseMass = 1;
     //totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
@@ -112,6 +113,9 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
     isStatic = fromMap(bool, "static", data);
     velocity = glm::vec2(0.0f, 0.0f);
 
+    bool addCollider = fromMap(bool, "addCollider", data);
+    if (!addCollider) return;
+
     float x = fromMap(float, "colliderPosX",data);
     float y = fromMap(float, "colliderPosY",data);
 
@@ -126,6 +130,7 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
         float height = fromMap(float, "height", data);
         collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
     }
+    
 }
 
 void PhysicsNode::drawDebug() {
@@ -182,4 +187,28 @@ void PhysicsNode::drawBox() {
 
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &VAO);
+}
+
+void PhysicsNode::processCollisions()
+{
+    for (auto& current : collider->getCurrentCollisions())
+    {
+        if (collider->getPreviousCollisions().find(current) == collider->getPreviousCollisions().end())
+        {
+            OnCollisionEnter(current);
+        }
+        else
+        {
+            OnCollisionStay(current);
+        }
+    }
+
+    for (auto& prev : collider->getPreviousCollisions())
+    {
+        if (collider->getCurrentCollisions().find(prev) == collider->getCurrentCollisions().end())
+        {
+            OnCollisionExit(prev);
+        }
+    }
+	collider->setCurrentToPrevious();
 }

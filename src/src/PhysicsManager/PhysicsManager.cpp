@@ -17,9 +17,8 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	// kolizje
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		if (auto col = currentNodes[i]->GetCollider()) {
-
-			col->setCurrentToPrevious();
+		auto col = currentNodes[i]->GetCollider();
+		if (col) {
 			if (!currentNodes[i]->getStatic()) {
 				col->updatePosition(currentNodes[i]->GetTransform());
 			}
@@ -29,6 +28,10 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 		for (size_t j = 0; j < currentNodes.size(); ++j) {
 			if (i == j) continue;
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
+		}
+
+		if (col) {
+			currentNodes[i]->processCollisions();
 		}
 	}
 

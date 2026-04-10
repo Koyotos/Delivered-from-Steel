@@ -2,7 +2,7 @@
 #define FE_PHYSICS_COLLIDER
 #include <glm/matrix.hpp>
 #include <memory>
-#include <vector>
+#include <unordered_set>
 #include "include/Core/Node.hpp"
 #include "include/Core/Transform.hpp"
 #include "include/PhysicsManager/CollisionInfo.hpp"
@@ -20,8 +20,8 @@ protected:
     std::shared_ptr<Node> owner;
 
 private:
-    vector<shared_ptr<Collider>> currentCollisions;
-    vector<shared_ptr<Collider>> previousCollisions;
+    std::unordered_set<std::shared_ptr<Collider>> currentCollisions;
+    std::unordered_set<std::shared_ptr<Collider>> previousCollisions;
     void clearCurrentCollisions();
 public:
     Collider();
@@ -37,8 +37,8 @@ public:
 
 	bool getTrigger() const;
 
-    vector<shared_ptr<Collider>> getCurrentCollisions() const;
-    vector<shared_ptr<Collider>> getPreviousCollisions() const;
+    std::unordered_set<std::shared_ptr<Collider>>& getCurrentCollisions();
+    std::unordered_set<std::shared_ptr<Collider>>& getPreviousCollisions();
 
 
     void addToCurrentCollisions(shared_ptr<Collider>);
