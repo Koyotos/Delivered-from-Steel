@@ -30,13 +30,14 @@ void TextNode::Draw() {
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
     map<char, Character> charset = Globals::GetGlobals().GetGameFont().GetCharset(this->size);
+    float localPos = pos.x;
     for(string::const_iterator c = content.begin(); c != content.end(); c++) {
         Character ch = charset[*c];
-        float xpos = pos.x + ch.bearing.x*scale;
+        float xpos = localPos + ch.bearing.x*scale;
         float ypos = pos.y - (ch.size.y - ch.bearing.y)*scale;
 
         float w = ch.size.x*scale;
-        float h = ch.size.y*scale;
+        float h = ch.size.y*-scale;
         float vertices[6][4] = {
             { xpos,     ypos + h,   0.0f, 0.0f },            
             { xpos,     ypos,       0.0f, 1.0f },
@@ -51,7 +52,7 @@ void TextNode::Draw() {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        pos.x += (ch.advance >> 6) * scale;
+        localPos+= (ch.advance >> 6) * scale;
         }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
