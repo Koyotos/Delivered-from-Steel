@@ -1,5 +1,6 @@
 #include "include/Renderer/Font.hpp"
 #include "freetype/freetype.h"
+#include <filesystem>
 
 void Font::CreateCharset(const ivec2& size) {
     FT_Set_Pixel_Sizes(face, size.x, size.y);
@@ -49,8 +50,8 @@ Font::Font(const string& path, const ivec2& size) {
     if(FT_Init_FreeType(&ftLib)) {
         throw runtime_error("Can't initialize FreeType.");
     }
-
-    int ercode = FT_New_Face(ftLib,"path",0,&face);
+    
+    int ercode = FT_New_Face(ftLib,path.c_str(),0,&face);
     if(ercode) {
         throw runtime_error("Can't load font from path : " + path);
     }
