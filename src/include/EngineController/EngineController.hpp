@@ -30,6 +30,7 @@ class EngineController {
     double lastTime;
 
     inline void EndFrame();
+    inline void ProcessNode(shared_ptr<Node>);
 
     public:
     // Engine API

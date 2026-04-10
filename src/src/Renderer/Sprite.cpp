@@ -33,11 +33,17 @@ void Sprite::Draw(Shader& shader) {
 }
 
 void Sprite::SetupSprite() {
+    GLint w,h;
+    glBindTexture(GL_TEXTURE_2D,textures[0].id);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH,&w);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
+    glBindTexture(GL_TEXTURE_2D,0);
+
     vertices = {
         {{0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{100.0f, 0.0f}, {100.0f, 0.0f}},
-        {{100.0f, 150.0f}, {100.0f, 150.0f}},
-        {{0.0f, 150.0f}, {0.0f, 150.0f}}
+        {{float(w), 0.0f}, {1.0f, 0.0f}},
+        {{float(w), float(h)}, {1.0f, 1.0f}},
+        {{0.0f, float(h)}, {0.0f, 1.0f}}
     };
     indices = { 0, 1, 2, 2, 3, 0 };
 
@@ -74,6 +80,7 @@ void Sprite::LoadTextures() {
     
 Sprite::Sprite(const string& path) {
     directory = path;
+	active = 0;
     LoadTextures();
     SetupSprite();
 }

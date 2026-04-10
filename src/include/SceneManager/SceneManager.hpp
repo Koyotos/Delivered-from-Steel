@@ -21,8 +21,6 @@ class SceneManager {
     void SetActive(const uint16_t&);
 
     void AddScene(shared_ptr<Scene>);
-
-    void TestScene();
 };
 
 #endif
