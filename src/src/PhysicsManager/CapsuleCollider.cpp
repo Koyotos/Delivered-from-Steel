@@ -64,7 +64,7 @@ std::shared_ptr<CollisionInfo> CapsuleCollider::calculateCollisionInfo(std::shar
         else {
             info->normal = glm::vec2(0, 1);
         }
-		info->Collider = other;
+		info->collider = other;
         return info;
     }
     else {

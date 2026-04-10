@@ -56,7 +56,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
         info->depth = overlapY;
         info->normal = (boxCenter.y < other->boxCenter.y) ? glm::vec2(0, -1) : glm::vec2(0, 1);
     }
-    info->Collider = other;
+    info->collider = other;
     return info;
 }
 
@@ -85,7 +85,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
         else {
             info->normal = (boxCenter.x > closest.x)? glm::vec2(1, 0) : glm::vec2(-1, 0);
         }
-        info->Collider = other;
+        info->collider = other;
 		return info;
     }
     else {

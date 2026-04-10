@@ -24,6 +24,10 @@ void Node::Physics(const float&) {
     return;
 }
 
+string Node::Type() {
+    return "Node";
+}
+
 Node::Node() {
 
 }

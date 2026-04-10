@@ -103,7 +103,7 @@ class Node {
     @param1 const bool& - state to be set
     @return void
     */
-    virtual inline void SetTranformChanged(const bool& state) noexcept {return;};
+    virtual inline void SetTransformChanged(const bool& state) noexcept {return;};
 
     /*
     @brief General purpose method, called once every frame. This may contain code that is related
@@ -133,6 +133,12 @@ class Node {
     @return void
     */
     virtual void Physics(const float&);
+
+    /*
+    @brief Returns nod type as string.
+    @return string - type
+    */
+    virtual string Type();
 
     /*
     @brief Basic constructor. Creates empty Node.

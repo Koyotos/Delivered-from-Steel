@@ -9,6 +9,10 @@ void Object2D::Draw() {
     sprite->Draw(*shader);
 }
 
+string Object2D::Type() {
+    return "Object2D";
+}
+
 shared_ptr<Sprite> Object2D::GetSprite() {
     return sprite;
 }

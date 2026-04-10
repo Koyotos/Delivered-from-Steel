@@ -60,6 +60,6 @@ Font::Font(const string& path, const ivec2& size) {
 
 Font::~Font() {
     charsets.clear();
-    FT_Done_Face(face);
-    FT_Done_FreeType(ftLib);
+    //FT_Done_Face(face);
+    //FT_Done_FreeType(ftLib);
 }

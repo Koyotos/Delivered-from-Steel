@@ -16,6 +16,8 @@ class Object2D : public PhysicsNode {
 
     public:
 
+    string Type() override;
+
     /*
     @brief Sets flag that informs renderer to use perspective matrix instead of orthogonal.
     @param1 const bool& - flag state

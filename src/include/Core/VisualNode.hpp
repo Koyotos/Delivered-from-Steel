@@ -22,6 +22,8 @@ class VisualNode : public Node {
     inline bool TestIgnoreParent() noexcept override final {return flags[4];};
     inline bool TestTransformChanged() noexcept override final {return flags[5];};
 
+    string Type() override;
+
     /*
     @brief Sets Draw flag state.
     @param1 const bool& - state to be set
@@ -35,6 +37,13 @@ class VisualNode : public Node {
     @return void
     */
     inline void SetIgnoreParent(const bool& state) noexcept override final {flags[4] = state;};
+
+    /*
+    @brief Sets TransformChanged flag state.
+    @param1 const bool& - state to be set
+    @return void
+    */
+    inline void SetTransformChanged(const bool& state) noexcept override final {flags[5] = state;};
 
     /*
     @brief Returns shader used by node.

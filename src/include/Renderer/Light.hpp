@@ -31,6 +31,8 @@ class Light : public Node {
     vec3 data3;
     float data4;
 
+    string Type();
+
     Light();
     Light(unordered_map<string,std::any>);
     ~Light();

@@ -1,6 +1,4 @@
 #include "include/Renderer/TextNode.hpp"
-#include "include/Core/Node.hpp"
-#include <string>
 
 void TextNode::SetContent(const string& content) {
     this->content = content;
@@ -22,8 +20,8 @@ void TextNode::SetSize(const ivec2& size) {
     this->size = size;
 }
 
-void TextNode::SetShader(shared_ptr<Shader> sh) {
-    this->shader = sh;
+string TextNode::Type() {
+    return "TextNode";
 }
 
 void TextNode::Draw() {
@@ -59,11 +57,11 @@ void TextNode::Draw() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-TextNode::TextNode() : Node() {
+TextNode::TextNode() : VisualNode(){
 
 }
 
-TextNode::TextNode(const unordered_map<string, std::any>& data) : Node(data) {
+TextNode::TextNode(const unordered_map<string, std::any>& data) : VisualNode(data) {
     vector<std::any> values = fromMap(vector<std::any>, "color", data);
     color.x = any_cast<float>(values[0]);
     color.y = any_cast<float>(values[1]);

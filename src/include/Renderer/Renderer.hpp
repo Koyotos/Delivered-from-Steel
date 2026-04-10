@@ -28,7 +28,7 @@ class Renderer {
 
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void Draw(shared_ptr<Node>);
-    inline void ConfigureShader(shared_ptr<VisualNode>);
+    inline void ConfigureShader(shared_ptr<Node>);
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
     inline void PrepareLights();
 
