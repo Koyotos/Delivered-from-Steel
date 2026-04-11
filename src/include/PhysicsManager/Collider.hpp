@@ -47,6 +47,8 @@ public:
     glm::vec2 getGlobalPosition2D() const;
 
     float distanceSquared(const glm::vec2& a, const glm::vec2& b) const;
+
+    std::shared_ptr<Node> getOwner();
 };
 
 #endif

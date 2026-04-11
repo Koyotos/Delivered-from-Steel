@@ -42,6 +42,7 @@ void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
 	if (physicsNode) {
 		currentNodes.push_back(physicsNode);
+		physicsNode->Init();
 	}
 
 	for (const auto& child : node->GetChildren()) {

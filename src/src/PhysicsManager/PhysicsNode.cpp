@@ -212,3 +212,9 @@ void PhysicsNode::processCollisions()
     }
 	collider->setCurrentToPrevious();
 }
+
+void PhysicsNode::Init() {
+    if (collider) {
+        collider->getOwner() = shared_from_this();
+    }
+}

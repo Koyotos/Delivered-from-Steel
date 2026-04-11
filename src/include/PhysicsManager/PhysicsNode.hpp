@@ -6,7 +6,7 @@
 #include "include/Core/VisualNode.hpp"
 
 
-class PhysicsNode : public VisualNode
+class PhysicsNode : public VisualNode, public std::enable_shared_from_this<PhysicsNode>
 {
 private:
 	bool isStatic = false;
@@ -45,6 +45,8 @@ public:
     virtual void OnCollisionExit(std::shared_ptr<Collider> other) {}
 
     void processCollisions();
+
+    void Init();
 
     PhysicsNode();
 
