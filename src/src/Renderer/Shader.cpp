@@ -1,7 +1,9 @@
 #include "include/Renderer/Shader.hpp"
+#include "include/Profiler/Profiler.hpp"
 #include <stdexcept>
 
 void Shader::Use() {
+	PROFILER_ADD_STATE_CHANGE();
     glUseProgram(id);
 }
 

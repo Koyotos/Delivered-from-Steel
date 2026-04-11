@@ -1,4 +1,5 @@
 #include "include/Renderer/Mesh.hpp"
+#include "include/Profiler/Profiler.hpp"
 
 void Mesh::SetupMesh(const bool& drawFlag) {
     glGenVertexArrays(1, &VAO);
@@ -41,6 +42,7 @@ void Mesh::Draw(Shader& shader) {
     }
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
+    PROFILER_ADD_DRAW_CALL(indices.size() / 3);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
