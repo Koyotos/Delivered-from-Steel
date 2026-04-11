@@ -15,6 +15,12 @@ public:
 		SetDraw(true);
 		SetIgnoreParent(true);
 	}
+
+	ProfilerNode(const unordered_map<string, std::any>& data) : TextNode(data) {
+		SetProcess(true);
+		SetDraw(true);
+		SetIgnoreParent(true);
+	}
 };
 
 #endif

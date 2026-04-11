@@ -8,6 +8,7 @@
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
+#include "include/Profiler/ProfilerNode.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
@@ -32,7 +33,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Camera>("Camera"),
     RegisterObjectType<Light>("Light"),
     RegisterObjectType<Player>("Player"),
-    RegisterObjectType<TextNode>("TextNode")
+    RegisterObjectType<TextNode>("TextNode"),
+    RegisterObjectType<ProfilerNode>("ProfilerNode")
 };
 
 struct RefCountModel {
