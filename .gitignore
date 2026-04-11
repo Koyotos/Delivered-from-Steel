@@ -55,6 +55,6 @@ res
 res/
 res/*
 
-game
-game/
-game/*
+/game
+/game/
+/game/*
