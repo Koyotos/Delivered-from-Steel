@@ -43,6 +43,6 @@ float Collider::distanceSquared(const glm::vec2& a, const glm::vec2& b) const {
     return dx * dx + dy * dy;
 }
 
-std::shared_ptr<Node> Collider::getOwner() {
+std::shared_ptr<PhysicsNode>& Collider::getOwner() {
     return owner;
 }

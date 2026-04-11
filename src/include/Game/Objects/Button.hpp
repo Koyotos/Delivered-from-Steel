@@ -5,6 +5,9 @@
 class Button :
     public Object2D
 {
+public:
+    Button(const unordered_map<string, std::any>&);
+
 };
 
 #endif // FE_BUTTON

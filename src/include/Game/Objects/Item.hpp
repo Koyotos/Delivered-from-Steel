@@ -5,6 +5,8 @@
 class Item :
     public Object3D
 {
+public:
+	Item(const unordered_map<string, std::any>&);
 };
 
 #endif // FE_ITEM

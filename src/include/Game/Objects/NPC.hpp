@@ -5,6 +5,8 @@
 class NPC :
     public Object2D
 {
+    public:
+		NPC(const unordered_map<string, std::any>&);
 };
 
 #endif // FE_NPC

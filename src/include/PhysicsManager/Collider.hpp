@@ -10,6 +10,8 @@
 class BoxCollider;
 class CapsuleCollider;
 
+class PhysicsNode;
+
 class Collider
 {
 protected:
@@ -17,7 +19,7 @@ protected:
 
     bool isTrigger;
     bool enabled;
-    std::shared_ptr<Node> owner;
+    std::shared_ptr<PhysicsNode> owner;
 
 private:
     std::unordered_set<std::shared_ptr<Collider>> currentCollisions;
@@ -48,7 +50,7 @@ public:
 
     float distanceSquared(const glm::vec2& a, const glm::vec2& b) const;
 
-    std::shared_ptr<Node> getOwner();
+    std::shared_ptr<PhysicsNode>& getOwner();
 };
 
 #endif

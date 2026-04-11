@@ -5,6 +5,8 @@
 class Platform :
     public Object3D
 {
+    public:
+		Platform(const unordered_map<string, std::any>&);
 };
 
 #endif // FE_PLATFORM

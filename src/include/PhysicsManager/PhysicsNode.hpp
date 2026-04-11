@@ -5,6 +5,12 @@
 #include "include/PhysicsManager/Collider.hpp"
 #include "include/Core/VisualNode.hpp"
 
+enum class ObjectType {
+	Default,
+    Player,
+    Enemy,
+    Wall
+};
 
 class PhysicsNode : public VisualNode, public std::enable_shared_from_this<PhysicsNode>
 {
@@ -15,6 +21,10 @@ private:
     glm::vec2 velocity;
 
 	std::shared_ptr<Shader> debugShader;
+
+protected:
+
+    ObjectType objectType = ObjectType::Default;
 
 public:
 	float maxFallSpeed = 50.0f;
@@ -47,6 +57,8 @@ public:
     void processCollisions();
 
     void Init();
+
+	ObjectType GetObjectType() const { return objectType; }
 
     PhysicsNode();
 

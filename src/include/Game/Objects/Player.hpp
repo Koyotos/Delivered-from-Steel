@@ -8,6 +8,9 @@
 class Player : public Object2D {
 	private:
 	shared_ptr<Camera> camera;
+
+	float hpMax = 100.0f;
+	float hp = hpMax;
 	
 	public:
 
@@ -17,6 +20,10 @@ class Player : public Object2D {
 	Player(const unordered_map<string, std::any>&);
 	void Process() override;
 	bool Input(InputEvent& event) override;
+
+	void takeDamage(float damage);
+
+	void Shatter();
 };
 
 #endif
