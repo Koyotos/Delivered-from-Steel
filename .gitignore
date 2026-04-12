@@ -55,6 +55,14 @@ res
 res/
 res/*
 
-game
-game/
-game/*
+arch
+arch/
+arch/*
+
+Debug
+Debug/
+Debug/*
+
+Release
+Release/
+Release/*
