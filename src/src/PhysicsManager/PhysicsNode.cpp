@@ -4,7 +4,7 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include <iostream>
-
+#include "include/PhysicsManager/PhysicsManager.hpp"
 string PhysicsNode::Type() {
     return "PhysicsNode";
 }
@@ -217,4 +217,52 @@ void PhysicsNode::Init() {
     if (collider) {
         collider->getOwner() = shared_from_this();
     }
+}
+
+std::optional<RaycastHit> PhysicsNode::raycast(
+    const glm::vec2& offset,
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
+
+    auto hit = PhysicsManager::GetPhysicsManager().raycast(origin, direction, maxDistance, collider, type);
+    return hit;
+}
+
+std::optional<RaycastHit> PhysicsNode::raycast(
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
+
+    auto hit = PhysicsManager::GetPhysicsManager().raycast(origin, direction, maxDistance, collider, type);
+    return hit;
+}
+
+std::vector<RaycastHit> PhysicsNode::raycastAll(
+    const glm::vec2& offset,
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
+    auto hits = PhysicsManager::GetPhysicsManager().raycastAll(origin, direction, maxDistance, collider, type);
+    return hits;
+}
+
+std::vector<RaycastHit> PhysicsNode::raycastAll(
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
+    auto hits = PhysicsManager::GetPhysicsManager().raycastAll(origin, direction, maxDistance, collider, type);
+    return hits;
 }

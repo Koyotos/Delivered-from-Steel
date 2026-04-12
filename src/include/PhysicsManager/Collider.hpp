@@ -6,6 +6,8 @@
 #include "include/Core/Node.hpp"
 #include "include/Core/Transform.hpp"
 #include "include/PhysicsManager/CollisionInfo.hpp"
+#include <optional>
+#include "include/PhysicsManager/RaycastHit.hpp"
 
 class BoxCollider;
 class CapsuleCollider;
@@ -37,6 +39,8 @@ public:
     virtual std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const = 0;
     virtual std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const = 0;
 
+    virtual std::optional<RaycastHit> raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) = 0;
+
 	bool getTrigger() const;
 
     std::unordered_set<std::shared_ptr<Collider>>& getCurrentCollisions();
@@ -51,6 +55,7 @@ public:
     float distanceSquared(const glm::vec2& a, const glm::vec2& b) const;
 
     std::shared_ptr<PhysicsNode>& getOwner();
+
 };
 
 #endif
