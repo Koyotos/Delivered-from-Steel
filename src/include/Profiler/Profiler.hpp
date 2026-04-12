@@ -39,6 +39,7 @@ private:
 	Profiler() {}
 
 public:
+	~Profiler();
 	static Profiler& Get() {
 		static Profiler instance;
 		return instance;

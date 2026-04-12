@@ -2,8 +2,21 @@
 #include <iomanip>
 #include <sstream>
 
+
+Profiler::~Profiler() {
+#ifdef FE_ENABLE_PROFILER
+	if (timeQuery != 0) {
+		glDeleteQueries(1, &timeQuery);
+		timeQuery = 0;
+	}
+#endif
+}
 void Profiler::Init() {
 #ifdef FE_ENABLE_PROFILER
+	if (timeQuery != 0) {
+		glDeleteQueries(1, &timeQuery);
+		timeQuery = 0;
+	}
 	glGenQueries(1, &timeQuery);
 #endif
 }
