@@ -1,5 +1,5 @@
 #include "include/Renderer/TextNode.hpp"
-#include "include/Profiler/ProfilerNode.hpp"
+#include "include/Profiler/Profiler.hpp"
 
 void TextNode::SetContent(const string& content) {
     this->content = content;

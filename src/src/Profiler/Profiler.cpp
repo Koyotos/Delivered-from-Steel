@@ -19,9 +19,13 @@ void Profiler::BeginFrame(float deltaTime) {
 	}
 
 	if (queryStarted) {
-		GLuint64 elapsed;
-		glGetQueryObjectui64v(timeQuery, GL_QUERY_RESULT, &elapsed);
-		gpuTime = elapsed / 1000000.0f;
+		GLuint available = 0;
+		glGetQueryObjectuiv(timeQuery, GL_QUERY_RESULT_AVAILABLE, &available);
+		if (available) {
+			GLuint64 elapsed;
+			glGetQueryObjectui64v(timeQuery, GL_QUERY_RESULT, &elapsed);
+			gpuTime = elapsed / 1000000.0f;
+		}
 	}
 
 	drawCalls = 0;
@@ -62,7 +66,12 @@ string Profiler::GetStatsString() {
 	stringstream ss;
 	ss << fixed << setprecision(2);
 	ss << "FPs: " << currentFPS << "\n";
-	ss << "Frame time: " << 1000.0f / currentFPS << " ms\n";
+	if (currentFPS > 0) {
+		ss << "Frame time: " << 1000.0f / currentFPS << " ms\n";
+	}
+	else {
+		ss << "Frame time: N/A\n";
+	}
 	ss << "CPU Logic: " << cpuLogicTime << " ms\n";
 	ss << "CPU Render: " << cpuRenderTime << " ms\n";
 	ss << "GPU Time: " << gpuTime << " ms\n";
