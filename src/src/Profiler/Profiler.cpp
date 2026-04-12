@@ -62,10 +62,10 @@ string Profiler::GetStatsString() {
 	stringstream ss;
 	ss << fixed << setprecision(2);
 	ss << "FPs: " << currentFPS << "\n";
+	ss << "Frame time: " << 1000.0f / currentFPS << " ms\n";
 	ss << "CPU Logic: " << cpuLogicTime << " ms\n";
 	ss << "CPU Render: " << cpuRenderTime << " ms\n";
 	ss << "GPU Time: " << gpuTime << " ms\n";
-
 	ss << "Draw Calls: " << lastDrawCalls << "\n";
 	ss << "Triangles: " << lastTriangles << "\n";
 	ss << "Objects: " << lastRenderedObjects << "\n";
