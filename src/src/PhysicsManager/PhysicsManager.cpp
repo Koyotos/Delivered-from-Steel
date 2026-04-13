@@ -17,9 +17,8 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	// kolizje
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		if (auto col = currentNodes[i]->GetCollider()) {
-
-			col->setCurrentToPrevious();
+		auto col = currentNodes[i]->GetCollider();
+		if (col) {
 			if (!currentNodes[i]->getStatic()) {
 				col->updatePosition(currentNodes[i]->GetTransform());
 			}
@@ -30,6 +29,10 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 			if (i == j) continue;
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
 		}
+
+		if (col) {
+			currentNodes[i]->processCollisions();
+		}
 	}
 
 	return;
@@ -39,9 +42,70 @@ void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
 	if (physicsNode) {
 		currentNodes.push_back(physicsNode);
+		physicsNode->Init();
 	}
 
 	for (const auto& child : node->GetChildren()) {
 		updateNode(child);
 	}	
+}
+
+PhysicsManager& PhysicsManager::GetPhysicsManager()
+{
+	static PhysicsManager instance;
+	return instance;
+}
+
+std::optional<RaycastHit> PhysicsManager::raycast(
+	const glm::vec2& origin,
+	const glm::vec2& direction,
+	float maxDistance,
+	std::shared_ptr<Collider> collider,
+	ObjectType type)
+{
+	float closest = maxDistance;
+	std::optional<RaycastHit> result;
+
+	for (size_t i = 0; i < currentNodes.size(); ++i) {
+		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
+		auto col = currentNodes[i]->GetCollider();
+		if (col && col != collider) {
+			auto hit = col->raycast(origin, direction, maxDistance);
+
+			if (hit && hit->distance < closest)
+			{
+				closest = hit->distance;
+				result = hit;
+			}			
+		}
+	}
+
+	return result;
+}
+
+std::vector<RaycastHit> PhysicsManager::raycastAll(
+	const glm::vec2& origin,
+	const glm::vec2& direction,
+	float maxDistance,
+	std::shared_ptr<Collider> collider,
+	ObjectType type)
+{
+	float closest = maxDistance;
+	std::vector<RaycastHit> result;
+
+	for (size_t i = 0; i < currentNodes.size(); ++i) {
+		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
+		auto col = currentNodes[i]->GetCollider();
+		if (col && col != collider) {
+			auto hit = col->raycast(origin, direction, maxDistance);
+
+			if (hit && hit->distance < closest)
+			{
+				closest = hit->distance;
+				result.push_back(*hit);
+			}
+		}
+	}
+
+	return result;
 }

@@ -11,12 +11,17 @@ void EngineController::Init() {
         exit(1);
     }
 
+    try {
+        psm = &PhysicsManager::GetPhysicsManager();
+    } catch (const exception& except) {
+        exit(1);
+    }
+
     globals->Log("Globals OK");
 
     try {
         scm = make_shared<SceneManager>();
         iom = make_shared<IOManager>();
-        psm = make_shared<PhysicsManager>();
         renderer = make_shared<Renderer>();
         rsm = make_shared<ResourceManager>();
         aum = make_shared<AudioManager>();

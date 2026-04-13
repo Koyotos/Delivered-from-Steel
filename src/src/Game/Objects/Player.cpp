@@ -1,8 +1,10 @@
 #include "include/Game/Objects/Player.hpp"
 #include "include/Core/Object2D.hpp"
+#include "include/Core/Object3D.hpp"
 #include "include/Globals/Globals.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <iostream>
 
 Player::Player() : Object2D() {
 	SetProcess(true);
@@ -11,7 +13,7 @@ Player::Player() : Object2D() {
 }
 
 Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
-
+	objectType = ObjectType::Player;
 }
 
 void Player::SetCamera(shared_ptr<Camera> cam) {
@@ -58,4 +60,18 @@ bool Player::Input(InputEvent& event) {
 		}
 	}
 	return false;
+}
+
+void Player::takeDamage(float damage) {
+	hp -= damage;
+	if (hp <= 0.0f) {
+		Shatter();
+	}
+}
+
+void Player::Shatter() {
+	hp = 0.0f;
+	Globals::GetGlobals().Log("Shatter");
+	// tutaj mo¿na dodaæ logikê œmierci gracza, np. respawn, game over itp.
+	hp = hpMax; // tymczasowo resetujemy HP, aby gracz móg³ kontynuowaæ grê
 }
