@@ -1,5 +1,6 @@
 #include "include/EngineController/EngineController.hpp"
 #include "include/Globals/Globals.hpp"
+#include "include/Profiler/Profiler.hpp"
 #include <stdexcept>
 
 void EngineController::Init() {
@@ -33,6 +34,7 @@ void EngineController::Init() {
         globals->Log("Engine initialization error : " + string(except.what()));
         exit(2);
     }
+    PROFILER_INIT();
 }
 
 void EngineController::ProcessNode(shared_ptr<Node> node) {
@@ -48,10 +50,13 @@ void EngineController::ProcessNode(shared_ptr<Node> node) {
 }
 
 void EngineController::Run() {
+	lastTime = glfwGetTime();
     while(!glfwWindowShouldClose(renderer->GetWindow())) {
         currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         shared_ptr<Scene> active = scm->GetActive();
+
+		PROFILER_BEGIN_FRAME(deltaTime);
 
 		psm->Update(active, deltaTime);
 		glfwPollEvents();
@@ -60,9 +65,14 @@ void EngineController::Run() {
 		    iom->ProcessInput(active->GetRoot());
             ProcessNode(active->GetRoot());
         }
+
+		PROFILER_END_LOGIC();
+
 		iom->ClearQueue();
 
         renderer->DrawScene(active);
+
+		PROFILER_END_RENDER();
 
         lastTime = currentTime;
         EndFrame();
