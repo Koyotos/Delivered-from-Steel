@@ -24,7 +24,6 @@ class UIElement : public Object2D {
 	bool isVisible;
 	float alpha;
 
-	void UpdateTransform();
 
 	public:
 
@@ -35,6 +34,7 @@ class UIElement : public Object2D {
 	void SetAlpha(float value);
 	float GetAlpha() const;
 
+	void UpdateTransform();
 	void FadeIn(float time, EaseType ease = EaseType::Linear);
 	void FadeOut(float time, EaseType ease = EaseType::Linear);
 	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear);

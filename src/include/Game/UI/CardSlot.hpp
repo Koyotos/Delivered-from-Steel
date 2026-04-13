@@ -2,9 +2,8 @@
 #define FE_CARD_SLOT
 
 #include "include/Game/UI/UIElement.hpp"
-
-class Card;
-class Icon;
+#include "include/Game/UI/Card.hpp"
+#include "include/Game/UI/Icon.hpp"
 
 class CardSlot : public UIElement {
 	
@@ -15,8 +14,8 @@ class CardSlot : public UIElement {
 
 	public:
 
-	void removeCard();
-	void ChangeCard(std::shared_ptr<Card> newCard);
+	void RemoveCard();
+	void SetCard(std::shared_ptr<Card> newCard);
 	void Draw() override;
 
 };

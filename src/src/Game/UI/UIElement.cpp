@@ -15,3 +15,7 @@ void UIElement::SetAlpha(float value) {
 float UIElement::GetAlpha() const {
 	return alpha;
 }
+
+void UIElement::UpdateTransform() {
+	return;
+}

@@ -7,6 +7,7 @@ class Card : public UIElement {
 
 	public:
 
+
 	/*
 	* This function should be called only inside CardSlot's Draw() function.
 	*/
