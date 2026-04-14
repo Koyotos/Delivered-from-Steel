@@ -13,6 +13,8 @@ class TextNode : public VisualNode {
     float scale;
     GLuint VAO,VBO;
 
+	int testNumber = 10;
+
     public:
 
     string Type() override;
@@ -24,6 +26,8 @@ class TextNode : public VisualNode {
     void SetSize(const ivec2&);
 
     void Draw() override final;
+	void Process() override;
+
 
     TextNode();
     TextNode(const unordered_map<string, std::any>&);

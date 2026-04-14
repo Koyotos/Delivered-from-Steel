@@ -1,4 +1,6 @@
 #include "include/Renderer/TextNode.hpp"
+#include "include/Globals/Globals.hpp"
+#include <GLFW/glfw3.h>
 
 void TextNode::SetContent(const string& content) {
     this->content = content;
@@ -58,6 +60,18 @@ void TextNode::Draw() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void TextNode::Process() {
+    if (Globals::GetGlobals().GetKeyState(GLFW_KEY_K)) {
+		testNumber -= 1;
+    }
+
+    if (Globals::GetGlobals().GetKeyState(GLFW_KEY_L)) {
+        testNumber += 1;
+    }
+
+	content = to_string(testNumber);
+}
+
 TextNode::TextNode() : VisualNode(){
 
 }
@@ -102,6 +116,8 @@ TextNode::TextNode(const unordered_map<string, std::any>& data) : VisualNode(dat
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+	SetProcess(true);
 }
 
 TextNode::~TextNode() {
