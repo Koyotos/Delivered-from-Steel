@@ -9,8 +9,15 @@ class Vignette : public UIElement {
 
 	int states;
 	float currentValue;
+	float minValue;
+	float maxValue;
+
+	void SetCurrentSprite();
 
 	public:
+	
+	// just for testing purposes, delete later
+	void Process() override;
 
 	Vignette();
 	Vignette(const std::unordered_map<std::string, std::any>& data);
