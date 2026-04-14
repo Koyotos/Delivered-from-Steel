@@ -23,6 +23,7 @@ class UIElement : public Object2D {
 
 	bool isVisible;
 	float alpha;
+	glm::vec3 tint;
 
 	public:
 
@@ -33,6 +34,8 @@ class UIElement : public Object2D {
 	bool GetVisible() const;
 	void SetAlpha(float value);
 	float GetAlpha() const;
+	void SetTint(glm::vec3 color);
+	glm::vec3 GetTint() const;
 
 	void UpdateTransform();
 	void FadeIn(float time, EaseType ease = EaseType::Linear);

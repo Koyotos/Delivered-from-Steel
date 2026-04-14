@@ -12,7 +12,12 @@ void CardSlot::SetCard(std::shared_ptr<Card> newCard) {
 	card->SetTransform(this->GetTransform());
 }
 
+
 void CardSlot::Draw() {
+	if (!GetVisible()) return;
+
+	shader->SetVec3("tint", GetTint());
+	shader->SetFloat("alpha", GetAlpha());
 
 	Object2D::Draw();
 	if (card) {
@@ -23,4 +28,7 @@ void CardSlot::Draw() {
 	}
 }
 
-CardSlot::CardSlot(const std::unordered_map<std::string, std::any>& data) : UIElement(data) {}
+
+CardSlot::CardSlot(const std::unordered_map<std::string, std::any>& data) : UIElement(data) {
+	SetDraw(true);
+}
