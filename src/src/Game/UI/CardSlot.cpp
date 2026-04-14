@@ -22,3 +22,8 @@ void CardSlot::Draw() {
 		icon->Draw();
 	}
 }
+
+CardSlot::CardSlot(const std::unordered_map<std::string, std::any>& data) : UIElement(data) {
+	card = fromMap(std::shared_ptr<Card>, "card", data);
+	icon = fromMap(std::shared_ptr<Icon>, "icon", data);
+}

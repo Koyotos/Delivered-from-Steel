@@ -24,10 +24,10 @@ class UIElement : public Object2D {
 	bool isVisible;
 	float alpha;
 
-
 	public:
 
 	UIElement();
+	UIElement(const std::unordered_map<std::string, std::any>& data);
 
 	void SetVisible(bool value);
 	bool GetVisible() const;
@@ -38,6 +38,7 @@ class UIElement : public Object2D {
 	void FadeIn(float time, EaseType ease = EaseType::Linear);
 	void FadeOut(float time, EaseType ease = EaseType::Linear);
 	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear);
+	void Tint(glm::vec3 color, float time, EaseType ease = EaseType::Linear);
 
 
 };

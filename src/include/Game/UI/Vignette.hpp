@@ -12,6 +12,9 @@ class Vignette : public UIElement {
 
 	public:
 
+	Vignette();
+	Vignette(const std::unordered_map<std::string, std::any>& data);
+
 	void Draw() override;
 
 };

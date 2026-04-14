@@ -12,6 +12,9 @@ class Icon : public UIElement {
 
 	public:
 
+	Icon();
+	Icon(const std::unordered_map<std::string, std::any>& data);
+
 	void Draw() override;
 
 };

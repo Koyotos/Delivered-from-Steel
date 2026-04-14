@@ -4,3 +4,8 @@ void Icon::Draw() {
 	UIElement::UpdateTransform();
 	Object2D::Draw();
 }
+
+
+Icon::Icon(const std::unordered_map<std::string, std::any>& data) : UIElement(data) {
+	isAnimated = fromMap(bool, "animated", data);
+}

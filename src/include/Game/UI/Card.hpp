@@ -7,6 +7,8 @@ class Card : public UIElement {
 
 	public:
 
+	Card();
+	Card(const std::unordered_map<std::string, std::any>& data);
 
 	/*
 	* This function should be called only inside CardSlot's Draw() function.

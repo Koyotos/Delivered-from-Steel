@@ -14,6 +14,9 @@ class CardSlot : public UIElement {
 
 	public:
 
+	CardSlot();
+	CardSlot(const std::unordered_map<std::string, std::any>& data);
+
 	void RemoveCard();
 	void SetCard(std::shared_ptr<Card> newCard);
 	void Draw() override;

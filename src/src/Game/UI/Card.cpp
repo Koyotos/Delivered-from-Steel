@@ -4,3 +4,5 @@ void Card::Draw() {
 	UIElement::UpdateTransform();
 	Object2D::Draw();
 }
+
+Card::Card(const std::unordered_map<std::string, std::any>& data) : UIElement(data) {}
