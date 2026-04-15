@@ -3,9 +3,12 @@
 #include <algorithm>
 
 CapsuleCollider::CapsuleCollider(const Transform transform, float x, float y, float radius, float height)
-    : Collider(), radius(radius), height(height)
+    : Collider()
 {
 	this->transform = vec2(x, y);
+
+    this->radius = radius;
+    this->height = height;
 
     updatePosition(transform);
 }
