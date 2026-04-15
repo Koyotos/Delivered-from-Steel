@@ -16,6 +16,25 @@ private:
 
 public:
 	void Update(shared_ptr<Scene> scene, float dt);
+
+	static PhysicsManager& GetPhysicsManager();
+
+	std::optional<RaycastHit> raycast(
+		const glm::vec2& origin,
+		const glm::vec2& direction,
+		float maxDistance,
+		std::shared_ptr<Collider> collider,
+		ObjectType type);
+
+	std::vector<RaycastHit> raycastAll(
+		const glm::vec2& origin,
+		const glm::vec2& direction,
+		float maxDistance,
+		std::shared_ptr<Collider> collider,
+		ObjectType type);
+
+	PhysicsManager() = default;
+	PhysicsManager(const PhysicsManager&) = delete;
 };
 
 #endif

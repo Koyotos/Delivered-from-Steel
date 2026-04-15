@@ -2,13 +2,17 @@
 #define FE_PHYSICS_COLLIDER
 #include <glm/matrix.hpp>
 #include <memory>
-#include <vector>
+#include <unordered_set>
 #include "include/Core/Node.hpp"
 #include "include/Core/Transform.hpp"
 #include "include/PhysicsManager/CollisionInfo.hpp"
+#include <optional>
+#include "include/PhysicsManager/RaycastHit.hpp"
 
 class BoxCollider;
 class CapsuleCollider;
+
+class PhysicsNode;
 
 class Collider
 {
@@ -17,11 +21,11 @@ protected:
 
     bool isTrigger;
     bool enabled;
-    std::shared_ptr<Node> owner;
+    std::shared_ptr<PhysicsNode> owner;
 
 private:
-    vector<shared_ptr<Collider>> currentCollisions;
-    vector<shared_ptr<Collider>> previousCollisions;
+    std::unordered_set<std::shared_ptr<Collider>> currentCollisions;
+    std::unordered_set<std::shared_ptr<Collider>> previousCollisions;
     void clearCurrentCollisions();
 public:
     Collider();
@@ -35,10 +39,12 @@ public:
     virtual std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const = 0;
     virtual std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const = 0;
 
+    virtual std::optional<RaycastHit> raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) = 0;
+
 	bool getTrigger() const;
 
-    vector<shared_ptr<Collider>> getCurrentCollisions() const;
-    vector<shared_ptr<Collider>> getPreviousCollisions() const;
+    std::unordered_set<std::shared_ptr<Collider>>& getCurrentCollisions();
+    std::unordered_set<std::shared_ptr<Collider>>& getPreviousCollisions();
 
 
     void addToCurrentCollisions(shared_ptr<Collider>);
@@ -47,6 +53,9 @@ public:
     glm::vec2 getGlobalPosition2D() const;
 
     float distanceSquared(const glm::vec2& a, const glm::vec2& b) const;
+
+    std::shared_ptr<PhysicsNode>& getOwner();
+
 };
 
 #endif

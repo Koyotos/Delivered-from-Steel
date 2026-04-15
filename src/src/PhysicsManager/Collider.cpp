@@ -1,16 +1,17 @@
 #include "include/PhysicsManager/Collider.hpp"
+#include "include/PhysicsManager/PhysicsNode.hpp"
 
 Collider::Collider()
-    : isTrigger(false), enabled(true), owner(nullptr) {
+    : isTrigger(false), enabled(true) {
 	currentCollisions = {};
 	previousCollisions = {};
 }
 
-vector<shared_ptr<Collider>> Collider::getCurrentCollisions() const {
+std::unordered_set<std::shared_ptr<Collider>>& Collider::getCurrentCollisions() {
     return currentCollisions;
 }
 
-vector<shared_ptr<Collider>> Collider::getPreviousCollisions() const {
+std::unordered_set<std::shared_ptr<Collider>>& Collider::getPreviousCollisions() {
     return previousCollisions;
 }
 
@@ -18,8 +19,8 @@ void Collider::clearCurrentCollisions() {
 	currentCollisions.clear();
 }
 
-void Collider::addToCurrentCollisions(shared_ptr<Collider> col) {
-	currentCollisions.push_back(col);
+void Collider::addToCurrentCollisions(std::shared_ptr<Collider> col) {
+	currentCollisions.insert(col);
 }
 
 void Collider::setCurrentToPrevious() {
@@ -40,4 +41,8 @@ float Collider::distanceSquared(const glm::vec2& a, const glm::vec2& b) const {
     float dx = a.x - b.x;
     float dy = a.y - b.y;
     return dx * dx + dy * dy;
+}
+
+std::shared_ptr<PhysicsNode>& Collider::getOwner() {
+    return owner;
 }

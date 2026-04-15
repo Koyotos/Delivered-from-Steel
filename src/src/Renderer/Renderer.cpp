@@ -4,6 +4,7 @@
 #include "include/Core/VisualNode.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
+#include "include/Profiler/Profiler.hpp"
 
 void Renderer::Init() {
     if(!glfwInit()) {
@@ -52,6 +53,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
 void Renderer::Draw(shared_ptr<Node> node) {
     if (node->TestDraw()) {
+		PROFILER_ADD_OBJECT();
         node->Draw();
     }
     for(auto& k : node->GetChildren()) {
@@ -135,7 +137,12 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
     } else if(node->Type() == "TextNode"){
         shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
         shared_ptr<Shader> shader = textNode->GetShader();
-        shader->SetMat4("VP",currentScene->sceneCam->GetVP(0) );
+        if (textNode->TestIgnoreParent()) {
+            shader->SetMat4("VP", currentScene->sceneCam->GetUI());
+        }
+        else {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        }
     } 
     else if(node->Type() == "Object3D") {
         shared_ptr<Object3D> obj3d = static_pointer_cast<Object3D>(node);

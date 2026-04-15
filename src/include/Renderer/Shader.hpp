@@ -23,6 +23,7 @@ class Shader {
     private:
     GLuint id;
     string name;
+    static GLuint currentlyBoundShader;
 
     inline void Compile(string[4]);
 

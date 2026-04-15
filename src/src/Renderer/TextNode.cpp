@@ -1,4 +1,5 @@
 #include "include/Renderer/TextNode.hpp"
+#include "include/Profiler/Profiler.hpp"
 
 void TextNode::SetContent(const string& content) {
     this->content = content;
@@ -26,15 +27,22 @@ string TextNode::Type() {
 
 void TextNode::Draw() {
     shader->SetVec3("color", color);
+	shader->SetMat4("M", mat4(1.0f));
     shader->Use();
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
     map<char, Character> charset = Globals::GetGlobals().GetGameFont().GetCharset(this->size);
     float localPos = pos.x;
+	float currentY = pos.y;
     for(string::const_iterator c = content.begin(); c != content.end(); c++) {
+        if (*c == '\n') {
+            currentY += size.y * scale * 1.2f;
+            localPos = pos.x;
+            continue;
+        }
         Character ch = charset[*c];
         float xpos = localPos + ch.bearing.x*scale;
-        float ypos = pos.y - (ch.size.y - ch.bearing.y)*scale;
+        float ypos = currentY - (ch.size.y - ch.bearing.y)*scale;
 
         float w = ch.size.x*scale;
         float h = ch.size.y*-scale;
@@ -51,6 +59,7 @@ void TextNode::Draw() {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        PROFILER_ADD_DRAW_CALL(2);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         localPos+= (ch.advance >> 6) * scale;
         }
@@ -59,7 +68,29 @@ void TextNode::Draw() {
 }
 
 TextNode::TextNode() : VisualNode(){
+    VAO = 0;
+    VBO = 0;
 
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        4 * sizeof(float),
+        (void*)0
+    );
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 TextNode::TextNode(const unordered_map<string, std::any>& data) : VisualNode(data) {

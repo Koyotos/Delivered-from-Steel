@@ -93,3 +93,32 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
 		return info;
     }
 }
+
+std::optional<RaycastHit> BoxCollider::raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
+
+    glm::vec2 invDir = 1.0f / dir;
+
+    glm::vec2 t1 = (min - origin) * invDir;
+    glm::vec2 t2 = (max - origin) * invDir;
+
+    glm::vec2 tmin = glm::min(t1, t2);
+    glm::vec2 tmax = glm::max(t1, t2);
+
+    float tNear = std::max(tmin.x, tmin.y);
+    float tFar = std::min(tmax.x, tmax.y);
+
+    if (tNear > tFar || tFar < 0 || tNear > maxDist)
+        return std::nullopt;
+
+    optional<RaycastHit> hit = RaycastHit();
+    hit->distance = tNear;
+    hit->point = origin + dir * tNear;
+
+    if (tmin.x > tmin.y)
+        hit->normal = (dir.x < 0) ? glm::vec2(1, 0) : glm::vec2(-1, 0);
+    else
+        hit->normal = (dir.y < 0) ? glm::vec2(0, 1) : glm::vec2(0, -1);
+
+    hit->collider = shared_from_this();
+    return hit;
+}

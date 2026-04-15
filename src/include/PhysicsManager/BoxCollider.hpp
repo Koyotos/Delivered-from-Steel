@@ -27,6 +27,9 @@ public:
 
     std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const override;
     std::shared_ptr<CollisionInfo> calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const override;
+
+
+    std::optional<RaycastHit> raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) override;
 };
 
 #endif

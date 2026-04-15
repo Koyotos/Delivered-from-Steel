@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "include/IOManager/InputEvent.hpp"
+#include <stdexcept>
 
 #define fromMap(type,key,data) FromMap<type>(data,key)
 

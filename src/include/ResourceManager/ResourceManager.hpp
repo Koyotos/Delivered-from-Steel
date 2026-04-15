@@ -5,9 +5,16 @@
 #include "include/Core/Object3D.hpp"
 #include "include/Core/Scene.hpp"
 #include "include/Game/Objects/Player.hpp"
+#include "include/Game/Objects/Trap.hpp"
+#include "include/Game/Objects/Item.hpp"
+#include "include/Game/Objects/Enemy.hpp"
+#include "include/Game/Objects/Platform.hpp"
+#include "include/Game/Objects/NPC.hpp"
+#include "include/Game/Objects/Button.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
+#include "include/Profiler/ProfilerNode.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
@@ -32,7 +39,18 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Camera>("Camera"),
     RegisterObjectType<Light>("Light"),
     RegisterObjectType<Player>("Player"),
+<<<<<<< GameObjects
+    RegisterObjectType<Trap>("Trap"),
+    RegisterObjectType<Enemy>("Enemy"),
+    RegisterObjectType<Platform>("Platform"),
+    RegisterObjectType<Item>("Item"),
+    RegisterObjectType<NPC>("NPC"),
+    RegisterObjectType<Button>("Button"),
     RegisterObjectType<TextNode>("TextNode")
+=======
+    RegisterObjectType<TextNode>("TextNode"),
+    RegisterObjectType<ProfilerNode>("ProfilerNode")
+>>>>>>> main
 };
 
 struct RefCountModel {
