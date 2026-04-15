@@ -52,6 +52,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
 void Renderer::Draw(shared_ptr<Node> node) {
     if (node->TestDraw()) {
+        ConfigureShader(node);
         node->Draw();
     }
     for(auto& k : node->GetChildren()) {
@@ -70,7 +71,6 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
     bool childTransformState = false;
     if(node->TestDraw()) {
         shared_ptr<VisualNode> nodeCast = static_pointer_cast<VisualNode>(node);
-        ConfigureShader(nodeCast);
         if(!nodeCast->TestIgnoreParent()) {
             if(nodeCast->TestTransformChanged()) {
                 nodeCast->ApplyParentTransform(t);
