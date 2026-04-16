@@ -13,6 +13,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 	// ruch
 	for (const auto& physicsNode : currentNodes) {
 		physicsNode->Update(dt);
+		physicsNode->ResetGlobal();
 	}
 
 	// kolizje

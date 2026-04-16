@@ -7,12 +7,10 @@ Player::Player() : Object2D() {
 	SetProcess(true);
 	SetInput(true);
 	SetDraw(true);
-	lastTime = glfwGetTime();
 }
 
 Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
 	objectType = ObjectType::Player;
-	lastTime = glfwGetTime();
 }
 
 void Player::SetCamera(shared_ptr<Camera> cam) {
@@ -50,14 +48,7 @@ bool Player::CheckWalled() {
 }
 
 void Player::Process() {
-	double currentTime = glfwGetTime();
-	float deltaTime = static_cast<float>(currentTime - lastTime);
-	lastTime = currentTime;
-	if (deltaTime > 0.1f) deltaTime = 0.1f;
-
-	if (camera) {
-		camera->SetPos(GetTransform().GetTranslation());
-	}
+	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
 	isGrounded = CheckGrounded();
 	isWalled = CheckWalled();

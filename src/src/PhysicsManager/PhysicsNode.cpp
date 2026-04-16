@@ -29,13 +29,11 @@ void PhysicsNode::Update(float dt)
 {
     if (isStatic) return;
 
-	float deltaTime = std::min(dt, 0.016f);
-
     // testowa symulacja grawitacji
-    velocity.y = std::clamp(velocity.y - 10.0f * deltaTime, -maxFallSpeed, maxFallSpeed);
+    velocity.y = std::clamp(velocity.y - 10.0f * dt, -maxFallSpeed, maxFallSpeed);
     Transform t = this->GetTransform(); 
 
-    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * deltaTime, 0.0f));
+    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * dt, 0.0f));
 
 	this->SetTransform(t);
 }
@@ -70,6 +68,8 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
         t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
 
         this->SetTransform(t);
+        this->ResetGlobal();
+        if (collider) collider->updatePosition(this->GetTransform());
     }
     //if (!other.isStatic) {
     //    Transform t = other.GetTransform();
