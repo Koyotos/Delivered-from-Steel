@@ -14,6 +14,7 @@ class VisualNode : public Node {
     protected:
     Transform transform;
     shared_ptr<Shader> shader;
+    float cullRadius;
 
     public:
     // Tests for engine purposes
@@ -23,6 +24,9 @@ class VisualNode : public Node {
     inline bool TestTransformChanged() noexcept override final {return flags[5];};
 
     string Type() override;
+    string RenderType() override final;
+
+    float GetCullRadius() const noexcept;
 
     /*
     @brief Sets Draw flag state.

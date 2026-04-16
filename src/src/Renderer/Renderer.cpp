@@ -5,6 +5,7 @@
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
 #include "include/Profiler/Profiler.hpp"
+#include <iostream>
 
 void Renderer::Init() {
     if(!glfwInit()) {
@@ -35,29 +36,55 @@ void Renderer::Init() {
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 }
 
+void Renderer::ComputeFrustum() {
+    mat4 vp = currentScene->sceneCam->GetVP(1);
+    frustumLeft = vec4(vp[0][3] + vp[0][0], vp[1][3] + vp[1][0], vp[2][3] + vp[2][0], vp[3][3] + vp[3][0]);
+    frustumRight = vec4(vp[0][3] - vp[0][0], vp[1][3] - vp[1][0], vp[2][3] - vp[2][0], vp[3][3] - vp[3][0]);
+    frustumBottom = vec4(vp[0][3] + vp[0][1], vp[1][3] + vp[1][1], vp[2][3] + vp[2][1], vp[3][3] + vp[3][1]);
+    frustumTop = vec4(vp[0][3] - vp[0][1], vp[1][3] - vp[1][1], vp[2][3] - vp[2][1], vp[3][3] - vp[3][1]);
+    auto normalizePlane = [](vec4& plane) {
+        float length = glm::length(vec3(plane));
+        plane /= length;
+    };
+
+    normalizePlane(frustumLeft);
+    normalizePlane(frustumRight);
+    normalizePlane(frustumBottom);
+    normalizePlane(frustumTop);
+}
+
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
+    // Clear from last frame
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
+    drawVector.clear();
+
+    // Prepare culling
     currentScene = scene;
+    ComputeFrustum();
+
+    // Vectorize scene
     PrepareDraw(scene->root, Transform());
+
+    // Setup shaders
     PrepareLights();
-    Draw(scene->root);
+    PrepareShaders();
+
+    // Draw
+    Draw();
 
     #if defined(DEBUG)
     glDisable(GL_DEPTH_TEST);
-    DrawDebug(scene->root);
+    DrawDebug();
     glEnable(GL_DEPTH_TEST);
     #endif
 }
 
-void Renderer::Draw(shared_ptr<Node> node) {
-    if (node->TestDraw()) {
-		PROFILER_ADD_OBJECT();
+void Renderer::Draw() {
+    for(auto& node : drawVector) {
+        PROFILER_ADD_OBJECT();
         node->Draw();
-    }
-    for(auto& k : node->GetChildren()) {
-        Draw(k);
     }
 }
 
@@ -68,20 +95,41 @@ void Renderer::PrepareLights() {
     });
 }
 
+void Renderer::PrepareShaders() {
+    for(auto& node : drawVector) {
+        ConfigureShader(node);
+    }
+}
+
+bool Renderer::Cull(shared_ptr<VisualNode> node) {
+    float radius = node->GetCullRadius();
+    if(radius < CULL_RADIUS_ALWAYS_TRUE) {
+        return true;
+    }
+    vec3 pos = node->GetTransform().GetGlobal()[3];
+    if(glm::dot(vec3(frustumLeft), pos) + frustumLeft.w < -radius) return false;
+    if(glm::dot(vec3(frustumRight), pos) + frustumRight.w < -radius) return false;
+    if(glm::dot(vec3(frustumBottom), pos) + frustumBottom.w < -radius) return false;
+    if(glm::dot(vec3(frustumTop), pos) + frustumTop.w < -radius) return false;
+    return true; 
+}
+
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
     bool childTransformState = false;
-    if(node->TestDraw()) {
-        shared_ptr<VisualNode> nodeCast = static_pointer_cast<VisualNode>(node);
-        ConfigureShader(nodeCast);
-        if(!nodeCast->TestIgnoreParent()) {
-            if(nodeCast->TestTransformChanged()) {
-                nodeCast->ApplyParentTransform(t);
+    if(node->RenderType() == "VisualNode") {
+        shared_ptr<VisualNode> visualCast = static_pointer_cast<VisualNode>(node);
+        if(!visualCast->TestIgnoreParent()) {
+            if(visualCast->TestTransformChanged()) {
+                visualCast->ApplyParentTransform(t);
                 childTransformState = true;
             }
         } else {
-            nodeCast->ResetGlobal();
+            visualCast->ResetGlobal();
         }
-        t = nodeCast->GetTransform();
+        t = visualCast->GetTransform();
+        if(Cull(visualCast)) {
+            drawVector.push_back(visualCast);
+        }
     } else if(node->Type() == "Light") {
         shared_ptr<Light> cast = static_pointer_cast<Light>(node);
         if(cast->type == LIGHT_DIRECTIONAL) {
@@ -93,21 +141,18 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         }
     }
     for(auto& k : node->GetChildren()) {
-        k->SetTransformChanged(childTransformState);
         PrepareDraw(k, t);
     }
 } 
 
-void Renderer::DrawDebug(shared_ptr<Node> node) {
-    if(node->Type() != "PhysicsNode") {
-        return;
-    }
-	auto physicsNode = static_pointer_cast<PhysicsNode>(node);
-    if (physicsNode) {
-        physicsNode->drawDebug();
-    }
-    for (auto& k : node->GetChildren()) {
-        DrawDebug(k);
+void Renderer::DrawDebug() {
+    for(auto& node : drawVector) {
+        auto physicsNode = static_pointer_cast<PhysicsNode>(node);
+        if (physicsNode) {
+            physicsNode->drawDebug();
+        } else {
+            node->Draw();
+        }
     }
 }
 void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, const int8_t& index) {

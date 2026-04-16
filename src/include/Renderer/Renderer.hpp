@@ -16,23 +16,36 @@
 #define DEF_WIN_W 1920
 #define DEF_WIN_H 1080
 
+#define CULL_RADIUS_ALWAYS_TRUE 0.000000001
+
 class Renderer {
     private: 
     GLFWwindow* window;
     uint16_t windowW;
     uint16_t windowH;
 
+    vec4 frustumLeft;
+    vec4 frustumRight;
+    vec4 frustumTop;
+    vec4 frustumBottom;
+
     shared_ptr<Scene> currentScene;
 
+    vector<shared_ptr<VisualNode>> drawVector;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
 
+    // Draw inlines
     inline void PrepareDraw(shared_ptr<Node>, Transform);
-    inline void Draw(shared_ptr<Node>);
+    inline bool Cull(shared_ptr<VisualNode>);
+
+    inline void Draw();
     inline void ConfigureShader(shared_ptr<Node>);
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
     inline void PrepareLights();
+    inline void PrepareShaders();
+    inline void ComputeFrustum();
 
-    inline void DrawDebug(shared_ptr<Node> node);
+    inline void DrawDebug();
 
     public:
     void DrawScene(shared_ptr<Scene>);
