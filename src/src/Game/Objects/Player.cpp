@@ -70,10 +70,8 @@ void Player::Process() {
 	jumpHeld = currentJumpRaw;
 	lastJumpInput = currentJumpRaw;
 
-	isGrounded = CheckGrounded();
-	isWalled = CheckWalled();
 
-	float moveInput = 0.0f;
+	moveInput = 0.0f;
 	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_D)) {
 		moveInput = 1.0f;
 	}
@@ -95,6 +93,11 @@ void Player::Process() {
 		t.SetScale(scale);
 		SetTransform(t);
 	}
+}
+
+void Player::Update(float deltaTime) {
+	isGrounded = CheckGrounded();
+	isWalled = CheckWalled();
 
 	glm::vec2 currentVelocity = GetVelocity();
 
@@ -140,6 +143,9 @@ void Player::Process() {
 	if (currentVelocity.y < 0) {
 		currentVelocity.y -= 10.0f * fallGravityMultiplier * deltaTime;
 	}
+	else {
+		currentVelocity.y -= 10.0f * deltaTime;
+	}
 
 	if (isWallSliding) {
 		currentVelocity.y = std::max(currentVelocity.y, -wallSlideSpeed);
@@ -149,6 +155,10 @@ void Player::Process() {
 	}
 
 	SetVelocity(currentVelocity);
+
+	Transform t = this->GetTransform();
+	t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
+	this->SetTransform(t);
 
 	jumpPressed = false;
 	jumpReleased = false;
@@ -183,6 +193,5 @@ void Player::takeDamage(float damage) {
 void Player::Shatter() {
 	hp = 0.0f;
 	Globals::GetGlobals().Log("Shatter");
-	// tutaj mo¿na dodaæ logikê œmierci gracza, np. respawn, game over itp.
-	hp = hpMax; // tymczasowo resetujemy HP, aby gracz móg³ kontynuowaæ grê
+	hp = hpMax;
 }

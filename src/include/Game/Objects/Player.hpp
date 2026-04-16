@@ -41,6 +41,8 @@ private:
 	float timeSinceLastRelease = 100.0f;
 	bool jumpHeld = false;
 
+	float moveInput = 0.0f;
+
 	float hpMax = 100.0f;
 	float hp = hpMax;
 
@@ -49,6 +51,8 @@ private:
 	float MoveTowards(float current, float target, float maxDelta);
 
 public:
+
+	void Update(float deltaTime) override;
 
 	void SetCamera(shared_ptr<Camera>);
 
