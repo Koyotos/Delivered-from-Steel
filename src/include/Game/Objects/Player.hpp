@@ -37,6 +37,10 @@ private:
 	bool jumpPressed = false;
 	bool jumpReleased = false;
 
+	bool lastJumpInput = false;
+	float timeSinceLastRelease = 100.0f;
+	bool jumpHeld = false;
+
 	float hpMax = 100.0f;
 	float hp = hpMax;
 

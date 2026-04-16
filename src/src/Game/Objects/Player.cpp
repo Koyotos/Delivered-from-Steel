@@ -50,6 +50,25 @@ bool Player::CheckWalled() {
 void Player::Process() {
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
+	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
+
+	if (currentJumpRaw && !lastJumpInput) {
+		if (timeSinceLastRelease > 0.08f) {
+			jumpPressed = true;
+		}
+	}
+
+	if (!currentJumpRaw && lastJumpInput) {
+		jumpReleased = true;
+		timeSinceLastRelease = 0.0f;
+	}
+	else {
+		timeSinceLastRelease += deltaTime;
+	}
+
+	jumpHeld = currentJumpRaw;
+	lastJumpInput = currentJumpRaw;
+
 	isGrounded = CheckGrounded();
 	isWalled = CheckWalled();
 
@@ -62,12 +81,13 @@ void Player::Process() {
 	}
 
 	float leftX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_X);
-	if (std::abs(leftX) > 0.4f) {
-		moveInput = (leftX > 0) ? 1.0f : -1.0f;
+	if (std::abs(leftX) > 0.1f) {
+		float normalizedSpeed = std::clamp((std::abs(leftX) - 0.1f) / (1.0f - 0.1f), 0.0f, 1.0f);
+		moveInput = normalizedSpeed * std::copysign(1.0f, leftX);
 	}
 
-	if (moveInput != 0.0f) {
-		facingDirection = moveInput;
+	if (std::abs(moveInput) > 0.01f) {
+		facingDirection = std::copysign(1.0f, moveInput);
 		Transform t = GetTransform();
 		glm::vec3 scale = t.GetScale();
 		scale.x = std::abs(scale.x) * facingDirection;
@@ -102,6 +122,9 @@ void Player::Process() {
 		jumpBufferCounter = 0.0f;
 		coyoteTimeCounter = 0.0f;
 		isGrounded = false;
+		if (!jumpHeld) {
+			currentVelocity.y = jumpForce * jumpCutMultiplier;
+		}
 	}
 	else if (jumpReleased && currentVelocity.y > 0) {
 		currentVelocity.y *= jumpCutMultiplier;
@@ -132,19 +155,19 @@ void Player::Process() {
 
 bool Player::Input(InputEvent& event) {
 	if (!event.handled) {
-		bool isJumpKey = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_SPACE) ||
-			(event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A);
+		//bool isJumpKey = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_SPACE) ||
+		//	(event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A);
 
-		if (isJumpKey) {
-			if (event.action == GLFW_PRESS) {
-				jumpPressed = true;
-				return true;
-			}
-			else if (event.action == GLFW_RELEASE) {
-				jumpReleased = true;
-				return true;
-			}
-		}
+		//if (isJumpKey) {
+		//	if (event.action == GLFW_PRESS) {
+		//		jumpPressed = true;
+		//		return true;
+		//	}
+		//	else if (event.action == GLFW_RELEASE) {
+		//		jumpReleased = true;
+		//		return true;
+		//	}
+		//}
 	}
 	return false;
 }
