@@ -1,62 +1,158 @@
 #include "include/Game/Objects/Player.hpp"
-#include "include/Core/Object2D.hpp"
-#include "include/Core/Object3D.hpp"
 #include "include/Globals/Globals.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
-#include <iostream>
 
 Player::Player() : Object2D() {
 	SetProcess(true);
 	SetInput(true);
 	SetDraw(true);
+	lastTime = glfwGetTime();
 }
 
 Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
 	objectType = ObjectType::Player;
+	lastTime = glfwGetTime();
 }
 
 void Player::SetCamera(shared_ptr<Camera> cam) {
 	camera = cam;
 }
 
+float Player::MoveTowards(float current, float target, float maxDelta) {
+	if (std::abs(target - current) <= maxDelta) {
+		return target;
+	}
+	return current + std::copysign(maxDelta, target - current);
+}
+
+bool Player::CheckGrounded() {
+	float rayLength = 0.01f;
+	glm::vec2 rayDir(0.0f, -1.0f);
+	float offsetX = 0.1f;
+	float offsetY = -0.4f;
+
+	auto hitCenter = raycast(glm::vec2(0.0f, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+
+	return hitCenter.has_value() || hitLeft.has_value() || hitRight.has_value();
+}
+
+bool Player::CheckWalled() {
+	float rayLength = 0.01f;
+	glm::vec2 rayDir(1.0f, 0.0f);
+	float offsetX = 0.5f;
+	float offsetY = 0.0f;
+	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), -rayDir, rayLength, ObjectType::Wall);
+	return hitRight.has_value() || hitLeft.has_value();
+}
+
 void Player::Process() {
-	Transform t = GetTransform();
-	vec3 pos = t.GetTranslation();
-	float speed = 0.025f;
+	double currentTime = glfwGetTime();
+	float deltaTime = static_cast<float>(currentTime - lastTime);
+	lastTime = currentTime;
+	if (deltaTime > 0.1f) deltaTime = 0.1f;
 
-	//float leftXM = Globals::GetGlobals().GetMouseX();
-	//float leftYM = Globals::GetGlobals().GetMouseY();
+	if (camera) {
+		camera->SetPos(GetTransform().GetTranslation());
+	}
 
-	//pos.x = leftXM;
-	//pos.y = leftYM;
+	isGrounded = CheckGrounded();
+	isWalled = CheckWalled();
 
-	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_W)) pos.y += speed;
-	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_S)) pos.y -= speed;
-	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_A)) pos.x -= speed;
-	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_D)) pos.x += speed;
+	float moveInput = 0.0f;
+	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_D)) {
+		moveInput = 1.0f;
+	}
+	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_A)) {
+		moveInput = -1.0f;
+	}
 
 	float leftX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_X);
-	float leftY = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_Y);
+	if (std::abs(leftX) > 0.4f) {
+		moveInput = (leftX > 0) ? 1.0f : -1.0f;
+	}
 
-	if (std::abs(leftX) > 0.1f) pos.x += leftX * speed;
-	if (std::abs(leftY) > 0.1f) pos.y += leftY * speed;
+	if (moveInput != 0.0f) {
+		facingDirection = moveInput;
+		Transform t = GetTransform();
+		glm::vec3 scale = t.GetScale();
+		scale.x = std::abs(scale.x) * facingDirection;
+		t.SetScale(scale);
+		SetTransform(t);
+	}
 
-	if (Globals::GetGlobals().GetMouseState(GLFW_MOUSE_BUTTON_LEFT)) pos.x -= speed;
-	if (Globals::GetGlobals().GetMouseState(GLFW_MOUSE_BUTTON_RIGHT)) pos.x += speed;
+	glm::vec2 currentVelocity = GetVelocity();
 
-	if (Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A)) pos.y -= speed;
+	if (isGrounded) {
+		coyoteTimeCounter = coyoteTime;
+	}
+	else {
+		coyoteTimeCounter -= deltaTime;
+	}
 
-	t.SetTranslation(pos);
-	SetTransform(t);
-	camera->SetPos(pos);
+	if (jumpPressed) {
+		jumpBufferCounter = jumpBufferTime;
+	}
+	else {
+		jumpBufferCounter -= deltaTime;
+	}
+
+	bool isSlidingDownWall = enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
+	isWallSliding = isSlidingDownWall && moveInput != 0.0f;
+
+	bool canJump = (enableCoyoteTime && coyoteTimeCounter > 0.0f) || (!enableCoyoteTime && isGrounded);
+	bool wantsToJump = (enableJumpBuffer && jumpBufferCounter > 0.0f) || (!enableJumpBuffer && jumpPressed);
+
+	if (wantsToJump && canJump) {
+		currentVelocity.y = jumpForce;
+		jumpBufferCounter = 0.0f;
+		coyoteTimeCounter = 0.0f;
+		isGrounded = false;
+	}
+	else if (jumpReleased && currentVelocity.y > 0) {
+		currentVelocity.y *= jumpCutMultiplier;
+		coyoteTimeCounter = 0.0f;
+	}
+
+	float targetSpeed = moveInput * maxWalkSpeed;
+	float acceleration = isGrounded ? (moveInput != 0.0f ? groundAcceleration : groundDeceleration) : (moveInput != 0.0f ? airAcceleration : airDeceleration);
+
+	currentVelocity.x = MoveTowards(currentVelocity.x, targetSpeed, acceleration * deltaTime);
+
+	if (currentVelocity.y < 0) {
+		currentVelocity.y -= 10.0f * fallGravityMultiplier * deltaTime;
+	}
+
+	if (isWallSliding) {
+		currentVelocity.y = std::max(currentVelocity.y, -wallSlideSpeed);
+	}
+	else {
+		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
+	}
+
+	SetVelocity(currentVelocity);
+
+	jumpPressed = false;
+	jumpReleased = false;
 }
 
 bool Player::Input(InputEvent& event) {
 	if (!event.handled) {
-		if (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_SPACE && event.action == GLFW_PRESS) {
-			Globals::GetGlobals().Log("Skok");
-			return true;
+		bool isJumpKey = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_SPACE) ||
+			(event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A);
+
+		if (isJumpKey) {
+			if (event.action == GLFW_PRESS) {
+				jumpPressed = true;
+				return true;
+			}
+			else if (event.action == GLFW_RELEASE) {
+				jumpReleased = true;
+				return true;
+			}
 		}
 	}
 	return false;

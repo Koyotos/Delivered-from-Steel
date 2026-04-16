@@ -55,6 +55,9 @@ public:
     virtual void OnCollisionStay(std::shared_ptr<Collider> other) {}
     virtual void OnCollisionExit(std::shared_ptr<Collider> other) {}
 
+    glm::vec2 GetVelocity() const { return velocity; }
+    void SetVelocity(const glm::vec2& v) { velocity = v; }
+
     void processCollisions();
 
     void Init();

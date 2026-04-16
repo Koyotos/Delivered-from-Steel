@@ -83,6 +83,7 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 
     float velocityAlongNormal = glm::dot(relativeVelocity, info->normal);
 
+    if (velocityAlongNormal < 0) return;
 
     float e = 0.0f;
 
