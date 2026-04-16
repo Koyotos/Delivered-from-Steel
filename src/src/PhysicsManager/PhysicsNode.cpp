@@ -4,6 +4,7 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include <iostream>
+#include <algorithm>
 #include "include/PhysicsManager/PhysicsManager.hpp"
 string PhysicsNode::Type() {
     return "PhysicsNode";
