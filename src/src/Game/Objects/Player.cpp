@@ -1,6 +1,7 @@
 #include "include/Game/Objects/Player.hpp"
 #include "include/Globals/Globals.hpp"
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <cmath>
 
 Player::Player() : Object2D() {
@@ -182,6 +183,6 @@ void Player::takeDamage(float damage) {
 void Player::Shatter() {
 	hp = 0.0f;
 	Globals::GetGlobals().Log("Shatter");
-	// tutaj mo¿na dodaæ logikê œmierci gracza, np. respawn, game over itp.
-	hp = hpMax; // tymczasowo resetujemy HP, aby gracz móg³ kontynuowaæ grê
+	// tutaj moÂ¿na dodaÃ¦ logikÃª Å“mierci gracza, np. respawn, game over itp.
+	hp = hpMax; // tymczasowo resetujemy HP, aby gracz mÃ³gÂ³ kontynuowaÃ¦ grÃª
 }
