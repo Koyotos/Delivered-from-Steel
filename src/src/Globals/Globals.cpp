@@ -114,6 +114,17 @@ float Globals::GetGamepadAxisState(int axis) const {
     return 0.0f;
 }
 
+void Globals::SetDeltaTime(float dt) {
+    deltaTime = dt;
+}
+
+float Globals::GetDeltaTime() const {
+    return deltaTime;
+}
+
+void Globals::SetPhysicsTime(double t) { physicsTime = t; }
+double Globals::GetPhysicsTime() const { return physicsTime; }
+
 Globals::Globals() {
 
     execPath = GetExecPathInternal();

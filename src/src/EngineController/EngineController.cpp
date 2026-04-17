@@ -50,20 +50,39 @@ void EngineController::ProcessNode(shared_ptr<Node> node) {
 }
 
 void EngineController::Run() {
+	double t = 0.0;
+	const double fixedDeltaTime = 1.0 / 60.0;
 	lastTime = glfwGetTime();
+	double accumulator = 0.0;
     while(!glfwWindowShouldClose(renderer->GetWindow())) {
         currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
+
+        if (deltaTime > 0.25) {
+            deltaTime = 0.25;
+		}
+
+		lastTime = currentTime;
+		accumulator += deltaTime;
+
+		Globals::GetGlobals().SetDeltaTime(static_cast<float>(deltaTime));
+
         shared_ptr<Scene> active = scm->GetActive();
 
-		PROFILER_BEGIN_FRAME(deltaTime);
+		PROFILER_BEGIN_FRAME(static_cast<float>(deltaTime));
 
-		psm->Update(active, deltaTime);
 		glfwPollEvents();
 		iom->PollGamepad();
         if (active) {
 		    iom->ProcessInput(active->GetRoot());
             ProcessNode(active->GetRoot());
+
+            while (accumulator >= fixedDeltaTime) {
+                psm->Update(active, static_cast<float>(fixedDeltaTime));
+                accumulator -= fixedDeltaTime;
+                t += fixedDeltaTime;
+                Globals::GetGlobals().SetPhysicsTime(t);
+			}
         }
 
 		PROFILER_END_LOGIC();
@@ -74,7 +93,6 @@ void EngineController::Run() {
 
 		PROFILER_END_RENDER();
 
-        lastTime = currentTime;
         EndFrame();
     }
 }

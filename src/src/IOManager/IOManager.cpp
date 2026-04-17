@@ -49,7 +49,7 @@ void IOManager::PollGamepad() {
 			Globals::GetGlobals().Log("Gamepad connected.");
 		}
 
-		for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_DPAD_RIGHT; i++) {
+		for (int i = 0; i <= GLFW_GAMEPAD_BUTTON_LAST; i++) {
 			if (state.buttons[i] != lastGamepadState.buttons[i]) {
 				InputEvent evt;
 				evt.type = InputType::GAMEPAD_BUTTON;

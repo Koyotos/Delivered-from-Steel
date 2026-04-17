@@ -80,12 +80,24 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
     if (distSq <= other->radius * other->radius) {
         info->collided = true;
         float dist = sqrt(distSq);
-        info->depth = other->radius - dist;
         if (dist > 0) {
+            info->depth = other->radius - dist;
             info->normal = -(closest - closestOnBox) / dist;
         }
         else {
-            info->normal = (boxCenter.x > closest.x)? glm::vec2(1, 0) : glm::vec2(-1, 0);
+            float distTop = max.y - closest.y;
+            float distBottom = closest.y - min.y;
+            float distLeft = closest.x - min.x;
+            float distRight = max.x - closest.x;
+
+            float minDist = std::min({ distTop, distBottom, distLeft, distRight });
+
+            if (minDist == distTop) info->normal = glm::vec2(0, -1);
+            else if (minDist == distBottom) info->normal = glm::vec2(0, 1);
+            else if (minDist == distLeft) info->normal = glm::vec2(1, 0);
+            else info->normal = glm::vec2(-1, 0);
+
+            info->depth = other->radius + minDist;
         }
         info->collider = other;
 		return info;

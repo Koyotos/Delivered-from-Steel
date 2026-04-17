@@ -6,13 +6,53 @@
 #include "include/Renderer/Camera.hpp"
 
 class Player : public Object2D {
-	private:
+private:
 	shared_ptr<Camera> camera;
+
+	float maxWalkSpeed = 8.0f;
+	float groundAcceleration = 40.0f;
+	float groundDeceleration = 40.0f;
+	float airAcceleration = 30.0f;
+	float airDeceleration = 30.0f;
+	float jumpForce = 8.0f;
+	float jumpCutMultiplier = 0.5f;
+	float fallGravityMultiplier = 2.0f;
+
+	bool enableWallSlide = true;
+	float wallSlideSpeed = 2.0f;
+
+	bool enableCoyoteTime = true;
+	float coyoteTime = 0.15f;
+	float coyoteTimeCounter = 0.0f;
+
+	bool enableJumpBuffer = true;
+	float jumpBufferTime = 0.15f;
+	float jumpBufferCounter = 0.0f;
+
+	bool isGrounded = false;
+	bool isWalled = false;
+	bool isWallSliding = false;
+	float facingDirection = 1.0f;
+
+	bool jumpPressed = false;
+	bool jumpReleased = false;
+
+	bool lastJumpInput = false;
+	float timeSinceLastRelease = 100.0f;
+	bool jumpHeld = false;
+
+	float moveInput = 0.0f;
 
 	float hpMax = 100.0f;
 	float hp = hpMax;
-	
-	public:
+
+	bool CheckGrounded();
+	bool CheckWalled();
+	float MoveTowards(float current, float target, float maxDelta);
+
+public:
+
+	void Update(float deltaTime) override;
 
 	void SetCamera(shared_ptr<Camera>);
 

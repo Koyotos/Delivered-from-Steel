@@ -32,6 +32,9 @@ class Globals {
 	float mouseX = 0.0f;
 	float mouseY = 0.0f;
 
+    float deltaTime = 0.0f;
+    double physicsTime = 0.0;
+
     inline path GetExecPathInternal();
 
     public:
@@ -91,6 +94,12 @@ class Globals {
 	bool GetGamepadBtnState(int button) const;
 	void SetGamepadAxisState(int axis, float value);
 	float GetGamepadAxisState(int axis) const;
+
+    void SetDeltaTime(float dt);
+    float GetDeltaTime() const;
+
+    void SetPhysicsTime(double t);
+    double GetPhysicsTime() const;
 
     Globals(const Globals&) = delete;
     Globals();

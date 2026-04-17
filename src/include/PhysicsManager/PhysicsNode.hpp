@@ -38,7 +38,7 @@ public:
     void setStatic(bool value);
     bool getStatic() const;
 
-    void Update(float dt);
+    virtual void Update(float dt);
 
     void resolveCollision(PhysicsNode& other);
 
@@ -54,6 +54,9 @@ public:
     virtual void OnCollisionEnter(std::shared_ptr<Collider> other) {}
     virtual void OnCollisionStay(std::shared_ptr<Collider> other) {}
     virtual void OnCollisionExit(std::shared_ptr<Collider> other) {}
+
+    glm::vec2 GetVelocity() const { return velocity; }
+    void SetVelocity(const glm::vec2& v) { velocity = v; }
 
     void processCollisions();
 
