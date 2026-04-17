@@ -136,10 +136,16 @@ class Node {
     virtual void Physics(const float&);
 
     /*
-    @brief Returns nod type as string.
+    @brief Returns node type as string.
     @return string - type
     */
     virtual string Type();
+
+    /*
+    @brief Returns node type as string for renderer.
+    @return string - type
+    */
+    virtual string RenderType();
 
     /*
     @brief Basic constructor. Creates empty Node.

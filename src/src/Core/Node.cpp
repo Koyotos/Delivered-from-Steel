@@ -28,6 +28,10 @@ string Node::Type() {
     return "Node";
 }
 
+string Node::RenderType() {
+    return "Node";
+}
+
 Node::Node() {
 
 }
