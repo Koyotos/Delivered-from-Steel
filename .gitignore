@@ -51,10 +51,7 @@ build/*
 .vscode/*
 compile_commands.json
 
-res
-res/
-res/*
-
-/game
-/game/
-/game/*
+game
+game/*
+!game/res
+!game/res/*
