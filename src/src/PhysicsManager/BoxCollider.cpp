@@ -3,9 +3,11 @@
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 
 BoxCollider::BoxCollider(const Transform transform, float x, float y, float width, float height)
-    : Collider(), size((width, height))
+    : Collider()
 {
 	this->transform = vec2(x, y);
+
+    this->size = vec2(width, height);
 
     updatePosition(transform);
 }
