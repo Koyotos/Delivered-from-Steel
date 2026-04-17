@@ -47,7 +47,6 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Button>("Button"),
     RegisterObjectType<TextNode>("TextNode"),
     RegisterObjectType<ProfilerNode>("ProfilerNode")
-
 };
 
 struct RefCountModel {
