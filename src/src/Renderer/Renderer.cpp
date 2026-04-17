@@ -59,6 +59,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
     drawVector.clear();
+    drawVectorUI.clear();
 
     // Prepare culling
     currentScene = scene;
@@ -66,6 +67,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
     // Vectorize scene
     PrepareDraw(scene->root, Transform());
+    ResolveZ();
 
     // Setup shaders
     PrepareLights();
@@ -86,6 +88,10 @@ void Renderer::Draw() {
         PROFILER_ADD_OBJECT();
         node->Draw();
     }
+    for(auto& node : drawVectorUI) {
+        PROFILER_ADD_OBJECT();
+        node->Draw();
+    }
 }
 
 void Renderer::PrepareLights() {
@@ -97,6 +103,9 @@ void Renderer::PrepareLights() {
 
 void Renderer::PrepareShaders() {
     for(auto& node : drawVector) {
+        ConfigureShader(node);
+    }
+    for(auto& node : drawVectorUI) {
         ConfigureShader(node);
     }
 }
@@ -116,31 +125,15 @@ bool Renderer::Cull(shared_ptr<VisualNode> node) {
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
     bool childTransformState = false;
-    if(node->RenderType() == "VisualNode") {
-        shared_ptr<VisualNode> visualCast = static_pointer_cast<VisualNode>(node);
-        if(!visualCast->TestIgnoreParent()) {
-            if(visualCast->TestTransformChanged()) {
-                visualCast->ApplyParentTransform(t);
-                childTransformState = true;
-            }
-        } else {
-            visualCast->ResetGlobal();
-        }
-        t = visualCast->GetTransform();
-        if(Cull(visualCast)) {
-            drawVector.push_back(visualCast);
-        }
+    if(node->Type() == "TextNode" || node->RenderType() == "Object2D" 
+        || node->RenderType() == "Object3D") {
+        PrepareDrawNode(static_pointer_cast<VisualNode>(node), t, childTransformState);
+        
     } else if(node->Type() == "Light") {
-        shared_ptr<Light> cast = static_pointer_cast<Light>(node);
-        if(cast->type == LIGHT_DIRECTIONAL) {
-            lightsPos.push_back({cast,0});
-        } else{
-            vec2 campos = currentScene->sceneCam->GetPos();
-            float dist = (campos.x-cast->data1.x)*(campos.x-cast->data1.x) + (campos.y-cast->data1.y)*(campos.y-cast->data1.y);
-            lightsPos.push_back({cast,dist});
-        }
+        PrepareDrawLight(static_pointer_cast<Light>(node));
     }
     for(auto& k : node->GetChildren()) {
+        k->SetTransformChanged(childTransformState);
         PrepareDraw(k, t);
     }
 } 
@@ -155,6 +148,44 @@ void Renderer::DrawDebug() {
         }
     }
 }
+
+void Renderer::ResolveZ() {
+    sort(drawVectorUI.begin(), drawVectorUI.end(),[](const shared_ptr<VisualNode>& a, 
+        const shared_ptr<VisualNode>& b) {
+            return a->GetZIndex() < b->GetZIndex();
+    });
+}
+
+void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t, bool& flag) {
+    if(!visualCast->TestIgnoreParent()) {
+        if(visualCast->TestTransformChanged()) {
+            visualCast->ApplyParentTransform(t);
+            flag = true;
+        }
+    } else {
+        visualCast->ResetGlobal();
+    }
+
+    t = visualCast->GetTransform();
+    if(Cull(visualCast)) {
+        if(visualCast->Type() == "TextNode" || visualCast->RenderType() == "Object2D") {
+            drawVectorUI.push_back(visualCast);
+        } else {
+            drawVector.push_back(visualCast);
+        }
+    }
+}
+
+void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
+    if(light->type == LIGHT_DIRECTIONAL) {
+            lightsPos.push_back({light,0});
+    } else {
+        vec2 campos = currentScene->sceneCam->GetPos();
+        float dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
+        lightsPos.push_back({light,dist});
+    }
+}
+
 void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, const int8_t& index) {
     if(light == nullptr) {
         return;

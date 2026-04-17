@@ -32,19 +32,25 @@ class Renderer {
     shared_ptr<Scene> currentScene;
 
     vector<shared_ptr<VisualNode>> drawVector;
+    vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
 
-    // Draw inlines
+    // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
+    inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&, bool&);
+   
     inline bool Cull(shared_ptr<VisualNode>);
 
-    inline void Draw();
+    inline void PrepareDrawLight(shared_ptr<Light>);
+    inline void ComputeFrustum();
+    inline void PrepareLights();
+    inline void ResolveZ();
+    inline void PrepareShaders();
     inline void ConfigureShader(shared_ptr<Node>);
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
-    inline void PrepareLights();
-    inline void PrepareShaders();
-    inline void ComputeFrustum();
 
+    // Draws
+    inline void Draw();
     inline void DrawDebug();
 
     public:

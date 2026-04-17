@@ -38,6 +38,14 @@ float VisualNode::GetCullRadius() const noexcept {
     return cullRadius;
 }
 
+void VisualNode::SetZIndex(const uint8_t& z) {
+    zIndex = z;
+}
+
+uint8_t VisualNode::GetZIndex() {
+    return zIndex;
+}
+
 VisualNode::VisualNode() {
 
 }
@@ -47,4 +55,5 @@ VisualNode::VisualNode(const unordered_map<string, std::any>& data) : Node(data)
     flags[3] = fromMap(bool, "draw", data);
     flags[4] = fromMap(bool, "ignoreParent", data);
     cullRadius = fromMap(float,"cull",data);
+    zIndex = (uint8_t)(fromMap(int64_t,"zIndex",data));
 }

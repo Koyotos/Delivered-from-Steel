@@ -15,6 +15,7 @@ class VisualNode : public Node {
     Transform transform;
     shared_ptr<Shader> shader;
     float cullRadius;
+    uint8_t zIndex;
 
     public:
     // Tests for engine purposes
@@ -24,8 +25,25 @@ class VisualNode : public Node {
     inline bool TestTransformChanged() noexcept override final {return flags[5];};
 
     string Type() override;
-    string RenderType() override final;
+    string RenderType() override;
 
+    /*
+    @brief Sets z index. 
+    @param1 const uint8_t& - z index
+    @return void
+    */
+    void SetZIndex(const uint8_t&);
+
+    /*
+    @brief Returns z index. Z index is used only for text and objects 2d by renderer to group objects in layers.
+    @return uint8_t - z index
+    */
+    uint8_t GetZIndex();
+
+    /*
+    @brief Returns object cull radius. Used only by renderer.
+    @return float - radius
+    */
     float GetCullRadius() const noexcept;
 
     /*
