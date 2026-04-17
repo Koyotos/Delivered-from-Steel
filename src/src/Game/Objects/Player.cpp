@@ -12,6 +12,8 @@ Player::Player() : Object2D() {
 
 Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
 	objectType = ObjectType::Player;
+	Transform t = Transform(fromMap(vector<std::any>, "transform", data));
+	respawnPoint = t.GetTranslation();
 }
 
 void Player::SetCamera(shared_ptr<Camera> cam) {
@@ -49,6 +51,10 @@ bool Player::CheckWalled() {
 }
 
 void Player::Process() {
+	if (isDead) {
+		moveInput = 0.0f;
+		return;
+	}
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
@@ -96,6 +102,29 @@ void Player::Process() {
 }
 
 void Player::Update(float deltaTime) {
+	if (isDead) {
+		respawnTimer -= deltaTime;
+		SetVelocity(glm::vec2(0.0f));
+		if (respawnTimer <= 0.0f) {
+			Transform t = GetTransform();
+			t.SetTranslation(respawnPoint);
+			SetTransform(t);
+
+			hp = hpMax;
+			isDead = false;
+
+		}
+
+		return;
+	}
+	if (!canTakeDamage) {
+		damageTimer -= deltaTime;
+		if (damageTimer <= 0.0f) {
+			canTakeDamage = true;
+		}
+	}
+
+
 	isGrounded = CheckGrounded();
 	isWalled = CheckWalled();
 
@@ -184,7 +213,13 @@ bool Player::Input(InputEvent& event) {
 }
 
 void Player::takeDamage(float damage) {
+	if (!canTakeDamage || isDead) return;
+
 	hp -= damage;
+
+	canTakeDamage = false;
+	damageTimer = damageCooldown;
+
 	if (hp <= 0.0f) {
 		Shatter();
 	}
@@ -192,6 +227,8 @@ void Player::takeDamage(float damage) {
 
 void Player::Shatter() {
 	hp = 0.0f;
+	isDead = true;
+	respawnTimer = respawnDelay;
 	Globals::GetGlobals().Log("Shatter");
 	hp = hpMax;
 }

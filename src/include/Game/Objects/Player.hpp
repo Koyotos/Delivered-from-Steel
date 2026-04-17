@@ -46,6 +46,16 @@ private:
 	float hpMax = 100.0f;
 	float hp = hpMax;
 
+	bool isDead = false;
+	float respawnDelay = 1.5f;
+	float respawnTimer = 0.0f;
+
+	float damageCooldown = 0.5f;
+	float damageTimer = 0.0f;
+	bool canTakeDamage = true;
+
+	glm::vec3 respawnPoint;
+
 	bool CheckGrounded();
 	bool CheckWalled();
 	float MoveTowards(float current, float target, float maxDelta);
