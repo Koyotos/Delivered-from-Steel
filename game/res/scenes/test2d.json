@@ -1,0 +1,38 @@
+{
+    "name": "test2d",
+    "1": {
+        "parent": 0,
+        "class": "Node",
+        "process": true,
+        "input": false,
+        "physics": false
+    },
+  "2": {
+    "parent": 1,
+    "transform": [
+      910.0,
+      920.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "sprite": "fishCard",
+    "class": "Object2D",
+    "shader": "basic2d",
+    "active": "test",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": false,
+    "addCollider": false,
+    "static": true,
+    "cull" : 0.0,
+    "zIndex" : 0
+  }
+}

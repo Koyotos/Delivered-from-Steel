@@ -51,7 +51,6 @@ build/*
 .vscode/*
 compile_commands.json
 
-game
 game/*
 !game/res
 !game/res/*
