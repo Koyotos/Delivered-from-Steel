@@ -198,6 +198,7 @@ void PhysicsNode::processCollisions()
         if (collider->getPreviousCollisions().find(current) == collider->getPreviousCollisions().end())
         {
             OnCollisionEnter(current);
+            OnCollisionStay(current);
         }
         else
         {

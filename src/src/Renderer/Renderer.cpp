@@ -169,7 +169,7 @@ void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t, 
     }
 
     t = visualCast->GetTransform();
-    if(Cull(visualCast)) {
+    if(Cull(visualCast) && visualCast->TestDraw()) {
         if(visualCast->Type() == "TextNode" || visualCast->RenderType() == "Object2D") {
             drawVectorUI.push_back(visualCast);
         } else {

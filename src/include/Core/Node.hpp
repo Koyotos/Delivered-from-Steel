@@ -147,6 +147,12 @@ class Node {
     */
     virtual string RenderType();
 
+    /**
+    @brief Disables all active behaviours of the node.
+    Simulates destruction without removing it from scene graph.
+    */
+    void Disable() noexcept;
+
     /*
     @brief Basic constructor. Creates empty Node.
     @return Node

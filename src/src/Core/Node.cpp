@@ -32,6 +32,15 @@ string Node::RenderType() {
     return "Node";
 }
 
+void Node::Disable() noexcept {
+    SetProcess(false);
+    SetInput(false);
+    SetPhysics(false);
+    SetDraw(false);
+    SetIgnoreParent(true);
+    SetTransformChanged(false);
+}
+
 Node::Node() {
 
 }

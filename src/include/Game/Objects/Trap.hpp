@@ -2,16 +2,19 @@
 #define FE_TRAP
 
 #include "include/Core/Object3D.hpp"
+#include "include/Game/Objects/Player.hpp"
 class Trap :
     public Object3D
 {
 private:
-    float damage = 100.0f;
+    float damage = 90.0f;
 
 public:
-    void OnCollisionEnter(shared_ptr<Collider> other) override;
+    void OnCollisionStay(shared_ptr<Collider> other) override;
 
     Trap(const unordered_map<string, std::any>&);
+
+	void ActivateEffect(shared_ptr<Player>);
 };
 
 #endif // FE_TRAP
