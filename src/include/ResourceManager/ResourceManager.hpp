@@ -13,6 +13,7 @@
 #include "include/Game/Objects/Button.hpp"
 #include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Game/Objects/SpikePlatform.hpp"
+#include "include/Game/Objects/MovingPlatform.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
@@ -49,6 +50,7 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Button>("Button"),
     RegisterObjectType<BreakableWall>("BreakableWall"),
     RegisterObjectType<SpikePlatform>("SpikePlatform"),
+	RegisterObjectType<MovingPlatform>("MovingPlatform"),
     RegisterObjectType<TextNode>("TextNode"),
     RegisterObjectType<ProfilerNode>("ProfilerNode")
 };

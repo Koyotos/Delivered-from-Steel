@@ -12,8 +12,8 @@ SpikePlatform::SpikePlatform(const unordered_map<string, std::any>& data)
     retractedTime = fromMap(float,"retractedTime", data);
 
     upDown = fromMap(bool,"upDown", data);
-    retractedPos = fromMap(float,"retractedTransform", data);
-    extendedPos = fromMap(float,"extendedTransform", data);
+    retractedPos = fromMap(float, "retractedPos", data);
+    extendedPos = fromMap(float, "extendedPos", data);
 
 }
 
