@@ -35,8 +35,8 @@
     "colliderType": true,
     "radius": 0.2,
     "height": 0.0,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
   },
   "3": {
     "parent": 1,
@@ -66,8 +66,8 @@
     "colliderType": true,
     "radius": 0.2,
     "height": 0.0,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
   },
   "4": {
     "parent": 1,
@@ -97,8 +97,8 @@
     "colliderType": true,
     "radius": 0.2,
     "height": 0.0,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
   },
   "5": {
     "parent": 1,
@@ -128,8 +128,8 @@
     "colliderType": false,
     "width": 100.0,
     "height": 0.4,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
   },
   "6": {
     "parent": 1,
@@ -159,8 +159,8 @@
     "colliderType": true,
     "radius": 0.2,
     "height": 0.0,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
   },
 
   "7": {
@@ -207,8 +207,8 @@
     "colliderType": false,
     "width": 2.1,
     "height": 0.4,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
   },
 
   "9": {
@@ -225,7 +225,7 @@
       1.0
     ],
     "model": "house",
-    "class": "Platform",
+    "class": "BreakableWall",
     "shader": "standard",
     "process": true,
     "input": true,
@@ -239,7 +239,178 @@
     "colliderType": false,
     "width": 2.1,
     "height": 1.2,
-    "cull" : 0.5,
-    "zIndex" : 0
+    "cull": 0.5,
+    "zIndex": 0
+  },
+
+  "10": {
+    "parent": 1,
+    "transform": [
+      -4.0,
+      -9.0,
+      -5.0,
+      0.0,
+      -0.0,
+      0.0,
+      5.0,
+      3.0,
+      1.0
+    ],
+    "model": "house",
+    "class": "Trap",
+    "shader": "standard",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": 0.4,
+    "colliderType": false,
+    "width": 2.1,
+    "height": 1.2,
+    "cull": 0.5,
+    "zIndex": 0
+  },
+
+  "11": {
+    "parent": 1,
+    "transform": [
+      4.0,
+      -9.0,
+      -5.0,
+      0.0,
+      -0.0,
+      0.0,
+      5.0,
+      3.0,
+      1.0
+    ],
+    "model": "house",
+    "class": "SpikePlatform",
+    "shader": "standard",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": 0.4,
+    "colliderType": false,
+    "width": 2.1,
+    "height": 1.2,
+    "extendTime": 0.1,
+    "retractTime": 1.0,
+    "extendedTime": 0.2,
+    "retractedTime": 1.0,
+    "upDown": false,
+    "retractedPos": 0.0,
+    "extendedPos": 2.0,
+    "cull": 0.5,
+    "zIndex": 0
+  },
+
+  "12": {
+    "parent": 11,
+    "transform": [
+      -4.0,
+      -7.0,
+      -5.0,
+      0.0,
+      -0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "model": "house",
+    "class": "Trap",
+    "shader": "standard",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": false,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": 0.4,
+    "colliderType": false,
+    "width": 0.4,
+    "height": 0.4,
+    "cull": 0.5,
+    "zIndex": 0
+  },
+
+
+  "13": {
+    "parent": 11,
+    "transform": [
+      -4.0,
+      -6.3,
+      -5.0,
+      0.0,
+      -0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "model": "house",
+    "class": "Trap",
+    "shader": "standard",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": false,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": 0.4,
+    "colliderType": false,
+    "width": 0.4,
+    "height": 0.4,
+    "cull": 0.5,
+    "zIndex": 0
+  },
+  "14": {
+    "parent": 1,
+    "transform": [
+      10.0,
+      -9.0,
+      -5.0,
+      0.0,
+      -0.0,
+      0.0,
+      5.0,
+      3.0,
+      1.0
+    ],
+    "model": "house",
+    "class": "MovingPlatform",
+    "shader": "standard",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": 0.4,
+    "colliderType": false,
+    "width": 2.1,
+    "height": 1.2,
+    "movingDuration": 2.0,
+    "stopDuration": 1.0,
+    "XendPosition": 15.0,
+    "YendPosition": -9.0,
+    "cull": 0.5,
+    "zIndex": 0
   }
 }
