@@ -51,11 +51,13 @@ bool CardSlot::Input(InputEvent& event) {
 
 		if(isUsedKeyU) {
 			event.handled = true;
-			UIElement::MoveTo(glm::vec2(100.0f, 100.0f), 0.5f);
+			UIElement::MoveTo(glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y - 100.0f), 0.5f, EaseType::InOutQuad);
+			UIElement::FadeOut(0.5f);
 		}
 		else if(isUsedKeyJ) {
 			event.handled = true;
-			UIElement::MoveTo(glm::vec2(200.0f, 100.0f), 0.5f);
+			UIElement::MoveTo(glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y + 100.0f), 0.5f, EaseType::OutSine);
+			UIElement::FadeIn(0.5f);
 		}
 	}
 	return false;
