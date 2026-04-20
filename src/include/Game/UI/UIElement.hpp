@@ -13,6 +13,9 @@ class UIElement : public Object2D {
 	glm::vec3 tint;
 	std::vector<Tween> tweens; // actvie tweens
 
+	float Ease(EaseType ease, float t);
+	void UpdateTweens(float dt);
+
 	public:
 
 	UIElement();
@@ -25,7 +28,7 @@ class UIElement : public Object2D {
 	void SetTint(glm::vec3 color);
 	glm::vec3 GetTint() const;
 
-	void UpdateTransform();
+
 	void FadeIn(float time, EaseType ease = EaseType::Linear);
 	void FadeOut(float time, EaseType ease = EaseType::Linear);
 	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear);
