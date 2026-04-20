@@ -36,7 +36,7 @@ class Object2D : public PhysicsNode {
     @brief Override of Draw() function. It renders object's sprite with given shader.
     @return void
     */
-    void Draw() override;
+    void Draw(shared_ptr<Shader> sh = nullptr) override;
 
     /*
     @brief Returns sprite used by object.

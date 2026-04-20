@@ -5,7 +5,6 @@
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
 #include "include/Profiler/Profiler.hpp"
-#include <iostream>
 
 void Renderer::Init() {
     if(!glfwInit()) {
@@ -23,10 +22,51 @@ void Renderer::Init() {
     }
 
     glfwMakeContextCurrent(window);
-    // glfwSwapInterval(1); VSYNC don't know if it will be useful
     
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw runtime_error("GL loader eror");
+        throw runtime_error("GL loader error");
+    }
+
+    glGenFramebuffers(1, &FBO);
+    glGenTextures(MAX_LIGHTS, depthCubemaps);
+    glGenTextures(MAX_LIGHTS, depthMaps2D);
+
+    for(int i = 0; i < MAX_LIGHTS; i++) {
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemaps[i]);
+
+        for(int j = 0; j < 6; j++) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, 0,
+                GL_DEPTH_COMPONENT,
+                SHADOW_WIDTH, SHADOW_HEIGHT,
+                0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+        }
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+
+    for(int i = 0; i < MAX_LIGHTS; i++) {
+        glBindTexture(GL_TEXTURE_2D, depthMaps2D[i]);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+            SHADOW_WIDTH, SHADOW_HEIGHT,
+            0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -51,6 +91,70 @@ void Renderer::ComputeFrustum() {
     normalizePlane(frustumRight);
     normalizePlane(frustumBottom);
     normalizePlane(frustumTop);
+}   
+
+void Renderer::DepthPass() {
+    glViewport(0,0,SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    for(uint8_t i = 0; i < MAX_LIGHTS; i++) {
+        auto light = lightsPos[i].first;
+
+        mat4 shadowTransforms[6];
+        mat4 projection;
+        mat4 view;
+
+        if(light->type == LIGHT_POINT) {
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemaps[i], 0);
+        } else {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMaps2D[i], 0);
+        }
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        switch(light->type) {
+            case LIGHT_DIRECTIONAL: {
+                vec3 dir = normalize(light->data1);
+                vec3 pos = -dir * 10.0f;
+                projection = ortho(-10.0f,10.0f,-10.0f,10.0f,0.1f,20.0f);
+                view = lookAt(pos, vec3(0.0f), vec3(0,1,0));
+                shadowTransforms[0] = projection * view;
+                depthShader->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
+                depthShader->SetInt("lightType", 0);
+                break;
+            }
+            case LIGHT_POINT: {
+                projection = perspective(radians(90.0f),1.0f,0.1f,20.f);
+                vec3 pos = light->data1;
+                shadowTransforms[0] = projection * lookAt(pos, pos+vec3(1,0,0), vec3(0,-1,0));
+                shadowTransforms[1] = projection * lookAt(pos, pos+vec3(-1,0,0), vec3(0,-1,0));
+                shadowTransforms[2] = projection * lookAt(pos, pos+vec3(0,1,0), vec3(0,0,1));
+                shadowTransforms[3] = projection * lookAt(pos, pos+vec3(0,-1,0), vec3(0,0,-1));
+                shadowTransforms[4] = projection * lookAt(pos, pos+vec3(0,0,1), vec3(0,-1,0));
+                shadowTransforms[5] = projection * lookAt(pos, pos+vec3(0,0,-1), vec3(0,-1,0));
+                for(int j = 0; j < 6; j++) {
+                    depthShader->SetMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
+                }
+                depthShader->SetInt("lightType", 1);
+                break;
+            }
+            case LIGHT_SPOT: {
+                projection = perspective(light->data4,1.0f,0.1f,20.f);
+                view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
+
+                shadowTransforms[0] = projection * view;
+                depthShader->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
+                depthShader->SetInt("lightType", 2);
+                break;
+            }
+        }
+        for(auto& k : drawVector) {
+            k->Draw(depthShader);
+        }
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {

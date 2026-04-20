@@ -23,7 +23,7 @@ class TextNode : public VisualNode {
     void SetScale(const float&);
     void SetSize(const ivec2&);
 
-    void Draw() override final;
+    void Draw(shared_ptr<Shader> sh = nullptr) override final;
 
     TextNode();
     TextNode(const unordered_map<string, std::any>&);

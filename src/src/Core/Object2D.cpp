@@ -1,12 +1,15 @@
 #include "include/Core/Object2D.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
 
-void Object2D::Draw() {
-    shader->SetMat4("M", transform.GetGlobal());
-    if(reqPerspecive) {
-        shader->SetVec2("spriteSize", sprite->GetSize());
+void Object2D::Draw(shared_ptr<Shader> sh) {
+    if(sh == nullptr) {
+        sh = shader;
     }
-    sprite->Draw(*shader);
+    sh->SetMat4("M", transform.GetGlobal());
+    if(reqPerspecive) {
+        sh->SetVec2("spriteSize", sprite->GetSize());
+    }
+    sprite->Draw(*sh);
 }
 
 string Object2D::Type() {

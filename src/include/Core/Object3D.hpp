@@ -20,7 +20,7 @@ class Object3D : public PhysicsNode {
     @brief Override of Draw() function. It renders object's model with given shader.
     @return void
     */
-    void Draw() override final;
+    void Draw(shared_ptr<Shader> sh = nullptr) override final;
 
     string Type() override;
     string RenderType() override final;

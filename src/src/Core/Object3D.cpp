@@ -1,8 +1,11 @@
 #include "include/Core/Object3D.hpp"
 
-void Object3D::Draw() {
-    shader->SetMat4("M", transform.GetGlobal());
-    model->Draw(*shader);
+void Object3D::Draw(shared_ptr<Shader> sh) {
+    if(sh == nullptr) {
+        sh = shader;
+    }
+    sh->SetMat4("M", transform.GetGlobal());
+    model->Draw(*sh);
 }
 
 string Object3D::Type() {

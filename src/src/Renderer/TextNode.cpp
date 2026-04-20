@@ -25,10 +25,13 @@ string TextNode::Type() {
     return "TextNode";
 }
 
-void TextNode::Draw() {
-    shader->SetVec3("color", color);
-	shader->SetMat4("M", mat4(1.0f));
-    shader->Use();
+void TextNode::Draw(shared_ptr<Shader> sh) {
+    if(sh == nullptr) {
+        sh = shader;
+    }
+    sh->SetVec3("color", color);
+	sh->SetMat4("M", mat4(1.0f));
+    sh->Use();
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
     map<char, Character> charset = Globals::GetGlobals().GetGameFont().GetCharset(this->size);

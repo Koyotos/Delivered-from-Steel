@@ -16,21 +16,34 @@
 #define DEF_WIN_W 1920
 #define DEF_WIN_H 1080
 
+#define SHADOW_WIDTH 1024
+#define SHADOW_HEIGHT 1024
+
+#define MAX_LIGHTS 20
+
 #define CULL_RADIUS_ALWAYS_TRUE 0.000000001
 
 class Renderer {
     private: 
+    // General
     GLFWwindow* window;
     uint16_t windowW;
     uint16_t windowH;
 
+    // Depth 
+    GLuint FBO;
+    GLuint depthMaps2D[MAX_LIGHTS];
+    GLuint depthCubemaps[MAX_LIGHTS];
+    shared_ptr<Shader> depthShader;
+
+    // Culling
     vec4 frustumLeft;
     vec4 frustumRight;
     vec4 frustumTop;
     vec4 frustumBottom;
 
+    // Drawing
     shared_ptr<Scene> currentScene;
-
     vector<shared_ptr<VisualNode>> drawVector;
     vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
@@ -39,6 +52,8 @@ class Renderer {
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&, bool&);
    
+    inline void DepthPass();
+
     inline bool Cull(shared_ptr<VisualNode>);
 
     inline void PrepareDrawLight(shared_ptr<Light>);
