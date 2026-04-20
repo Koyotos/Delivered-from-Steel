@@ -1,0 +1,36 @@
+{
+    "name": "test2d",
+    "1": {
+        "parent": 0,
+        "class": "Node",
+        "process": true,
+        "input": false,
+        "physics": false
+    },
+    "3" : {
+        "parent": 1,
+        "class": "TextNode",
+        "shader": "text",
+        "transform": [
+            2.1545641,
+            -0.19549918,
+            -6.369107,
+            0.0,
+            -0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "color" : [0.6, 0.6, 0.6],
+        "size" : [0,50],
+        "pos" : [400, 400],
+        "scale" : 1.0,
+        "content" : "Test Text",
+        "process": false,
+        "input": false,
+        "physics": false,
+        "draw" : true,
+        "ignoreParent" : true
+    }
+}
