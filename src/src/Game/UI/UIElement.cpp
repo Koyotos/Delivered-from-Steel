@@ -64,7 +64,7 @@ void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease)
 	t.elapsed = 0.0f;
 	t.ease = ease;
 
-	t.startPos = glm::vec2(GetTransform().GetGlobal()[2]); // get global position
+	t.startPos = glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y); // get global position
 	t.targetPos = target;
 
 	tweens.push_back(t);
@@ -145,5 +145,5 @@ UIElement::UIElement() : Object2D() {
 }
 
 void UIElement::Process() {
-	// UpdateTweens(Globals::GetGlobals().GetDelatTime());
+	UpdateTweens(Globals::GetGlobals().GetDeltaTime());
 }
