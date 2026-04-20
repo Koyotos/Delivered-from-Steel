@@ -2,20 +2,7 @@
 #define FE_UI_ELEMENT
 
 #include "include/Core/Object2D.hpp"
-
-enum class EaseType
-{
-	Linear,
-
-	InSine,
-	OutSine,
-	InOutSine,
-
-	InQuad,
-	OutQuad,
-	InOutQuad,
-
-};
+#include "include/Game/UI/Tween.hpp"
 
 class UIElement : public Object2D {
 
@@ -24,6 +11,7 @@ class UIElement : public Object2D {
 	bool isVisible;
 	float alpha;
 	glm::vec3 tint;
+	std::vector<Tween> tweens; // actvie tweens
 
 	public:
 
