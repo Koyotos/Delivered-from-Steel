@@ -1,14 +1,14 @@
-#ifndef FE_CARD
-#define FE_CARD
+#ifndef FE_CARD_UI
+#define FE_CARD_UI
 
 #include "include/Game/UI/UIElement.hpp"
 
-class Card : public UIElement {
+class CardUI : public UIElement {
 
 	public:
 
-	Card();
-	Card(const std::unordered_map<std::string, std::any>& data);
+	CardUI();
+	CardUI(const std::unordered_map<std::string, std::any>& data);
 
 	/*
 	* This function should be called only inside CardSlot's Draw() function.

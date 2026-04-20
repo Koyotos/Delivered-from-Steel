@@ -7,7 +7,7 @@ void CardSlot::RemoveCard() {
 	card = nullptr;
 }
 
-void CardSlot::SetCard(std::shared_ptr<Card> newCard) {
+void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 	card = newCard;
 	card->SetTransform(this->GetTransform());
 }

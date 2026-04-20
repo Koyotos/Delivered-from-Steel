@@ -16,7 +16,7 @@
 #include "include/Renderer/TextNode.hpp"
 #include "include/Game/UI/CardSlot.hpp"
 #include "include/Game/UI/Icon.hpp"
-#include "include/Game/UI/Card.hpp"
+#include "include/Game/UI/CardUI.hpp"
 #include "include/Game/UI/Vignette.hpp"
 #include "include/Profiler/ProfilerNode.hpp"
 #include <nlohmann/json.hpp>
@@ -47,7 +47,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
 	RegisterObjectType<CardSlot>("CardSlot"),
 	RegisterObjectType<Icon>("Icon"),
 	RegisterObjectType<Card>("Card"),
-	RegisterObjectType<Vignette>("Vignette")
+	RegisterObjectType<CardUI>("CardUI"),
+	RegisterObjectType<Vignette>("Vignette"),
     RegisterObjectType<Trap>("Trap"),
     RegisterObjectType<Enemy>("Enemy"),
     RegisterObjectType<Platform>("Platform"),
