@@ -141,6 +141,8 @@ void Player::Update(float deltaTime) {
 			SetTransform(t);
 			currentVelocity.y = jumpForce;
 			currentVelocity.x = -facingDirection * 2.0f;
+			canCutJump = true;
+			jumpReleased = false;
 			facingDirection = -facingDirection;
 			ledgeDropCooldown = 0.3f;
 			jumpPressed = false;
@@ -186,6 +188,8 @@ void Player::Update(float deltaTime) {
 
 	if (wantsToJump && canJump) {
 		currentVelocity.y = jumpForce;
+		canCutJump = true;
+		jumpReleased = false;
 		jumpBufferCounter = 0.0f;
 		coyoteTimeCounter = 0.0f;
 		isGrounded = false;
@@ -193,9 +197,10 @@ void Player::Update(float deltaTime) {
 			currentVelocity.y = jumpForce * jumpCutMultiplier;
 		}
 	}
-	else if (jumpReleased && currentVelocity.y > 0) {
+	else if (jumpReleased && currentVelocity.y > 0 && canCutJump) {
 		currentVelocity.y *= jumpCutMultiplier;
 		coyoteTimeCounter = 0.0f;
+		canCutJump = false;
 	}
 
 	float targetSpeed = moveInput * maxWalkSpeed;
@@ -305,7 +310,7 @@ void Player::UpdateCamera(float deltaTime) {
 	if (std::abs(yDistance) > deadZone.y)
 		cameraTargetPos.y = focusPosition.y - std::copysign(deadZone.y, yDistance);
 
-	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, -0.3f);
+	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, -0.25f);
 
 	float rightX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_X);
 	float rightY = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_Y);

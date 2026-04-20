@@ -17,6 +17,7 @@ private:
 	float jumpForce = 6.0f;
 	float jumpCutMultiplier = 0.5f;
 	float fallGravityMultiplier = 3.0f;
+	bool canCutJump = false;
 
 	bool enableWallSlide = true;
 	float wallSlideSpeed = 2.0f;
