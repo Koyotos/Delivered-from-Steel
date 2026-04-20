@@ -9,6 +9,10 @@ string Object3D::Type() {
     return "Object3D";
 }
 
+string Object3D::RenderType() {
+    return "Object3D";
+}
+
 shared_ptr<Model> Object3D::GetModel() {
     return model;
 }

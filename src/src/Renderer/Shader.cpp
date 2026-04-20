@@ -1,8 +1,17 @@
 #include "include/Renderer/Shader.hpp"
+#include "include/Profiler/Profiler.hpp"
 #include <stdexcept>
 
+GLuint Shader::currentlyBoundShader = 0;
+
 void Shader::Use() {
-    glUseProgram(id);
+    if (Shader::currentlyBoundShader == this->id) {
+        return;
+    }
+
+    PROFILER_ADD_STATE_CHANGE();
+    glUseProgram(this->id);
+    Shader::currentlyBoundShader = this->id;
 }
 
 void Shader::SetName(const string& name) {
@@ -14,37 +23,37 @@ const string& Shader::GetName() const noexcept {
 }
 
 void Shader::SetInt(const string& name, const int32_t& val) {
-    glUseProgram(id);
+    Use();
     glUniform1i(glGetUniformLocation(id, name.c_str()), (int)val);
 }   
 
 void Shader::SetBool(const string& name, const bool& val) {
-    glUseProgram(id);
+    Use();
     glUniform1i(glGetUniformLocation(id, name.c_str()), (int)val);
 }
 
 void Shader::SetFloat(const string& name, const float& val) {
-    glUseProgram(id);
+    Use();
     glUniform1f(glGetUniformLocation(id, name.c_str()), (int)val);
 }
 
 void Shader::SetVec2(const string& name, const vec2& val) {
-    glUseProgram(id);
+    Use();
     glUniform2fv(glGetUniformLocation(id,name.c_str()),1,&val[0]);
 }
 
 void Shader::SetVec3(const string& name, const vec3& val) {
-    glUseProgram(id);
+    Use();
     glUniform3fv(glGetUniformLocation(id,name.c_str()),1,&val[0]);
 }
 
 void Shader::SetVec4(const string& name, const vec4& val) {
-    glUseProgram(id);
+    Use();
     glUniform4fv(glGetUniformLocation(id,name.c_str()),1,&val[0]);
 }
 
 void Shader::SetMat4(const string& name, const mat4x4& val) {
-    glUseProgram(id);
+    Use();
     glUniformMatrix4fv(glGetUniformLocation(id,name.c_str()),1,GL_FALSE,&val[0][0]);
 }
 

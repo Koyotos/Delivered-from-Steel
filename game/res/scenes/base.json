@@ -1,0 +1,82 @@
+{
+  "name": "base",
+  "1": {
+    "class": "Node",
+    "parent": 0,
+    "process": true,
+    "input": true,
+    "physics": true
+  },
+
+  "2": {
+    "class": "Camera",
+    "parent": 1,
+    "x": 0,
+    "y": 0,
+    "process": true,
+    "input": true,
+    "physics": true
+  },
+
+  "3": {
+    "parent": 1,
+    "transform": [
+      0.0,
+      0.0,
+      -5.0,
+      0.0,
+      0.0,
+      0.0,
+      0.012,
+      -0.012,
+      1.0
+    ],
+    "sprite": "player",
+    "class": "Player",
+    "shader": "player",
+    "active": "player",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": true,
+    "static": false,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": -0.2,
+    "colliderType": true,
+    "height": 0.2,
+    "radius": 0.1,
+    "cull" : 0.0,
+    "zIndex" : 0
+  },
+  "4": {
+    "parent": 1,
+    "class": "ProfilerNode",
+    "shader": "text",
+    "transform": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "color": [ 1.0, 0.55, 0.0 ],
+    "size": [ 0, 20 ],
+    "pos": [ 20, 850 ],
+    "scale": 1.0,
+    "content": "",
+    "process": true,
+    "input": false,
+    "physics": false,
+    "draw": true,
+    "ignoreParent": true,
+    "cull" : 0.0,
+    "zIndex" : 0
+  }
+}

@@ -1,5 +1,6 @@
 #include "include/Renderer/Sprite.hpp"
 #include "include/Renderer/Mesh.hpp"
+#include "include/Profiler/Profiler.hpp"
 
 const string& Sprite::GetDir() const noexcept {
     return directory;
@@ -32,6 +33,7 @@ void Sprite::Draw(Shader& shader) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[active].id);
     glBindVertexArray(VAO);
+    PROFILER_ADD_DRAW_CALL(indices.size() / 3);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

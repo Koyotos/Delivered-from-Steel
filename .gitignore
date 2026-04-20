@@ -51,18 +51,6 @@ build/*
 .vscode/*
 compile_commands.json
 
-res
-res/
-res/*
-
-arch
-arch/
-arch/*
-
-Debug
-Debug/
-Debug/*
-
-Release
-Release/
-Release/*
+game/*
+!game/res
+!game/res/*

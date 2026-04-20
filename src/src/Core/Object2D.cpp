@@ -13,6 +13,10 @@ string Object2D::Type() {
     return "Object2D";
 }
 
+string Object2D::RenderType() {
+    return "Object2D";
+}
+
 shared_ptr<Sprite> Object2D::GetSprite() {
     return sprite;
 }

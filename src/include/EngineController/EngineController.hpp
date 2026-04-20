@@ -17,10 +17,10 @@ class EngineController {
     private:
 
     Globals* globals;
+    PhysicsManager* psm;
 
     shared_ptr<SceneManager> scm;
     shared_ptr<IOManager> iom;
-    shared_ptr<PhysicsManager> psm;
     shared_ptr<Renderer> renderer;
     shared_ptr<ResourceManager> rsm;
     shared_ptr<AudioManager> aum;

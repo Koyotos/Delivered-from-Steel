@@ -4,7 +4,8 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include <iostream>
-
+#include <algorithm>
+#include "include/PhysicsManager/PhysicsManager.hpp"
 string PhysicsNode::Type() {
     return "PhysicsNode";
 }
@@ -29,13 +30,11 @@ void PhysicsNode::Update(float dt)
 {
     if (isStatic) return;
 
-	float deltaTime = std::min(dt, 0.016f);
-
     // testowa symulacja grawitacji
-    velocity.y = std::clamp(velocity.y - 10.0f * deltaTime, -maxFallSpeed, maxFallSpeed);
+    velocity.y = std::clamp(velocity.y - 10.0f * dt, -maxFallSpeed, maxFallSpeed);
     Transform t = this->GetTransform(); 
 
-    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * deltaTime, 0.0f));
+    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * dt, 0.0f));
 
 	this->SetTransform(t);
 }
@@ -56,7 +55,8 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
     if (!info->collided) return;
     if (this->isStatic) return;
 
-	collider->getCurrentCollisions().push_back(other.collider);
+	collider->getCurrentCollisions().insert(other.collider);
+	other.collider->getCurrentCollisions().insert(collider);
 
     float totalInverseMass = 1;
     //totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
@@ -69,6 +69,8 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
         t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
 
         this->SetTransform(t);
+        this->ResetGlobal();
+        if (collider) collider->updatePosition(this->GetTransform());
     }
     //if (!other.isStatic) {
     //    Transform t = other.GetTransform();
@@ -82,6 +84,7 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 
     float velocityAlongNormal = glm::dot(relativeVelocity, info->normal);
 
+    if (velocityAlongNormal < 0) return;
 
     float e = 0.0f;
 
@@ -112,6 +115,9 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
     isStatic = fromMap(bool, "static", data);
     velocity = glm::vec2(0.0f, 0.0f);
 
+    bool addCollider = fromMap(bool, "addCollider", data);
+    if (!addCollider) return;
+
     float x = fromMap(float, "colliderPosX",data);
     float y = fromMap(float, "colliderPosY",data);
 
@@ -126,6 +132,7 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
         float height = fromMap(float, "height", data);
         collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
     }
+    
 }
 
 void PhysicsNode::drawDebug() {
@@ -182,4 +189,82 @@ void PhysicsNode::drawBox() {
 
     glDeleteBuffers(1, &VBO);
     glDeleteVertexArrays(1, &VAO);
+}
+
+void PhysicsNode::processCollisions()
+{
+    for (auto& current : collider->getCurrentCollisions())
+    {
+        if (collider->getPreviousCollisions().find(current) == collider->getPreviousCollisions().end())
+        {
+            OnCollisionEnter(current);
+        }
+        else
+        {
+            OnCollisionStay(current);
+        }
+    }
+
+    for (auto& prev : collider->getPreviousCollisions())
+    {
+        if (collider->getCurrentCollisions().find(prev) == collider->getCurrentCollisions().end())
+        {
+            OnCollisionExit(prev);
+        }
+    }
+	collider->setCurrentToPrevious();
+}
+
+void PhysicsNode::Init() {
+    if (collider) {
+        collider->getOwner() = shared_from_this();
+    }
+}
+
+std::optional<RaycastHit> PhysicsNode::raycast(
+    const glm::vec2& offset,
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
+
+    auto hit = PhysicsManager::GetPhysicsManager().raycast(origin, direction, maxDistance, collider, type);
+    return hit;
+}
+
+std::optional<RaycastHit> PhysicsNode::raycast(
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
+
+    auto hit = PhysicsManager::GetPhysicsManager().raycast(origin, direction, maxDistance, collider, type);
+    return hit;
+}
+
+std::vector<RaycastHit> PhysicsNode::raycastAll(
+    const glm::vec2& offset,
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
+    auto hits = PhysicsManager::GetPhysicsManager().raycastAll(origin, direction, maxDistance, collider, type);
+    return hits;
+}
+
+std::vector<RaycastHit> PhysicsNode::raycastAll(
+    const glm::vec2& direction,
+    float maxDistance,
+    ObjectType type)
+{
+    mat4 modelMatrix = GetTransform().GetGlobal();
+    vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
+    auto hits = PhysicsManager::GetPhysicsManager().raycastAll(origin, direction, maxDistance, collider, type);
+    return hits;
 }
