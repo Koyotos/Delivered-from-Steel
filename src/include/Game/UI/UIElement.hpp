@@ -18,6 +18,8 @@ class UIElement : public Object2D {
 
 	public:
 
+	void Process() override;
+
 	UIElement();
 	UIElement(const std::unordered_map<std::string, std::any>& data);
 
@@ -33,7 +35,6 @@ class UIElement : public Object2D {
 	void FadeOut(float time, EaseType ease = EaseType::Linear);
 	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear);
 	void Tint(glm::vec3 color, float time, EaseType ease = EaseType::Linear);
-
 
 };
 

@@ -1,4 +1,6 @@
 #include "include/Game/UI/UIElement.hpp"
+#include "include/Globals/Globals.hpp"
+
 
 void UIElement::SetVisible(bool value) {
 	isVisible = value;
@@ -140,4 +142,8 @@ UIElement::UIElement(const std::unordered_map<std::string, std::any>& data) : Ob
 UIElement::UIElement() : Object2D() {
 	tint = glm::vec3(1.0f, 1.0f, 1.0f);
 	SetDraw(true);
+}
+
+void UIElement::Process() {
+	// UpdateTweens(Globals::GetGlobals().GetDelatTime());
 }

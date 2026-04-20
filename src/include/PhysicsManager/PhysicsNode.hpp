@@ -28,7 +28,7 @@ public:
     void setStatic(bool value);
     bool getStatic() const;
 
-    void Update(float dt);
+    virtual void Update(float dt);
 
     void resolveCollision(PhysicsNode& other);
 
