@@ -36,6 +36,8 @@ class UIElement : public Object2D {
 	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear);
 	void Tint(glm::vec3 color, float time, EaseType ease = EaseType::Linear);
 
+	void Draw() override;
+
 };
 
 #endif

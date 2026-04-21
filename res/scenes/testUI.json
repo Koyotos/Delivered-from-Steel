@@ -62,7 +62,7 @@
         "static" : true,
 		"addCollider" : false,
 		"visible" : true,
-		"alpha" : 1.0
+		"alpha" : 0.8
 		},
 	"4": {
         "parent": 1,

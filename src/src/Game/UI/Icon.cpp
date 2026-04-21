@@ -1,7 +1,7 @@
 #include "include/Game/UI/Icon.hpp"
 
 void Icon::Draw() {
-	Object2D::Draw();
+	UIElement::Draw();
 }
 
 

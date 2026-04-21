@@ -147,3 +147,12 @@ UIElement::UIElement() : Object2D() {
 void UIElement::Process() {
 	UpdateTweens(Globals::GetGlobals().GetDeltaTime());
 }
+
+void UIElement::Draw() {
+	if (!isVisible) return;
+	shader->SetMat4("VP", glm::ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f));
+	shader->SetFloat("alpha", alpha);
+	shader->SetVec3("tint", tint);
+
+	Object2D::Draw();
+}

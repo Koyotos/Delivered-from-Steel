@@ -17,9 +17,7 @@ Vignette::Vignette(const std::unordered_map<std::string, std::any>& data) : UIEl
 void Vignette::Draw() {
 	SetCurrentSprite();
 
-	// make better later
-	shader->SetMat4("VP", glm::ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f));
-	Object2D::Draw();
+	UIElement::Draw();
 }
 
 void Vignette::SetCurrentSprite() {
