@@ -15,7 +15,7 @@ void main()
     tex.rgb *= tint;
     tex.a = alpha;
 
-    if (tex.a < 0.1)
+    if (tex.a == 0.0)
         discard;
 
     FragColor = tex;
