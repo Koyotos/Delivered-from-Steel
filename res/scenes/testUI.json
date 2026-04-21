@@ -34,7 +34,7 @@
 		"addCollider" : false,
 		"visible" : true,
 		"alpha" : 1.0,
-		"states" : 2
+		"states" : 2.0
 	},
     "3": {
         "parent": 1,

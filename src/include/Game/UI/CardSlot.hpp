@@ -21,9 +21,6 @@ class CardSlot : public UIElement {
 	void SetCard(std::shared_ptr<CardUI> newCard);
 	void Draw() override;
 
-	// just for testing, delete later
-	void Process() override;
-	bool Input(InputEvent& event) override;
 
 };
 

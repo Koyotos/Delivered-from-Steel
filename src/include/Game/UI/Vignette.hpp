@@ -16,11 +16,17 @@ class Vignette : public UIElement {
 
 	public:
 	
-	// just for testing purposes, delete later
-	void Process() override;
-
 	Vignette();
 	Vignette(const std::unordered_map<std::string, std::any>& data);
+
+	void SetCurrentValue(float value);
+	float GetCurrentValue();
+
+	void SetMinValue(float value);
+	float GetMinValue();
+
+	void SetMaxValue(float value);
+	float GetMaxValue();
 
 	void Draw() override;
 
