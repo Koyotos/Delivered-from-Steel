@@ -25,6 +25,7 @@ class TextNode : public VisualNode {
 
     void Draw() override final;
 
+
     TextNode();
     TextNode(const unordered_map<string, std::any>&);
     ~TextNode();

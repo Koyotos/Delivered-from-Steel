@@ -14,6 +14,10 @@
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
+#include "include/Game/UI/CardSlot.hpp"
+#include "include/Game/UI/Icon.hpp"
+#include "include/Game/UI/CardUI.hpp"
+#include "include/Game/UI/Vignette.hpp"
 #include "include/Profiler/ProfilerNode.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -39,6 +43,12 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Camera>("Camera"),
     RegisterObjectType<Light>("Light"),
     RegisterObjectType<Player>("Player"),
+    RegisterObjectType<TextNode>("TextNode"),
+	RegisterObjectType<CardSlot>("CardSlot"),
+	RegisterObjectType<Icon>("Icon"),
+	RegisterObjectType<Card>("Card"),
+	RegisterObjectType<CardUI>("CardUI"),
+	RegisterObjectType<Vignette>("Vignette"),
     RegisterObjectType<Trap>("Trap"),
     RegisterObjectType<Enemy>("Enemy"),
     RegisterObjectType<Platform>("Platform"),

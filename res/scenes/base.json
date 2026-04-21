@@ -1,0 +1,52 @@
+{
+    "name" : "base",
+    "1" : {
+        "class" : "Node",
+        "parent" : 0,
+        "process" : true,
+        "input" : true,
+        "physics" : true
+    }, 
+
+    "2" : {
+        "class" : "Camera",
+        "parent" : 1,
+        "x": 0,
+        "y" : 0,
+        "process" : true,
+        "input" : true,
+        "physics" : true
+    },
+
+    "3": {
+        "parent": 1,
+        "transform": [
+            0.0,
+            0.0,
+            -5.0,
+            0.0,
+            0.0,
+            0.0,
+            0.005,
+            -0.003,
+            1.0
+        ],
+        "sprite": "player",
+        "class": "Player",
+        "shader": "player",
+        "active" : "player",
+        "process": true,
+        "input": true,
+        "physics": true,
+        "draw": true,
+        "ignoreParent": true,
+        "reqPerspective" : true,
+        "static" : false,
+		"addCollider" : true,
+        "colliderPosX" : 100.0,
+        "colliderPosY" : 100.0,
+        "colliderType" : false,
+        "width" : 50.0,
+        "height" : 50.0
+    }
+}

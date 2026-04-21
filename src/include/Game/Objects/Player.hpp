@@ -57,7 +57,7 @@ public:
 	void SetCamera(shared_ptr<Camera>);
 
 	Player();
-	Player(const unordered_map<string, std::any>&);
+	Player(const unordered_map<string, std::any>& data);
 	void Process() override;
 	bool Input(InputEvent& event) override;
 
