@@ -19,16 +19,8 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 }
 
 
-void CardSlot::Draw() {
-	
+void CardSlot::Draw() {	
 	UIElement::Draw();
-
-	if (card) {
-		card->Draw();
-	}
-	if (icon) {
-		icon->Draw();
-	}
 }
 
 

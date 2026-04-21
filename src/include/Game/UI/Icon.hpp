@@ -3,6 +3,9 @@
 
 #include "include/Game/UI/UIElement.hpp"
 
+/*
+* @brief This class represents an icon in the UI.
+*/
 class Icon : public UIElement {
 
 	private:

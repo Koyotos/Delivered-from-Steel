@@ -3,6 +3,9 @@
 
 #include "include/Game/UI/UIElement.hpp"
 
+/*
+* @brief This class represents a card in the UI. It is a simple UIElement that can be placed inside a CardSlot.
+*/
 class CardUI : public UIElement {
 
 	public:
@@ -10,9 +13,6 @@ class CardUI : public UIElement {
 	CardUI();
 	CardUI(const std::unordered_map<std::string, std::any>& data);
 
-	/*
-	* This function should be called only inside CardSlot's Draw() function.
-	*/
 	void Draw() override;
 };
 
