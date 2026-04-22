@@ -81,7 +81,6 @@ class ResourceManager {
     // Asset loaders
     inline shared_ptr<Model> LoadModel(const string&);
     inline shared_ptr<Sprite> LoadSprite(const string&);
-    inline shared_ptr<Shader> LoadShader(const string&);
 
     // Helper
     inline string LoadPlainText(const path&);
@@ -98,6 +97,8 @@ class ResourceManager {
     public:
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void ConfigurePaths();
+
+    shared_ptr<Shader> LoadShader(const string&);
 
     ResourceManager();
     ~ResourceManager();

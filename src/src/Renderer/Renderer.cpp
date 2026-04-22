@@ -3,10 +3,12 @@
 #include "include/Core/Object3D.hpp"
 #include "include/Core/VisualNode.hpp"
 #include "include/Renderer/Light.hpp"
+#include "include/Renderer/Shader.hpp"
 #include "include/Renderer/TextNode.hpp"
 #include "include/Profiler/Profiler.hpp"
+#include "include/ResourceManager/ResourceManager.hpp"
 
-void Renderer::Init() {
+void Renderer::Init(ResourceManager& rsm) {
     if(!glfwInit()) {
         throw runtime_error("Can't initilize GLFW");
     }
@@ -27,6 +29,11 @@ void Renderer::Init() {
         throw runtime_error("GL loader error");
     }
 
+    lightSpaceMatrices.resize(MAX_LIGHTS);
+    farPlanes.resize(MAX_LIGHTS);
+
+    depthShader = rsm.LoadShader("depth");
+
     glGenFramebuffers(1, &FBO);
     glGenTextures(MAX_LIGHTS, depthCubemaps);
     glGenTextures(MAX_LIGHTS, depthMaps2D);
@@ -41,8 +48,8 @@ void Renderer::Init() {
                 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         }
 
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -57,11 +64,11 @@ void Renderer::Init() {
             SHADOW_WIDTH, SHADOW_HEIGHT,
             0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         float borderColor[] = {1.0, 1.0, 1.0, 1.0};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
@@ -99,8 +106,12 @@ void Renderer::DepthPass() {
 
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+    glCullFace(GL_FRONT);
 
     for(uint8_t i = 0; i < MAX_LIGHTS; i++) {
+        if(i==lightsPos.size()) {
+            break;
+        }
         auto light = lightsPos[i].first;
 
         mat4 shadowTransforms[6];
@@ -117,10 +128,13 @@ void Renderer::DepthPass() {
         switch(light->type) {
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
-                vec3 pos = -dir * 10.0f;
-                projection = ortho(-10.0f,10.0f,-10.0f,10.0f,0.1f,20.0f);
-                view = lookAt(pos, vec3(0.0f), vec3(0,1,0));
-                shadowTransforms[0] = projection * view;
+                vec3 center = vec3(0.0f, -5.0f, -5.0f);
+                vec3 pos = center - dir * 30.0f;
+                float range = 30.0f;
+                mat4 projection = ortho(-range, range, -range, range, 0.1f, 100.0f);
+                mat4 view = lookAt(pos, center, vec3(0,1,0));
+                lightSpaceMatrices[i] = projection * view;
+                shadowTransforms[0] = lightSpaceMatrices[i];
                 depthShader->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
                 depthShader->SetInt("lightType", 0);
                 break;
@@ -134,6 +148,7 @@ void Renderer::DepthPass() {
                 shadowTransforms[3] = projection * lookAt(pos, pos+vec3(0,-1,0), vec3(0,0,-1));
                 shadowTransforms[4] = projection * lookAt(pos, pos+vec3(0,0,1), vec3(0,-1,0));
                 shadowTransforms[5] = projection * lookAt(pos, pos+vec3(0,0,-1), vec3(0,-1,0));
+                farPlanes[i] = 20.0f;
                 for(int j = 0; j < 6; j++) {
                     depthShader->SetMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
                 }
@@ -143,8 +158,8 @@ void Renderer::DepthPass() {
             case LIGHT_SPOT: {
                 projection = perspective(light->data4,1.0f,0.1f,20.f);
                 view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
-
                 shadowTransforms[0] = projection * view;
+                lightSpaceMatrices[i] = shadowTransforms[0];
                 depthShader->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
                 depthShader->SetInt("lightType", 2);
                 break;
@@ -155,6 +170,8 @@ void Renderer::DepthPass() {
         }
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, windowW, windowH);
+    glCullFace(GL_BACK);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
@@ -177,6 +194,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
     // Setup shaders
     PrepareLights();
+    DepthPass();
     PrepareShaders();
 
     // Draw
@@ -296,7 +314,6 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     if(light == nullptr) {
         return;
     }
-    shader->SetInt("lightsNum", index);
     shader->SetInt("lights["+to_string(index)+"].type", light->type);
     shader->SetVec3("lights["+to_string(index)+"].data1", light->data1);
     shader->SetVec3("lights["+to_string(index)+"].data2", light->data2);
@@ -331,8 +348,31 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         shared_ptr<Shader> shader = obj3d->GetShader();
         shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
         shader->SetVec3("viewPos",vec3(currentScene->sceneCam->GetPos(),0));
+        shader->SetInt("lightsNum", std::min((int)lightsPos.size(), 20));
         for(int8_t i = 0; i < (lightsPos.size()>20 ? 20 : lightsPos.size()); i++) {
             SetLight(lightsPos[i].first, shader, i);
+        }
+        int textureUnit = 10;
+        for(int i = 0; i < lightsPos.size() && i < 20; i++) {
+            auto light = lightsPos[i].first;
+            if(light->type == LIGHT_DIRECTIONAL || light->type == LIGHT_SPOT) {
+                glActiveTexture(GL_TEXTURE0 + textureUnit);
+                glBindTexture(GL_TEXTURE_2D, depthMaps2D[i]);
+
+                shader->SetInt("shadowMaps2D[" + to_string(i) + "]", textureUnit);
+                shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
+
+                textureUnit++;
+            }
+            if(light->type == LIGHT_POINT) {
+                glActiveTexture(GL_TEXTURE0 + textureUnit);
+                glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemaps[i]);
+
+                shader->SetInt("shadowCubemaps[" + to_string(i) + "]", textureUnit);
+                shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
+
+                textureUnit++;
+            }
         }
     }   
 }
@@ -345,7 +385,6 @@ void Renderer::EndFrame() {
 Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
     this->windowW = windowW;
     this->windowH = windowH;
-    Init();
 }
 
 Renderer::~Renderer() {

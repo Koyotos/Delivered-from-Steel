@@ -16,8 +16,8 @@
 #define DEF_WIN_W 1920
 #define DEF_WIN_H 1080
 
-#define SHADOW_WIDTH 1024
-#define SHADOW_HEIGHT 1024
+#define SHADOW_WIDTH 2048
+#define SHADOW_HEIGHT 2048
 
 #define MAX_LIGHTS 20
 
@@ -47,6 +47,8 @@ class Renderer {
     vector<shared_ptr<VisualNode>> drawVector;
     vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
+    vector<glm::mat4> lightSpaceMatrices;
+    vector<float> farPlanes;
 
     // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
@@ -71,7 +73,7 @@ class Renderer {
     public:
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();
-    void Init();
+    void Init(ResourceManager&);
 	GLFWwindow* GetWindow() const noexcept { return window; };
 
     Renderer(uint16_t windowW = DEF_WIN_W, uint16_t windowH = DEF_WIN_H);
