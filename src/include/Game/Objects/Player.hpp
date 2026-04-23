@@ -9,18 +9,18 @@ class Player : public Object2D {
 private:
 	shared_ptr<Camera> camera;
 
-	float maxWalkSpeed = 3.0f;
-	float groundAcceleration = 15.0f;
-	float groundDeceleration = 15.0f;
-	float airAcceleration = 10.0f;
-	float airDeceleration = 10.0f;
-	float jumpForce = 6.0f;
+	float maxWalkSpeed = 2.5f;
+	float groundAcceleration = 10.0f;
+	float groundDeceleration = 10.0f;
+	float airAcceleration = 8.0f;
+	float airDeceleration = 8.0f;
+	float jumpForce = 4.5f;
 	float jumpCutMultiplier = 0.5f;
-	float fallGravityMultiplier = 3.0f;
+	float fallGravityMultiplier = 2.0f;
 	bool canCutJump = false;
 
 	bool enableWallSlide = true;
-	float wallSlideSpeed = 2.0f;
+	float wallSlideSpeed = 1.5f;
 
 	bool enableCoyoteTime = true;
 	float coyoteTime = 0.15f;
@@ -54,9 +54,9 @@ private:
 
 	glm::vec2 cameraTargetPos = { 0.0f, 0.0f };
 	glm::vec2 cameraVelocity = { 0.0f, 0.0f };
-	glm::vec2 deadZone = { 0.3f, 0.5f };
+	glm::vec2 deadZone = { 0.8f, 1.0f };
 	float currentLookAheadX = 0.0f;
-	float activeSmoothTime = 0.20f;
+	float activeSmoothTime = 0.15f;
 	float cameraShakeTimer = 0.0f;
 	float cameraShakeIntensity = 0.0f;
 	bool isCameraInitialized = false;
