@@ -292,7 +292,7 @@ void Player::UpdateCamera(float deltaTime) {
 	float targetLookAheadX = 0.0f;
 
 	if (std::abs(playerVel.x) > 1.0f && std::abs(moveInput) > 0.01f) {
-		targetLookAheadX = std::copysign(1.0f, playerVel.x) * 1.0f;
+		targetLookAheadX = std::copysign(1.0f, playerVel.x) * 1.5f;
 	}
 
 	float currentSpeed = (targetLookAheadX == 0.0f) ? 10.0f : 4.0f;
@@ -310,7 +310,7 @@ void Player::UpdateCamera(float deltaTime) {
 	if (std::abs(yDistance) > deadZone.y)
 		cameraTargetPos.y = focusPosition.y - std::copysign(deadZone.y, yDistance);
 
-	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, -0.1f);
+	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, 0.2f);
 
 	float rightX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_X);
 	float rightY = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_Y);
@@ -326,7 +326,12 @@ void Player::UpdateCamera(float deltaTime) {
 	}
 
 	if (std::abs(playerVel.y) > 0.1f) {
-		targetSmoothTime = 0.2f;
+		if (playerVel.y < -10.0f) {
+			targetSmoothTime = 0.1f;
+		}
+		else {
+			targetSmoothTime = 0.2f;
+		}
 	}
 
 	activeSmoothTime = MoveTowards(activeSmoothTime, targetSmoothTime, 2.0f * deltaTime);

@@ -54,7 +54,7 @@ private:
 
 	glm::vec2 cameraTargetPos = { 0.0f, 0.0f };
 	glm::vec2 cameraVelocity = { 0.0f, 0.0f };
-	glm::vec2 deadZone = { 0.8f, 1.0f };
+	glm::vec2 deadZone = { 0.8f, 0.8f };
 	float currentLookAheadX = 0.0f;
 	float activeSmoothTime = 0.15f;
 	float cameraShakeTimer = 0.0f;
