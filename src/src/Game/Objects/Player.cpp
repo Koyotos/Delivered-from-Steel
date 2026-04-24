@@ -6,7 +6,7 @@
 
 Player::Player() : Object2D() {
 	SetProcess(true);
-	SetInput(false);
+	SetInput(true);
 	SetDraw(true);
 }
 
@@ -233,6 +233,13 @@ void Player::Update(float deltaTime) {
 	jumpPressed = false;
 	jumpReleased = false;
 	UpdateCamera(deltaTime);
+}
+
+bool Player::Input(InputEvent& event) {
+	if (!event.handled) {
+		//karty
+	}
+	return false;
 }
 
 void Player::takeDamage(float damage) {

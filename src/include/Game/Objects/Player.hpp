@@ -80,6 +80,7 @@ public:
 	Player();
 	Player(const unordered_map<string, std::any>&);
 	void Process() override;
+	bool Input(InputEvent& event) override;
 
 	void takeDamage(float damage);
 
