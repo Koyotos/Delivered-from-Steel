@@ -381,7 +381,7 @@
   "14": {
     "parent": 1,
     "transform": [
-      10.0,
+      -3.0,
       -9.0,
       -5.0,
       0.0,
@@ -408,8 +408,43 @@
     "height": 1.2,
     "movingDuration": 2.0,
     "stopDuration": 1.0,
-    "XendPosition": 15.0,
+    "XendPosition": 3.0,
     "YendPosition": -9.0,
+    "cull": 0.5,
+    "zIndex": 0
+  },
+  "15": {
+    "parent": 1,
+    "transform": [
+      4.0,
+      -9.0,
+      -5.0,
+      0.0,
+      -0.0,
+      0.0,
+      5.0,
+      3.0,
+      1.0
+    ],
+    "model": "house",
+    "class": "MovingPlatform",
+    "shader": "standard",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": 0.4,
+    "colliderType": false,
+    "width": 2.1,
+    "height": 1.2,
+    "movingDuration": 2.0,
+    "stopDuration": 1.0,
+    "XendPosition": 7.0,
+    "YendPosition": -4.0,
     "cull": 0.5,
     "zIndex": 0
   }
