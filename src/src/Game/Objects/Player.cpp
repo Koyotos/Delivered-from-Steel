@@ -125,6 +125,22 @@ void Player::Update(float deltaTime) {
 	isGrounded = CheckGrounded();
 	isWalled = CheckWalled();
 
+	if (isGrounded) {
+		coyoteTimeCounter = coyoteTime;
+	}
+	else {
+		coyoteTimeCounter -= deltaTime;
+	}
+
+	if (jumpPressed) {
+		jumpBufferCounter = jumpBufferTime;
+	}
+	else {
+		jumpBufferCounter -= deltaTime;
+	}
+
+	bool wantsToJump = (enableJumpBuffer && jumpBufferCounter > 0.0f) || (!enableJumpBuffer && jumpPressed);
+
 	if (!isGrounded && currentVelocity.y < 0.0f && !isHanging) {
 		if (CheckLedge()) {
 			isHanging = true;
@@ -134,7 +150,7 @@ void Player::Update(float deltaTime) {
 	}
 
 	if (isHanging) {
-		if (jumpPressed) {
+		if (wantsToJump) {
 			isHanging = false;
 			Transform t = GetTransform();
 			t.SetTranslation(t.GetTranslation() + glm::vec3(0.0f, 0.1f, 0.0f));
@@ -166,25 +182,11 @@ void Player::Update(float deltaTime) {
 		}
 	}
 
-	if (isGrounded) {
-		coyoteTimeCounter = coyoteTime;
-	}
-	else {
-		coyoteTimeCounter -= deltaTime;
-	}
-
-	if (jumpPressed) {
-		jumpBufferCounter = jumpBufferTime;
-	}
-	else {
-		jumpBufferCounter -= deltaTime;
-	}
 
 	bool isSlidingDownWall = enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
 	isWallSliding = isSlidingDownWall && moveInput != 0.0f;
 
 	bool canJump = (enableCoyoteTime && coyoteTimeCounter > 0.0f) || (!enableCoyoteTime && isGrounded);
-	bool wantsToJump = (enableJumpBuffer && jumpBufferCounter > 0.0f) || (!enableJumpBuffer && jumpPressed);
 
 	if (wantsToJump && canJump) {
 		currentVelocity.y = jumpForce;
