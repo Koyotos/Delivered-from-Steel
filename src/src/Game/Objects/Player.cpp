@@ -183,6 +183,10 @@ void Player::Update(float deltaTime) {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
 	}
 
+
+	currentVelocity = currentVelocity + platformVelocity;
+	platformVelocity = glm::vec2(0, 0);
+
 	SetVelocity(currentVelocity);
 
 	Transform t = this->GetTransform();

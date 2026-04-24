@@ -54,6 +54,8 @@ private:
 	float damageTimer = 0.0f;
 	bool canTakeDamage = true;
 
+	glm::vec2 platformVelocity = glm::vec2(0.0f);
+
 	glm::vec3 respawnPoint;
 
 	bool CheckGrounded();
@@ -74,6 +76,8 @@ public:
 	void takeDamage(float damage);
 
 	void Shatter();
+
+	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity += velocity; }
 };
 
 #endif

@@ -13,6 +13,10 @@ enum class MovingPlatformState {
 class MovingPlatform : public Platform
 {
 private:
+    vec3 velocityDelta;
+    vec3 velocity;
+    vec3 lastPosition;
+
     MovingPlatformState state;
 
     float MovingDuration;
@@ -27,6 +31,10 @@ public:
     MovingPlatform(const unordered_map<string, std::any>&);
 
     void Update(float deltaTime) override;
+
+    void OnCollisionStay(shared_ptr<Collider> other) override;
+
+    void OnCollisionExit(shared_ptr<Collider> other) override;
 };
 
 #endif // FE_MOVING_PLATFORM

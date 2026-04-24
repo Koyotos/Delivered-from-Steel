@@ -1,4 +1,7 @@
 #include "include/Game/Objects/MovingPlatform.hpp"
+#include "include/Game/Objects/Player.hpp"
+#include "include/PhysicsManager/CapsuleCollider.hpp"
+#include "include/PhysicsManager/BoxCollider.hpp"
 
 MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Platform(data) {
 	state = MovingPlatformState::StopStart;
@@ -52,5 +55,44 @@ void MovingPlatform::Update(float deltaTime) {
         }
         break;
     }
+    }
+    vec3 newPosition = GetTransform().GetTranslation();
+    velocityDelta = newPosition - lastPosition;
+    velocity = velocityDelta/deltaTime;
+    lastPosition = newPosition;
+}
+
+
+void MovingPlatform::OnCollisionStay(std::shared_ptr<Collider> other) {
+    shared_ptr<PhysicsNode> owner = other->getOwner();
+    if (owner->GetObjectType() == ObjectType::Player) {
+        std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
+        if (playerNode) {
+            std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+
+            float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius + capsule->height/2);
+            float platformTop = this->GetTransform().GetTranslation().y + static_pointer_cast<BoxCollider>(GetCollider())->size.y/2;
+
+            if (playerBottom >= platformTop) {
+                Transform trans = playerNode->GetTransform();
+
+                vec3 pos = trans.GetTranslation();
+                pos += velocityDelta;
+
+                trans.SetTranslation(pos);
+                playerNode->SetTransform(trans);
+            }
+
+        }
+    }
+}
+
+void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
+    shared_ptr<PhysicsNode> owner = other->getOwner();
+    if (owner->GetObjectType() == ObjectType::Player) {
+        std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
+        if (playerNode) {
+            playerNode->addPlatformVelocity(velocity);
+        }
     }
 }
