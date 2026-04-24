@@ -59,7 +59,10 @@ private:
 	glm::vec3 respawnPoint;
 
 	bool CheckGrounded();
-	bool CheckWalled();
+	bool CheckLeftWalled();
+	bool CheckRightWalled();
+	bool CheckCeiling();
+
 	float MoveTowards(float current, float target, float maxDelta);
 
 public:

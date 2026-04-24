@@ -28,26 +28,43 @@ float Player::MoveTowards(float current, float target, float maxDelta) {
 }
 
 bool Player::CheckGrounded() {
-	float rayLength = 0.01f;
-	glm::vec2 rayDir(0.0f, -1.0f);
-	float offsetX = 0.1f;
-	float offsetY = -0.4f;
+	float rayLength = 0.2f;
+	glm::vec2 rayDir(1.0f, 0.0f);
+	float offsetX = -0.1f;
+	float offsetY = -0.41f;
 
-	auto hitCenter = raycast(glm::vec2(0.0f, offsetY), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
 	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
 
-	return hitCenter.has_value() || hitLeft.has_value() || hitRight.has_value();
+	return hitRight.has_value();
 }
 
-bool Player::CheckWalled() {
+bool Player::CheckCeiling() {
+	float rayLength = 0.1f;
+	glm::vec2 rayDir(1.0f, 0.0f);
+	float offsetX = -0.05f;
+	float offsetY = 0.01f;
+
+	auto hitCenter = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+
+	return hitCenter.has_value();
+}
+
+bool Player::CheckLeftWalled() {
+	float rayLength = 0.01f;
+	glm::vec2 rayDir(1.0f, 0.0f);
+	float offsetX = 0.5f;
+	float offsetY = 0.0f;
+	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), -rayDir, rayLength, ObjectType::Wall);
+	return hitLeft.has_value();
+}
+
+bool Player::CheckRightWalled() {
 	float rayLength = 0.01f;
 	glm::vec2 rayDir(1.0f, 0.0f);
 	float offsetX = 0.5f;
 	float offsetY = 0.0f;
 	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), -rayDir, rayLength, ObjectType::Wall);
-	return hitRight.has_value() || hitLeft.has_value();
+	return hitRight.has_value();
 }
 
 void Player::Process() {
@@ -126,12 +143,21 @@ void Player::Update(float deltaTime) {
 
 
 	isGrounded = CheckGrounded();
-	isWalled = CheckWalled();
+	bool isWalledLeft = CheckLeftWalled();
+	bool isWalledRight = CheckRightWalled();
+	isWalled = isWalledRight || isWalledLeft;
+
+	if (isWalledRight && isWalledLeft) {
+		Shatter();
+	}
 
 	glm::vec2 currentVelocity = GetVelocity();
 
 	if (isGrounded) {
 		coyoteTimeCounter = coyoteTime;
+		if (CheckCeiling()) {
+			Shatter();
+		}
 	}
 	else {
 		coyoteTimeCounter -= deltaTime;
