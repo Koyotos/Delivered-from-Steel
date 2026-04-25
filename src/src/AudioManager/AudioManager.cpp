@@ -309,11 +309,22 @@ void AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
 	stream.sampleRate = info.sample_rate;
 	stream.loop = loop;
 
+	ALuint queuedBuffers[4];
+	int filledBufferCount = 0;
 	for (int i = 0; i < 4; ++i) {
-		StreamBufferData(stream.buffers[i], stream);
+		if (StreamBufferData(stream.buffers[i], stream)) {
+			queuedBuffers[filledBufferCount++] = stream.buffers[i];
+		}
 	}
 
-	alSourceQueueBuffers(stream.source, 4, stream.buffers);
+	if (filledBufferCount == 0) {
+		stb_vorbis_close(stream.oggStream);
+		stream.oggStream = nullptr;
+		stream.isPlaying = false;
+		return;
+	}
+
+	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
 	alSourcef(stream.source, AL_GAIN, volume);
 	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
 
