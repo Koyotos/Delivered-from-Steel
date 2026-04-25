@@ -36,10 +36,10 @@ private:
 
 	std::unordered_map<std::string, ALuint> audioBuffers;
 	std::vector<ALuint> audioSources;
-	const int MAX_SOURCES = 32;
+	static constexpr int MAX_SOURCES = 32;
 
 	std::unordered_map<std::string, AudioStream> streams;
-	const int BUFFER_SIZE = 32768;
+	static constexpr int BUFFER_SIZE = 32768;
 
 	std::vector<std::string> currentPlaylist;
 	int currentPlaylistIndex = 0;
