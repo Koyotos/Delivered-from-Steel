@@ -19,12 +19,13 @@
 #include "include/Game/UI/CardUI.hpp"
 #include "include/Game/UI/Vignette.hpp"
 #include "include/Profiler/ProfilerNode.hpp"
-#include "include/AudioManager/AudioManager.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
 #include <filesystem>
 #include <fstream>
+
+class AudioManager;
 
 using namespace std;
 using namespace filesystem;

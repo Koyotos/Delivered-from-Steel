@@ -2,11 +2,12 @@
 #define FE_GLOBALS
 
 #include "include/Renderer/Font.hpp"
-#include "include/AudioManager/AudioManager.hpp"
 #include <filesystem>
 #include <fstream>
 #include <memory>
 #include <unordered_map>
+
+class AudioManager;
 
 using namespace std;
 using namespace filesystem;

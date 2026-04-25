@@ -263,12 +263,12 @@ void AudioManager::RegisterBGM(const std::string& name, const std::string& filep
 bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	if (!context || !stream.oggStream) return false;
 
-	std::vector<short> pcm(32768);
+	std::vector<short> pcm(BUFFER_SIZE);
 	const int channels = (stream.format == AL_FORMAT_STEREO16 ? 2 : 1);
 
 	for (int attempt = 0; attempt < (stream.loop ? 2 : 1); ++attempt) {
 		int samples = stb_vorbis_get_samples_short_interleaved(
-			stream.oggStream, channels, pcm.data(), 32768
+			stream.oggStream, channels, pcm.data(), BUFFER_SIZE
 		);
 
 		if (samples > 0) {

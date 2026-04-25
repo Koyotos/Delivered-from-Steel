@@ -2,6 +2,7 @@
 #include "include/Core/Node.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/Renderer/TextNode.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <cstdint>
 #include <filesystem>
 
@@ -188,7 +189,7 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
                     for (const auto& song : playlistAny) {
                         playlistNames.push_back(std::any_cast<string>(song));
                     }
-                    //audioManager->PlayPlaylist(playlistNames, 0.4f);
+                    audioManager->PlayPlaylist(playlistNames, 0.4f);
                 }
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }

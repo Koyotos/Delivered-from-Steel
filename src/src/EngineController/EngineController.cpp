@@ -1,6 +1,7 @@
 #include "include/EngineController/EngineController.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/Profiler/Profiler.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <stdexcept>
 
 void EngineController::Init() {
