@@ -241,5 +241,20 @@
     "height": 1.2,
     "cull" : 0.5,
     "zIndex" : 0
+  },
+  "10": {
+    "parent": 1,
+    "class": "Light",
+    "process": true,
+    "input": true,
+    "physics": true,
+    "type": 2,
+    "colorAmbient": [ 0.4, 0.4, 1.0 ],
+    "colorDiffuse": [ 0.4, 0.4, 1.0 ],
+    "colorSpecular": [ 0.4, 0.4, 1.0 ],
+    "data1": [ 4.0, -4.0, 0.0 ],
+    "data2": [ 1.0, -1.0, 0.0 ],
+    "data3": [ 1.0, 0.09, 0.032 ],
+    "data4": 45.0
   }
 }

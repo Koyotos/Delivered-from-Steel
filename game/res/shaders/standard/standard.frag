@@ -60,10 +60,13 @@ float ShadowCube(int i) {
     vec3 fragToLight = FragPos - lights[i].data1;
     float currentDepth = length(fragToLight);
 
+    if(currentDepth > farPlanes[i])
+        return 0.0;
+
+    float bias = 0.005;
     float closestDepth = texture(shadowCubemaps[i], fragToLight).r;
     closestDepth *= farPlanes[i];
 
-    float bias = 0.05;
     float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 
     return shadow;

@@ -26,46 +26,66 @@ string TextNode::Type() {
 }
 
 void TextNode::Draw(shared_ptr<Shader> sh) {
-    if(sh == nullptr) {
+    if (sh == nullptr) {
         sh = shader;
     }
-    sh->SetVec3("color", color);
-	sh->SetMat4("M", mat4(1.0f));
+
     sh->Use();
+    sh->SetVec3("color", color);
+    sh->SetMat4("M", mat4(1.0f));
+    sh->SetInt("text", 0);
+
     glActiveTexture(GL_TEXTURE0);
+
+    Charset charset = Globals::GetGlobals().GetGameFont().GetCharset(this->size);
+    glBindTexture(GL_TEXTURE_2D, charset.atlasTexture);
+
     glBindVertexArray(VAO);
-    map<char, Character> charset = Globals::GetGlobals().GetGameFont().GetCharset(this->size);
+
     float localPos = pos.x;
-	float currentY = pos.y;
-    for(string::const_iterator c = content.begin(); c != content.end(); c++) {
-        if (*c == '\n') {
+    float currentY = pos.y;
+
+    vector<float> vertices;
+    vertices.reserve(content.size() * 6 * 4);
+
+    for (char c : content) {
+        if (c == '\n') {
             currentY += size.y * scale * 1.2f;
             localPos = pos.x;
             continue;
         }
-        Character ch = charset[*c];
-        float xpos = localPos + ch.bearing.x*scale;
-        float ypos = currentY - (ch.size.y - ch.bearing.y)*scale;
+        Character ch = charset.chars[c];
 
-        float w = ch.size.x*scale;
-        float h = ch.size.y*-scale;
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },            
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
+        float xpos = localPos + ch.bearing.x * scale;
+        float ypos = currentY - (ch.size.y - ch.bearing.y) * scale;
 
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }           
-        };
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        PROFILER_ADD_DRAW_CALL(2);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        localPos+= (ch.advance >> 6) * scale;
-        }
+        float w = ch.size.x * scale;
+        float h = ch.size.y * scale;
+
+        float u0 = ch.uvOffset.x;
+        float v0 = ch.uvOffset.y;
+        float u1 = u0 + ch.uvSize.x;
+        float v1 = v0 + ch.uvSize.y;
+
+        vertices.insert(vertices.end(), {
+            xpos,     ypos + h,   u0, v1,
+            xpos,     ypos,       u0, v0,
+            xpos + w, ypos,       u1, v0,
+            xpos,     ypos + h,   u0, v1,
+            xpos + w, ypos,       u1, v0,
+            xpos + w, ypos + h,   u1, v1
+        });
+
+        localPos += (ch.advance >> 6) * scale;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
+
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 4);
+
+    PROFILER_ADD_DRAW_CALL(1);
+
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }

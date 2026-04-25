@@ -123,25 +123,29 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
 }
 
 void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,std::any> data) {
-    if(auto obj3d = dynamic_pointer_cast<Object3D>(node)) { // Think about casts, try to replace 
+    if(node->Type() == "Object3D") {
+        auto cast = static_pointer_cast<Object3D>(node);
         if(data.contains("model")) {
-            obj3d->SetModel(LoadModel(fromMap(string,"model",data)));
+            cast->SetModel(LoadModel(fromMap(string,"model",data)));
         }
 
         if(data.contains("shader")) {
-            obj3d->SetShader(LoadShader(fromMap(string,"shader",data)));
+            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
-    } else if(auto obj2d = dynamic_pointer_cast<Object2D>(node)) {
+
+    } else if(node->Type() == "Object2D") {
+        auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("sprite")) {
-            obj2d->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
-            obj2d->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
+            cast->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
+            cast->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
         }
         if(data.contains("shader")) {
-            obj2d->SetShader(LoadShader(fromMap(string,"shader",data)));
+            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
-    } else if(auto textNode = dynamic_pointer_cast<TextNode>(node)) {
+    } else if(node->Type() == "TextNode") {
+        auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("shader")) {
-            textNode->SetShader(LoadShader(fromMap(string,"shader",data)));
+            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
     }
 }
