@@ -18,6 +18,7 @@ private:
 
 	void ShuffleDeck();
 	void SortHand();
+	bool IsEmpty();
 
 
 public:
@@ -40,11 +41,11 @@ public:
 	
 
 	void UnlockCard(shared_ptr<Card> card);
-	bool AddCard(shared_ptr<Card> card);
-	void RemoveCard(shared_ptr<Card> card);
-	void RemoveCard(int index);
-	void DrawCard(int slot);
-	void DrawCard();
+	bool AddCardToDeck(shared_ptr<Card> card);
+	void RemoveCardFromDeck(shared_ptr<Card> card);
+	void RemoveCardFromDeck(int index);
+	void DrawCardToHand(int slot);
+	void DrawCardsToHand();
 	void UseCard(int index);
 
 	void Process() override;

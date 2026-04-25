@@ -45,3 +45,67 @@ int CardManager::GetMaxHandSize()
 	return maxHandSize;
 }
 
+void CardManager::UnlockCard(std::shared_ptr<Card> card)
+{
+	unlockedCards.push_back(card);
+}
+
+bool CardManager::AddCardToDeck(std::shared_ptr<Card> card)
+{
+	if (currentDeck.size() <= maxDeckSize)
+	{
+		currentDeck.push_back(card);
+		return true;
+	}
+	return false;
+}
+
+void CardManager::RemoveCardFromDeck(std::shared_ptr<Card> card)
+{
+	for (int i = 0; i < currentDeck.size(); i++)
+	{
+		// if(currentDeck[i]->GetCardType() == card->GetCardType())
+	}
+}
+
+void CardManager::RemoveCardFromDeck(int index)
+{
+	if (index > currentDeck.size()) return;
+
+	currentDeck.erase(currentDeck.begin() + index);
+	currentDeck.shrink_to_fit(); // sprawdzic pozniej
+	
+}
+
+void CardManager::DrawCardToHand(int slot)
+{
+	// add ui logic later
+	if (currentHand[slot] != nullptr) return;
+
+	ShuffleDeck();
+
+	currentHand.insert(currentHand.begin() + slot, currentDeck.back());
+	currentDeck.pop_back();
+}
+
+void CardManager::DrawCardsToHand()
+{
+	for (int i = 0; i < currentHand.size(); i++)
+	{
+		if (currentHand[i] == nullptr) DrawCardToHand(i);
+	}
+}
+
+void CardManager::UseCard(int index)
+{
+	if (index > maxHandSize) return;
+	if (currentHand[index] == nullptr) return;
+
+	// currentHand[index]->UseCard();
+	
+	if (drawOnHandEmpty) DrawCardToHand(index);
+	else if (IsEmpty()) DrawCardsToHand();
+
+	
+	// add ui logic later
+}
