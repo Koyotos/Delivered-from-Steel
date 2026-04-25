@@ -75,7 +75,7 @@ void EngineController::Run() {
 
         shared_ptr<Scene> active = scm->GetActive();
 
-        if (active->GetPlayer()) {
+        if (active && aum && active->GetPlayer()) {
             aum->SetListenerPosition(active->GetPlayer()->GetTransform().GetTranslation());
         }
 
