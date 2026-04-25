@@ -204,7 +204,7 @@ ALuint AudioManager::GetAvailableSource() {
 			return source;
 		}
 	}
-	return audioSources.empty() ? 0 : audioSources[0];
+	return 0;
 }
 
 void AudioManager::PlaySound2D(const std::string& name, float volume, float pitch, bool loop) {
