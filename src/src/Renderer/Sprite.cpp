@@ -35,6 +35,7 @@ void Sprite::Draw(Shader& shader) {
     glBindVertexArray(VAO);
     PROFILER_ADD_DRAW_CALL(indices.size() / 3);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindTexture(GL_TEXTURE_2D,0);
     glBindVertexArray(0);
 }
 

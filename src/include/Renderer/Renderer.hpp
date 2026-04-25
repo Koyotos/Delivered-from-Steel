@@ -32,10 +32,12 @@ class Renderer {
 
     // Depth 
     GLuint FBO;
-    GLuint depthMaps2D[MAX_LIGHTS];
-    GLuint depthCubemaps[MAX_LIGHTS];
+    GLuint depthMaps2DArray;
+    GLuint depthCubeArray;
     shared_ptr<Shader> depthShaderLayered;
     shared_ptr<Shader> depthShaderNormal;
+    int shadow2DUnit;
+    int shadowCubeUnit;
 
     // Culling
     vec4 frustumLeft;
@@ -66,6 +68,7 @@ class Renderer {
     inline void PrepareShaders();
     inline void ConfigureShader(shared_ptr<Node>);
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
+    inline void BindShadowTextures();
 
     // Draws
     inline void Draw();

@@ -1,4 +1,5 @@
 #version 420
+
 layout(location = 0) in vec2 UV;
 layout(location = 1) in vec3 Normal;
 layout(location = 2) in vec3 FragPos;
@@ -21,17 +22,20 @@ struct Light {
     float data4;
 };
 
-vec3 matDiffuse;
-vec3 matSpecular;
-
 uniform Material material;
 uniform Light lights[20];
+
 uniform vec3 viewPos;
 uniform int lightsNum;
-uniform sampler2D shadowMaps2D[20];
-uniform samplerCube shadowCubemaps[20];
+
+uniform sampler2DArray shadowMaps2D;
+uniform samplerCubeArray shadowCubemaps;
+
 uniform mat4 lightSpaceMatrices[20];
 uniform float farPlanes[20];
+
+vec3 matDiffuse;
+vec3 matSpecular;
 
 float Shadow2D(int i, vec3 normal, vec3 lightDir) {
     vec4 fragPosLightSpace = lightSpaceMatrices[i] * vec4(FragPos, 1.0);
@@ -43,17 +47,18 @@ float Shadow2D(int i, vec3 normal, vec3 lightDir) {
     float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0001);
 
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMaps2D[i], 0);
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps2D, 0));
 
     for(int x = -1; x <= 1; x++)
-    for(int y = -1; y <= 1; y++) {
-        float pcfDepth = texture(shadowMaps2D[i], projCoords.xy + vec2(x,y)*texelSize).r;
+    for(int y = -1; y <= 1; y++)
+    {
+        float pcfDepth = texture(shadowMaps2D,
+                                 vec3(projCoords.xy + vec2(x,y)*texelSize, i)).r;
+
         shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
     }
 
-    shadow /= 9.0;
-
-    return shadow;
+    return shadow / 9.0;
 }
 
 float ShadowCube(int i) {
@@ -64,12 +69,13 @@ float ShadowCube(int i) {
         return 0.0;
 
     float bias = 0.005;
-    float closestDepth = texture(shadowCubemaps[i], fragToLight).r;
+
+    float closestDepth = texture(shadowCubemaps,
+                                  vec4(fragToLight, i)).r;
+
     closestDepth *= farPlanes[i];
 
-    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-
-    return shadow;
+    return currentDepth - bias > closestDepth ? 1.0 : 0.0;
 }
 
 vec3 DirectionalLight(int i, Light light, vec3 normal, vec3 viewDirection) {
