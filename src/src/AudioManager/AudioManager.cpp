@@ -141,11 +141,15 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 		return 0;
 	}
 
-	char buffer[4];
+	char buffer[5] = { 0 };
+
 	file.read(buffer, 4);
+	if (std::string(buffer) != "RIFF") { Globals::GetGlobals().Log("AUDIO ERROR: File is not RIFF"); return 0; }
 	file.seekg(4, std::ios::cur);
 	file.read(buffer, 4);
+	if (std::string(buffer) != "WAVE") { Globals::GetGlobals().Log("AUDIO ERROR: File is not WAVE"); return 0; }
 	file.read(buffer, 4);
+	if (std::string(buffer) != "fmt ") { Globals::GetGlobals().Log("AUDIO ERROR: Missing fmt chunk"); return 0; }
 
 	uint32_t fmtSize;
 	file.read(reinterpret_cast<char*>(&fmtSize), 4);
@@ -155,6 +159,7 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	uint16_t blockAlign, bitsPerSample;
 
 	file.read(reinterpret_cast<char*>(&audioFormat), 2);
+	if (audioFormat != 1) { Globals::GetGlobals().Log("AUDIO ERROR: WAV must be uncompressed PCM"); return 0; }
 	file.read(reinterpret_cast<char*>(&numChannels), 2);
 	file.read(reinterpret_cast<char*>(&sampleRate), 4);
 	file.read(reinterpret_cast<char*>(&byteRate), 4);
@@ -163,13 +168,23 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 
 	if (fmtSize > 16) file.seekg(fmtSize - 16, std::ios::cur);
 
-	uint32_t dataSize;
-	while (true) {
-		file.read(buffer, 4);
+	uint32_t dataSize = 0;
+	bool foundData = false;
+
+	while (file.read(buffer, 4)) {
 		file.read(reinterpret_cast<char*>(&dataSize), 4);
-		if (std::string(buffer, 4) == "data") break;
+		if (std::string(buffer, 4) == "data") {
+			foundData = true;
+			break;
+		}
 		file.seekg(dataSize, std::ios::cur);
-		if (file.eof()) return 0;
+	}
+
+	if (!foundData) { Globals::GetGlobals().Log("AUDIO ERROR: Missing data chunk"); return 0; }
+
+	if (dataSize > 50 * 1024 * 1024) {
+		Globals::GetGlobals().Log("AUDIO ERROR: WAV file is suspiciously large (over 50MB)");
+		return 0;
 	}
 
 	std::vector<char> audioData(dataSize);
