@@ -34,7 +34,8 @@ class Renderer {
     GLuint FBO;
     GLuint depthMaps2D[MAX_LIGHTS];
     GLuint depthCubemaps[MAX_LIGHTS];
-    shared_ptr<Shader> depthShader;
+    shared_ptr<Shader> depthShaderLayered;
+    shared_ptr<Shader> depthShaderNormal;
 
     // Culling
     vec4 frustumLeft;

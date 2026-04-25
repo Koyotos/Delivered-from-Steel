@@ -7,6 +7,7 @@
 #include "include/Renderer/TextNode.hpp"
 #include "include/Profiler/Profiler.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
+#include <iostream>
 
 void Renderer::Init(ResourceManager& rsm) {
     if(!glfwInit()) {
@@ -32,7 +33,8 @@ void Renderer::Init(ResourceManager& rsm) {
     lightSpaceMatrices.resize(MAX_LIGHTS);
     farPlanes.resize(MAX_LIGHTS);
 
-    depthShader = rsm.LoadShader("depth");
+    depthShaderLayered = rsm.LoadShader("layeredDepth");
+    depthShaderNormal = rsm.LoadShader("simpleDepth");
 
     glGenFramebuffers(1, &FBO);
     glGenTextures(MAX_LIGHTS, depthCubemaps);
@@ -43,7 +45,7 @@ void Renderer::Init(ResourceManager& rsm) {
 
         for(int j = 0; j < 6; j++) {
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, 0,
-                GL_DEPTH_COMPONENT,
+                GL_DEPTH_COMPONENT24,
                 SHADOW_WIDTH, SHADOW_HEIGHT,
                 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
         }
@@ -53,6 +55,8 @@ void Renderer::Init(ResourceManager& rsm) {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
 
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
@@ -60,7 +64,7 @@ void Renderer::Init(ResourceManager& rsm) {
     for(int i = 0; i < MAX_LIGHTS; i++) {
         glBindTexture(GL_TEXTURE_2D, depthMaps2D[i]);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
             SHADOW_WIDTH, SHADOW_HEIGHT,
             0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
@@ -70,6 +74,9 @@ void Renderer::Init(ResourceManager& rsm) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
         float borderColor[] = {1.0, 1.0, 1.0, 1.0};
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
@@ -78,6 +85,7 @@ void Renderer::Init(ResourceManager& rsm) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
     glDepthFunc(GL_LESS);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -102,13 +110,12 @@ void Renderer::ComputeFrustum() {
 
 void Renderer::DepthPass() {
     glViewport(0,0,SHADOW_WIDTH, SHADOW_HEIGHT);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
     glCullFace(GL_FRONT);
 
     for(uint8_t i = 0; i < MAX_LIGHTS; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
         if(i==lightsPos.size()) {
             break;
         }
@@ -121,7 +128,11 @@ void Renderer::DepthPass() {
         if(light->type == LIGHT_POINT) {
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemaps[i], 0);
         } else {
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMaps2D[i], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMaps2D[i],0);
+        }
+        auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if(status != GL_FRAMEBUFFER_COMPLETE) {
+            throw runtime_error("Framebuffer incomplete! : " + to_string(status));
         }
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -135,8 +146,11 @@ void Renderer::DepthPass() {
                 mat4 view = lookAt(pos, center, vec3(0,1,0));
                 lightSpaceMatrices[i] = projection * view;
                 shadowTransforms[0] = lightSpaceMatrices[i];
-                depthShader->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
-                depthShader->SetInt("lightType", 0);
+                depthShaderNormal->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
+                depthShaderNormal->SetInt("lightType", 0);
+                for(auto& k : drawVector) {
+                    k->Draw(depthShaderNormal);
+                }
                 break;
             }
             case LIGHT_POINT: {
@@ -150,9 +164,12 @@ void Renderer::DepthPass() {
                 shadowTransforms[5] = projection * lookAt(pos, pos+vec3(0,0,-1), vec3(0,-1,0));
                 farPlanes[i] = 20.0f;
                 for(int j = 0; j < 6; j++) {
-                    depthShader->SetMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
+                    depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
                 }
-                depthShader->SetInt("lightType", 1);
+                depthShaderLayered->SetInt("lightType", 1);
+                for(auto& k : drawVector) {
+                    k->Draw(depthShaderLayered);
+                }
                 break;
             }
             case LIGHT_SPOT: {
@@ -160,13 +177,13 @@ void Renderer::DepthPass() {
                 view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
                 shadowTransforms[0] = projection * view;
                 lightSpaceMatrices[i] = shadowTransforms[0];
-                depthShader->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
-                depthShader->SetInt("lightType", 2);
+                depthShaderNormal->SetMat4("shadowMatrices[0]", shadowTransforms[0]);
+                depthShaderNormal->SetInt("lightType", 2);
+                for(auto& k : drawVector) {
+                    k->Draw(depthShaderNormal);
+                }
                 break;
             }
-        }
-        for(auto& k : drawVector) {
-            k->Draw(depthShader);
         }
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -188,7 +205,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     currentScene = scene;
     ComputeFrustum();
 
-    // Vectorize scene
+    // Vectorize sceneCull
     PrepareDraw(scene->root, Transform());
     ResolveZ();
 

@@ -3,10 +3,12 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 18) out;
 
 uniform mat4 shadowMatrices[6];
+uniform int lightType;
 
 void main()
 {
-    for(int face = 0; face < 6; face++) {
+    int faces = (lightType == 1) ? 6 : 1;
+    for(int face = 0; face < faces; face++) {
         gl_Layer = face;
 
         for(int i = 0; i < 3; i++) {
