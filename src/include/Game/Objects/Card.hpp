@@ -2,6 +2,9 @@
 #define FE_CARD
 
 #include "include/Core/Object2D.hpp"
+#include "include/Game/UI/CardUI.hpp"
+
+
 class Card :
     public Object2D
 {
@@ -10,6 +13,9 @@ private:
     bool used = false;
 
     bool DestroyAfterUsed = false;
+
+    shared_ptr<CardUI> display;
+
 public:
     Card(const unordered_map<string, std::any>&);
 
