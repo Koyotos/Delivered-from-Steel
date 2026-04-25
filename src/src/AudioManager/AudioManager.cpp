@@ -264,20 +264,24 @@ bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	if (!context || !stream.oggStream) return false;
 
 	std::vector<short> pcm(32768);
+	const int channels = (stream.format == AL_FORMAT_STEREO16 ? 2 : 1);
 
-	int samples = stb_vorbis_get_samples_short_interleaved(
-		stream.oggStream, stream.format == AL_FORMAT_STEREO16 ? 2 : 1, pcm.data(), 32768
-	);
+	for (int attempt = 0; attempt < (stream.loop ? 2 : 1); ++attempt) {
+		int samples = stb_vorbis_get_samples_short_interleaved(
+			stream.oggStream, channels, pcm.data(), 32768
+		);
 
-	if (samples > 0) {
-		int size = samples * (stream.format == AL_FORMAT_STEREO16 ? 2 : 1) * sizeof(short);
-		alBufferData(buffer, stream.format, pcm.data(), size, stream.sampleRate);
-		return true;
-	}
+		if (samples > 0) {
+			int size = samples * channels * sizeof(short);
+			alBufferData(buffer, stream.format, pcm.data(), size, stream.sampleRate);
+			return true;
+		}
 
-	if (stream.loop) {
+		if (!stream.loop || attempt > 0) {
+			break;
+		}
+
 		stb_vorbis_seek_start(stream.oggStream);
-		return StreamBufferData(buffer, stream);
 	}
 
 	return false;
