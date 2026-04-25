@@ -19,6 +19,7 @@
 #include "include/Game/UI/CardUI.hpp"
 #include "include/Game/UI/Vignette.hpp"
 #include "include/Profiler/ProfilerNode.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
@@ -105,9 +106,13 @@ class ResourceManager {
     inline vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ParseNodes(unordered_map<string, std::any>&);
     inline void LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>&, shared_ptr<Scene>);
 
+    shared_ptr<AudioManager> audioManager;
+
     public:
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void ConfigurePaths();
+
+    void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
 
     ResourceManager();
     ~ResourceManager();

@@ -2,6 +2,7 @@
 #define FE_GLOBALS
 
 #include "include/Renderer/Font.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -38,6 +39,7 @@ class Globals {
     inline path GetExecPathInternal();
 
     public:
+    std::shared_ptr<AudioManager> audioManager;
     /*
     @brief Returns instance of Globals class.
     @return Globals& - globals instance

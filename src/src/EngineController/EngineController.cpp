@@ -25,6 +25,12 @@ void EngineController::Init() {
         renderer = make_shared<Renderer>();
         rsm = make_shared<ResourceManager>();
         aum = make_shared<AudioManager>();
+        if (!aum->Init()) {
+            globals->Log("Audio failed to initialize. Game will continue without sound.");
+            aum = nullptr;
+        }
+        rsm->SetAudioManager(aum);
+        Globals::GetGlobals().audioManager = aum;
 
 		iom->Init(renderer->GetWindow());
         rsm->ConfigurePaths();
@@ -69,6 +75,10 @@ void EngineController::Run() {
 
         shared_ptr<Scene> active = scm->GetActive();
 
+        if (active->GetPlayer()) {
+            aum->SetListenerPosition(active->GetPlayer()->GetTransform().GetTranslation());
+        }
+
 		PROFILER_BEGIN_FRAME(static_cast<float>(deltaTime));
 
 		glfwPollEvents();
@@ -86,6 +96,10 @@ void EngineController::Run() {
         }
 
 		PROFILER_END_LOGIC();
+
+        if (aum) {
+            aum->Update();
+        }
 
 		iom->ClearQueue();
 

@@ -144,6 +144,20 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
             textNode->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
     }
+    if (data.contains("sound") && audioManager) {
+        string soundName = fromMap(string, "sound", data);
+        string fullPath = (audioPath / (soundName + ".wav")).string();
+        audioManager->LoadSound(soundName, fullPath);
+    }
+    if (data.contains("sounds") && audioManager) {
+        vector<std::any> soundList = fromMap(vector<std::any>, "sounds", data);
+
+        for (const auto& soundAny : soundList) {
+            string soundName = std::any_cast<string>(soundAny);
+            string fullPath = (audioPath / (soundName + ".wav")).string();
+            audioManager->LoadSound(soundName, fullPath);
+        }
+    }
 }
 
 vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(unordered_map<string, std::any>& data) {
@@ -155,6 +169,27 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
             if(currentType==octEntry.first) {
                 shared_ptr<Node> node = octEntry.second(objVarList);
                 ApplyAssets(node, objVarList);
+                if (objVarList.contains("bgm") && audioManager) {
+                    string bgmName = fromMap(string, "bgm", objVarList);
+                    audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
+                }
+                if (objVarList.contains("bgms") && audioManager) {
+                    vector<std::any> bgmList = fromMap(vector<std::any>, "bgms", objVarList);
+
+                    for (const auto& bgmAny : bgmList) {
+                        string bgmName = std::any_cast<string>(bgmAny);
+                        audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
+                    }
+                }
+                if (objVarList.contains("playlist") && audioManager) {
+                    vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", objVarList);
+                    vector<string> playlistNames;
+
+                    for (const auto& song : playlistAny) {
+                        playlistNames.push_back(std::any_cast<string>(song));
+                    }
+                    //audioManager->PlayPlaylist(playlistNames, 0.4f);
+                }
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }
