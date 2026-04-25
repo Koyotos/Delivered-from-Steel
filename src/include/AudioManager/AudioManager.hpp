@@ -123,9 +123,9 @@ public:
 	 * @param1 const std::string& - stream name
 	 * @param2 float - volume
 	 * @param3 bool - should loop
-	 * @return void
+	 * @return true if playback started successfully
 	 */
-	void PlayBGM(const std::string& name, float volume = 1.0f, bool loop = true);
+	bool PlayBGM(const std::string& name, float volume = 1.0f, bool loop = true);
 	/**
 	 * @brief Stops a specific BGM stream.
 	 * @param1 const std::string& - stream name

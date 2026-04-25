@@ -2,7 +2,6 @@
 #include "include/Globals/Globals.hpp"
 #define STB_VORBIS_HEADER_ONLY
 #include <stb_vorbis.c>
-#include <iostream>
 #include <fstream>
 
 AudioManager::AudioManager() : device(nullptr), context(nullptr) {}
@@ -115,12 +114,21 @@ void AudioManager::Update() {
 	}
 
 	if (isPlaylistActive && !isAnyStreamPlaying) {
+		if (currentPlaylist.empty()) {
+			isPlaylistActive = false;
+			return;
+		}
 		currentPlaylistIndex++;
 		if (currentPlaylistIndex >= currentPlaylist.size()) {
 			currentPlaylistIndex = 0;
 		}
-		PlayBGM(currentPlaylist[currentPlaylistIndex], playlistVolume, false);
-		isPlaylistActive = true;
+		if (!PlayBGM(currentPlaylist[currentPlaylistIndex], playlistVolume, false)) {
+			Globals::GetGlobals().Log("PLAYLIST ERROR: Failed to play track, stopping playlist.");
+			isPlaylistActive = false;
+		}
+		else {
+			isPlaylistActive = true;
+		}
 	}
 }
 
@@ -287,13 +295,13 @@ bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	return false;
 }
 
-void AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
-	if (!context) return;
+bool AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
+	if (!context) return false;
 	auto it = streams.find(name);
-	if (it == streams.end()) return;
+	if (it == streams.end()) return false;
 
 	AudioStream& stream = it->second;
-	if (stream.isPlaying) return;
+	if (stream.isPlaying) return true;
 
 	StopAllBGM();
 
@@ -301,7 +309,7 @@ void AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
 	stream.oggStream = stb_vorbis_open_filename(stream.currentFile.c_str(), &error, nullptr);
 	if (!stream.oggStream) {
 		Globals::GetGlobals().Log("AUDIO ERROR: Can't open ogg file: " + stream.currentFile);
-		return;
+		return false;
 	}
 
 	stb_vorbis_info info = stb_vorbis_get_info(stream.oggStream);
@@ -321,7 +329,7 @@ void AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
 		stb_vorbis_close(stream.oggStream);
 		stream.oggStream = nullptr;
 		stream.isPlaying = false;
-		return;
+		return false;
 	}
 
 	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
@@ -330,6 +338,7 @@ void AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
 
 	alSourcePlay(stream.source);
 	stream.isPlaying = true;
+	return true;
 }
 
 
