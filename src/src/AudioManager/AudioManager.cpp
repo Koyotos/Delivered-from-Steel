@@ -263,7 +263,10 @@ void AudioManager::RegisterBGM(const std::string& name, const std::string& filep
 bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	if (!context || !stream.oggStream) return false;
 
-	std::vector<short> pcm(BUFFER_SIZE);
+	thread_local std::vector<short> pcm;
+	if (pcm.size() != BUFFER_SIZE) {
+		pcm.resize(BUFFER_SIZE);
+	}
 	const int channels = (stream.format == AL_FORMAT_STEREO16 ? 2 : 1);
 
 	for (int attempt = 0; attempt < (stream.loop ? 2 : 1); ++attempt) {
