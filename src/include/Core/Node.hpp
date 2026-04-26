@@ -25,6 +25,8 @@ T FromMap(const std::unordered_map<std::string, std::any>& data, const std::stri
 
 using namespace std;
 
+class Scene;
+
 /*
 @brief Base class for all in-game objects. Every object that is going to be used inside scene graphs
 has to inherit from this class. This will also provide basic functionality like flags for scene graph and
@@ -152,6 +154,19 @@ class Node {
     Simulates destruction without removing it from scene graph.
     */
     void Disable() noexcept;
+
+
+	/*
+    * @brief Initializes the node and all its children.
+    * @return void
+    */
+    void InitRecursive(shared_ptr<Scene>);
+
+	/*
+    * @brief Initializes the node.
+    * @return void
+    */
+    virtual void Init(shared_ptr<Scene>) {}
 
     /*
     @brief Basic constructor. Creates empty Node.

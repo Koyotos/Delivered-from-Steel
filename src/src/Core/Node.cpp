@@ -41,6 +41,14 @@ void Node::Disable() noexcept {
     SetTransformChanged(false);
 }
 
+void Node::InitRecursive(shared_ptr<Scene> scene) {
+    Init(scene);
+
+    for (auto& child : GetChildren()) {
+        child->InitRecursive(scene);
+    }
+}
+
 Node::Node() {
 
 }

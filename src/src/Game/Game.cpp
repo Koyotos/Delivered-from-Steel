@@ -8,6 +8,8 @@ void Game::Init() {
     gameScene->GetRoot()->AddChild(engine.LoadScene("res/scenes/test2d.json")->GetRoot());
 
     engine.SetActiveScene(gameScene);
+
+    gameScene->GetRoot()->InitRecursive(gameScene);
 }
 
 void Game::Start() {

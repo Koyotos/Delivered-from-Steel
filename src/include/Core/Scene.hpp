@@ -47,6 +47,8 @@ class Scene {
 
     shared_ptr<Node> GetRoot();
 
+	shared_ptr<Player> GetPlayer() { return scenePlayer; }
+
 	/*
     * @brief Updates the transformation of a node and its children.
     * @param node The node to update.
