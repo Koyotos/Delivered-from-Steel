@@ -28,7 +28,7 @@ bool AudioManager::Init() {
 	audioSources.resize(MAX_SOURCES);
 	alGenSources(MAX_SOURCES, audioSources.data());
 
-	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 	Globals::GetGlobals().Log("Audio Manager initialized.");
 	return true;
 }
@@ -261,10 +261,11 @@ void AudioManager::PlaySound3D(const std::string& name, glm::vec3 position, floa
 	alSourcef(source, AL_GAIN, volume);
 	alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 	alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-	alSource3f(source, AL_POSITION, position.x, position.y, position.z);
+	float safeZ = position.z + 3.0f;
+	alSource3f(source, AL_POSITION, position.x, position.y, safeZ);
 
-	alSourcef(source, AL_REFERENCE_DISTANCE, 5.0f);
-	alSourcef(source, AL_MAX_DISTANCE, 50.0f);
+	alSourcef(source, AL_REFERENCE_DISTANCE, 2.0f);
+	alSourcef(source, AL_MAX_DISTANCE, 15.0f);
 
 	alSourcePlay(source);
 }
