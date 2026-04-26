@@ -92,7 +92,15 @@ void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
     if (owner->GetObjectType() == ObjectType::Player) {
         std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
         if (playerNode) {
-            playerNode->addPlatformVelocity(velocity);
+
+            std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+
+            float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
+            float platformTop = this->GetTransform().GetTranslation().y + static_pointer_cast<BoxCollider>(GetCollider())->size.y / 2;
+
+            if (playerBottom >= platformTop) {
+                playerNode->addPlatformVelocity(velocity);
+            }
         }
     }
 }

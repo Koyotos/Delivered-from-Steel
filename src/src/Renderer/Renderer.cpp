@@ -68,6 +68,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     ComputeFrustum();
 
     // Vectorize scene
+    scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), Transform());
     PrepareDraw(scene->root, Transform());
     ResolveZ();
 
@@ -157,15 +158,6 @@ void Renderer::ResolveZ() {
 }
 
 void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) {
-    if(!visualCast->TestIgnoreParent()) {
-        if(visualCast->TestTransformChanged()) {
-            visualCast->ApplyParentTransform(t);
-            visualCast->SetTransformChanged(false);
-        }
-    } else {
-        visualCast->ResetGlobal();
-    }
-
     t = visualCast->GetTransform();
     if(Cull(visualCast) && visualCast->TestDraw()) {
         if(visualCast->Type() == "TextNode" || visualCast->RenderType() == "Object2D") {

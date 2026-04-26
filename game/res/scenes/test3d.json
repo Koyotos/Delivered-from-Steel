@@ -295,7 +295,7 @@
     "input": true,
     "physics": true,
     "draw": true,
-    "ignoreParent": true,
+    "ignoreParent": false,
     "static": true,
     "addCollider": true,
     "colliderPosX": 0.0,
@@ -309,7 +309,7 @@
     "retractedTime": 1.0,
     "upDown": false,
     "retractedPos": 0.0,
-    "extendedPos": 2.0,
+    "extendedPos": 0.3,
     "cull": 0.5,
     "zIndex": 0
   },
@@ -317,15 +317,15 @@
   "12": {
     "parent": 11,
     "transform": [
-      -4.0,
-      -7.0,
-      -5.0,
+      0.0,
+      0.0,
+      0.0,
       0.0,
       -0.0,
       0.0,
-      1.0,
-      1.0,
-      1.0
+      0.4,
+      0.4,
+      0.4
     ],
     "model": "house",
     "class": "Trap",
@@ -338,7 +338,7 @@
     "static": true,
     "addCollider": true,
     "colliderPosX": 0.0,
-    "colliderPosY": 0.4,
+    "colliderPosY": 0.0,
     "colliderType": false,
     "width": 0.4,
     "height": 0.4,
@@ -350,15 +350,15 @@
   "13": {
     "parent": 11,
     "transform": [
-      -4.0,
-      -6.3,
-      -5.0,
+      0.0,
+      0.2,
+      0.0,
       0.0,
       -0.0,
       0.0,
-      1.0,
-      1.0,
-      1.0
+      0.4,
+      0.4,
+      0.4
     ],
     "model": "house",
     "class": "Trap",
@@ -371,7 +371,7 @@
     "static": true,
     "addCollider": true,
     "colliderPosX": 0.0,
-    "colliderPosY": 0.4,
+    "colliderPosY": 0.0,
     "colliderType": false,
     "width": 0.4,
     "height": 0.4,
@@ -382,7 +382,7 @@
     "parent": 1,
     "transform": [
       -3.0,
-      -9.0,
+      -10.0,
       -5.0,
       0.0,
       -0.0,
@@ -409,7 +409,7 @@
     "movingDuration": 2.0,
     "stopDuration": 1.0,
     "XendPosition": 3.0,
-    "YendPosition": -9.0,
+    "YendPosition": -10.0,
     "cull": 0.5,
     "zIndex": 0
   },

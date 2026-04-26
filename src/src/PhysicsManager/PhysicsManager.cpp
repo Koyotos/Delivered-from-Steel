@@ -1,6 +1,5 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 
-
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	// jesli scena sie zmienila to pobierz nowe PhysicsNode'y
@@ -19,25 +18,35 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 		}
 	}
 
+	for (size_t i = 0; i < currentNodes.size(); ++i) {
+		auto col = currentNodes[i]->GetCollider();
+		if (col) {
+			currentNodes[i]->processCollisions();
+		}
+	}
+
 	// przeliczenie pozycji globalnych
 
+	Transform t;
+
+	scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
 
 
 	// kolizje
+
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		auto col = currentNodes[i]->GetCollider();
 		if (col) {
 			col->updatePosition(currentNodes[i]->GetTransform());
 		}
+	}
 
 
+	for (size_t i = 0; i < currentNodes.size(); ++i) {
+		auto col = currentNodes[i]->GetCollider();
 		for (size_t j = 0; j < currentNodes.size(); ++j) {
 			if (i == j) continue;
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
-		}
-
-		if (col) {
-			currentNodes[i]->processCollisions();
 		}
 	}
 
