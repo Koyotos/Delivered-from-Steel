@@ -59,6 +59,7 @@ void MovingPlatform::Update(float deltaTime) {
     vec3 newPosition = GetTransform().GetTranslation();
     velocityDelta = newPosition - lastPosition;
     velocity = velocityDelta/deltaTime;
+	SetVelocity(vec2(velocity.x,0));
     lastPosition = newPosition;
 }
 
