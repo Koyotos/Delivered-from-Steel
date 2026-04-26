@@ -415,7 +415,10 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         }
         shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
         shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
-
+        for (uint8_t i = 0; i < count; i++) {
+            shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
+            shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
+        }
     } else if(node->RenderType() == "TextNode") {
         shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
         shared_ptr<Shader> shader = textNode->GetShader();
