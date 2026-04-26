@@ -19,6 +19,10 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 		}
 	}
 
+	// przeliczenie pozycji globalnych
+
+
+
 	// kolizje
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		auto col = currentNodes[i]->GetCollider();
