@@ -22,7 +22,7 @@
     ],
     "sprite": "fishCard",
     "class": "Object2D",
-    "shader": "basic2d",
+    "shader": "ui",
     "active": "test",
     "process": true,
     "input": true,

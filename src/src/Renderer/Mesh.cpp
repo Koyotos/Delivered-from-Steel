@@ -24,33 +24,24 @@ void Mesh::SetupMesh(const bool& drawFlag) {
 
 void Mesh::Draw(Shader& shader)
 {
-    shader.Use();
-
-    GLuint diffuseNr = 0;
-    GLuint specularNr = 0;
-
     for (unsigned int i = 0; i < textures.size(); i++)
     {
         std::string name = textures[i].type;
-        std::string number;
-
         GLuint slot = 0;
 
         if (name == "texture_diffuse")
         {
-            slot = TEXTURES_SLOT_DIFFUSE + diffuseNr++;
-            number = std::to_string(diffuseNr);
+            slot = TEXTURES_SLOT_DIFFUSE;
         }
         else if (name == "texture_specular")
         {
-            slot = TEXTURES_SLOT_SPECULAR + specularNr++;
-            number = std::to_string(specularNr);
+            slot = TEXTURES_SLOT_SPECULAR;
         }
 
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
 
-        shader.SetInt(("material." + name + number), slot);
+        shader.SetInt(("material." + name), slot);
     }
 
     glBindVertexArray(VAO);

@@ -6,8 +6,10 @@
 #include "include/Renderer/Shader.hpp"
 #include "include/Renderer/TextNode.hpp"
 #include "include/Profiler/Profiler.hpp"
+#include "include/Renderer/Utils.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include <iostream>
+#include <memory>
 
 void Renderer::Init(ResourceManager& rsm)
 {
@@ -388,28 +390,37 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     shader->SetVec3("lights["+to_string(index)+"].colorSpecular", light->colorSpecular);
 }
 
-void Renderer::ConfigureShader(shared_ptr<Node> node)
-{
-    if (node->Type() != "Object3D")
-        return;
+void Renderer::ConfigureShader(shared_ptr<Node> node) {
+    if(node->Type() == "Object2D") {
+        shared_ptr<Object2D> obj2D = static_pointer_cast<Object2D>(node);
+        shared_ptr<Shader> shader = obj2D->GetShader();
+        if(obj2D->GetReqPerspective()) {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
+        } else {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        }
+    } else if(node->Type() == "Object3D") {
+        shared_ptr<Object3D> obj3D = static_pointer_cast<Object3D>(node);
+        shared_ptr<Shader> shader = obj3D->GetShader();
+        shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
+        shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
+        uint8_t count = std::min((int)lightsPos.size(),20);
+        shader->SetInt("lightsNum", count);
+        for(uint8_t i = 0; i < count; i++) {
+            SetLight(lightsPos[i].first, shader, i);
+        }
+        shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
+        shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
 
-    auto obj = static_pointer_cast<Object3D>(node);
-    auto shader = obj->GetShader();
-
-    shader->Use();
-
-    shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
-    shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),1));
-
-    int count = std::min((int)lightsPos.size(), 20);
-    shader->SetInt("lightsNum", count);
-
-    for (int i = 0; i < count; i++)
-        SetLight(lightsPos[i].first, shader, i);
-
-    // FIXED GLOBAL BINDINGS (NO COLLISION)
-    shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
-    shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
+    } else if(node->Type() == "TextNode") {
+        shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
+        shared_ptr<Shader> shader = textNode->GetShader();
+        if(textNode->TestIgnoreParent()) {
+            shader->SetMat4("VP", currentScene->sceneCam->GetUI());
+        } else {
+            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        }
+    }
 }
 
 void Renderer::EndFrame() {
