@@ -229,12 +229,14 @@ void Renderer::DepthPass()
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0,0,windowW, windowH);
     glCullFace(GL_BACK);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
-    if (scene->scenePlayer && scene->sceneCam) {
-        scene->sceneCam->SetPos(scene->scenePlayer->GetTransform().GetTranslation());
+    if(scene->scenePlayer && scene->sceneCam) {
+        vec3 ppos = scene->scenePlayer->GetTransform().GetTranslation();
+        scene->sceneCam->SetPos(ppos);
     }
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -271,6 +273,7 @@ void Renderer::BindShadowTextures() {
     glBindTexture(GL_TEXTURE_2D_ARRAY, depthMaps2DArray);
     glActiveTexture(GL_TEXTURE0 + TEXTURES_SLOT_SHADOWCUBEMAPS);
     glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Renderer::Draw() {
@@ -334,7 +337,7 @@ void Renderer::DrawDebug() {
         if (physicsNode) {
             physicsNode->drawDebug();
         } else {
-            //node->Draw();
+            node->Draw();
         }
     }
 }
@@ -391,7 +394,7 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
 }
 
 void Renderer::ConfigureShader(shared_ptr<Node> node) {
-    if(node->Type() == "Object2D") {
+    if(node->RenderType() == "Object2D") {
         shared_ptr<Object2D> obj2D = static_pointer_cast<Object2D>(node);
         shared_ptr<Shader> shader = obj2D->GetShader();
         if(obj2D->GetReqPerspective()) {
@@ -402,6 +405,7 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
     } else if(node->Type() == "Object3D") {
         shared_ptr<Object3D> obj3D = static_pointer_cast<Object3D>(node);
         shared_ptr<Shader> shader = obj3D->GetShader();
+        auto vp = currentScene->sceneCam->GetVP(1);
         shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
         shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
         uint8_t count = std::min((int)lightsPos.size(),20);
@@ -412,7 +416,7 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
         shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
 
-    } else if(node->Type() == "TextNode") {
+    } else if(node->RenderType() == "TextNode") {
         shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
         shared_ptr<Shader> shader = textNode->GetShader();
         if(textNode->TestIgnoreParent()) {

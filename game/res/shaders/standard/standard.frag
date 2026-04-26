@@ -4,6 +4,12 @@ layout(location = 0) in vec2 UV;
 layout(location = 1) in vec3 Normal;
 layout(location = 2) in vec3 FragPos;
 
+layout(binding = 0) uniform sampler2D material_diffuse;
+layout(binding = 4) uniform sampler2D material_specular;
+
+layout(binding = 9) uniform sampler2DArray shadowMaps2D;
+layout(binding = 10) uniform samplerCubeArray shadowCubemaps;
+
 layout(location = 0) out vec4 FragColor;
 
 struct Material {
@@ -22,14 +28,10 @@ struct Light {
     float data4;
 };
 
-uniform Material material;
 uniform Light lights[20];
 
 uniform vec3 viewPos;
 uniform int lightsNum;
-
-uniform sampler2DArray shadowMaps2D;
-uniform samplerCubeArray shadowCubemaps;
 
 uniform mat4 lightSpaceMatrices[20];
 uniform float farPlanes[20];
@@ -179,8 +181,8 @@ void main()
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    matDiffuse = texture(material.diffuse, UV).rgb;
-    matSpecular = texture(material.specular, UV).rgb;
+    matDiffuse = texture(material_diffuse, UV).rgb;
+    matSpecular = texture(material_specular, UV).rgb;
 
     vec3 result = vec3(0.0,0.0,0.0);
     for(int i = 0; i < lightsNum; i++) {
