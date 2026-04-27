@@ -25,6 +25,10 @@ string TextNode::Type() {
     return "TextNode";
 }
 
+string TextNode::RenderType() {
+    return "TextNode";
+}
+
 void TextNode::Draw(shared_ptr<Shader> sh) {
     if (sh == nullptr) {
         sh = shader;
@@ -80,9 +84,15 @@ void TextNode::Draw(shared_ptr<Shader> sh) {
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
+    glBufferData(GL_ARRAY_BUFFER,
+    vertices.size() * sizeof(float),
+    vertices.data(),
+    GL_DYNAMIC_DRAW
+    );
 
+    glDisable(GL_CULL_FACE);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 4);
+    glEnable(GL_CULL_FACE);
 
     PROFILER_ADD_DRAW_CALL(1);
 
@@ -141,8 +151,13 @@ TextNode::TextNode(const unordered_map<string, std::any>& data) : VisualNode(dat
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    const size_t MAX_CHARS = 1024;
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,
+        MAX_CHARS * 6 * 4 * sizeof(float),
+        nullptr,
+        GL_DYNAMIC_DRAW
+    );
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
