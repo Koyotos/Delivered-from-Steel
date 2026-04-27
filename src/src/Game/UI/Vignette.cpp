@@ -13,7 +13,7 @@ Vignette::Vignette(const std::unordered_map<std::string, std::any>& data) : UIEl
 	maxValue = states;
 }
 
-void Vignette::Draw() {
+void Vignette::Draw(shared_ptr<Shader> sh) {
 	SetCurrentSprite();
 
 	UIElement::Draw();

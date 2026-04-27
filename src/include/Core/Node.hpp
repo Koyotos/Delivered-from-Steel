@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "include/IOManager/InputEvent.hpp"
+#include "include/Renderer/Shader.hpp"
 #include <stdexcept>
 
 #define fromMap(type,key,data) FromMap<type>(data,key)
@@ -127,7 +128,7 @@ class Node {
     @brief Method that draws object's model. Called inside renderer.
     @return void
     */
-    virtual void Draw();
+    virtual void Draw(shared_ptr<Shader> sh = nullptr);
 
     /*
     @brief Method that is responsible for physics related calculations. It's called inside PhysicsManager
@@ -147,7 +148,7 @@ class Node {
     @brief Returns node type as string for renderer.
     @return string - type
     */
-    virtual string RenderType();
+    virtual uint8_t RenderType();
 
     /**
     @brief Disables all active behaviours of the node.

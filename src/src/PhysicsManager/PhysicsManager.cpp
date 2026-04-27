@@ -6,7 +6,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 	if (currentScene != scene) {
 		currentScene = scene;
 		currentNodes.clear();
-		updateNode(scene->root);
+		UpdateNode(scene->root);
 	}
 
 	// ruch
@@ -37,7 +37,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		auto col = currentNodes[i]->GetCollider();
 		if (col) {
-			col->updatePosition(currentNodes[i]->GetTransform());
+			col->UpdatePosition(currentNodes[i]->GetTransform());
 		}
 	}
 
@@ -53,7 +53,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 	return;
 }
 
-void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
+void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
 	if (physicsNode) {
 		currentNodes.push_back(physicsNode);
@@ -61,7 +61,7 @@ void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
 	}
 
 	for (const auto& child : node->GetChildren()) {
-		updateNode(child);
+		UpdateNode(child);
 	}	
 }
 
@@ -71,7 +71,7 @@ PhysicsManager& PhysicsManager::GetPhysicsManager()
 	return instance;
 }
 
-std::optional<RaycastHit> PhysicsManager::raycast(
+std::optional<RaycastHit> PhysicsManager::Raycast(
 	const glm::vec2& origin,
 	const glm::vec2& direction,
 	float maxDistance,
@@ -85,7 +85,7 @@ std::optional<RaycastHit> PhysicsManager::raycast(
 		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
-			auto hit = col->raycast(origin, direction, maxDistance);
+			auto hit = col->Raycast(origin, direction, maxDistance);
 
 			if (hit && hit->distance < closest)
 			{
@@ -98,7 +98,7 @@ std::optional<RaycastHit> PhysicsManager::raycast(
 	return result;
 }
 
-std::vector<RaycastHit> PhysicsManager::raycastAll(
+std::vector<RaycastHit> PhysicsManager::RaycastAll(
 	const glm::vec2& origin,
 	const glm::vec2& direction,
 	float maxDistance,
@@ -112,7 +112,7 @@ std::vector<RaycastHit> PhysicsManager::raycastAll(
 		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
-			auto hit = col->raycast(origin, direction, maxDistance);
+			auto hit = col->Raycast(origin, direction, maxDistance);
 
 			if (hit && hit->distance < closest)
 			{

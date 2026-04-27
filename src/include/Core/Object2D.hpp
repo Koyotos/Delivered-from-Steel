@@ -1,7 +1,6 @@
 #ifndef FE_OBJECT_2D
 #define FE_OBJECT_2D
 
-#include "include/Core/VisualNode.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
 #include "include/Renderer/Sprite.hpp"
 
@@ -17,7 +16,7 @@ class Object2D : public PhysicsNode {
     public:
 
     string Type() override;
-    string RenderType() override final;
+    uint8_t RenderType() override final;
 
     /*
     @brief Sets flag that informs renderer to use perspective matrix instead of orthogonal.
@@ -36,7 +35,7 @@ class Object2D : public PhysicsNode {
     @brief Override of Draw() function. It renders object's sprite with given shader.
     @return void
     */
-    void Draw() override;
+    void Draw(shared_ptr<Shader> sh = nullptr) override;
 
     /*
     @brief Returns sprite used by object.

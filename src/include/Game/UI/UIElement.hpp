@@ -106,7 +106,7 @@ class UIElement : public Object2D {
 	*/
 	void Tint(glm::vec3 color, float time, EaseType ease = EaseType::Linear);
 
-	void Draw() override;
+	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
 };
 

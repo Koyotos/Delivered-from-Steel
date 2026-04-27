@@ -1,6 +1,6 @@
 #include "include/Game/UI/CardUI.hpp"
 
-void CardUI::Draw() {
+void CardUI::Draw(shared_ptr<Shader> sh) {
 	UIElement::Draw();
 }
 

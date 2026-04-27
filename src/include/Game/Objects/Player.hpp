@@ -60,16 +60,25 @@ private:
 	float cameraShakeTimer = 0.0f;
 	float cameraShakeIntensity = 0.0f;
 	bool isCameraInitialized = false;
+	bool isDead = false;
+	float respawnDelay = 1.5f;
+	float respawnTimer = 0.0f;
+
+	float damageCooldown = 0.5f;
+	float damageTimer = 0.0f;
+	bool canTakeDamage = true;
+
+	glm::vec2 platformVelocity = glm::vec2(0.0f);
+	glm::vec3 respawnPoint;
+	bool CheckGrounded();
+	bool CheckWalled();
+	bool CheckLeftWalled();
+	bool CheckCeiling();
 
 	float SmoothDamp(float current, float target, float& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
 	glm::vec2 SmoothDamp(glm::vec2 current, glm::vec2 target, glm::vec2& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
 
 	bool CheckLedge();
-	bool CheckGrounded();
-	bool CheckLeftWalled();
-	bool CheckRightWalled();
-	bool CheckCeiling();
-
 	float MoveTowards(float current, float target, float maxDelta);
 
 public:

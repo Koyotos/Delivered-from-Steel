@@ -35,8 +35,7 @@ void Scene::FindPlayer(shared_ptr<Node> node) noexcept {
 
 void Scene::UpdateTransforms(shared_ptr<Node> node, Transform t) {
 
-    if (node->Type() == "TextNode" || node->RenderType() == "Object2D"
-        || node->RenderType() == "Object3D") {
+    if(node->RenderType()>=3) {
         shared_ptr<PhysicsNode> physicsCast = static_pointer_cast<PhysicsNode>(node);
         if (!physicsCast->TestIgnoreParent()) {
             if (physicsCast->TestTransformChanged()) {

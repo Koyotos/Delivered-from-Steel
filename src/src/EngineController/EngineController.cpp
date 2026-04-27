@@ -1,8 +1,4 @@
 #include "include/EngineController/EngineController.hpp"
-#include "include/Globals/Globals.hpp"
-#include "include/Profiler/Profiler.hpp"
-#include "include/AudioManager/AudioManager.hpp"
-#include <stdexcept>
 
 void EngineController::Init() {
 
@@ -23,8 +19,8 @@ void EngineController::Init() {
     try {
         scm = make_shared<SceneManager>();
         iom = make_shared<IOManager>();
-        renderer = make_shared<Renderer>();
         rsm = make_shared<ResourceManager>();
+        renderer = make_shared<Renderer>();
         aum = make_shared<AudioManager>();
         if (!aum->Init()) {
             globals->Log("Audio failed to initialize. Game will continue without sound.");
@@ -33,8 +29,9 @@ void EngineController::Init() {
         rsm->SetAudioManager(aum);
         Globals::GetGlobals().audioManager = aum;
 
-		iom->Init(renderer->GetWindow());
         rsm->ConfigurePaths();
+        renderer->Init(*rsm);
+		iom->Init(renderer->GetWindow());
         globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
 
     } catch(const exception& except) {

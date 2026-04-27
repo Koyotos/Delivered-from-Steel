@@ -148,7 +148,7 @@ void UIElement::Process() {
 	UpdateTweens(Globals::GetGlobals().GetDeltaTime());
 }
 
-void UIElement::Draw() {
+void UIElement::Draw(shared_ptr<Shader> sh) {
 	if (!isVisible) return;
 	shader->SetMat4("VP", glm::ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f));
 	shader->SetFloat("alpha", alpha);

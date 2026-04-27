@@ -16,6 +16,7 @@ class TextNode : public VisualNode {
     public:
 
     string Type() override;
+    uint8_t RenderType() override final;
 
     void SetContent(const string&);
     void SetColor(const vec3&);
@@ -23,7 +24,7 @@ class TextNode : public VisualNode {
     void SetScale(const float&);
     void SetSize(const ivec2&);
 
-    void Draw() override final;
+    void Draw(shared_ptr<Shader> sh = nullptr) override final;
 
 
     TextNode();

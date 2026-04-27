@@ -99,7 +99,6 @@ class ResourceManager {
     // Asset loaders
     inline shared_ptr<Model> LoadModel(const string&);
     inline shared_ptr<Sprite> LoadSprite(const string&);
-    inline shared_ptr<Shader> LoadShader(const string&);
 
     // Helper
     inline string LoadPlainText(const path&);
@@ -120,6 +119,7 @@ class ResourceManager {
     void ConfigurePaths();
 
     void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
+    shared_ptr<Shader> LoadShader(const string&);
 
     ResourceManager();
     ~ResourceManager();

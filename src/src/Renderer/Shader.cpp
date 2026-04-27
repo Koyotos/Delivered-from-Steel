@@ -83,10 +83,10 @@ void Shader::Compile(string sources[4]) {
         glDeleteShader(part);
     }
     glLinkProgram(id);
-    glGetShaderiv(id, GL_LINK_STATUS,&status);
+    glGetProgramiv(id, GL_LINK_STATUS,&status);
     if(!status) {
         char buffer[512];
-        glGetShaderInfoLog(id,512,nullptr,buffer);
+        glGetProgramInfoLog(id,512,nullptr,buffer);
         throw runtime_error("Failed to link shader : " + string(buffer));
     }
 }

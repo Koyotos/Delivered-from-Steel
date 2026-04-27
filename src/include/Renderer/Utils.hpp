@@ -15,6 +15,12 @@
 using namespace glm;
 using namespace std;
 
+#define TEXTURES_SLOT_DIFFUSE 0
+#define TEXTURES_SLOT_SPECULAR 4
+#define TEXTURES_SLOT_NORMAL 8
+#define TEXTURES_SLOT_SHADOWMAPS 9
+#define TEXTURES_SLOT_SHADOWCUBEMAPS 10
+
 struct Vertex {
     vec3 position;
     vec3 normal;

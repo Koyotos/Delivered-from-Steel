@@ -74,7 +74,7 @@
     "process": true,
     "input": false,
     "physics": false,
-    "draw": true,
+    "draw": false,
     "ignoreParent": true,
     "cull" : 0.0,
     "zIndex" : 0

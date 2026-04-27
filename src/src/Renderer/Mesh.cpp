@@ -1,5 +1,4 @@
 #include "include/Renderer/Mesh.hpp"
-#include "include/Profiler/Profiler.hpp"
 
 void Mesh::SetupMesh(const bool& drawFlag) {
     glGenVertexArrays(1, &VAO);
@@ -24,28 +23,25 @@ void Mesh::SetupMesh(const bool& drawFlag) {
 }
 
 void Mesh::Draw(Shader& shader) {
-    GLuint diffuseNr = 1;
-    GLuint specularNr = 1;
-    shader.Use();
-    for(unsigned int i = 0; i < textures.size(); i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i);
-        string number;
+    for (unsigned int i = 0; i < textures.size(); i++) {
         string name = textures[i].type;
-        if(name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if(name == "texture_specular")
-            number = std::to_string(specularNr++);
-
-        shader.SetInt(("material." + name + number).c_str(), i);
+        GLuint slot = 0;
+        if (name == "texture_diffuse") {
+            slot = TEXTURES_SLOT_DIFFUSE;
+        }
+        else if (name == "texture_specular") {
+            slot = TEXTURES_SLOT_SPECULAR;
+        }
+        glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        shader.SetInt((name), slot);
     }
-    glActiveTexture(GL_TEXTURE0);
+    PROFILER_ADD_DRAW_CALL(1);
     glBindVertexArray(VAO);
-    PROFILER_ADD_DRAW_CALL(indices.size() / 3);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
+       
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, const bool& drawFlag) {
     this->vertices = vertices;

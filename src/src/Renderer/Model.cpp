@@ -6,6 +6,7 @@ const string& Model::GetDir() const noexcept {
 }
 
 void Model::Draw(Shader& sh) {
+    sh.Use();
     for(auto& k : meshes) {
         k->Draw(sh);
     }

@@ -26,7 +26,7 @@ void Enemy::ChangeState(shared_ptr<Player> player) {
         break;
     }
     case EnemyState::Attack: {
-		//  to ³atwiej bedzie ustawiwæ w AttackState(dt);
+		//  to ï¿½atwiej bedzie ustawiwï¿½ w AttackState(dt);
         break;
     }
     }
@@ -50,7 +50,7 @@ void Enemy::UpdateState(float dt) {
 }
 
 void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
-	shared_ptr<PhysicsNode> owner = other->getOwner();
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		Attack(player);
@@ -86,7 +86,7 @@ void Enemy::DetectPlayer() {
         if (dist > 0.0001f && dist < 4.0f) {
             dir /= dist;
 
-            auto hit = raycast(
+            auto hit = Raycast(
                 glm::vec2(0.0f),
                 dir,
                 dist,

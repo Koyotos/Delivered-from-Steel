@@ -12,8 +12,8 @@ string VisualNode::Type() {
     return "VisualNode";
 }
 
-string VisualNode::RenderType() {
-    return "VisualNode";
+uint8_t VisualNode::RenderType() {
+    return 1;
 }
 
 void VisualNode::ApplyParentTransform(Transform t) {

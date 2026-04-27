@@ -1,56 +1,197 @@
 #include "include/Renderer/Renderer.hpp"
-#include "include/Core/Object2D.hpp"
-#include "include/Core/Object3D.hpp"    
-#include "include/Core/VisualNode.hpp"
-#include "include/Renderer/Light.hpp"
-#include "include/Renderer/TextNode.hpp"
-#include "include/Profiler/Profiler.hpp"
-#include <iostream>
 
-void Renderer::Init() {
-    if(!glfwInit()) {
-        throw runtime_error("Can't initilize GLFW");
-    }
+static auto normalizePlane = [](vec4& plane) {
+        float length = glm::length(vec3(plane));
+        plane /= length;
+};
+
+void Renderer::Init(ResourceManager& rsm)
+{
+    if (!glfwInit())
+        throw runtime_error("Can't initialize GLFW");
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_VERSION_MAJOR);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);    
-    
-    window = glfwCreateWindow(DEF_WIN_W,DEF_WIN_H,"Game",nullptr,nullptr);
-    if(!window) {
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+    window = glfwCreateWindow(DEF_WIN_W, DEF_WIN_H, "Game", nullptr, nullptr);
+    if (!window)
         throw runtime_error("Can't create window");
-    }
 
     glfwMakeContextCurrent(window);
-    // glfwSwapInterval(1); VSYNC don't know if it will be useful
-    
-    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw runtime_error("GL loader eror");
-    }
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        throw runtime_error("GL loader error");
+
+    lightSpaceMatrices.resize(MAX_LIGHTS);
+    farPlanes.resize(MAX_LIGHTS);
+
+    depthShaderLayered = rsm.LoadShader("layeredDepth");
+    depthShaderNormal  = rsm.LoadShader("simpleDepth");
+
+    glGenFramebuffers(1, &FBO);
+
+    GenShadowMaps();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+    glEnable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LESS);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+}
+
+void Renderer::GenShadowMaps() {
+    // Cube array
+    glGenTextures(1, &depthCubeArray);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
+
+    glTexStorage3D(
+        GL_TEXTURE_CUBE_MAP_ARRAY,
+        1,
+        GL_DEPTH_COMPONENT24,
+        SHADOW_WIDTH,
+        SHADOW_HEIGHT,
+        MAX_LIGHTS * 6
+    );
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+   // Array 2D
+    glGenTextures(1, &depthMaps2DArray);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, depthMaps2DArray);
+
+    glTexStorage3D(
+        GL_TEXTURE_2D_ARRAY,
+        1,
+        GL_DEPTH_COMPONENT24,
+        SHADOW_WIDTH,
+        SHADOW_HEIGHT,
+        MAX_LIGHTS
+    );
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Renderer::ComputeFrustum() {
-    mat4 vp = currentScene->sceneCam->GetVP(1);
-    frustumLeft = vec4(vp[0][3] + vp[0][0], vp[1][3] + vp[1][0], vp[2][3] + vp[2][0], vp[3][3] + vp[3][0]);
-    frustumRight = vec4(vp[0][3] - vp[0][0], vp[1][3] - vp[1][0], vp[2][3] - vp[2][0], vp[3][3] - vp[3][0]);
-    frustumBottom = vec4(vp[0][3] + vp[0][1], vp[1][3] + vp[1][1], vp[2][3] + vp[2][1], vp[3][3] + vp[3][1]);
-    frustumTop = vec4(vp[0][3] - vp[0][1], vp[1][3] - vp[1][1], vp[2][3] - vp[2][1], vp[3][3] - vp[3][1]);
-    auto normalizePlane = [](vec4& plane) {
-        float length = glm::length(vec3(plane));
-        plane /= length;
-    };
+    frustumLeft = vec4(frameVP[0][3] + frameVP[0][0], frameVP[1][3] + frameVP[1][0], frameVP[2][3] + frameVP[2][0], frameVP[3][3] + frameVP[3][0]);
+    frustumRight = vec4(frameVP[0][3] - frameVP[0][0], frameVP[1][3] - frameVP[1][0], frameVP[2][3] - frameVP[2][0], frameVP[3][3] - frameVP[3][0]);
+    frustumBottom = vec4(frameVP[0][3] + frameVP[0][1], frameVP[1][3] + frameVP[1][1], frameVP[2][3] + frameVP[2][1], frameVP[3][3] + frameVP[3][1]);
+    frustumTop = vec4(frameVP[0][3] - frameVP[0][1], frameVP[1][3] - frameVP[1][1], frameVP[2][3] - frameVP[2][1], frameVP[3][3] - frameVP[3][1]);
 
     normalizePlane(frustumLeft);
     normalizePlane(frustumRight);
     normalizePlane(frustumBottom);
     normalizePlane(frustumTop);
+}  
+
+bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light) {
+    vec3 objPos = obj->GetTransform().GetGlobal()[3];
+    float radius = obj->GetCullRadius();
+    switch(light->type) {
+        case LIGHT_POINT: {
+            float maxDist = 20.0f;
+            float dist2 = glm::length2(objPos - light->data1);
+            float r = maxDist + radius + 2.0f;
+            return dist2 < r * r;
+        }
+        case LIGHT_SPOT: {
+            vec3 toObj = objPos - light->data1;
+            float dist = glm::length(toObj);
+
+            float maxDist = 20.0f;
+            if(dist > maxDist + radius) return false;
+
+            vec3 dir = normalize(light->data2);
+            float angle = dot(normalize(toObj), dir);
+
+            float cutoff = light->data4;
+            return angle > cutoff - 0.1f;
+        }
+    }
+    return true;
+}
+
+void Renderer::DepthPass() {
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glEnable(GL_DEPTH_TEST);
+    glCullFace(GL_FRONT);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS; i++) {
+        shared_ptr<Light> light = lightsPos[i].first;
+        mat4 projection, view;
+        switch(light->type) {
+            case LIGHT_DIRECTIONAL: {
+                vec3 dir = normalize(light->data1);
+                vec3 center = vec3(0.0f);
+                vec3 pos = center - dir * 30.0f;
+                projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
+                view = lookAt(pos, center, vec3(0, 1, 0));
+                lightSpaceMatrices[i] = projection * view;
+                depthShaderNormal->Use();
+                depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+                glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMaps2DArray, 0, i);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                for(auto& obj : potentialCasters) {
+                    PROFILER_ADD_OBJECT();
+                    obj->Draw(depthShaderNormal);
+                }
+                break;
+            }
+            case LIGHT_POINT: {
+                vec3 pos = light->data1;
+                projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
+                depthShaderLayered->Use();
+                for(int face = 0; face < 6; face++) {
+                    view = lookAt(pos, pos + dirs[face], ups[face]);
+                    mat4 shadowMat = projection * view;
+                    depthShaderLayered->SetMat4("lightSpaceMatrix", shadowMat);
+                    int layer = i * 6 + face;
+                    glFramebufferTextureLayer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0, layer);
+                    glClear(GL_DEPTH_BUFFER_BIT);
+                    for(auto& obj : potentialCasters){
+                        if(!AffectsLight(obj, light)) {
+                            continue;
+                        }
+                        PROFILER_ADD_OBJECT();
+                        obj->Draw(depthShaderLayered);
+                    }
+                }
+                farPlanes[i] = 20.0f;
+                break;
+            }
+            case LIGHT_SPOT: {
+                projection = perspective(light->data4, 1.f, 0.1f, 20.f);
+                view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
+                lightSpaceMatrices[i] = projection * view;
+                depthShaderNormal->Use();
+                depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+                glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMaps2DArray, 0, i);
+                glClear(GL_DEPTH_BUFFER_BIT);
+                for(auto& obj : potentialCasters){
+                    if(!AffectsLight(obj, light)) {
+                        continue;
+                    }
+                    PROFILER_ADD_OBJECT();
+                    obj->Draw(depthShaderLayered);
+                }
+                break;
+            }
+        }
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0,0,windowW, windowH);
+    glCullFace(GL_BACK);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
@@ -59,6 +200,18 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     lightsPos.clear();
     drawVector.clear();
     drawVectorUI.clear();
+    potentialCasters.clear();
+    lightsUpdatedList.clear();
+
+    // Preallocate memory (optimization)
+    lightsPos.reserve(MAX_LIGHTS);
+    drawVector.reserve(OBJECTS_NUMBER_PREDICT);
+    drawVectorUI.reserve(UI_NUMBER_PREDICT);
+    lightsUpdatedList.reserve(LIGHTS_SHADERS_PREDICT);
+
+    frameVP = scene->sceneCam->GetVP(1);
+    frameVO = scene->sceneCam->GetVP(0);
+    frameO = scene->sceneCam->GetUI();
 
     // Prepare culling
     currentScene = scene;
@@ -71,6 +224,8 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
     // Setup shaders
     PrepareLights();
+    DepthPass();
+    BindShadowTextures();
     PrepareShaders();
 
     // Draw
@@ -83,15 +238,25 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     #endif
 }
 
+void Renderer::BindShadowTextures() {
+    glActiveTexture(GL_TEXTURE0 + TEXTURES_SLOT_SHADOWMAPS);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, depthMaps2DArray);
+    glActiveTexture(GL_TEXTURE0 + TEXTURES_SLOT_SHADOWCUBEMAPS);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
+    glActiveTexture(GL_TEXTURE0);
+}
+
 void Renderer::Draw() {
     for(auto& node : drawVector) {
         PROFILER_ADD_OBJECT();
         node->Draw();
     }
+    glDisable(GL_CULL_FACE);
     for(auto& node : drawVectorUI) {
         PROFILER_ADD_OBJECT();
         node->Draw();
     }
+    glEnable(GL_CULL_FACE);
 }
 
 void Renderer::PrepareLights() {
@@ -124,14 +289,19 @@ bool Renderer::Cull(shared_ptr<VisualNode> node) {
 }
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
-    if(node->Type() == "TextNode" || node->RenderType() == "Object2D" 
-        || node->RenderType() == "Object3D") {
-        PrepareDrawNode(static_pointer_cast<VisualNode>(node), t);
+    bool childTransformState = false;
+    if(node->RenderType() >= NRT_OBJECT2D) {
+        shared_ptr<VisualNode> cast = static_pointer_cast<VisualNode>(node);
+        PrepareDrawNode(cast, t);
+        if(node->RenderType() == NRT_OBJECT3D) {
+            potentialCasters.push_back(cast);
+        }
         
     } else if(node->Type() == "Light") {
         PrepareDrawLight(static_pointer_cast<Light>(node));
     }
     for(auto& k : node->GetChildren()) {
+        k->SetTransformChanged(childTransformState);
         PrepareDraw(k, t);
     }
 } 
@@ -156,8 +326,8 @@ void Renderer::ResolveZ() {
 
 void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) {
     t = visualCast->GetTransform();
-    if(Cull(visualCast) && visualCast->TestDraw()) {
-        if(visualCast->Type() == "TextNode" || visualCast->RenderType() == "Object2D") {
+    if(Cull(visualCast)) {
+        if(visualCast->RenderType() == NRT_OBJECT2D || visualCast->RenderType() == NRT_TEXTNODE) {
             drawVectorUI.push_back(visualCast);
         } else {
             drawVector.push_back(visualCast);
@@ -179,7 +349,11 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     if(light == nullptr) {
         return;
     }
-    shader->SetInt("lightsNum", index);
+    for(auto& s : lightsUpdatedList) {
+        if(s==shader.get()) {
+            return;
+        }
+    }
     shader->SetInt("lights["+to_string(index)+"].type", light->type);
     shader->SetVec3("lights["+to_string(index)+"].data1", light->data1);
     shader->SetVec3("lights["+to_string(index)+"].data2", light->data2);
@@ -188,36 +362,52 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     shader->SetVec3("lights["+to_string(index)+"].colorAmbient", light->colorAmbient);
     shader->SetVec3("lights["+to_string(index)+"].colorDiffuse", light->colorDiffuse);
     shader->SetVec3("lights["+to_string(index)+"].colorSpecular", light->colorSpecular);
+    lightsUpdatedList.push_back(shader.get());
 }
 
 void Renderer::ConfigureShader(shared_ptr<Node> node) {
-    if(node->Type() == "Object2D") {
-        shared_ptr<Object2D> obj2d = static_pointer_cast<Object2D>(node);
-        shared_ptr<Shader> shader = obj2d->GetShader();
-        if(obj2d->GetReqPerspective()) {
-            shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
-        } else {
-            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+    shared_ptr<Shader> shader;
+    switch(node->RenderType()) {
+        case NRT_OBJECT3D: {
+            shared_ptr<Object3D> obj3D = static_pointer_cast<Object3D>(node);
+            shader = obj3D->GetShader();
+            shader->SetMat4("VP", frameVP);
+            shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
+            uint8_t count = std::min((int)lightsPos.size(),20);
+            shader->SetInt("lightsNum", count);
+            for(uint8_t i = 0; i < count; i++) {
+                SetLight(lightsPos[i].first, shader, i);
+            }
+            shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
+            shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
+            for (uint8_t i = 0; i < count; i++) {
+                shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
+                shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
+            }
+            break;
         }
-    } else if(node->Type() == "TextNode"){
-        shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
-        shared_ptr<Shader> shader = textNode->GetShader();
-        if (textNode->TestIgnoreParent()) {
-            shader->SetMat4("VP", currentScene->sceneCam->GetUI());
+        case NRT_OBJECT2D: {
+            shared_ptr<Object2D> obj2D = static_pointer_cast<Object2D>(node);
+            shader = obj2D->GetShader();
+            if(obj2D->GetReqPerspective()) {
+                shader->SetMat4("VP", frameVP);
+            } else {
+                shader->SetMat4("VP", frameVO);
+            }
+            break;
         }
-        else {
-            shader->SetMat4("VP", currentScene->sceneCam->GetVP(0));
+        case NRT_TEXTNODE: {
+            shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
+            shader = textNode->GetShader();
+            if(textNode->TestIgnoreParent()) {
+                shader->SetMat4("VP", frameO);
+            } else {
+                shader->SetMat4("VP", frameVO);
+            }
+            break;
         }
-    } 
-    else if(node->Type() == "Object3D") {
-        shared_ptr<Object3D> obj3d = static_pointer_cast<Object3D>(node);
-        shared_ptr<Shader> shader = obj3d->GetShader();
-        shader->SetMat4("VP", currentScene->sceneCam->GetVP(1));
-        shader->SetVec3("viewPos",vec3(currentScene->sceneCam->GetPos(),0));
-        for(int8_t i = 0; i < (lightsPos.size()>20 ? 20 : lightsPos.size()); i++) {
-            SetLight(lightsPos[i].first, shader, i);
-        }
-    }   
+        default : break;
+    }
 }
 
 void Renderer::EndFrame() {
@@ -228,7 +418,6 @@ void Renderer::EndFrame() {
 Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
     this->windowW = windowW;
     this->windowH = windowH;
-    Init();
 }
 
 Renderer::~Renderer() {

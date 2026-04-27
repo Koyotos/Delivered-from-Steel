@@ -1,6 +1,5 @@
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 #include "include/PhysicsManager/BoxCollider.hpp"
-#include <algorithm>
 
 CapsuleCollider::CapsuleCollider(const Transform transform, float x, float y, float radius, float height)
     : Collider()
@@ -10,10 +9,10 @@ CapsuleCollider::CapsuleCollider(const Transform transform, float x, float y, fl
     this->radius = radius;
     this->height = height;
 
-    updatePosition(transform);
+    UpdatePosition(transform);
 }
 
-void CapsuleCollider::updatePosition(const Transform transform)
+void CapsuleCollider::UpdatePosition(const Transform transform)
 {
     mat4 modelMatrix = transform.GetGlobal();
 
@@ -27,22 +26,22 @@ void CapsuleCollider::updatePosition(const Transform transform)
     this->b = center - upDirection * segmentHalfLength;
 }
 
-bool CapsuleCollider::checkCollision(std::shared_ptr<BoxCollider> other) const {
-	return calculateCollisionInfo(other)->collided;
+bool CapsuleCollider::CheckCollision(std::shared_ptr<BoxCollider> other) const {
+	return CalculateCollisionInfo(other)->collided;
 }
 
-bool CapsuleCollider::checkCollision(std::shared_ptr<CapsuleCollider> other) const {
-    return calculateCollisionInfo(other)->collided;
+bool CapsuleCollider::CheckCollision(std::shared_ptr<CapsuleCollider> other) const {
+    return CalculateCollisionInfo(other)->collided;
 }
 
-std::shared_ptr<CollisionInfo> CapsuleCollider::calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
-    std::shared_ptr<CollisionInfo> info = other->calculateCollisionInfo(std::const_pointer_cast<CapsuleCollider>(shared_from_this()));
+std::shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
+    std::shared_ptr<CollisionInfo> info = other->CalculateCollisionInfo(std::const_pointer_cast<CapsuleCollider>(shared_from_this()));
 	vec2 tempNormal = info->normal;
 	info->normal = -tempNormal;
     return info;
 }
 
-std::shared_ptr<CollisionInfo> CapsuleCollider::calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
+std::shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
     std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
 	glm::vec2 closestCapsule = {
@@ -55,7 +54,7 @@ std::shared_ptr<CollisionInfo> CapsuleCollider::calculateCollisionInfo(std::shar
        std::clamp(closestCapsule.y, b.y, a.y)
 	};
 
-	float distSq = distanceSquared(closestCapsule, closestCapsuleOther);
+	float distSq = DistanceSquared(closestCapsule, closestCapsuleOther);
 
     if (distSq < (other->radius + radius) * (other->radius + radius)) {
         info->collided = true;
@@ -101,7 +100,7 @@ std::optional<float> rayVsCircle(
     return t;
 }
 
-std::optional<RaycastHit> CapsuleCollider::raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
+std::optional<RaycastHit> CapsuleCollider::Raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
     float closest = maxDist;
     std::optional<RaycastHit> result;
 

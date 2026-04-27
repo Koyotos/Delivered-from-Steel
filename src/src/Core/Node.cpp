@@ -16,7 +16,7 @@ bool Node::Input(InputEvent& event) {
     return false;
 }
 
-void Node::Draw() {
+void Node::Draw(shared_ptr<Shader> sh) {
     return;
 }
 
@@ -28,8 +28,8 @@ string Node::Type() {
     return "Node";
 }
 
-string Node::RenderType() {
-    return "Node";
+uint8_t Node::RenderType() {
+    return 0;
 }
 
 void Node::Disable() noexcept {
@@ -53,7 +53,7 @@ Node::Node() {
 
 }
 
-Node::Node(const unordered_map<string, any>& data) {
+Node::Node(const unordered_map<string, std::any>& data) {
     flags[0] = fromMap(bool, "process", data);
     flags[1] = fromMap(bool, "input", data);
     flags[2] = fromMap(bool, "physics", data);
