@@ -31,9 +31,9 @@ bool Player::CheckGrounded() {
 	float offsetX = 0.1f;
 	float offsetY = -0.4f;
 
-	auto hitCenter = raycast(glm::vec2(0.0f, offsetY), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
-	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitCenter = Raycast(glm::vec2(0.0f, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitLeft = Raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
 
 	return hitCenter.has_value() || hitLeft.has_value() || hitRight.has_value();
 }
@@ -43,8 +43,8 @@ bool Player::CheckWalled() {
 	glm::vec2 rayDir(1.0f, 0.0f);
 	float offsetX = 0.5f;
 	float offsetY = 0.0f;
-	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), -rayDir, rayLength, ObjectType::Wall);
+	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitLeft = Raycast(glm::vec2(-offsetX, offsetY), -rayDir, rayLength, ObjectType::Wall);
 	return hitRight.has_value() || hitLeft.has_value();
 }
 

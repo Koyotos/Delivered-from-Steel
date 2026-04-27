@@ -146,7 +146,7 @@ class Node {
     @brief Returns node type as string for renderer.
     @return string - type
     */
-    virtual string RenderType();
+    virtual uint8_t RenderType();
 
     /*
     @brief Basic constructor. Creates empty Node.

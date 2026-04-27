@@ -3,11 +3,8 @@
 void Font::CreateCharset(const ivec2& size) {
     int atlasWidth = 0;
     int atlasHeight = 0;
-
     int rowWidth = 0;
     int rowHeight = 0;
-    const int MAX_ROW_WIDTH = 1024;
-
     FT_Set_Char_Size(face, 0, size.y * 64, 0, 0);
     for (unsigned char c = 0; c < 128; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
@@ -15,19 +12,15 @@ void Font::CreateCharset(const ivec2& size) {
 
         int w = face->glyph->bitmap.width;
         int h = face->glyph->bitmap.rows;
-
         if (rowWidth + w >= MAX_ROW_WIDTH) {
             atlasWidth = std::max(atlasWidth, rowWidth);
             atlasHeight += rowHeight;
-
             rowWidth = 0;
             rowHeight = 0;
         }
-
         rowWidth += w;
         rowHeight = std::max(rowHeight, h);
     }
-
     atlasWidth = std::max(atlasWidth, rowWidth);
     atlasHeight += rowHeight;
     if (atlasWidth == 0 || atlasHeight == 0) {
@@ -51,7 +44,6 @@ void Font::CreateCharset(const ivec2& size) {
     rowHeight = 0;
 
     map<char, Character> charset;
-
     for(unsigned char c = 0; c < 128; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
             continue;

@@ -4,6 +4,7 @@
 #include "include/Core/Scene.hpp"
 #include "include/Core/Transform.hpp"
 #include "include/Core/VisualNode.hpp"
+#include "include/ResourceManager/ResourceManager.hpp"
 
 #include "GLFW/glfw3.h"
 #include "include/Renderer/Camera.hpp"
@@ -20,8 +21,20 @@
 #define SHADOW_HEIGHT 2048
 
 #define MAX_LIGHTS 20
+#define OBJECTS_NUMBER_PREDICT 15
+#define UI_NUMBER_PREDICT 20
+#define LIGHTS_SHADERS_PREDICT 5
 
 #define CULL_RADIUS_ALWAYS_TRUE 0.000000001
+
+enum NodeRenderType {
+    NRT_NODE = 0,
+    NRT_VISUALNODE = 1,
+    NRT_PHYSICSNODE = 2,
+    NRT_OBJECT2D = 3,
+    NRT_OBJECT3D = 4,
+    NRT_TEXTNODE = 5
+};
 
 class Renderer {
     private: 
@@ -30,6 +43,12 @@ class Renderer {
     uint16_t windowW;
     uint16_t windowH;
 
+    // Optimizations
+    mat4 frameVP;
+    mat4 frameVO;
+    mat4 frameO;
+    vector<Shader*> lightsUpdatedList;
+ 
     // Depth 
     GLuint FBO;
     GLuint depthMaps2DArray;
@@ -38,6 +57,18 @@ class Renderer {
     shared_ptr<Shader> depthShaderNormal;
     int shadow2DUnit;
     int shadowCubeUnit;
+    vector<shared_ptr<VisualNode>> potentialCasters; 
+
+    static constexpr vec3 dirs[6] = {
+                    {1,0,0},{-1,0,0},
+                    {0,1,0},{0,-1,0},
+                    {0,0,1},{0,0,-1}
+                };
+    static constexpr vec3 ups[6] = {
+                    {0,-1,0},{0,-1,0},
+                    {0,0,1},{0,0,-1},
+                    {0,-1,0},{0,-1,0}
+                };
 
     // Culling
     vec4 frustumLeft;
@@ -53,6 +84,9 @@ class Renderer {
     vector<glm::mat4> lightSpaceMatrices;
     vector<float> farPlanes;
 
+    // Init 
+    inline void GenShadowMaps();
+
     // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&, bool&);
@@ -60,6 +94,7 @@ class Renderer {
     inline void DepthPass();
 
     inline bool Cull(shared_ptr<VisualNode>);
+    inline bool AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light);
 
     inline void PrepareDrawLight(shared_ptr<Light>);
     inline void ComputeFrustum();

@@ -1,7 +1,6 @@
 #ifndef FE_OBJECT_2D
 #define FE_OBJECT_2D
 
-#include "include/Core/VisualNode.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
 #include "include/Renderer/Sprite.hpp"
 
@@ -17,7 +16,7 @@ class Object2D : public PhysicsNode {
     public:
 
     string Type() override;
-    string RenderType() override final;
+    uint8_t RenderType() override final;
 
     /*
     @brief Sets flag that informs renderer to use perspective matrix instead of orthogonal.

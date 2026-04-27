@@ -1,6 +1,4 @@
 #include "include/Renderer/Sprite.hpp"
-#include "include/Renderer/Mesh.hpp"
-#include "include/Profiler/Profiler.hpp"
 
 const string& Sprite::GetDir() const noexcept {
     return directory;
@@ -30,7 +28,6 @@ vec2 Sprite::GetSize() {
 
 void Sprite::Draw(Shader& shader) {
     shader.Use();
-    glDisable(GL_CULL_FACE);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[active].id);
     glBindVertexArray(VAO);
@@ -38,7 +35,6 @@ void Sprite::Draw(Shader& shader) {
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindTexture(GL_TEXTURE_2D,0);
     glBindVertexArray(0);
-    glEnable(GL_CULL_FACE);
 }
 
 void Sprite::SetupSprite() {

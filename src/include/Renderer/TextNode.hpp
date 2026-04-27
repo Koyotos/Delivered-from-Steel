@@ -16,7 +16,7 @@ class TextNode : public VisualNode {
     public:
 
     string Type() override;
-    string RenderType() override final;
+    uint8_t RenderType() override final;
 
     void SetContent(const string&);
     void SetColor(const vec3&);

@@ -28,8 +28,8 @@ string Node::Type() {
     return "Node";
 }
 
-string Node::RenderType() {
-    return "Node";
+uint8_t Node::RenderType() {
+    return 0;
 }
 
 Node::Node() {

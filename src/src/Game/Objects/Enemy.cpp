@@ -6,7 +6,7 @@ Enemy::Enemy(const unordered_map<string, std::any>& data) : Object2D(data) {
 }
 
 void Enemy::OnCollisionEnter(shared_ptr<Collider> other) {
-	shared_ptr<PhysicsNode> owner = other->getOwner();
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		player->takeDamage(damage);

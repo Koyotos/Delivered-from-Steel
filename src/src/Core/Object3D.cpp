@@ -12,8 +12,8 @@ string Object3D::Type() {
     return "Object3D";
 }
 
-string Object3D::RenderType() {
-    return "Object3D";
+uint8_t Object3D::RenderType() {
+    return 4;
 }
 
 shared_ptr<Model> Object3D::GetModel() {

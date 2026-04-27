@@ -7,42 +7,42 @@ Collider::Collider()
 	previousCollisions = {};
 }
 
-std::unordered_set<std::shared_ptr<Collider>>& Collider::getCurrentCollisions() {
+std::unordered_set<std::shared_ptr<Collider>>& Collider::GetCurrentCollisions() {
     return currentCollisions;
 }
 
-std::unordered_set<std::shared_ptr<Collider>>& Collider::getPreviousCollisions() {
+std::unordered_set<std::shared_ptr<Collider>>& Collider::GetPreviousCollisions() {
     return previousCollisions;
 }
 
-void Collider::clearCurrentCollisions() {
+void Collider::ClearCurrentCollisions() {
 	currentCollisions.clear();
 }
 
-void Collider::addToCurrentCollisions(std::shared_ptr<Collider> col) {
+void Collider::AddToCurrentCollisions(std::shared_ptr<Collider> col) {
 	currentCollisions.insert(col);
 }
 
-void Collider::setCurrentToPrevious() {
+void Collider::SetCurrentToPrevious() {
 	previousCollisions = currentCollisions;
-	clearCurrentCollisions();
+	ClearCurrentCollisions();
 }
 
-glm::vec2 Collider::getGlobalPosition2D() const {
+glm::vec2 Collider::GetGlobalPosition2D() const {
     return transform;
 }
 
 
-bool Collider::getTrigger() const {
+bool Collider::GetTrigger() const {
     return isTrigger;
 }
 
-float Collider::distanceSquared(const glm::vec2& a, const glm::vec2& b) const {
+float Collider::DistanceSquared(const glm::vec2& a, const glm::vec2& b) const {
     float dx = a.x - b.x;
     float dy = a.y - b.y;
     return dx * dx + dy * dy;
 }
 
-std::shared_ptr<PhysicsNode>& Collider::getOwner() {
+std::shared_ptr<PhysicsNode>& Collider::GetOwner() {
     return owner;
 }

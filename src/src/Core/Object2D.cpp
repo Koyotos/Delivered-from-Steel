@@ -1,5 +1,4 @@
 #include "include/Core/Object2D.hpp"
-#include "include/PhysicsManager/PhysicsNode.hpp"
 
 void Object2D::Draw(shared_ptr<Shader> sh) {
     if(sh == nullptr) {
@@ -16,8 +15,8 @@ string Object2D::Type() {
     return "Object2D";
 }
 
-string Object2D::RenderType() {
-    return "Object2D";
+uint8_t Object2D::RenderType() {
+    return 3;
 }
 
 shared_ptr<Sprite> Object2D::GetSprite() {

@@ -1,6 +1,4 @@
 #include "include/EngineController/EngineController.hpp"
-#include "include/Globals/Globals.hpp"
-#include "include/Profiler/Profiler.hpp"
 
 void EngineController::Init() {
 

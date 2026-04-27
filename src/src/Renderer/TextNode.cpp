@@ -25,8 +25,8 @@ string TextNode::Type() {
     return "TextNode";
 }
 
-string TextNode::RenderType() {
-    return "TextNode";
+uint8_t TextNode::RenderType() {
+    return 5;
 }
 
 void TextNode::Draw(shared_ptr<Shader> sh) {
@@ -84,15 +84,8 @@ void TextNode::Draw(shared_ptr<Shader> sh) {
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER,
-    vertices.size() * sizeof(float),
-    vertices.data(),
-    GL_DYNAMIC_DRAW
-    );
-
-    glDisable(GL_CULL_FACE);
+    glBufferData(GL_ARRAY_BUFFER,vertices.size() * sizeof(float),  vertices.data(), GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 4);
-    glEnable(GL_CULL_FACE);
 
     PROFILER_ADD_DRAW_CALL(1);
 

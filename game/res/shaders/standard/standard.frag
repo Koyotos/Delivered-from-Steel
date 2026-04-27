@@ -39,45 +39,90 @@ uniform float farPlanes[20];
 vec3 matDiffuse;
 vec3 matSpecular;
 
+vec3 sampleOffsetDirections[20] = vec3[](
+    vec3( 1,  1,  1), vec3(-1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1),
+    vec3( 1,  1, -1), vec3(-1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1),
+    vec3( 1,  0,  0), vec3(-1,  0,  0),
+    vec3( 0,  1,  0), vec3( 0, -1,  0),
+    vec3( 0,  0,  1), vec3( 0,  0, -1),
+    vec3( 1,  1,  0), vec3(-1,  1,  0),
+    vec3( 1, -1,  0), vec3(-1, -1,  0),
+    vec3( 1,  0,  1), vec3(-1,  0,  1)
+);
+
+vec2 poissonDisk[16] = vec2[](
+    vec2(-0.94201624, -0.39906216),
+    vec2( 0.94558609, -0.76890725),
+    vec2(-0.09418410, -0.92938870),
+    vec2( 0.34495938,  0.29387760),
+    vec2(-0.91588581,  0.45771432),
+    vec2(-0.81544232, -0.87912464),
+    vec2(-0.38277543,  0.27676845),
+    vec2( 0.97484398,  0.75648379),
+    vec2( 0.44323325, -0.97511554),
+    vec2( 0.53742981, -0.47373420),
+    vec2(-0.26496911, -0.41893023),
+    vec2( 0.79197514,  0.19090188),
+    vec2(-0.24188840,  0.99706507),
+    vec2(-0.81409955,  0.91437590),
+    vec2( 0.19984126,  0.78641367),
+    vec2( 0.14383161, -0.14100790)
+);
+
 float Shadow2D(int i, vec3 normal, vec3 lightDir) {
     vec4 fragPosLightSpace = lightSpaceMatrices[i] * vec4(FragPos, 1.0);
 
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
 
+    if(projCoords.z > 1.0 || projCoords.z < 0.0)
+        return 0.0;
+
     float currentDepth = projCoords.z;
-    float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0001);
+    float bias = 0.0005;
+
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps2D, 0));
+    float radius = (1.0 + projCoords.z) * texelSize.x * 4.0;
 
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / vec2(textureSize(shadowMaps2D, 0));
 
-    for(int x = -1; x <= 1; x++)
-    for(int y = -1; y <= 1; y++)
-    {
-        float pcfDepth = texture(shadowMaps2D,
-                                 vec3(projCoords.xy + vec2(x,y)*texelSize, i)).r;
+    for(int j = 0; j < 16; j++) {
+        vec2 uv = projCoords.xy + poissonDisk[j] * radius;
 
+        if(uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0)
+            continue;
+
+        float pcfDepth = texture(shadowMaps2D, vec3(uv, i)).r;
         shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
     }
 
-    return shadow / 9.0;
+    return shadow / 16.0;
 }
 
-float ShadowCube(int i) {
+float ShadowCube(int i, vec3 normal) {
     vec3 fragToLight = FragPos - lights[i].data1;
     float currentDepth = length(fragToLight);
 
     if(currentDepth > farPlanes[i])
         return 0.0;
 
-    float bias = 0.005;
+    vec3 lightDir = normalize(lights[i].data1 - FragPos);
+    float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0005);
+    float shadow = 0.0;
 
-    float closestDepth = texture(shadowCubemaps,
-                                  vec4(fragToLight, i)).r;
+    int samples = 20;
+    float diskRadius = 0.05;
 
-    closestDepth *= farPlanes[i];
+    for(int s = 0; s < samples; ++s) {
+        vec3 offset = sampleOffsetDirections[s] * diskRadius;
+        float closestDepth = texture(shadowCubemaps,
+                                     vec4(fragToLight + offset, i)).r;
+        closestDepth *= farPlanes[i];
 
-    return currentDepth - bias > closestDepth ? 1.0 : 0.0;
+        shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    }
+
+    return shadow / float(samples);
 }
 
 vec3 DirectionalLight(int i, Light light, vec3 normal, vec3 viewDirection) {
@@ -104,7 +149,7 @@ vec3 DirectionalLight(int i, Light light, vec3 normal, vec3 viewDirection) {
 vec3 PointLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     vec3 lightDir = normalize(light.data1 - FragPos);
 
-    float shadow = ShadowCube(i);
+    float shadow = ShadowCube(i, normal);
 
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 halfwayDir = normalize(lightDir + viewDirection);

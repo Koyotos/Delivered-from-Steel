@@ -30,6 +30,7 @@ class Font {
 
     FT_Library ftLib;
     FT_Face face;
+    static constexpr int MAX_ROW_WIDTH = 1024;
 
     inline void CreateCharset(const ivec2&);
 

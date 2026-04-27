@@ -22,28 +22,21 @@ void Mesh::SetupMesh(const bool& drawFlag) {
     glBindVertexArray(0);
 }
 
-void Mesh::Draw(Shader& shader)
-{
-    for (unsigned int i = 0; i < textures.size(); i++)
-    {
-        std::string name = textures[i].type;
+void Mesh::Draw(Shader& shader) {
+    for (unsigned int i = 0; i < textures.size(); i++) {
+        string name = textures[i].type;
         GLuint slot = 0;
-
-        if (name == "texture_diffuse")
-        {
+        if (name == "texture_diffuse") {
             slot = TEXTURES_SLOT_DIFFUSE;
         }
-        else if (name == "texture_specular")
-        {
+        else if (name == "texture_specular") {
             slot = TEXTURES_SLOT_SPECULAR;
         }
-
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
-
         shader.SetInt((name), slot);
     }
-
+    PROFILER_ADD_DRAW_CALL(1);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

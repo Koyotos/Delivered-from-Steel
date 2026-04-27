@@ -3,6 +3,8 @@
 
 #include "Utils.hpp"
 #include "include/Renderer/Shader.hpp"
+#include "include/Profiler/Profiler.hpp"
+
 #include <vector>
 
 using namespace std;
