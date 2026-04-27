@@ -1,4 +1,5 @@
 #include "include/Renderer/Sprite.hpp"
+#include <algorithm>
 
 const string& Sprite::GetDir() const noexcept {
     return directory;
@@ -75,13 +76,49 @@ void Sprite::SetupSprite() {
 }
 
 void Sprite::LoadTextures() {
-    for(const directory_entry& entry : directory_iterator(directory)) {
-        Texture text;
-        text.id = TextureFromFile(entry.path().filename().string().c_str(), directory.c_str());
-        text.path = entry.path().string();
-        text.type = entry.path().stem().string();
-        textures.push_back(text);
+    for (const directory_entry& entry : directory_iterator(directory)) {
+        if (entry.is_directory()) {
+            AnimationData anim;
+            anim.name = entry.path().filename().string();
+
+            vector<path> framePaths;
+            for (const directory_entry& subEntry : directory_iterator(entry.path())) {
+                if (subEntry.is_regular_file()) {
+                    framePaths.push_back(subEntry.path());
+                }
+            }
+            sort(framePaths.begin(), framePaths.end());
+
+            for (const auto& p : framePaths) {
+                Texture text;
+                text.id = TextureFromFile(p.filename().string().c_str(), entry.path().string().c_str());
+                text.path = p.string();
+                text.type = anim.name;
+                textures.push_back(text);
+                anim.frames.push_back(textures.size() - 1);
+            }
+            animations[anim.name] = anim;
+        }
+        else if (entry.is_regular_file()) {
+            Texture text;
+            text.id = TextureFromFile(entry.path().filename().string().c_str(), directory.c_str());
+            text.path = entry.path().string();
+            text.type = entry.path().stem().string();
+            textures.push_back(text);
+        }
     }
+}
+
+const AnimationData* Sprite::GetAnimation(const string& name) const {
+    auto it = animations.find(name);
+    if (it != animations.end()) {
+        return &it->second;
+    }
+    return nullptr;
+}
+
+bool Sprite::HasAnimation(const string& name) const {
+    return animations.find(name) != animations.end();
 }
     
 Sprite::Sprite(const string& path) {

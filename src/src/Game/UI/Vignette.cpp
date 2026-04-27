@@ -20,7 +20,7 @@ void Vignette::Draw(shared_ptr<Shader> sh) {
 }
 
 void Vignette::SetCurrentSprite() {
-	GetSprite()->SetActiveTexture(static_cast<int>((currentValue - minValue) / (maxValue - minValue) * states));
+	GetSprite()->SetActiveTexture(static_cast<GLuint>((currentValue - minValue) / (maxValue - minValue) * states));
 }
 
 

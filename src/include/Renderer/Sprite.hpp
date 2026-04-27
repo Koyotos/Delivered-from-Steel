@@ -5,9 +5,16 @@
 #include <glad/glad.h>
 #include <vector>
 #include <filesystem>
+#include <string>
+#include <unordered_map>
 
 using namespace std;
 using namespace filesystem;
+
+struct AnimationData {
+    string name;
+    vector<GLuint> frames;
+};
 
 class Sprite {
     private:
@@ -19,6 +26,7 @@ class Sprite {
     vector<Vertex2D> vertices;
     vector<GLuint> indices;
     vector<Texture> textures;
+    unordered_map<string, AnimationData> animations;
 
     void SetupSprite();
     void LoadTextures();
@@ -32,6 +40,9 @@ class Sprite {
     Texture& GetActiveTexture();
     const string& GetDir() const noexcept;
     void Draw(Shader&);
+
+    const AnimationData* GetAnimation(const string& name) const;
+    bool HasAnimation(const string& name) const;
 
     Sprite(const string&);
     ~Sprite();

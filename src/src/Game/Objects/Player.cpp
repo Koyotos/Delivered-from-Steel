@@ -80,6 +80,7 @@ bool Player::CheckLedge() {
 }
 
 void Player::Process() {
+	Object2D::Process();
 	if (isDead) {
 		moveInput = 0.0f;
 		return;
@@ -168,6 +169,9 @@ void Player::Update(float deltaTime) {
 	}
 
 	if (isHanging) {
+		if (GetCurrentAnimation() != "CourierLedgeGrab") {
+			Play("CourierLedgeGrab", 0.3f, true);
+		}
 		if (wantsToJump) {
 			isHanging = false;
 			Transform t = GetTransform();
@@ -236,6 +240,9 @@ void Player::Update(float deltaTime) {
 	}
 
 	if (isWallSliding) {
+		if (GetCurrentAnimation() != "CourierWallSlide") {
+			Play("CourierWallSlide", 0.1f, true);
+		}
 		currentVelocity.y = std::max(currentVelocity.y, -wallSlideSpeed);
 	}
 	else {
@@ -255,6 +262,43 @@ void Player::Update(float deltaTime) {
 	jumpPressed = false;
 	jumpReleased = false;
 	UpdateCamera(deltaTime);
+
+	bool isJumpPlaying = (GetCurrentAnimation() == "CourierJump" && IsPlaying());
+	if (!isGrounded) {
+		if (currentVelocity.y > 0.0f) {
+			if (GetCurrentAnimation() != "CourierJump" && GetCurrentAnimation() != "CourierAirUp") {
+				Play("CourierJump", 0.1f, false);
+			}
+			else if (!isJumpPlaying && GetCurrentAnimation() == "CourierJump") {
+				Play("CourierAirUp", 0.1f, true);
+			}
+		}
+		else {
+			float anticipationDistance = 0.1f;
+			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, ObjectType::Wall);
+			if (hitGroundSoon.has_value()) {
+				if (GetCurrentAnimation() != "CourierFall") {
+					Play("CourierFall", 0.1f, false);
+				}
+			}
+			else {
+				if (!isJumpPlaying && GetCurrentAnimation() != "CourierFall") {
+					Play("CourierAirLoop", 0.1f, true);
+				}
+			}
+		}
+	}
+	else if (!(GetCurrentAnimation() == "CourierFall" && IsPlaying())) {
+		bool isStopping = (GetCurrentAnimation() == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
+		if (moveInput != 0.0f || isStopping) {
+			if (std::abs(currentVelocity.x) > 0.01f) {
+				Play("CourierWalk", 0.1f, true);
+			}
+		}
+		else {
+			Play("CourierStanding", 0.2f, true);
+		}
+	}
 }
 
 bool Player::Input(InputEvent& event) {
