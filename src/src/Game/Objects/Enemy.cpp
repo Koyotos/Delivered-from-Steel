@@ -49,7 +49,7 @@ void Enemy::UpdateState(float dt) {
     }
 }
 
-void Enemy::OnCollisionEnter(shared_ptr<Collider> other) {
+void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	shared_ptr<PhysicsNode> owner = other->getOwner();
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);

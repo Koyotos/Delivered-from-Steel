@@ -31,7 +31,7 @@ private:
 public:
 	Enemy(const unordered_map<string, std::any>&);
 
-	void OnCollisionEnter(shared_ptr<Collider> other) override;
+	void OnCollisionStay(shared_ptr<Collider> other) override;
 
 	void Update(float deltaTime) override;
 
