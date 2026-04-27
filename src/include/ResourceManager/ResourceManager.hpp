@@ -28,6 +28,8 @@
 #include <filesystem>
 #include <fstream>
 
+class AudioManager;
+
 using namespace std;
 using namespace filesystem;
 using namespace nlohmann;
@@ -111,9 +113,13 @@ class ResourceManager {
     inline vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ParseNodes(unordered_map<string, std::any>&);
     inline void LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>&, shared_ptr<Scene>);
 
+    shared_ptr<AudioManager> audioManager;
+
     public:
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void ConfigurePaths();
+
+    void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
 
     ResourceManager();
     ~ResourceManager();

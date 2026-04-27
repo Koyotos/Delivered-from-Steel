@@ -36,7 +36,8 @@ class Scene {
     inline void FindPlayer(shared_ptr<Node>) noexcept;
 
     public:
-    
+    shared_ptr<Player> GetPlayer() const { return scenePlayer; }
+
     /*
     @brief Sets scene root. Root will be used as startpoint for all 
     per graph calls.

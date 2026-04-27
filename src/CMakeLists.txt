@@ -35,6 +35,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} glad)
 target_link_libraries(${PROJECT_NAME} stb_image)
+target_link_libraries(${PROJECT_NAME} stb_vorbis)
 target_link_libraries(${PROJECT_NAME} assimp)
 target_link_libraries(${PROJECT_NAME} glfw)
 target_link_libraries(${PROJECT_NAME} glm::glm)
