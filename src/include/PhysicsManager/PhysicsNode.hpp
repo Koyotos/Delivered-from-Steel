@@ -9,7 +9,9 @@ enum class ObjectType {
 	Default,
     Player,
     Enemy,
+    Trap,
     Wall,
+    BreakableWall,
     Null
 };
 

@@ -32,6 +32,23 @@ string Node::RenderType() {
     return "Node";
 }
 
+void Node::Disable() noexcept {
+    SetProcess(false);
+    SetInput(false);
+    SetPhysics(false);
+    SetDraw(false);
+    SetIgnoreParent(true);
+    SetTransformChanged(false);
+}
+
+void Node::InitRecursive(shared_ptr<Scene> scene) {
+    Init(scene);
+
+    for (auto& child : GetChildren()) {
+        child->InitRecursive(scene);
+    }
+}
+
 Node::Node() {
 
 }

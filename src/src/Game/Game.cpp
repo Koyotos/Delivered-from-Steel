@@ -9,6 +9,8 @@ void Game::Init() {
     gameScene->GetRoot()->AddChild(engine.LoadScene("res/scenes/testUI.json")->GetRoot());
 
     engine.SetActiveScene(gameScene);
+
+    gameScene->GetRoot()->InitRecursive(gameScene);
 }
 
 void Game::Start() {

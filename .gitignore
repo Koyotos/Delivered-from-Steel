@@ -54,3 +54,5 @@ compile_commands.json
 game/*
 !game/res
 !game/res/*
+
+/res/

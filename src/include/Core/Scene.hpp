@@ -46,6 +46,15 @@ class Scene {
     void SetRoot(shared_ptr<Node>);
 
     shared_ptr<Node> GetRoot();
+
+	shared_ptr<Player> GetPlayer() { return scenePlayer; }
+
+	/*
+    * @brief Updates the transformation of a node and its children.
+    * @param node The node to update.
+    * @param parent The parent's transformation.
+    */
+    void UpdateTransforms(shared_ptr<Node>, Transform);
 };
 
 #endif
