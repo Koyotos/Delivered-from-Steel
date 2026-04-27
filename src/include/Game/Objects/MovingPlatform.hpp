@@ -3,6 +3,8 @@
 
 #include "include/Game/Objects/Platform.hpp"
 
+class Player;
+
 enum class MovingPlatformState {
     MovingToEnd,
     MovingToStart,
@@ -13,8 +15,6 @@ enum class MovingPlatformState {
 class MovingPlatform : public Platform
 {
 private:
-    vec3 velocityDelta;
-    vec3 velocity;
     vec3 lastPosition;
 
     MovingPlatformState state;
@@ -25,9 +25,15 @@ private:
     vec3 startPosition;
     vec3 endPosition;
 
+    weak_ptr<Player> player;
+	bool playerHangingOnPlatform = false;
+    vec3 relativePositionToPlatform = vec3(0.0f);
+
     float timer;
 
 public:
+    vec3 velocityDelta;
+    vec3 velocity;
     MovingPlatform(const unordered_map<string, std::any>&);
 
     void Update(float deltaTime) override;
@@ -35,6 +41,8 @@ public:
     void OnCollisionStay(shared_ptr<Collider> other) override;
 
     void OnCollisionExit(shared_ptr<Collider> other) override;
+
+    void Init(shared_ptr<Scene>) override;
 };
 
 #endif // FE_MOVING_PLATFORM
