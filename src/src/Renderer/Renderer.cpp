@@ -1,6 +1,6 @@
 #include "include/Renderer/Renderer.hpp"
 #include "include/Core/Object2D.hpp"
-#include "include/Core/Object3D.hpp"
+#include "include/Core/Object3D.hpp"    
 #include "include/Core/VisualNode.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
@@ -65,6 +65,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     ComputeFrustum();
 
     // Vectorize scene
+    scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), Transform());
     PrepareDraw(scene->root, Transform());
     ResolveZ();
 
@@ -123,16 +124,14 @@ bool Renderer::Cull(shared_ptr<VisualNode> node) {
 }
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
-    bool childTransformState = false;
     if(node->Type() == "TextNode" || node->RenderType() == "Object2D" 
         || node->RenderType() == "Object3D") {
-        PrepareDrawNode(static_pointer_cast<VisualNode>(node), t, childTransformState);
+        PrepareDrawNode(static_pointer_cast<VisualNode>(node), t);
         
     } else if(node->Type() == "Light") {
         PrepareDrawLight(static_pointer_cast<Light>(node));
     }
     for(auto& k : node->GetChildren()) {
-        k->SetTransformChanged(childTransformState);
         PrepareDraw(k, t);
     }
 } 
@@ -155,18 +154,9 @@ void Renderer::ResolveZ() {
     });
 }
 
-void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t, bool& flag) {
-    if(!visualCast->TestIgnoreParent()) {
-        if(visualCast->TestTransformChanged()) {
-            visualCast->ApplyParentTransform(t);
-            flag = true;
-        }
-    } else {
-        visualCast->ResetGlobal();
-    }
-
+void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) {
     t = visualCast->GetTransform();
-    if(Cull(visualCast)) {
+    if(Cull(visualCast) && visualCast->TestDraw()) {
         if(visualCast->Type() == "TextNode" || visualCast->RenderType() == "Object2D") {
             drawVectorUI.push_back(visualCast);
         } else {

@@ -37,7 +37,7 @@ class Renderer {
 
     // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
-    inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&, bool&);
+    inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&);
    
     inline bool Cull(shared_ptr<VisualNode>);
 

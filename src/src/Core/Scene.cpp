@@ -32,3 +32,27 @@ void Scene::FindPlayer(shared_ptr<Node> node) noexcept {
         FindPlayer(k);
     }
 }
+
+void Scene::UpdateTransforms(shared_ptr<Node> node, Transform t) {
+
+    if (node->Type() == "TextNode" || node->RenderType() == "Object2D"
+        || node->RenderType() == "Object3D") {
+        shared_ptr<PhysicsNode> physicsCast = static_pointer_cast<PhysicsNode>(node);
+        if (!physicsCast->TestIgnoreParent()) {
+            if (physicsCast->TestTransformChanged()) {
+                physicsCast->ApplyParentTransform(t);
+                physicsCast->SetTransformChanged(false);
+            }
+        }
+        else {
+            physicsCast->ResetGlobal();
+        }
+        t = physicsCast->GetTransform();
+    }
+
+
+    for (const auto& child : node->GetChildren()) {
+        Transform childTransform = t;
+        UpdateTransforms(child, childTransform);
+    }
+}

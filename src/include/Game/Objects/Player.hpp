@@ -66,7 +66,10 @@ private:
 
 	bool CheckLedge();
 	bool CheckGrounded();
-	bool CheckWalled();
+	bool CheckLeftWalled();
+	bool CheckRightWalled();
+	bool CheckCeiling();
+
 	float MoveTowards(float current, float target, float maxDelta);
 
 public:
@@ -78,13 +81,15 @@ public:
 	void TriggerCameraShake(float duration, float intensity);
 
 	Player();
-	Player(const unordered_map<string, std::any>&);
+	Player(const unordered_map<string, std::any>& data);
 	void Process() override;
 	bool Input(InputEvent& event) override;
 
 	void takeDamage(float damage);
 
 	void Shatter();
+
+	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity += velocity; }
 };
 
 #endif

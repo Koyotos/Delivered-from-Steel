@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3 uid="uid://di1dumnefwpef"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_g5ejs"]
+
+[node name="Base" type="Node3D"]
+
+[node name="Platform" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.014026642, 0, -6.369107)
+mesh = SubResource("BoxMesh_g5ejs")
+metadata/model = "house"
+metadata/class = "Object3D"
+metadata/shader = "basic"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+
+[node name="Platform2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0100791, -0.93269414, -6.369107)
+mesh = SubResource("BoxMesh_g5ejs")
+skeleton = NodePath("../Platform")
+metadata/model = "house"
+metadata/class = "Object3D"
+metadata/shader = "basic"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+
+[node name="Platform3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1545641, -0.19549918, -6.369107)
+mesh = SubResource("BoxMesh_g5ejs")
+skeleton = NodePath("../Platform2")
+metadata/model = "house"
+metadata/class = "Object3D"
+metadata/shader = "basic"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true

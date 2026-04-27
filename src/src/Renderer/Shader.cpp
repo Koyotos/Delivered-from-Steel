@@ -34,7 +34,7 @@ void Shader::SetBool(const string& name, const bool& val) {
 
 void Shader::SetFloat(const string& name, const float& val) {
     Use();
-    glUniform1f(glGetUniformLocation(id, name.c_str()), (int)val);
+    glUniform1f(glGetUniformLocation(id, name.c_str()), val);
 }
 
 void Shader::SetVec2(const string& name, const vec2& val) {

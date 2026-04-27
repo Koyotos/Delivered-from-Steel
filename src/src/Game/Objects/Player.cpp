@@ -12,6 +12,8 @@ Player::Player() : Object2D() {
 
 Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
 	objectType = ObjectType::Player;
+	Transform t = Transform(fromMap(vector<std::any>, "transform", data));
+	respawnPoint = t.GetTranslation();
 }
 
 void Player::SetCamera(shared_ptr<Camera> cam) {
@@ -26,19 +28,28 @@ float Player::MoveTowards(float current, float target, float maxDelta) {
 }
 
 bool Player::CheckGrounded() {
-	float rayLength = 0.01f;
-	glm::vec2 rayDir(0.0f, -1.0f);
-	float offsetX = 0.1f;
-	float offsetY = -0.4f;
+	float rayLength = 0.2f;
+	glm::vec2 rayDir(1.0f, 0.0f);
+	float offsetX = -0.1f;
+	float offsetY = -0.41f;
 
-	auto hitCenter = raycast(glm::vec2(0.0f, offsetY), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeft = raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
 	auto hitRight = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
 
-	return hitCenter.has_value() || hitLeft.has_value() || hitRight.has_value();
+	return hitRight.has_value();
 }
 
-bool Player::CheckWalled() {
+bool Player::CheckCeiling() {
+	float rayLength = 0.1f;
+	glm::vec2 rayDir(1.0f, 0.0f);
+	float offsetX = -0.05f;
+	float offsetY = 0.01f;
+
+	auto hitCenter = raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+
+	return hitCenter.has_value();
+}
+
+bool Player::CheckLeftWalled() {
 	float rayLength = 0.01f;
 	glm::vec2 rayDir(1.0f, 0.0f);
 	float offsetX = 0.1f;
@@ -69,6 +80,10 @@ bool Player::CheckLedge() {
 }
 
 void Player::Process() {
+	if (isDead) {
+		moveInput = 0.0f;
+		return;
+	}
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
@@ -127,6 +142,9 @@ void Player::Update(float deltaTime) {
 
 	if (isGrounded) {
 		coyoteTimeCounter = coyoteTime;
+		if (CheckCeiling()) {
+			Shatter();
+		}
 	}
 	else {
 		coyoteTimeCounter -= deltaTime;
@@ -224,6 +242,10 @@ void Player::Update(float deltaTime) {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
 	}
 
+
+	currentVelocity = currentVelocity + platformVelocity;
+	platformVelocity = glm::vec2(0, 0);
+
 	SetVelocity(currentVelocity);
 
 	Transform t = this->GetTransform();
@@ -243,7 +265,13 @@ bool Player::Input(InputEvent& event) {
 }
 
 void Player::takeDamage(float damage) {
+	if (!canTakeDamage || isDead) return;
+
 	hp -= damage;
+
+	canTakeDamage = false;
+	damageTimer = damageCooldown;
+
 	if (hp <= 0.0f) {
 		Shatter();
 	}
@@ -251,6 +279,8 @@ void Player::takeDamage(float damage) {
 
 void Player::Shatter() {
 	hp = 0.0f;
+	isDead = true;
+	respawnTimer = respawnDelay;
 	Globals::GetGlobals().Log("Shatter");
 	hp = hpMax;
 }
