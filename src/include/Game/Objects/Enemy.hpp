@@ -37,7 +37,7 @@ public:
 
 	void UpdateState(float);
 
-	void Attack(shared_ptr<Player> player);
+	virtual void Attack(shared_ptr<Player> player);
 
 	virtual void ChangeState(shared_ptr<Player> player);
 
