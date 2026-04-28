@@ -37,12 +37,30 @@ void Renderer::Init(ResourceManager& rsm)
     GenShadowMaps();
 
     glGenFramebuffers(1,&mainFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, mainFBO);
     glGenTextures(1, &mainColorBuffer);
     glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL); 
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mainColorBuffer, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    tuple<GLuint, GLuint, GLuint> screenQuad = CreateQuad(windowW, windowH);
+    glGenRenderbuffers(1, &renderBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowW, windowH);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                            GL_RENDERBUFFER, renderBuffer);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw std::runtime_error("Framebuffer not complete!");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    tuple<GLuint, GLuint, GLuint> screenQuad = CreateQuad(windowW, windowH, true);
     screenQuadVAO = get<0>(screenQuad);
     screenQuadVBO = get<1>(screenQuad);
     screenQuadEBO = get<2>(screenQuad);
@@ -264,6 +282,7 @@ void Renderer::BindShadowTextures() {
 
 void Renderer::Draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, mainFBO);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(auto& node : drawVector) {
         PROFILER_ADD_OBJECT();
         node->Draw();
@@ -278,11 +297,14 @@ void Renderer::Draw() {
 }
 
 void Renderer::PostProcessingPass() {
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glViewport(0, 0, windowW, windowH);
+    glClear(GL_COLOR_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0+TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
     glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
     glDisable(GL_DEPTH_TEST);
     postProcessingShader->SetInt("hdrBuffer",TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
-    postProcessingShader->SetFloat("exposure", 0.1);
+    postProcessingShader->SetFloat("exposure", 0.6);
     glBindVertexArray(screenQuadVAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindTexture(GL_TEXTURE_2D,0);

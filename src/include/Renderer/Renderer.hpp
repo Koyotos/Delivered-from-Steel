@@ -45,6 +45,7 @@ class Renderer {
     uint16_t windowH;
     GLuint mainFBO;
     GLuint mainColorBuffer;
+    GLuint renderBuffer;
 
     // Optimizations
     mat4 frameVP;

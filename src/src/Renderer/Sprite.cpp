@@ -31,8 +31,8 @@ void Sprite::Draw(Shader& shader) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[active].id);
     glBindVertexArray(VAO);
-    PROFILER_ADD_DRAW_CALL(indices.size() / 3);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    PROFILER_ADD_DRAW_CALL(2);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindTexture(GL_TEXTURE_2D,0);
     glBindVertexArray(0);
 }
@@ -43,7 +43,11 @@ void Sprite::SetupSprite() {
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH,&w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
     glBindTexture(GL_TEXTURE_2D,0);
+    size = vec2(w,h);
     tuple<GLuint, GLuint, GLuint> buffers = CreateQuad(w,h);
+    VAO = get<0>(buffers);
+    VBO = get<1>(buffers);
+    EBO = get<2>(buffers);
 }
 
 void Sprite::LoadTextures() {

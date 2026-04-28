@@ -58,15 +58,22 @@ GLuint TextureFromFile(const char* name, const char* dir) {
     return texID;
 }
 
-tuple<GLuint, GLuint, GLuint> CreateQuad(const float& w, const float& h) {
+tuple<GLuint, GLuint, GLuint> CreateQuad(const float& w, const float& h, const bool& ndc) {
     GLuint VAO, VBO, EBO;
-    Vertex vertices[4] = {
-        Vertex(vec3(0.0f),vec3(0.0f),vec2(0.0f)),
-        Vertex(vec3(w,0.0f,0.0f),vec3(0.0f),vec2(1.0f,0.0f)),
-        Vertex(vec3(w,h,0.0f),vec3(0.0f),vec2(1.0f,1.0f)),
-        Vertex(vec3(0.0f,h,0.0f),vec3(0.0f),vec2(0.0f,1.0f)),
-    };
-    uint8_t indices[6] = { 0, 1, 2, 2, 3, 0 };
+    Vertex2D vertices[4];
+    if(ndc) {
+        vertices[0] = Vertex2D(vec2(-1.0f),vec2(0.0f));
+        vertices[1] = Vertex2D(vec2(1.0f,-1.0f),vec2(1.0f,0.0f));
+        vertices[2] = Vertex2D(vec2(1.0f,1.0f),vec2(1.0f,1.0f));
+        vertices[3] = Vertex2D(vec2(-1.0f,1.0f),vec2(0.0f,1.0f));
+        
+    } else {
+        vertices[0] = Vertex2D(vec2(0.0f),vec2(0.0f));
+        vertices[1] = Vertex2D(vec2(w,0.0f),vec2(1.0f,0.0f));
+        vertices[2] = Vertex2D(vec2(w,h),vec2(1.0f,1.0f));
+        vertices[3] = Vertex2D(vec2(0.0f,h),vec2(0.0f,1.0f));
+    }
+    GLuint indices[6] = { 0, 1, 2, 2, 3, 0 };
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
