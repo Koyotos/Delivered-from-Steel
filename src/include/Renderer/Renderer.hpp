@@ -4,6 +4,7 @@
 #include "include/Core/Scene.hpp"
 #include "include/Core/Transform.hpp"
 #include "include/Core/VisualNode.hpp"
+#include "include/Renderer/Shader.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 
 #include "GLFW/glfw3.h"
@@ -42,6 +43,8 @@ class Renderer {
     GLFWwindow* window;
     uint16_t windowW;
     uint16_t windowH;
+    GLuint mainFBO;
+    GLuint mainColorBuffer;
 
     // Optimizations
     mat4 frameVP;
@@ -50,7 +53,7 @@ class Renderer {
     vector<Shader*> lightsUpdatedList;
  
     // Depth 
-    GLuint FBO;
+    GLuint depthFBO;
     GLuint depthMaps2DArray;
     GLuint depthCubeArray;
     shared_ptr<Shader> depthShaderLayered;
@@ -58,6 +61,12 @@ class Renderer {
     int shadow2DUnit;
     int shadowCubeUnit;
     vector<shared_ptr<VisualNode>> potentialCasters; 
+
+    // Post processing
+    GLuint screenQuadVAO;
+    GLuint screenQuadVBO;
+    GLuint screenQuadEBO;
+    shared_ptr<Shader> postProcessingShader;
 
     static constexpr vec3 dirs[6] = {
                     {1,0,0},{-1,0,0},
@@ -104,6 +113,7 @@ class Renderer {
     inline void ConfigureShader(shared_ptr<Node>);
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
     inline void BindShadowTextures();
+    inline void PostProcessingPass();
 
     // Draws
     inline void Draw();

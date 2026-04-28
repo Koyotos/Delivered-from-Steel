@@ -234,5 +234,5 @@ void main()
         result += ApplyLight(i, lights[i], norm, viewDir);
     }
     
-    FragColor = vec4(pow(result, vec3(1.0/2.2)), 1.0);
+    FragColor = vec4(result, 1.0);
 } 

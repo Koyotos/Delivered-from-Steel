@@ -1,4 +1,6 @@
 #include "include/Renderer/Renderer.hpp"
+#include "include/Renderer/Shader.hpp"
+#include "include/Renderer/Utils.hpp"
 
 static auto normalizePlane = [](vec4& plane) {
         float length = glm::length(vec3(plane));
@@ -29,10 +31,21 @@ void Renderer::Init(ResourceManager& rsm)
 
     depthShaderLayered = rsm.LoadShader("layeredDepth");
     depthShaderNormal  = rsm.LoadShader("simpleDepth");
+    postProcessingShader = rsm.LoadShader("postProcess");
 
-    glGenFramebuffers(1, &FBO);
-
+    glGenFramebuffers(1, &depthFBO);
     GenShadowMaps();
+
+    glGenFramebuffers(1,&mainFBO);
+    glGenTextures(1, &mainColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL); 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    tuple<GLuint, GLuint, GLuint> screenQuad = CreateQuad(windowW, windowH);
+    screenQuadVAO = get<0>(screenQuad);
+    screenQuadVBO = get<1>(screenQuad);
+    screenQuadEBO = get<2>(screenQuad);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -120,7 +133,7 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
 }
 
 void Renderer::DepthPass() {
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_FRONT);
@@ -231,6 +244,9 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     // Draw
     Draw();
 
+    // Post processing
+    PostProcessingPass();
+
     #if defined(DEBUG)
     glDisable(GL_DEPTH_TEST);
     DrawDebug();
@@ -247,6 +263,7 @@ void Renderer::BindShadowTextures() {
 }
 
 void Renderer::Draw() {
+    glBindFramebuffer(GL_FRAMEBUFFER, mainFBO);
     for(auto& node : drawVector) {
         PROFILER_ADD_OBJECT();
         node->Draw();
@@ -257,6 +274,19 @@ void Renderer::Draw() {
         node->Draw();
     }
     glEnable(GL_CULL_FACE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::PostProcessingPass() {
+    glActiveTexture(GL_TEXTURE0+TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
+    glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    glDisable(GL_DEPTH_TEST);
+    postProcessingShader->SetInt("hdrBuffer",TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
+    postProcessingShader->SetFloat("exposure", 0.1);
+    glBindVertexArray(screenQuadVAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindTexture(GL_TEXTURE_2D,0);
+    glBindVertexArray(0);
 }
 
 void Renderer::PrepareLights() {
@@ -422,4 +452,7 @@ Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
 
 Renderer::~Renderer() {
     glfwDestroyWindow(window);
+    glDeleteBuffers(1,&screenQuadVBO);
+    glDeleteVertexArrays(1,&screenQuadVAO);
+    glDeleteBuffers(1,&screenQuadEBO);
 }

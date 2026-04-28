@@ -57,3 +57,35 @@ GLuint TextureFromFile(const char* name, const char* dir) {
     stbi_image_free(data);
     return texID;
 }
+
+tuple<GLuint, GLuint, GLuint> CreateQuad(const float& w, const float& h) {
+    GLuint VAO, VBO, EBO;
+    Vertex vertices[4] = {
+        Vertex(vec3(0.0f),vec3(0.0f),vec2(0.0f)),
+        Vertex(vec3(w,0.0f,0.0f),vec3(0.0f),vec2(1.0f,0.0f)),
+        Vertex(vec3(w,h,0.0f),vec3(0.0f),vec2(1.0f,1.0f)),
+        Vertex(vec3(0.0f,h,0.0f),vec3(0.0f),vec2(0.0f,1.0f)),
+    };
+    uint8_t indices[6] = { 0, 1, 2, 2, 3, 0 };
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vertex2D), &vertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, uv));
+
+    glBindVertexArray(0);
+    return make_tuple(VAO,VBO,EBO);
+}
