@@ -1,6 +1,7 @@
 #include "include/Renderer/Renderer.hpp"
 #include "include/Renderer/Shader.hpp"
 #include "include/Renderer/Utils.hpp"
+#include <iostream>
 
 static auto normalizePlane = [](vec4& plane) {
         float length = glm::length(vec3(plane));
@@ -77,20 +78,18 @@ void Renderer::GenShadowMaps() {
     glGenTextures(1, &depthCubeArray);
     glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
 
-    glTexStorage3D(
-        GL_TEXTURE_CUBE_MAP_ARRAY,
-        1,
-        GL_DEPTH_COMPONENT24,
-        SHADOW_WIDTH,
-        SHADOW_HEIGHT,
-        MAX_LIGHTS * 6
-    );
+    glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24,
+                SHADOW_WIDTH, SHADOW_HEIGHT, MAX_LIGHTS * 6);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAX_LEVEL, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
    // Array 2D
     glGenTextures(1, &depthMaps2DArray);
@@ -109,6 +108,7 @@ void Renderer::GenShadowMaps() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Renderer::ComputeFrustum() {
@@ -154,25 +154,35 @@ void Renderer::DepthPass() {
     glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glEnable(GL_DEPTH_TEST);
-    glCullFace(GL_FRONT);
+    glCullFace(GL_BACK);
+
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+
+    uint8_t pointLightIndex = 0;
 
     for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS; i++) {
         shared_ptr<Light> light = lightsPos[i].first;
         mat4 projection, view;
+
         switch(light->type) {
+
+            // ------------------ DIRECTIONAL ------------------
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
                 vec3 center = vec3(0.0f);
                 vec3 pos = center - dir * 30.0f;
+
                 projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
                 view = lookAt(pos, center, vec3(0, 1, 0));
                 lightSpaceMatrices[i] = projection * view;
+
                 depthShaderNormal->Use();
                 depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+
                 glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMaps2DArray, 0, i);
                 glClear(GL_DEPTH_BUFFER_BIT);
+
                 for(auto& obj : potentialCasters) {
                     PROFILER_ADD_OBJECT();
                     obj->Draw(depthShaderNormal);
@@ -182,47 +192,60 @@ void Renderer::DepthPass() {
             case LIGHT_POINT: {
                 vec3 pos = light->data1;
                 projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
+
                 depthShaderLayered->Use();
+                
+                glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
+                auto xd = glCheckFramebufferStatus(GL_FRAMEBUFFER);     
+                xd = glGetError();   
+                mat4 shadowMatrices[6];
                 for(int face = 0; face < 6; face++) {
                     view = lookAt(pos, pos + dirs[face], ups[face]);
-                    mat4 shadowMat = projection * view;
-                    depthShaderLayered->SetMat4("lightSpaceMatrix", shadowMat);
-                    int layer = i * 6 + face;
-                    glFramebufferTextureLayer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0, layer);
-                    glClear(GL_DEPTH_BUFFER_BIT);
-                    for(auto& obj : potentialCasters){
-                        if(!AffectsLight(obj, light)) {
-                            continue;
-                        }
-                        PROFILER_ADD_OBJECT();
-                        obj->Draw(depthShaderLayered);
-                    }
+                    shadowMatrices[face] = projection * view;
                 }
+                for(int f = 0; f < 6; f++) {
+                    depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
+                }
+                depthShaderLayered->SetInt("lightIndex", pointLightIndex);
+
+                glClear(GL_DEPTH_BUFFER_BIT);
+
+                for(auto& obj : potentialCasters){
+                    if(!AffectsLight(obj, light)) continue;
+                    PROFILER_ADD_OBJECT();
+                    obj->Draw(depthShaderLayered);
+                }
+
                 farPlanes[i] = 20.0f;
+                pointLightIndex++;
                 break;
             }
+
+            // ------------------ SPOT ------------------
             case LIGHT_SPOT: {
                 projection = perspective(light->data4, 1.f, 0.1f, 20.f);
                 view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
                 lightSpaceMatrices[i] = projection * view;
+
                 depthShaderNormal->Use();
                 depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+
                 glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMaps2DArray, 0, i);
                 glClear(GL_DEPTH_BUFFER_BIT);
+
                 for(auto& obj : potentialCasters){
-                    if(!AffectsLight(obj, light)) {
-                        continue;
-                    }
+                    if(!AffectsLight(obj, light)) continue;
+
                     PROFILER_ADD_OBJECT();
-                    obj->Draw(depthShaderLayered);
+                    obj->Draw(depthShaderNormal);
                 }
                 break;
             }
         }
     }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,windowW, windowH);
-    glCullFace(GL_BACK);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
@@ -401,11 +424,6 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     if(light == nullptr) {
         return;
     }
-    for(auto& s : lightsUpdatedList) {
-        if(s==shader.get()) {
-            return;
-        }
-    }
     shader->SetInt("lights["+to_string(index)+"].type", light->type);
     shader->SetVec3("lights["+to_string(index)+"].data1", light->data1);
     shader->SetVec3("lights["+to_string(index)+"].data2", light->data2);
@@ -414,7 +432,6 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     shader->SetVec3("lights["+to_string(index)+"].colorAmbient", light->colorAmbient);
     shader->SetVec3("lights["+to_string(index)+"].colorDiffuse", light->colorDiffuse);
     shader->SetVec3("lights["+to_string(index)+"].colorSpecular", light->colorSpecular);
-    lightsUpdatedList.push_back(shader.get());
 }
 
 void Renderer::ConfigureShader(shared_ptr<Node> node) {
@@ -427,9 +444,15 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
             shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
             uint8_t count = std::min((int)lightsPos.size(),20);
             shader->SetInt("lightsNum", count);
+            for(auto& s : lightsUpdatedList) {
+                if(s==shader.get()) {
+                    return;
+                }
+            }
             for(uint8_t i = 0; i < count; i++) {
                 SetLight(lightsPos[i].first, shader, i);
             }
+            lightsUpdatedList.push_back(shader.get());
             shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
             shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
             for (uint8_t i = 0; i < count; i++) {

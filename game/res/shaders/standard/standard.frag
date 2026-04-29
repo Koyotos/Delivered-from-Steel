@@ -36,8 +36,8 @@ uniform int lightsNum;
 uniform mat4 lightSpaceMatrices[20];
 uniform float farPlanes[20];
 
-vec3 matDiffuse;
-vec3 matSpecular;
+vec3 matDiffuse = vec3(0.0, 0.0, 0.0);
+vec3 matSpecular = vec3(0.0, 0.0, 0.0);
 
 vec3 sampleOffsetDirections[20] = vec3[](
     vec3( 1,  1,  1), vec3(-1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1),
@@ -107,16 +107,21 @@ float ShadowCube(int i, vec3 normal) {
         return 0.0;
 
     vec3 lightDir = normalize(lights[i].data1 - FragPos);
-    float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0005);
-    float shadow = 0.0;
+    float bias = max(0.01 * (1.0 - dot(normal, lightDir)), 0.002);
 
+    float shadow = 0.0;
     int samples = 20;
-    float diskRadius = 0.05;
+
+    float diskRadius = (1.0 + currentDepth / farPlanes[i]) * 0.02;
+
+    vec3 baseDir = normalize(fragToLight);
 
     for(int s = 0; s < samples; ++s) {
-        vec3 offset = sampleOffsetDirections[s] * diskRadius;
+        vec3 offsetDir = normalize(sampleOffsetDirections[s]) * diskRadius;
+        vec3 sampleDir = normalize(baseDir + offsetDir);
+
         float closestDepth = texture(shadowCubemaps,
-                                     vec4(fragToLight + offset, i)).r;
+                                     vec4(sampleDir, i)).r;
         closestDepth *= farPlanes[i];
 
         shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
@@ -220,8 +225,7 @@ vec3 ApplyLight(int i, Light l, vec3 normal, vec3 viewDir) {
     return vec3(0.0);
 }
 
-void main()
-{  
+void main() {  
     // properties
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
