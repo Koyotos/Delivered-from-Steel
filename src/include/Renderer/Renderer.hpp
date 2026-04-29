@@ -92,6 +92,7 @@ class Renderer {
     vector<shared_ptr<VisualNode>> drawVector;
     vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
+    vector<pair<shared_ptr<Light>,float>> lightsPosPoint;
     vector<glm::mat4> lightSpaceMatrices;
     vector<float> farPlanes;
 

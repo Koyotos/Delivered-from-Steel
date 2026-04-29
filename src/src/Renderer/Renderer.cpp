@@ -1,4 +1,5 @@
 #include "include/Renderer/Renderer.hpp"
+#include "include/Renderer/Light.hpp"
 #include "include/Renderer/Shader.hpp"
 #include "include/Renderer/Utils.hpp"
 #include <iostream>
@@ -27,8 +28,8 @@ void Renderer::Init(ResourceManager& rsm)
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw runtime_error("GL loader error");
 
-    lightSpaceMatrices.resize(MAX_LIGHTS);
-    farPlanes.resize(MAX_LIGHTS);
+    lightSpaceMatrices.resize(MAX_LIGHTS_DIR_AND_SPOT);
+    farPlanes.resize(MAX_LIGHTS_POINT);
 
     depthShaderLayered = rsm.LoadShader("layeredDepth");
     depthShaderNormal  = rsm.LoadShader("simpleDepth");
@@ -79,7 +80,7 @@ void Renderer::GenShadowMaps() {
     glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
 
     glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24,
-                SHADOW_WIDTH, SHADOW_HEIGHT, MAX_LIGHTS * 6);
+                SHADOW_WIDTH, SHADOW_HEIGHT, MAX_LIGHTS_POINT * 6);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -89,7 +90,7 @@ void Renderer::GenShadowMaps() {
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAX_LEVEL, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, 0);
 
    // Array 2D
     glGenTextures(1, &depthMaps2DArray);
@@ -101,7 +102,7 @@ void Renderer::GenShadowMaps() {
         GL_DEPTH_COMPONENT24,
         SHADOW_WIDTH,
         SHADOW_HEIGHT,
-        MAX_LIGHTS
+        MAX_LIGHTS_DIR_AND_SPOT
     );
 
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -128,7 +129,7 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
     float radius = obj->GetCullRadius();
     switch(light->type) {
         case LIGHT_POINT: {
-            float maxDist = 20.0f;
+            float maxDist = 40.0f;
             float dist2 = glm::length2(objPos - light->data1);
             float r = maxDist + radius + 2.0f;
             return dist2 < r * r;
@@ -146,6 +147,7 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
             float cutoff = light->data4;
             return angle > cutoff - 0.1f;
         }
+        default : break;
     }
     return true;
 }
@@ -159,15 +161,11 @@ void Renderer::DepthPass() {
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
-    uint8_t pointLightIndex = 0;
-
-    for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS; i++) {
+    for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS_DIR_AND_SPOT; i++) {
         shared_ptr<Light> light = lightsPos[i].first;
         mat4 projection, view;
 
         switch(light->type) {
-
-            // ------------------ DIRECTIONAL ------------------
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
                 vec3 center = vec3(0.0f);
@@ -189,39 +187,6 @@ void Renderer::DepthPass() {
                 }
                 break;
             }
-            case LIGHT_POINT: {
-                vec3 pos = light->data1;
-                projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
-
-                depthShaderLayered->Use();
-                
-                glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
-                auto xd = glCheckFramebufferStatus(GL_FRAMEBUFFER);     
-                xd = glGetError();   
-                mat4 shadowMatrices[6];
-                for(int face = 0; face < 6; face++) {
-                    view = lookAt(pos, pos + dirs[face], ups[face]);
-                    shadowMatrices[face] = projection * view;
-                }
-                for(int f = 0; f < 6; f++) {
-                    depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
-                }
-                depthShaderLayered->SetInt("lightIndex", pointLightIndex);
-
-                glClear(GL_DEPTH_BUFFER_BIT);
-
-                for(auto& obj : potentialCasters){
-                    if(!AffectsLight(obj, light)) continue;
-                    PROFILER_ADD_OBJECT();
-                    obj->Draw(depthShaderLayered);
-                }
-
-                farPlanes[i] = 20.0f;
-                pointLightIndex++;
-                break;
-            }
-
-            // ------------------ SPOT ------------------
             case LIGHT_SPOT: {
                 projection = perspective(light->data4, 1.f, 0.1f, 20.f);
                 view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
@@ -241,9 +206,33 @@ void Renderer::DepthPass() {
                 }
                 break;
             }
+            default : break;
         }
     }
-
+    for(uint8_t i = 0; i < lightsPosPoint.size() && i < MAX_LIGHTS_POINT; i++) {
+        shared_ptr<Light> light = lightsPosPoint[i].first;
+        mat4 projection, view;
+        vec3 pos = light->data1;
+        projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
+        depthShaderLayered->Use();
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
+        mat4 shadowMatrices[6];
+        for(int face = 0; face < 6; face++) {
+            view = lookAt(pos, pos + dirs[face], ups[face]);
+            shadowMatrices[face] = projection * view;
+        }
+        for(int f = 0; f < 6; f++) {
+            depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
+        }
+        depthShaderLayered->SetInt("lightIndex", i);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        for(auto& obj : potentialCasters){
+            if(!AffectsLight(obj, light)) continue;
+            PROFILER_ADD_OBJECT();
+            obj->Draw(depthShaderLayered);
+        }
+        farPlanes[i] = 20.0f;
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,windowW, windowH);
 }
@@ -252,13 +241,15 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
+    lightsPosPoint.clear();
     drawVector.clear();
     drawVectorUI.clear();
     potentialCasters.clear();
     lightsUpdatedList.clear();
 
     // Preallocate memory (optimization)
-    lightsPos.reserve(MAX_LIGHTS);
+    lightsPos.reserve(MAX_LIGHTS_DIR_AND_SPOT*2);
+    lightsPosPoint.reserve(MAX_LIGHTS_POINT*2);
     drawVector.reserve(OBJECTS_NUMBER_PREDICT);
     drawVectorUI.reserve(UI_NUMBER_PREDICT);
     lightsUpdatedList.reserve(LIGHTS_SHADERS_PREDICT);
@@ -339,6 +330,10 @@ void Renderer::PrepareLights() {
         const pair<shared_ptr<Light>,float>& b) {
             return a.second < b.second;
     });
+    sort(lightsPosPoint.begin(), lightsPosPoint.end(), [](const pair<shared_ptr<Light>,float>& a, 
+        const pair<shared_ptr<Light>,float>& b) {
+            return a.second < b.second;
+    });
 }
 
 void Renderer::PrepareShaders() {
@@ -411,12 +406,26 @@ void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) 
 }
 
 void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
-    if(light->type == LIGHT_DIRECTIONAL) {
+    vec2 campos;
+    float dist;
+    switch(light->type) {
+        case LIGHT_DIRECTIONAL: {
             lightsPos.push_back({light,0});
-    } else {
-        vec2 campos = currentScene->sceneCam->GetPos();
-        float dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
-        lightsPos.push_back({light,dist});
+            break;
+        }
+        case LIGHT_POINT: {
+            campos = currentScene->sceneCam->GetPos();
+            dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
+            lightsPosPoint.push_back({light,dist});
+            break;
+        }
+        case LIGHT_SPOT: {
+            campos = currentScene->sceneCam->GetPos();
+            dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
+            lightsPos.push_back({light,dist});
+            break;
+        }   
+        default: break;
     }
 }
 
@@ -442,23 +451,25 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
             shader = obj3D->GetShader();
             shader->SetMat4("VP", frameVP);
             shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
-            uint8_t count = std::min((int)lightsPos.size(),20);
-            shader->SetInt("lightsNum", count);
+            uint8_t count = std::min((int)lightsPos.size(),MAX_LIGHTS_DIR_AND_SPOT);
+            uint8_t countPoint = std::min((int)lightsPosPoint.size(),MAX_LIGHTS_POINT);
+            shader->SetInt("lightsNum", count+countPoint);
             for(auto& s : lightsUpdatedList) {
                 if(s==shader.get()) {
                     return;
                 }
             }
             for(uint8_t i = 0; i < count; i++) {
+                shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
                 SetLight(lightsPos[i].first, shader, i);
+            }
+            for(uint8_t i = 0; i < countPoint; i++) {
+                shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
+                SetLight(lightsPosPoint[i].first, shader, i+count);
             }
             lightsUpdatedList.push_back(shader.get());
             shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
             shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
-            for (uint8_t i = 0; i < count; i++) {
-                shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
-                shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
-            }
             break;
         }
         case NRT_OBJECT2D: {
