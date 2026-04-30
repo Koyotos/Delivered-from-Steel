@@ -131,7 +131,26 @@ void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
 			float platformTop = static_pointer_cast<BoxCollider>(GetCollider())->getMax().y;
 
             if (playerBottom >= platformTop) {
-                playerNode->addPlatformVelocity(velocity);
+                Transform trans = playerNode->GetTransform();
+
+                vec3 pos = trans.GetTranslation();
+
+                pos += vec3(0.0f, velocityDelta.y * 1.0f,0.0f);
+
+                trans.SetTranslation(pos);
+                playerNode->SetTransform(trans);
+            }
+
+            if (playerBottom + 0.05f >= platformTop) {
+                Transform trans = playerNode->GetTransform();
+
+                vec3 pos = trans.GetTranslation();
+
+                pos += vec3(velocityDelta.x * 1.0f, velocityDelta.y * 1.0f, 0.0f);
+
+                trans.SetTranslation(pos);
+                playerNode->SetTransform(trans);
+                playerNode->addPlatformVelocity(velocity * 1.0f);
             }
         }
     }
