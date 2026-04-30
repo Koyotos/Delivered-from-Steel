@@ -8,7 +8,7 @@ void Card::Deactivate()
     
 }
 
-void Card::Used()
+void Card::Use()
 {
     if (DestroyAfterUsed)
     {

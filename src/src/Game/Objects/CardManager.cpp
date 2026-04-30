@@ -79,13 +79,15 @@ void CardManager::RemoveCardFromDeck(int index)
 
 void CardManager::DrawCardToHand(int slot)
 {
-	// add ui logic later
 	if (currentHand[slot] != nullptr) return;
 
 	ShuffleDeck();
 
-	currentHand.insert(currentHand.begin() + slot, currentDeck.back());
+	std::shared_ptr<Card> newCard = currentDeck.back();
+	currentHand.insert(currentHand.begin() + slot, newCard);
+	// slots[slot]->SetCard(newCard->getUI());
 	currentDeck.pop_back();
+
 }
 
 void CardManager::DrawCardsToHand()
@@ -101,11 +103,22 @@ void CardManager::UseCard(int index)
 	if (index > maxHandSize) return;
 	if (currentHand[index] == nullptr) return;
 
-	// currentHand[index]->UseCard();
+	currentHand[index]->Use();
+	slots[index]->RemoveCard();
 	
 	if (drawOnHandEmpty) DrawCardToHand(index);
 	else if (IsEmpty()) DrawCardsToHand();
 
 	
-	// add ui logic later
+
+}
+
+void CardManager::ShuffleDeck()
+{
+	return; //TBD
+}
+
+bool CardManager::IsEmpty()
+{
+	return currentHand.empty();
 }

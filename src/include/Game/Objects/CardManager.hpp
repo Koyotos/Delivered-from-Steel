@@ -3,6 +3,7 @@
 
 #include "include/Core/Node.hpp"
 #include "include/Game/Objects/Card.hpp"
+#include "include/Game/UI/CardSlot.hpp"
 
 class CardManager : public Node
 {
@@ -15,6 +16,8 @@ private:
 	std::vector<shared_ptr<Card>> unlockedCards;
 	std::vector<shared_ptr<Card>> currentDeck;
 	std::vector<shared_ptr<Card>> currentHand;
+
+	std::vector<shared_ptr<CardSlot>> slots;
 
 	void ShuffleDeck();
 	void SortHand();

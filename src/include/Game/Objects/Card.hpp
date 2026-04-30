@@ -33,7 +33,7 @@ public:
 
     void Deactivate();
 
-    void Used();
+    void Use();
 };
 
 #endif // FE_CARD
