@@ -15,6 +15,9 @@ Enemy::Enemy(const unordered_map<string, std::any>& data) : Object2D(data) {
 	groundCheckDistance = 0.461f;
 	wallCheckDistance = 0.1f;
 
+	visiblityAngle = 2.0f;
+	visiblityAngle = 1/tan(radians(60.0f));
+	visiblityDistance = 2.0f;
 
 	damage = 100.0f;
 	atakDystanse = 0.5f;
@@ -99,14 +102,14 @@ void Enemy::DetectPlayer() {
 		glm::vec2 playerPos(playerPos3);
 
 		glm::vec2 dir = playerPos - enemyPos;
-		if (sign(dir.x) != sign(direction) || abs(dir.x/dir.y)<2) {
+		if (sign(dir.x) != sign(direction) || abs(dir.x/dir.y) < visiblityAngle) {
 			seePlayer = false;
 			return;
 		}
 
 		float dist = glm::length(dir);
 
-		if (dist > 0.0001f && dist < 2.0f) {
+		if (dist > 0.0001f && dist < visiblityDistance) {
 			dir /= dist;
 
 			auto hit = Raycast(

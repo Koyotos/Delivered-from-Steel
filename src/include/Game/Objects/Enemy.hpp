@@ -28,6 +28,8 @@ protected:
 	float groundCheckDistance;
 	float wallCheckDistance;
 
+	float visiblityAngle;
+	float visiblityDistance;
 
 	float damage;
 	float atakDystanse;
