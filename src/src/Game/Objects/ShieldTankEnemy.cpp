@@ -13,16 +13,72 @@ ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : 
 	groundCheckDistance = 0.461f;
 	wallCheckDistance = 0.1f;
 
-	shieldRaycastOffsetX = 0.1f;
+	shieldRaycastOffsetX = 0.11f;
+
+	shieldCooldown = 0.1f;
+
+	chaseTime = 2.0f;
 }
 
 void ShieldTankEnemy::Chase(float dt) {
 	glm::vec2 dir = player->GetTransform().GetTranslation() - transform.GetTranslation();
+	if (!seePlayer) {
+		if (chaseTimer == 0.0f) {
+			if (dir.y > 0.0f) {
+				playerJumpingOver = true;
+			}
+		}
+		chaseTimer += dt;
+		if (chaseTimer >= chaseTime) {
+			state = EnemyState::Patrol;
+			chaseTimer = 0.0f;
+
+		}
+
+		chaseTimer += dt;
+
+		if (playerJumpingOver) {
+			float dist = length(dir);
+			if (dist > 2.0f || dir.y < 0.0f) {
+				playerJumpingOver = false;
+			}
+			else {
+				auto hit = Raycast(
+					glm::vec2(0.0f),
+					dir,
+					dist,
+					ObjectType::Wall
+				);
+				if (hit.has_value()) {
+					playerJumpingOver = false;
+				}
+				else if (direction != sign(dir.x)) {
+					direction = sign(dir.x);
+
+					Transform t = GetTransform();
+					glm::vec3 scale = t.GetScale();
+					scale.x = std::abs(scale.x) * direction;
+					t.SetScale(scale);
+					SetTransform(t);
+				}
+			}
+
+		}
+		else {
+			dir = lastPlayerDir;
+		}
+
+	}
+	else {
+		chaseTimer = 0.0f;
+	}
+	lastPlayerDir = dir;
+
 	dir.y = 0.0f;
 	dir = glm::normalize(dir);
 
 	auto groundHit = Raycast(
-		glm::vec2(raycastOffsetX * direction, 0.0f),
+		glm::vec2(shieldRaycastOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		groundCheckDistance,
 		ObjectType::Wall
@@ -32,7 +88,7 @@ void ShieldTankEnemy::Chase(float dt) {
 		SetVelocity(glm::vec2(dir.x * speed, GetVelocity().y));
 	}
 	else {
-		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
+ 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
 	}
 }
 
@@ -44,8 +100,42 @@ void ShieldTankEnemy::AttackState(float dt) {
 		groundCheckDistance,
 		ObjectType::Player
 	);
-	if (!shieldHit.has_value()) {
+	if (shieldHit.has_value() && !shieldOnCooldown) {
+		shieldOnCooldown = true;
 		player->takeDamage(damage);
 		player->SetVelocity( player->GetVelocity() + glm::vec2(direction * 5.0f, 0.0f));
+	}
+}
+
+void ShieldTankEnemy::Update(float deltaTime) {
+	if (shieldOnCooldown) {
+		shieldCooldownTimer += deltaTime;
+		if (shieldCooldownTimer >= shieldOnCooldown) {
+			shieldOnCooldown = false;
+			shieldCooldownTimer = 0.0f;
+
+		}
+	}
+	Enemy::Update(deltaTime);
+}
+
+void ShieldTankEnemy::ChangeState(shared_ptr<Player> player) {
+	switch (state) {
+	case EnemyState::Patrol: {
+		if (seePlayer) {
+			state = EnemyState::Chase;
+		}
+		break;
+	}
+	case EnemyState::Chase: {
+		float enemyToPlayerDist = glm::length(player->GetTransform().GetTranslation() - transform.GetTranslation());
+		if (enemyToPlayerDist < atakDystanse) {
+			state = EnemyState::Attack;
+		}
+		break;
+	}
+	case EnemyState::Attack: {
+		break;
+	}
 	}
 }
