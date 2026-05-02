@@ -8,6 +8,10 @@
 #include "include/Game/Objects/Trap.hpp"
 #include "include/Game/Objects/Item.hpp"
 #include "include/Game/Objects/Enemy.hpp"
+#include "include/Game/Objects/ChargingEnemy.hpp"
+#include "include/Game/Objects/TurretEnemy.hpp"
+#include "include/Game/Objects/ShieldTankEnemy.hpp"
+#include "include/Game/Objects/HookEnemy.hpp"
 #include "include/Game/Objects/Platform.hpp"
 #include "include/Game/Objects/NPC.hpp"
 #include "include/Game/Objects/Button.hpp"
@@ -56,6 +60,10 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
 	RegisterObjectType<Vignette>("Vignette"),
     RegisterObjectType<Trap>("Trap"),
     RegisterObjectType<Enemy>("Enemy"),
+    RegisterObjectType<HookEnemy>("HookEnemy"),
+    RegisterObjectType<ShieldTankEnemy>("ShieldTankEnemy"),
+    RegisterObjectType<ChargingEnemy>("ChargingEnemy"),
+    RegisterObjectType<TurretEnemy>("TurretEnemy"),
     RegisterObjectType<Platform>("Platform"),
     RegisterObjectType<Item>("Item"),
     RegisterObjectType<NPC>("NPC"),

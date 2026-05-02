@@ -16,7 +16,7 @@ enum class EnemyState {
 class Enemy :
 	public Object2D
 {
-private:
+protected:
 	float hpMax;
 	float hp = hpMax;
 
@@ -43,7 +43,7 @@ public:
 
 	void OnCollisionStay(shared_ptr<Collider> other) override;
 
-	void Update(float deltaTime) override final;
+	void Update(float deltaTime) override;
 
 	void UpdateState(float);
 

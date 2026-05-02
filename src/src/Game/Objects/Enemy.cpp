@@ -99,14 +99,14 @@ void Enemy::DetectPlayer() {
 		glm::vec2 playerPos(playerPos3);
 
 		glm::vec2 dir = playerPos - enemyPos;
-		if (sign(dir.x) != sign(direction)) {
+		if (sign(dir.x) != sign(direction) || abs(dir.x/dir.y)<2) {
 			seePlayer = false;
 			return;
 		}
 
 		float dist = glm::length(dir);
 
-		if (dist > 0.0001f && dist < 4.0f) {
+		if (dist > 0.0001f && dist < 2.0f) {
 			dir /= dist;
 
 			auto hit = Raycast(
