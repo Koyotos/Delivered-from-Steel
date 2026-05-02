@@ -26,8 +26,6 @@ private:
     vec3 endPosition;
 
     weak_ptr<Player> player;
-	bool playerHangingOnPlatform = false;
-    vec3 relativePositionToPlatform = vec3(0.0f);
 
     float timer;
 

@@ -14,16 +14,26 @@ enum class EnemyState {
 };
 
 class Enemy :
-    public Object2D
+	public Object2D
 {
 private:
-	float hpMax = 100.0f;
+	float hpMax;
 	float hp = hpMax;
 
-	float damage = 100.0f;
-	float atakDystanse = 0.5f;
+	float speed;
+
+	float raycastOffsetX;
+	float raycastOffsetY;
+
+	float groundCheckDistance;
+	float wallCheckDistance;
+
+
+	float damage;
+	float atakDystanse;
 
 	bool seePlayer = false;
+	int direction = 1;
 	EnemyState state = EnemyState::Patrol;
 
 	shared_ptr<Player> player;
@@ -33,7 +43,7 @@ public:
 
 	void OnCollisionStay(shared_ptr<Collider> other) override;
 
-	void Update(float deltaTime) override;
+	void Update(float deltaTime) override final;
 
 	void UpdateState(float);
 
@@ -41,7 +51,7 @@ public:
 
 	virtual void ChangeState(shared_ptr<Player> player);
 
-	virtual void Patrol(float) {};
+	virtual void Patrol(float);
 
 	virtual void Chase(float) {};
 
