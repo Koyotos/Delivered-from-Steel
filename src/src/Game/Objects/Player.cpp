@@ -82,6 +82,7 @@ bool Player::CheckLedge() {
 
 void Player::Process() {
 	Object2D::Process();
+	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 	if (isDead) {
 		moveInput = 0.0f;
 		respawnTimer -= deltaTime;
