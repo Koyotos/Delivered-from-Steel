@@ -23,8 +23,6 @@ class Sprite {
     GLuint active;
     vec2 size;
 
-    vector<Vertex2D> vertices;
-    vector<GLuint> indices;
     vector<Texture> textures;
     unordered_map<string, AnimationData> animations;
 
