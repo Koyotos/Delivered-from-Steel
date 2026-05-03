@@ -576,4 +576,13 @@ Renderer::~Renderer() {
     glDeleteBuffers(1,&screenQuadVBO);
     glDeleteVertexArrays(1,&screenQuadVAO);
     glDeleteBuffers(1,&screenQuadEBO);
+    glDeleteBuffers(1,&mainColorBuffer);
+    glDeleteBuffers(1,&depthColorBuffer);
+    glDeleteBuffers(1,&brightColorBuffer);
+    glDeleteBuffers(2,blurColorBuffers);
+    glDeleteFramebuffers(1,&mainFBO);
+    glDeleteFramebuffers(1,&depthFBO);
+    glDeleteFramebuffers(2,blurFBOs);
+    glDeleteTextures(1,&depthMaps2DArray);
+    glDeleteTextures(1,&depthCubeArray);
 }

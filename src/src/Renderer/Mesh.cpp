@@ -42,7 +42,6 @@ void Mesh::Draw(Shader& shader) {
     glBindVertexArray(0);
 }
        
-
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures, const bool& drawFlag) {
     this->vertices = vertices;
     this->indices = indices;
