@@ -34,6 +34,7 @@ void Renderer::Init(ResourceManager& rsm)
     depthShaderLayered = rsm.LoadShader("layeredDepth");
     depthShaderNormal  = rsm.LoadShader("simpleDepth");
     postProcessingShader = rsm.LoadShader("postProcess");
+    blurShader = rsm.LoadShader("blur");
 
     glGenFramebuffers(1, &depthFBO);
     GenShadowMaps();
@@ -50,12 +51,45 @@ void Renderer::Init(ResourceManager& rsm)
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mainColorBuffer, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glGenRenderbuffers(1, &renderBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowW, windowH);
+    glGenTextures(1, &depthColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                            GL_RENDERBUFFER, renderBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+                windowW, windowH, 0,
+                GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        depthColorBuffer, 0);
+
+    glGenTextures(1, &brightColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, brightColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+                        GL_TEXTURE_2D, brightColorBuffer, 0);
+
+    GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
+
+    glGenFramebuffers(2, blurFBOs);
+    glGenTextures(2, blurColorBuffers);
+
+    for (int i = 0; i < 2; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[i]);
+        glBindTexture(GL_TEXTURE_2D, blurColorBuffers[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                            GL_TEXTURE_2D, blurColorBuffers[i], 0);
+    }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         throw std::runtime_error("Framebuffer not complete!");
@@ -174,6 +208,7 @@ void Renderer::DepthPass() {
                 projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
                 view = lookAt(pos, center, vec3(0, 1, 0));
                 lightSpaceMatrices[i] = projection * view;
+                sunMatrix = lightSpaceMatrices[i];
 
                 depthShaderNormal->Use();
                 depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
@@ -256,7 +291,9 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
     frameVP = scene->sceneCam->GetVP(1);
     frameVO = scene->sceneCam->GetVP(0);
-    frameO = scene->sceneCam->GetUI();
+    frameO = scene->sceneCam->GetO();
+    frameV = scene->sceneCam->GetV();
+    frameP = scene->sceneCam->GetP();
 
     // Prepare culling
     currentScene = scene;
@@ -275,6 +312,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
     // Draw
     Draw();
+    BlurBloomPass();
 
     // Post processing
     PostProcessingPass();
@@ -319,10 +357,40 @@ void Renderer::PostProcessingPass() {
     glDisable(GL_DEPTH_TEST);
     postProcessingShader->SetInt("hdrBuffer",TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
     postProcessingShader->SetFloat("exposure", 0.6);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
+    postProcessingShader->SetInt("depthBuffer", 1);
+    postProcessingShader->SetMat4("invProjection", inverse(frameP));
+    postProcessingShader->SetMat4("invView", inverse(frameV));
+    postProcessingShader->SetVec3("lightDir", sunDir);
+    postProcessingShader->SetMat4("sunMatrix", sunMatrix);
+    postProcessingShader->SetVec3("lightColor", vec3(1.0));
+    postProcessingShader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
     glBindVertexArray(screenQuadVAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindTexture(GL_TEXTURE_2D,0);
     glBindVertexArray(0);
+}
+
+void Renderer::BlurBloomPass() {
+    bool horizontal = true;
+    bool first_iteration = true;
+    int amount = 5;
+    blurShader->SetInt("image", 0); // texture unit 0
+    for (int i = 0; i < amount; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[horizontal]);
+
+        blurShader->SetBool("horizontal", horizontal);
+
+        glBindTexture(GL_TEXTURE_2D,
+            first_iteration ? brightColorBuffer : blurColorBuffers[!horizontal]);
+        glBindVertexArray(screenQuadVAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        horizontal = !horizontal;
+        if (first_iteration)
+            first_iteration = false;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::PrepareLights() {
@@ -410,6 +478,7 @@ void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
     float dist;
     switch(light->type) {
         case LIGHT_DIRECTIONAL: {
+            sunDir = light->data1;
             lightsPos.push_back({light,0});
             break;
         }

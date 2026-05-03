@@ -46,12 +46,15 @@ class Renderer {
     uint16_t windowH;
     GLuint mainFBO;
     GLuint mainColorBuffer;
-    GLuint renderBuffer;
+    GLuint depthColorBuffer;
+    GLuint brightColorBuffer;
 
     // Optimizations
     mat4 frameVP;
     mat4 frameVO;
     mat4 frameO;
+    mat4 frameV;
+    mat4 frameP;
     vector<Shader*> lightsUpdatedList;
  
     // Depth 
@@ -69,6 +72,11 @@ class Renderer {
     GLuint screenQuadVBO;
     GLuint screenQuadEBO;
     shared_ptr<Shader> postProcessingShader;
+    shared_ptr<Shader> blurShader;
+    vec3 sunDir;
+    mat4 sunMatrix;
+    GLuint blurFBOs[2];
+    GLuint blurColorBuffers[2];
 
     static constexpr vec3 dirs[6] = {
                     {1,0,0},{-1,0,0},
@@ -117,6 +125,7 @@ class Renderer {
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
     inline void BindShadowTextures();
     inline void PostProcessingPass();
+    inline void BlurBloomPass();
 
     // Draws
     inline void Draw();
