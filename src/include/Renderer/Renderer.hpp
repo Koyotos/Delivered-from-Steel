@@ -26,6 +26,7 @@
 #define OBJECTS_NUMBER_PREDICT 15
 #define UI_NUMBER_PREDICT 20
 #define LIGHTS_SHADERS_PREDICT 5
+#define SHADER_NUMBER_PREDICT 5
 
 #define CULL_RADIUS_ALWAYS_TRUE 0.000000001
 
@@ -40,14 +41,19 @@ enum NodeRenderType {
 
 class Renderer {
     private: 
-    // General
+    // Window
     GLFWwindow* window;
     uint16_t windowW;
     uint16_t windowH;
+
+    // Buffers
     GLuint mainFBO;
     GLuint mainColorBuffer;
     GLuint depthColorBuffer;
     GLuint brightColorBuffer;
+    GLuint depthFBO;
+    GLuint blurFBOs[2];
+    GLuint blurColorBuffers[2];
 
     // Optimizations
     mat4 frameVP;
@@ -55,16 +61,15 @@ class Renderer {
     mat4 frameO;
     mat4 frameV;
     mat4 frameP;
-    vector<Shader*> lightsUpdatedList;
+    vector<Shader*> updatedShaders;
  
-    // Depth 
-    GLuint depthFBO;
+    // Depth Pass
+    int shadow2DUnit;
+    int shadowCubeUnit;
     GLuint depthMaps2DArray;
     GLuint depthCubeArray;
     shared_ptr<Shader> depthShaderLayered;
     shared_ptr<Shader> depthShaderNormal;
-    int shadow2DUnit;
-    int shadowCubeUnit;
     vector<shared_ptr<VisualNode>> potentialCasters; 
 
     // Post processing
@@ -75,8 +80,6 @@ class Renderer {
     shared_ptr<Shader> blurShader;
     vec3 sunDir;
     mat4 sunMatrix;
-    GLuint blurFBOs[2];
-    GLuint blurColorBuffers[2];
 
     static constexpr vec3 dirs[6] = {
                     {1,0,0},{-1,0,0},
@@ -90,10 +93,7 @@ class Renderer {
                 };
 
     // Culling
-    vec4 frustumLeft;
-    vec4 frustumRight;
-    vec4 frustumTop;
-    vec4 frustumBottom;
+    vec4 frustumPlanes[6];
 
     // Drawing
     shared_ptr<Scene> currentScene;
@@ -106,26 +106,27 @@ class Renderer {
 
     // Init 
     inline void GenShadowMaps();
+    inline void GenFramebuffers();
 
     // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&);
+    inline void PrepareDrawLight(shared_ptr<Light>);
    
     inline void DepthPass();
-
-    inline bool Cull(shared_ptr<VisualNode>);
-    inline bool AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light);
-
-    inline void PrepareDrawLight(shared_ptr<Light>);
-    inline void ComputeFrustum();
-    inline void PrepareLights();
-    inline void ResolveZ();
-    inline void PrepareShaders();
-    inline void ConfigureShader(shared_ptr<Node>);
-    inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
-    inline void BindShadowTextures();
     inline void PostProcessingPass();
     inline void BlurBloomPass();
+
+    inline void ComputeFrustum();
+    inline bool Cull(const shared_ptr<VisualNode>&);
+    inline void ResolveZ();
+    inline bool AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light);
+
+    inline void PrepareLights();
+    inline void PrepareShaders();
+    inline void ConfigureShader(shared_ptr<VisualNode>);
+    inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
+    inline void BindShadowTextures();
 
     // Draws
     inline void Draw();

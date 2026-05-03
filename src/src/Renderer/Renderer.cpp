@@ -1,16 +1,11 @@
 #include "include/Renderer/Renderer.hpp"
+#include "include/Core/VisualNode.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/Shader.hpp"
 #include "include/Renderer/Utils.hpp"
 #include <iostream>
 
-static auto normalizePlane = [](vec4& plane) {
-        float length = glm::length(vec3(plane));
-        plane /= length;
-};
-
-void Renderer::Init(ResourceManager& rsm)
-{
+void Renderer::Init(ResourceManager& rsm) {
     if (!glfwInit())
         throw runtime_error("Can't initialize GLFW");
 
@@ -36,6 +31,28 @@ void Renderer::Init(ResourceManager& rsm)
     postProcessingShader = rsm.LoadShader("postProcess");
     blurShader = rsm.LoadShader("blur");
 
+    GenFramebuffers();
+
+    tuple<GLuint, GLuint, GLuint> screenQuad = CreateQuad(windowW, windowH, true);
+    screenQuadVAO = get<0>(screenQuad);
+    screenQuadVBO = get<1>(screenQuad);
+    screenQuadEBO = get<2>(screenQuad);
+
+    // Preallocate memory (optimization)
+    lightsPos.reserve(MAX_LIGHTS_DIR_AND_SPOT*2);
+    lightsPosPoint.reserve(MAX_LIGHTS_POINT*2);
+    drawVector.reserve(OBJECTS_NUMBER_PREDICT);
+    drawVectorUI.reserve(UI_NUMBER_PREDICT);
+    updatedShaders.reserve(SHADER_NUMBER_PREDICT);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthFunc(GL_LESS);
+}
+
+void Renderer::GenFramebuffers() {
     glGenFramebuffers(1, &depthFBO);
     GenShadowMaps();
 
@@ -95,17 +112,6 @@ void Renderer::Init(ResourceManager& rsm)
         throw std::runtime_error("Framebuffer not complete!");
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    tuple<GLuint, GLuint, GLuint> screenQuad = CreateQuad(windowW, windowH, true);
-    screenQuadVAO = get<0>(screenQuad);
-    screenQuadVBO = get<1>(screenQuad);
-    screenQuadEBO = get<2>(screenQuad);
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthFunc(GL_LESS);
 }
 
 void Renderer::GenShadowMaps() {
@@ -147,16 +153,17 @@ void Renderer::GenShadowMaps() {
 }
 
 void Renderer::ComputeFrustum() {
-    frustumLeft = vec4(frameVP[0][3] + frameVP[0][0], frameVP[1][3] + frameVP[1][0], frameVP[2][3] + frameVP[2][0], frameVP[3][3] + frameVP[3][0]);
-    frustumRight = vec4(frameVP[0][3] - frameVP[0][0], frameVP[1][3] - frameVP[1][0], frameVP[2][3] - frameVP[2][0], frameVP[3][3] - frameVP[3][0]);
-    frustumBottom = vec4(frameVP[0][3] + frameVP[0][1], frameVP[1][3] + frameVP[1][1], frameVP[2][3] + frameVP[2][1], frameVP[3][3] + frameVP[3][1]);
-    frustumTop = vec4(frameVP[0][3] - frameVP[0][1], frameVP[1][3] - frameVP[1][1], frameVP[2][3] - frameVP[2][1], frameVP[3][3] - frameVP[3][1]);
+    frustumPlanes[0] = frameVP[3] + frameVP[0];
+    frustumPlanes[1] = frameVP[3] - frameVP[0];
+    frustumPlanes[2] = frameVP[3] + frameVP[1];
+    frustumPlanes[3] = frameVP[3] - frameVP[1];
+    frustumPlanes[4] = frameVP[3] + frameVP[2];
+    frustumPlanes[5] = frameVP[3] - frameVP[2];
 
-    normalizePlane(frustumLeft);
-    normalizePlane(frustumRight);
-    normalizePlane(frustumBottom);
-    normalizePlane(frustumTop);
-}  
+    for(auto& p : frustumPlanes) {
+        p*=1.0f/length(p);
+    }
+}
 
 bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light) {
     vec3 objPos = obj->GetTransform().GetGlobal()[3];
@@ -280,14 +287,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     drawVector.clear();
     drawVectorUI.clear();
     potentialCasters.clear();
-    lightsUpdatedList.clear();
-
-    // Preallocate memory (optimization)
-    lightsPos.reserve(MAX_LIGHTS_DIR_AND_SPOT*2);
-    lightsPosPoint.reserve(MAX_LIGHTS_POINT*2);
-    drawVector.reserve(OBJECTS_NUMBER_PREDICT);
-    drawVectorUI.reserve(UI_NUMBER_PREDICT);
-    lightsUpdatedList.reserve(LIGHTS_SHADERS_PREDICT);
+    updatedShaders.clear();
 
     frameVP = scene->sceneCam->GetVP(1);
     frameVO = scene->sceneCam->GetVP(0);
@@ -376,15 +376,13 @@ void Renderer::BlurBloomPass() {
     bool horizontal = true;
     bool first_iteration = true;
     int amount = 5;
-    blurShader->SetInt("image", 0); // texture unit 0
+    blurShader->SetInt("image", 0);
+    glBindVertexArray(screenQuadVAO);
     for (int i = 0; i < amount; i++) {
         glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[horizontal]);
-
         blurShader->SetBool("horizontal", horizontal);
-
         glBindTexture(GL_TEXTURE_2D,
             first_iteration ? brightColorBuffer : blurColorBuffers[!horizontal]);
-        glBindVertexArray(screenQuadVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         horizontal = !horizontal;
         if (first_iteration)
@@ -413,17 +411,18 @@ void Renderer::PrepareShaders() {
     }
 }
 
-bool Renderer::Cull(shared_ptr<VisualNode> node) {
-    float radius = node->GetCullRadius();
-    if(radius < CULL_RADIUS_ALWAYS_TRUE) {
+bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
+    const float radius = node->GetCullRadius();
+    if (radius < CULL_RADIUS_ALWAYS_TRUE)
         return true;
+    const glm::vec3 pos = node->GetTransform().GetGlobal()[3];
+
+    for (int i = 0; i < 6; i++) {
+        const glm::vec4& p = frustumPlanes[i];
+        if (glm::dot(glm::vec3(p), pos) + p.w < -radius)
+            return false;
     }
-    vec3 pos = node->GetTransform().GetGlobal()[3];
-    if(glm::dot(vec3(frustumLeft), pos) + frustumLeft.w < -radius) return false;
-    if(glm::dot(vec3(frustumRight), pos) + frustumRight.w < -radius) return false;
-    if(glm::dot(vec3(frustumBottom), pos) + frustumBottom.w < -radius) return false;
-    if(glm::dot(vec3(frustumTop), pos) + frustumTop.w < -radius) return false;
-    return true; 
+    return true;
 }
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
@@ -512,22 +511,21 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     shader->SetVec3("lights["+to_string(index)+"].colorSpecular", light->colorSpecular);
 }
 
-void Renderer::ConfigureShader(shared_ptr<Node> node) {
-    shared_ptr<Shader> shader;
+void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
+    shared_ptr<Shader> shader = node->GetShader();
+    for(auto& s : updatedShaders) {
+        if(s == shader.get()) {
+            return;
+        }
+    }
     switch(node->RenderType()) {
         case NRT_OBJECT3D: {
             shared_ptr<Object3D> obj3D = static_pointer_cast<Object3D>(node);
-            shader = obj3D->GetShader();
             shader->SetMat4("VP", frameVP);
             shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
             uint8_t count = std::min((int)lightsPos.size(),MAX_LIGHTS_DIR_AND_SPOT);
             uint8_t countPoint = std::min((int)lightsPosPoint.size(),MAX_LIGHTS_POINT);
             shader->SetInt("lightsNum", count+countPoint);
-            for(auto& s : lightsUpdatedList) {
-                if(s==shader.get()) {
-                    return;
-                }
-            }
             for(uint8_t i = 0; i < count; i++) {
                 shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
                 SetLight(lightsPos[i].first, shader, i);
@@ -536,14 +534,12 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
                 shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
                 SetLight(lightsPosPoint[i].first, shader, i+count);
             }
-            lightsUpdatedList.push_back(shader.get());
             shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
             shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
             break;
         }
         case NRT_OBJECT2D: {
             shared_ptr<Object2D> obj2D = static_pointer_cast<Object2D>(node);
-            shader = obj2D->GetShader();
             if(obj2D->GetReqPerspective()) {
                 shader->SetMat4("VP", frameVP);
             } else {
@@ -553,7 +549,6 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         }
         case NRT_TEXTNODE: {
             shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
-            shader = textNode->GetShader();
             if(textNode->TestIgnoreParent()) {
                 shader->SetMat4("VP", frameO);
             } else {
@@ -563,6 +558,7 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         }
         default : break;
     }
+    updatedShaders.push_back(shader.get());
 }
 
 void Renderer::EndFrame() {
