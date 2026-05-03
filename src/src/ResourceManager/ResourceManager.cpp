@@ -138,7 +138,14 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
         auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("sprite")) {
             cast->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
-            cast->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
+            if (data.contains("active")) {
+                cast->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
+            }
+            if (data.contains("playAnimation")) {
+                float speed = data.contains("animSpeed") ? fromMap(float, "animSpeed", data) : 0.1f;
+                bool loop = data.contains("animLoop") ? fromMap(bool, "animLoop", data) : true;
+                cast->Play(fromMap(string, "playAnimation", data), speed, loop);
+            }
         }
         if(data.contains("shader")) {
             cast->SetShader(LoadShader(fromMap(string,"shader",data)));
