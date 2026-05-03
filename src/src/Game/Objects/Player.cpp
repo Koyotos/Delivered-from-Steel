@@ -28,9 +28,9 @@ float Player::MoveTowards(float current, float target, float maxDelta) {
 }
 
 bool Player::CheckGrounded() {
-	float rayLength = 0.2f;
+	float rayLength = 0.19f;
 	glm::vec2 rayDir(1.0f, 0.0f);
-	float offsetX = -0.1f;
+	float offsetX = -0.095f;
 	float offsetY = -0.41f;
 
 	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
@@ -50,20 +50,21 @@ bool Player::CheckCeiling() {
 }
 
 bool Player::CheckLeftWalled() {
-	float rayLength = 0.01f;
-	glm::vec2 rayDir(1.0f, 0.0f);
-	float offsetX = 0.1f;
+	float rayLength = 0.38f;
+	glm::vec2 rayDir(0.0f, -1.0f);
+	float offsetX = 0.11f;
+	float offsetY = -0.01f;
+	auto hitLeft = Raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	return hitLeft.has_value();
+}
 
-	auto hitRightTop = Raycast(glm::vec2(offsetX, 0.0f), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeftTop = Raycast(glm::vec2(-offsetX, 0.0f), -rayDir, rayLength, ObjectType::Wall);
-
-	auto hitRightMid = Raycast(glm::vec2(offsetX, -0.2f), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeftMid = Raycast(glm::vec2(-offsetX, -0.2f), -rayDir, rayLength, ObjectType::Wall);
-
-	auto hitRightBot = Raycast(glm::vec2(offsetX, -0.4f), rayDir, rayLength, ObjectType::Wall);
-	auto hitLeftBot = Raycast(glm::vec2(-offsetX, -0.4f), -rayDir, rayLength, ObjectType::Wall);
-
-	return hitRightTop.has_value() || hitLeftTop.has_value() || hitRightMid.has_value() || hitLeftMid.has_value() || hitRightBot.has_value() || hitLeftBot.has_value();
+bool Player::CheckRightWalled() {
+	float rayLength = 0.38f;
+	glm::vec2 rayDir(0.0f, -1.0f);
+	float offsetX = 0.11f;
+	float offsetY = -0.01f;
+	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	return hitRight.has_value();
 }
 
 bool Player::CheckLedge() {
@@ -83,9 +84,25 @@ void Player::Process() {
 	Object2D::Process();
 	if (isDead) {
 		moveInput = 0.0f;
+		respawnTimer -= deltaTime;
+		if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
+		SetVelocity(glm::vec2(0.0f));
+		if (respawnTimer <= 0.0f) {
+			Transform t = GetTransform();
+			t.SetTranslation(respawnPoint);
+			SetTransform(t);
+			hp = hpMax;
+			glm::vec2 currentVelocity = GetVelocity();
+			isDead = false;
+		}
 		return;
 	}
-	float deltaTime = Globals::GetGlobals().GetDeltaTime();
+	if (!canTakeDamage) {
+		damageTimer -= deltaTime;
+		if (damageTimer <= 0.0f) {
+			canTakeDamage = true;
+		}
+	}
 
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
@@ -139,7 +156,12 @@ void Player::Update(float deltaTime) {
 	glm::vec2 currentVelocity = GetVelocity();
 
 	isGrounded = CheckGrounded();
-	isWalled = CheckLeftWalled() || CheckLedge();
+	bool isWalledLeft = CheckLeftWalled();
+	bool isWalledRight = CheckRightWalled();
+	isWalled = isWalledRight || isWalledLeft;
+	if (isWalledRight && isWalledLeft) {
+		Shatter();
+	}
 
 	if (isGrounded) {
 		coyoteTimeCounter = coyoteTime;
@@ -193,7 +215,10 @@ void Player::Update(float deltaTime) {
 		}
 
 		SetVelocity(currentVelocity);
+
 		if (isHanging) {
+			SetVelocity(vec2(0.0f, 0.0f));
+
 			Transform t = GetTransform();
 			glm::vec3 scale = t.GetScale();
 			scale.x = std::abs(scale.x) * facingDirectionHang;
@@ -435,4 +460,8 @@ void Player::UpdateCamera(float deltaTime) {
 void Player::TriggerCameraShake(float duration, float intensity) {
 	cameraShakeTimer = duration;
 	cameraShakeIntensity = intensity;
+}
+
+bool Player::IsHanging() {
+	return isHanging;
 }

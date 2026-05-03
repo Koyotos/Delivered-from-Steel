@@ -5,6 +5,8 @@
 #include "include/IOManager/InputEvent.hpp"
 #include "include/Renderer/Camera.hpp"
 
+class MovingPlatform;
+
 class Player : public Object2D {
 private:
 	shared_ptr<Camera> camera;
@@ -71,7 +73,7 @@ private:
 	glm::vec2 platformVelocity = glm::vec2(0.0f);
 	glm::vec3 respawnPoint;
 	bool CheckGrounded();
-	bool CheckWalled();
+	bool CheckRightWalled();
 	bool CheckLeftWalled();
 	bool CheckCeiling();
 
@@ -98,7 +100,9 @@ public:
 
 	void Shatter();
 
-	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity += velocity; }
+	bool IsHanging();
+
+	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity = velocity; }
 };
 
 #endif
