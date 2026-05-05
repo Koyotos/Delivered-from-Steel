@@ -4,7 +4,7 @@ TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(da
 {
 	objectType = ObjectType::Enemy;
 	speed = 0.0f;
-	damage = 40.0f;
+	damage = 0.0f;
 
 	shotTime = 1.0f;
 
@@ -13,16 +13,18 @@ TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(da
 }
 
 void TurretEnemy::AttackState(float dt) {
-	glm::vec2 dir = player->GetTransform().GetTranslation() - transform.GetTranslation();
-	auto bulletHit = Raycast(
-		glm::vec2(0.0f, 0.0f),
-		dir,
-		50.0f,
-		ObjectType::Player
-	);
-	if (bulletHit.has_value()) {
-		player->takeDamage(damage);
-		isWaiting = true;
+
+	if (!isWaiting) {
+		shared_ptr<Bullet> bullet = static_pointer_cast<Bullet>(GetChildren()[0]);
+		if (!bullet->GetVisible()) {
+			glm::vec2 dir = normalize(player->GetTransform().GetTranslation() - transform.GetTranslation());
+			bullet->SetDirection(dir);
+			bullet->SetVisible(true);
+			Transform bulletTransform = bullet->GetTransform();
+			bulletTransform.SetTranslation(vec3(0.0f));
+			bullet->SetTransform(bulletTransform);
+			isWaiting = true;
+		}
 	}
 }
 
@@ -59,4 +61,5 @@ void TurretEnemy::ChangeState(shared_ptr<Player> player) {
 	}
 	}
 }
+
  

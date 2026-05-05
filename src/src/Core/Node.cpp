@@ -37,8 +37,15 @@ void Node::Disable() noexcept {
     SetInput(false);
     SetPhysics(false);
     SetDraw(false);
-    SetIgnoreParent(true);
-    SetTransformChanged(false);
+    SetTransformChanged(true);
+}
+
+void Node::Enable() noexcept {
+    SetProcess(true);
+    SetInput(true);
+    SetPhysics(true);
+    SetDraw(true);
+    SetTransformChanged(true);
 }
 
 void Node::InitRecursive(shared_ptr<Scene> scene) {

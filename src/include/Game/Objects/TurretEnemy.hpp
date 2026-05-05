@@ -1,4 +1,5 @@
 #include "include/Game/Objects/Enemy.hpp"
+#include "include/Game/Objects/Bullet.hpp"
 
 #ifndef FE_TURRETENEMY
 #define FE_TURRETENEMY

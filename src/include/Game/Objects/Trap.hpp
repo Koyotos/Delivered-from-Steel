@@ -7,7 +7,7 @@ class Trap :
     public Object3D
 {
 private:
-    float damage = 90.0f;
+    float damage = 1000.0f;
 
 public:
     void OnCollisionStay(shared_ptr<Collider> other) override;
