@@ -1,12 +1,11 @@
 #include "include/Renderer/Renderer.hpp"
+#include "include/Core/VisualNode.hpp"
+#include "include/Renderer/Light.hpp"
+#include "include/Renderer/Shader.hpp"
+#include "include/Renderer/Utils.hpp"
+#include <iostream>
 
-static auto normalizePlane = [](vec4& plane) {
-        float length = glm::length(vec3(plane));
-        plane /= length;
-};
-
-void Renderer::Init(ResourceManager& rsm)
-{
+void Renderer::Init(ResourceManager& rsm) {
     if (!glfwInit())
         throw runtime_error("Can't initialize GLFW");
 
@@ -24,15 +23,27 @@ void Renderer::Init(ResourceManager& rsm)
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw runtime_error("GL loader error");
 
-    lightSpaceMatrices.resize(MAX_LIGHTS);
-    farPlanes.resize(MAX_LIGHTS);
+    lightSpaceMatrices.resize(MAX_LIGHTS_DIR_AND_SPOT);
+    farPlanes.resize(MAX_LIGHTS_POINT);
 
     depthShaderLayered = rsm.LoadShader("layeredDepth");
     depthShaderNormal  = rsm.LoadShader("simpleDepth");
+    postProcessingShader = rsm.LoadShader("postProcess");
+    blurShader = rsm.LoadShader("blur");
 
-    glGenFramebuffers(1, &FBO);
+    GenFramebuffers();
 
-    GenShadowMaps();
+    tuple<GLuint, GLuint, GLuint> screenQuad = CreateQuad(windowW, windowH, true);
+    screenQuadVAO = get<0>(screenQuad);
+    screenQuadVBO = get<1>(screenQuad);
+    screenQuadEBO = get<2>(screenQuad);
+
+    // Preallocate memory (optimization)
+    lightsPos.reserve(MAX_LIGHTS_DIR_AND_SPOT*2);
+    lightsPosPoint.reserve(MAX_LIGHTS_POINT*2);
+    drawVector.reserve(OBJECTS_NUMBER_PREDICT);
+    drawVectorUI.reserve(UI_NUMBER_PREDICT);
+    updatedShaders.reserve(SHADER_NUMBER_PREDICT);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -41,25 +52,85 @@ void Renderer::Init(ResourceManager& rsm)
     glDepthFunc(GL_LESS);
 }
 
+void Renderer::GenFramebuffers() {
+    glGenFramebuffers(1, &depthFBO);
+    GenShadowMaps();
+
+    glGenFramebuffers(1,&mainFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, mainFBO);
+    glGenTextures(1, &mainColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL); 
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mainColorBuffer, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenTextures(1, &depthColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+                windowW, windowH, 0,
+                GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        depthColorBuffer, 0);
+
+    glGenTextures(1, &brightColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, brightColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+                        GL_TEXTURE_2D, brightColorBuffer, 0);
+
+    GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, attachments);
+
+    glGenFramebuffers(2, blurFBOs);
+    glGenTextures(2, blurColorBuffers);
+
+    for (int i = 0; i < 2; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[i]);
+        glBindTexture(GL_TEXTURE_2D, blurColorBuffers[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowW, windowH, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                            GL_TEXTURE_2D, blurColorBuffers[i], 0);
+    }
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw std::runtime_error("Framebuffer not complete!");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void Renderer::GenShadowMaps() {
     // Cube array
     glGenTextures(1, &depthCubeArray);
     glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
 
-    glTexStorage3D(
-        GL_TEXTURE_CUBE_MAP_ARRAY,
-        1,
-        GL_DEPTH_COMPONENT24,
-        SHADOW_WIDTH,
-        SHADOW_HEIGHT,
-        MAX_LIGHTS * 6
-    );
+    glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24,
+                SHADOW_WIDTH, SHADOW_HEIGHT, MAX_LIGHTS_POINT * 6);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAX_LEVEL, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, 0);
 
    // Array 2D
     glGenTextures(1, &depthMaps2DArray);
@@ -71,33 +142,35 @@ void Renderer::GenShadowMaps() {
         GL_DEPTH_COMPONENT24,
         SHADOW_WIDTH,
         SHADOW_HEIGHT,
-        MAX_LIGHTS
+        MAX_LIGHTS_DIR_AND_SPOT
     );
 
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Renderer::ComputeFrustum() {
-    frustumLeft = vec4(frameVP[0][3] + frameVP[0][0], frameVP[1][3] + frameVP[1][0], frameVP[2][3] + frameVP[2][0], frameVP[3][3] + frameVP[3][0]);
-    frustumRight = vec4(frameVP[0][3] - frameVP[0][0], frameVP[1][3] - frameVP[1][0], frameVP[2][3] - frameVP[2][0], frameVP[3][3] - frameVP[3][0]);
-    frustumBottom = vec4(frameVP[0][3] + frameVP[0][1], frameVP[1][3] + frameVP[1][1], frameVP[2][3] + frameVP[2][1], frameVP[3][3] + frameVP[3][1]);
-    frustumTop = vec4(frameVP[0][3] - frameVP[0][1], frameVP[1][3] - frameVP[1][1], frameVP[2][3] - frameVP[2][1], frameVP[3][3] - frameVP[3][1]);
+    frustumPlanes[0] = frameVP[3] + frameVP[0];
+    frustumPlanes[1] = frameVP[3] - frameVP[0];
+    frustumPlanes[2] = frameVP[3] + frameVP[1];
+    frustumPlanes[3] = frameVP[3] - frameVP[1];
+    frustumPlanes[4] = frameVP[3] + frameVP[2];
+    frustumPlanes[5] = frameVP[3] - frameVP[2];
 
-    normalizePlane(frustumLeft);
-    normalizePlane(frustumRight);
-    normalizePlane(frustumBottom);
-    normalizePlane(frustumTop);
-}  
+    for(auto& p : frustumPlanes) {
+        p*=1.0f/length(p);
+    }
+}
 
 bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light) {
     vec3 objPos = obj->GetTransform().GetGlobal()[3];
     float radius = obj->GetCullRadius();
     switch(light->type) {
         case LIGHT_POINT: {
-            float maxDist = 20.0f;
+            float maxDist = 40.0f;
             float dist2 = glm::length2(objPos - light->data1);
             float r = maxDist + radius + 2.0f;
             return dist2 < r * r;
@@ -115,103 +188,112 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
             float cutoff = light->data4;
             return angle > cutoff - 0.1f;
         }
+        default : break;
     }
     return true;
 }
 
 void Renderer::DepthPass() {
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
     glEnable(GL_DEPTH_TEST);
-    glCullFace(GL_FRONT);
+    glCullFace(GL_BACK);
+
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
-    for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS; i++) {
+    for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS_DIR_AND_SPOT; i++) {
         shared_ptr<Light> light = lightsPos[i].first;
         mat4 projection, view;
+
         switch(light->type) {
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
                 vec3 center = vec3(0.0f);
                 vec3 pos = center - dir * 30.0f;
+
                 projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
                 view = lookAt(pos, center, vec3(0, 1, 0));
                 lightSpaceMatrices[i] = projection * view;
+                sunMatrix = lightSpaceMatrices[i];
+
                 depthShaderNormal->Use();
                 depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+
                 glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMaps2DArray, 0, i);
                 glClear(GL_DEPTH_BUFFER_BIT);
+
                 for(auto& obj : potentialCasters) {
                     PROFILER_ADD_OBJECT();
                     obj->Draw(depthShaderNormal);
                 }
                 break;
             }
-            case LIGHT_POINT: {
-                vec3 pos = light->data1;
-                projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
-                depthShaderLayered->Use();
-                for(int face = 0; face < 6; face++) {
-                    view = lookAt(pos, pos + dirs[face], ups[face]);
-                    mat4 shadowMat = projection * view;
-                    depthShaderLayered->SetMat4("lightSpaceMatrix", shadowMat);
-                    int layer = i * 6 + face;
-                    glFramebufferTextureLayer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0, layer);
-                    glClear(GL_DEPTH_BUFFER_BIT);
-                    for(auto& obj : potentialCasters){
-                        if(!AffectsLight(obj, light)) {
-                            continue;
-                        }
-                        PROFILER_ADD_OBJECT();
-                        obj->Draw(depthShaderLayered);
-                    }
-                }
-                farPlanes[i] = 20.0f;
-                break;
-            }
             case LIGHT_SPOT: {
                 projection = perspective(light->data4, 1.f, 0.1f, 20.f);
                 view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
                 lightSpaceMatrices[i] = projection * view;
+
                 depthShaderNormal->Use();
                 depthShaderNormal->SetMat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+
                 glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMaps2DArray, 0, i);
                 glClear(GL_DEPTH_BUFFER_BIT);
+
                 for(auto& obj : potentialCasters){
-                    if(!AffectsLight(obj, light)) {
-                        continue;
-                    }
+                    if(!AffectsLight(obj, light)) continue;
+
                     PROFILER_ADD_OBJECT();
-                    obj->Draw(depthShaderLayered);
+                    obj->Draw(depthShaderNormal);
                 }
                 break;
             }
+            default : break;
         }
+    }
+    for(uint8_t i = 0; i < lightsPosPoint.size() && i < MAX_LIGHTS_POINT; i++) {
+        shared_ptr<Light> light = lightsPosPoint[i].first;
+        mat4 projection, view;
+        vec3 pos = light->data1;
+        projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
+        depthShaderLayered->Use();
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
+        mat4 shadowMatrices[6];
+        for(int face = 0; face < 6; face++) {
+            view = lookAt(pos, pos + dirs[face], ups[face]);
+            shadowMatrices[face] = projection * view;
+        }
+        for(int f = 0; f < 6; f++) {
+            depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
+        }
+        depthShaderLayered->SetInt("lightIndex", i);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        for(auto& obj : potentialCasters){
+            if(!AffectsLight(obj, light)) continue;
+            PROFILER_ADD_OBJECT();
+            obj->Draw(depthShaderLayered);
+        }
+        farPlanes[i] = 20.0f;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,windowW, windowH);
-    glCullFace(GL_BACK);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
+    lightsPosPoint.clear();
     drawVector.clear();
     drawVectorUI.clear();
     potentialCasters.clear();
-    lightsUpdatedList.clear();
-
-    // Preallocate memory (optimization)
-    lightsPos.reserve(MAX_LIGHTS);
-    drawVector.reserve(OBJECTS_NUMBER_PREDICT);
-    drawVectorUI.reserve(UI_NUMBER_PREDICT);
-    lightsUpdatedList.reserve(LIGHTS_SHADERS_PREDICT);
+    updatedShaders.clear();
 
     frameVP = scene->sceneCam->GetVP(1);
     frameVO = scene->sceneCam->GetVP(0);
-    frameO = scene->sceneCam->GetUI();
+    frameO = scene->sceneCam->GetO();
+    frameV = scene->sceneCam->GetV();
+    frameP = scene->sceneCam->GetP();
 
     // Prepare culling
     currentScene = scene;
@@ -230,6 +312,10 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
 
     // Draw
     Draw();
+    BlurBloomPass();
+
+    // Post processing
+    PostProcessingPass();
 
     #if defined(DEBUG)
     glDisable(GL_DEPTH_TEST);
@@ -247,6 +333,8 @@ void Renderer::BindShadowTextures() {
 }
 
 void Renderer::Draw() {
+    glBindFramebuffer(GL_FRAMEBUFFER, mainFBO);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(auto& node : drawVector) {
         PROFILER_ADD_OBJECT();
         node->Draw();
@@ -257,10 +345,58 @@ void Renderer::Draw() {
         node->Draw();
     }
     glEnable(GL_CULL_FACE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::PostProcessingPass() {
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glViewport(0, 0, windowW, windowH);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glActiveTexture(GL_TEXTURE0+TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
+    glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    glDisable(GL_DEPTH_TEST);
+    postProcessingShader->SetInt("hdrBuffer",TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
+    postProcessingShader->SetFloat("exposure", 0.6);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
+    postProcessingShader->SetInt("depthBuffer", 1);
+    postProcessingShader->SetMat4("invProjection", inverse(frameP));
+    postProcessingShader->SetMat4("invView", inverse(frameV));
+    postProcessingShader->SetVec3("lightDir", sunDir);
+    postProcessingShader->SetMat4("sunMatrix", sunMatrix);
+    postProcessingShader->SetVec3("lightColor", vec3(1.0));
+    postProcessingShader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
+    glBindVertexArray(screenQuadVAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindTexture(GL_TEXTURE_2D,0);
+    glBindVertexArray(0);
+}
+
+void Renderer::BlurBloomPass() {
+    bool horizontal = true;
+    bool first_iteration = true;
+    int amount = 5;
+    blurShader->SetInt("image", 0);
+    glBindVertexArray(screenQuadVAO);
+    for (int i = 0; i < amount; i++) {
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[horizontal]);
+        blurShader->SetBool("horizontal", horizontal);
+        glBindTexture(GL_TEXTURE_2D,
+            first_iteration ? brightColorBuffer : blurColorBuffers[!horizontal]);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        horizontal = !horizontal;
+        if (first_iteration)
+            first_iteration = false;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::PrepareLights() {
     sort(lightsPos.begin(), lightsPos.end(), [](const pair<shared_ptr<Light>,float>& a, 
+        const pair<shared_ptr<Light>,float>& b) {
+            return a.second < b.second;
+    });
+    sort(lightsPosPoint.begin(), lightsPosPoint.end(), [](const pair<shared_ptr<Light>,float>& a, 
         const pair<shared_ptr<Light>,float>& b) {
             return a.second < b.second;
     });
@@ -275,17 +411,18 @@ void Renderer::PrepareShaders() {
     }
 }
 
-bool Renderer::Cull(shared_ptr<VisualNode> node) {
-    float radius = node->GetCullRadius();
-    if(radius < CULL_RADIUS_ALWAYS_TRUE) {
+bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
+    const float radius = node->GetCullRadius();
+    if (radius < CULL_RADIUS_ALWAYS_TRUE)
         return true;
+    const glm::vec3 pos = node->GetTransform().GetGlobal()[3];
+
+    for (int i = 0; i < 6; i++) {
+        const glm::vec4& p = frustumPlanes[i];
+        if (glm::dot(glm::vec3(p), pos) + p.w < -radius)
+            return false;
     }
-    vec3 pos = node->GetTransform().GetGlobal()[3];
-    if(glm::dot(vec3(frustumLeft), pos) + frustumLeft.w < -radius) return false;
-    if(glm::dot(vec3(frustumRight), pos) + frustumRight.w < -radius) return false;
-    if(glm::dot(vec3(frustumBottom), pos) + frustumBottom.w < -radius) return false;
-    if(glm::dot(vec3(frustumTop), pos) + frustumTop.w < -radius) return false;
-    return true; 
+    return true;
 }
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
@@ -336,23 +473,33 @@ void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) 
 }
 
 void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
-    if(light->type == LIGHT_DIRECTIONAL) {
+    vec2 campos;
+    float dist;
+    switch(light->type) {
+        case LIGHT_DIRECTIONAL: {
+            sunDir = light->data1;
             lightsPos.push_back({light,0});
-    } else {
-        vec2 campos = currentScene->sceneCam->GetPos();
-        float dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
-        lightsPos.push_back({light,dist});
+            break;
+        }
+        case LIGHT_POINT: {
+            campos = currentScene->sceneCam->GetPos();
+            dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
+            lightsPosPoint.push_back({light,dist});
+            break;
+        }
+        case LIGHT_SPOT: {
+            campos = currentScene->sceneCam->GetPos();
+            dist = (campos.x-light->data1.x)*(campos.x-light->data1.x) + (campos.y-light->data1.y)*(campos.y-light->data1.y);
+            lightsPos.push_back({light,dist});
+            break;
+        }   
+        default: break;
     }
 }
 
 void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, const int8_t& index) {
     if(light == nullptr) {
         return;
-    }
-    for(auto& s : lightsUpdatedList) {
-        if(s==shader.get()) {
-            return;
-        }
     }
     shader->SetInt("lights["+to_string(index)+"].type", light->type);
     shader->SetVec3("lights["+to_string(index)+"].data1", light->data1);
@@ -362,33 +509,37 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
     shader->SetVec3("lights["+to_string(index)+"].colorAmbient", light->colorAmbient);
     shader->SetVec3("lights["+to_string(index)+"].colorDiffuse", light->colorDiffuse);
     shader->SetVec3("lights["+to_string(index)+"].colorSpecular", light->colorSpecular);
-    lightsUpdatedList.push_back(shader.get());
 }
 
-void Renderer::ConfigureShader(shared_ptr<Node> node) {
-    shared_ptr<Shader> shader;
+void Renderer::ConfigureShader(shared_ptr<VisualNode> node) {
+    shared_ptr<Shader> shader = node->GetShader();
+    for(auto& s : updatedShaders) {
+        if(s == shader.get()) {
+            return;
+        }
+    }
     switch(node->RenderType()) {
         case NRT_OBJECT3D: {
             shared_ptr<Object3D> obj3D = static_pointer_cast<Object3D>(node);
-            shader = obj3D->GetShader();
             shader->SetMat4("VP", frameVP);
             shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
-            uint8_t count = std::min((int)lightsPos.size(),20);
-            shader->SetInt("lightsNum", count);
+            uint8_t count = std::min((int)lightsPos.size(),MAX_LIGHTS_DIR_AND_SPOT);
+            uint8_t countPoint = std::min((int)lightsPosPoint.size(),MAX_LIGHTS_POINT);
+            shader->SetInt("lightsNum", count+countPoint);
             for(uint8_t i = 0; i < count; i++) {
+                shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
                 SetLight(lightsPos[i].first, shader, i);
+            }
+            for(uint8_t i = 0; i < countPoint; i++) {
+                shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
+                SetLight(lightsPosPoint[i].first, shader, i+count);
             }
             shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
             shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
-            for (uint8_t i = 0; i < count; i++) {
-                shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
-                shader->SetFloat("farPlanes[" + to_string(i) + "]", farPlanes[i]);
-            }
             break;
         }
         case NRT_OBJECT2D: {
             shared_ptr<Object2D> obj2D = static_pointer_cast<Object2D>(node);
-            shader = obj2D->GetShader();
             if(obj2D->GetReqPerspective()) {
                 shader->SetMat4("VP", frameVP);
             } else {
@@ -398,7 +549,6 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         }
         case NRT_TEXTNODE: {
             shared_ptr<TextNode> textNode = static_pointer_cast<TextNode>(node);
-            shader = textNode->GetShader();
             if(textNode->TestIgnoreParent()) {
                 shader->SetMat4("VP", frameO);
             } else {
@@ -408,6 +558,7 @@ void Renderer::ConfigureShader(shared_ptr<Node> node) {
         }
         default : break;
     }
+    updatedShaders.push_back(shader.get());
 }
 
 void Renderer::EndFrame() {
@@ -422,4 +573,16 @@ Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
 
 Renderer::~Renderer() {
     glfwDestroyWindow(window);
+    glDeleteBuffers(1,&screenQuadVBO);
+    glDeleteVertexArrays(1,&screenQuadVAO);
+    glDeleteBuffers(1,&screenQuadEBO);
+    glDeleteBuffers(1,&mainColorBuffer);
+    glDeleteBuffers(1,&depthColorBuffer);
+    glDeleteBuffers(1,&brightColorBuffer);
+    glDeleteBuffers(2,blurColorBuffers);
+    glDeleteFramebuffers(1,&mainFBO);
+    glDeleteFramebuffers(1,&depthFBO);
+    glDeleteFramebuffers(2,blurFBOs);
+    glDeleteTextures(1,&depthMaps2DArray);
+    glDeleteTextures(1,&depthCubeArray);
 }

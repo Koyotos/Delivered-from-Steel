@@ -19,6 +19,7 @@ enum class ObjectType {
 class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNode> {
     private:
 	bool isStatic = false;
+	bool isResolveCollision = true;
 
     shared_ptr<Collider> collider;
     vec2 velocity;
