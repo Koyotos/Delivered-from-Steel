@@ -35,7 +35,7 @@
     "colliderType": false,
     "width": 100.0,
     "height": 0.4,
-    "cull": 0.5,
+    "cull": 5.0,
     "zIndex": 0
   },
 
@@ -625,7 +625,7 @@
     "ignoreParent": true,
     "static": true,
     "addCollider": false,
-    "cull": 0.5,
+    "cull": 5.0,
     "zIndex": 0
   }, 
 

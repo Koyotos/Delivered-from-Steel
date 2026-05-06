@@ -170,7 +170,7 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
     float radius = obj->GetCullRadius();
     switch(light->type) {
         case LIGHT_POINT: {
-            float maxDist = 40.0f;
+            float maxDist = 5.0f;
             float dist2 = glm::length2(objPos - light->data1);
             float r = maxDist + radius + 2.0f;
             return dist2 < r * r;
@@ -242,7 +242,6 @@ void Renderer::DepthPass() {
 
                 for(auto& obj : potentialCasters){
                     if(!AffectsLight(obj, light)) continue;
-
                     PROFILER_ADD_OBJECT();
                     obj->Draw(depthShaderNormal);
                 }
@@ -419,7 +418,7 @@ bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
 
     for (int i = 0; i < 6; i++) {
         const glm::vec4& p = frustumPlanes[i];
-        if (glm::dot(glm::vec3(p), pos) + p.w < -radius)
+        if (glm::dot(glm::vec3(p), pos) + p.w > -radius)
             return false;
     }
     return true;
