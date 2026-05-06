@@ -112,22 +112,22 @@ void Drone::Chase(float dt) {
 		return;
 	}
 	vec3 moveStep = vec3(currentDiveVelocity.x, currentDiveVelocity.y, 0.0f) * dt;
-	float stepLen = glm::length(moveStep);
+	//float stepLen = glm::length(moveStep);
 
-	vec2 rayDir = vec2(-diveDir.y, diveDir.x) * 0.1f;
-	vec2 rayOrigins[3] = { vec2(0.0f, 0.0f),rayDir,-rayDir };
+	//vec2 rayDir = vec2(-diveDir.y, diveDir.x) * 0.1f;
+	//vec2 rayOrigins[3] = { vec2(0.0f, 0.0f),rayDir,-rayDir };
 
-	for (int i = 0; i < 3; i++) {
-		auto hitWall = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Wall);
-		auto hitTrap = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Trap);
-		auto hitBreakable = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::BreakableWall);
-		auto hitEnemy = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Enemy);
+	//for (int i = 0; i < 3; i++) {
+	//	auto hitWall = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Wall);
+	//	auto hitTrap = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Trap);
+	//	auto hitBreakable = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::BreakableWall);
+	//	auto hitEnemy = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Enemy);
 
-		if (hitWall.has_value() || hitTrap.has_value() || hitBreakable.has_value() || hitEnemy.has_value()) {
-			Explode();
-			return;
-		}
-	}
+	//	if (hitWall.has_value() || hitTrap.has_value() || hitBreakable.has_value() || hitEnemy.has_value()) {
+	//		Explode();
+	//		return;
+	//	}
+	//}
 
 	Transform t = GetTransform();
 	t.SetTranslation(currentPos + moveStep);
@@ -198,6 +198,22 @@ void Drone::ReversePatrol() {
 	}
 	else {
 		targetPos = startPos;
+	}
+}
+
+void Drone::OnCollisionEnter(shared_ptr<Collider> other) {
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (owner->GetObjectType() == ObjectType::Wall) {
+		Explode();
+	}
+	if (owner->GetObjectType() == ObjectType::BreakableWall) {
+		Explode();
+	}
+	if (owner->GetObjectType() == ObjectType::Enemy) {
+		Explode();
+	}
+	if (owner->GetObjectType() == ObjectType::Trap) {
+		Explode();
 	}
 }
 

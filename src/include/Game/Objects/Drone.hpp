@@ -30,6 +30,8 @@ public:
 	void Init(shared_ptr<Scene> scene) override;
 	void Update(float deltaTime) override;
 
+	void OnCollisionEnter(shared_ptr<Collider> other) override;
+
 	void DetectPlayer() override;
 	void ChangeState(shared_ptr<Player> player) override;
 	void Chase(float dt) override;
