@@ -154,3 +154,15 @@ bool CardManager::IsEmpty()
 	return true;
 }
 
+CardManager::CardManager()
+{
+}
+
+void CardManager::Process()
+{
+	return; //TBD
+}
+
+CardManager::~CardManager()
+{
+}

@@ -28,7 +28,6 @@ private:
 
 public:
 	CardManager();
-	CardManager(const unordered_map<string, std::any>& data);
 	~CardManager();
 
 	std::vector<shared_ptr<Card>> GetUnlockedCards();

@@ -21,6 +21,7 @@ void EngineController::Init() {
         iom = make_shared<IOManager>();
         rsm = make_shared<ResourceManager>();
         renderer = make_shared<Renderer>();
+		crm = make_shared<CardManager>();
         aum = make_shared<AudioManager>();
         if (!aum->Init()) {
             globals->Log("Audio failed to initialize. Game will continue without sound.");

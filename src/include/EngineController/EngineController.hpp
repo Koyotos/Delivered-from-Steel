@@ -8,6 +8,7 @@
 #include "include/AudioManager/AudioManager.hpp"
 #include "include/PhysicsManager/PhysicsManager.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
+#include "include/Game/Objects/CardManager.hpp"
 
 /*
 @brief Main engine class that acts as a facade for modules. It hides low-level mechanisms of modules
@@ -24,6 +25,7 @@ class EngineController {
     shared_ptr<Renderer> renderer;
     shared_ptr<ResourceManager> rsm;
     shared_ptr<AudioManager> aum;
+	shared_ptr<CardManager> crm;
 
     double currentTime;
     double deltaTime; 
