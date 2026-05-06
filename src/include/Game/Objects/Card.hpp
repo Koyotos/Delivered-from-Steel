@@ -3,16 +3,7 @@
 
 #include "include/Core/Object2D.hpp"
 #include "include/Game/UI/CardUI.hpp"
-
-enum class CardType {
-    Dash,
-    Bounce,
-    FeatherFalling,
-    ExtraJump,
-    WallSnap,
-    WallJump
-};
-
+#include "include/Game/CardType.hpp"
 
 
 class Card :
@@ -25,7 +16,7 @@ private:
 
     bool DestroyAfterUsed = false;
 
-    std::shared_ptr<CardUI> display;
+    shared_ptr<CardUI> display;
 
 public:
     Card(const unordered_map<string, std::any>&);

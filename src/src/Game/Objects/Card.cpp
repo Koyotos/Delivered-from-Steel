@@ -12,7 +12,7 @@ bool Card::CheckUse()
 {
     if (type == CardType::WallJump)
     {
-		return IsNextToWall();
+		// return IsNextToWall();
     }
 	// tbd: integracja z player movementem, sprawdzanie czy jest na ziemi itd
     return true;
