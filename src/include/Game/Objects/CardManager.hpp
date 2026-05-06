@@ -14,8 +14,10 @@ private:
 	bool drawOnHandEmpty = true;
 
 	std::vector<shared_ptr<Card>> unlockedCards;
+	std::vector<shared_ptr<Card>> allDeckCards;
 	std::vector<shared_ptr<Card>> currentDeck;
 	std::vector<shared_ptr<Card>> currentHand;
+	shared_ptr<Card> learningCard;
 
 	std::vector<shared_ptr<CardSlot>> slots;
 
@@ -41,8 +43,11 @@ public:
 	
 	void SetMaxHandSize(int value);
 	int GetMaxHandSize();
-	
 
+	void LearnCard(shared_ptr<Card> card);
+	
+	void ReachCheckpoint();
+	
 	void UnlockCard(shared_ptr<Card> card);
 	bool AddCardToDeck(shared_ptr<Card> card);
 	void RemoveCardFromDeck(shared_ptr<Card> card);
@@ -50,6 +55,7 @@ public:
 	void DrawCardToHand(int slot);
 	void DrawCardsToHand();
 	void UseCard(int index);
+	void RefreshCurrentDeck();
 
 	void Process() override;
 

@@ -1,4 +1,5 @@
 #include "include/Game/Objects/CardManager.hpp"
+#include <random>
 
 std::vector<shared_ptr<Card>> CardManager::GetCurrentDeck()
 {
@@ -52,8 +53,9 @@ void CardManager::UnlockCard(std::shared_ptr<Card> card)
 
 bool CardManager::AddCardToDeck(std::shared_ptr<Card> card)
 {
-	if (currentDeck.size() <= maxDeckSize)
+	if (allDeckCards.size() < maxDeckSize)
 	{
+		allDeckCards.push_back(card);
 		currentDeck.push_back(card);
 		return true;
 	}
@@ -62,9 +64,9 @@ bool CardManager::AddCardToDeck(std::shared_ptr<Card> card)
 
 void CardManager::RemoveCardFromDeck(std::shared_ptr<Card> card)
 {
-	for (int i = 0; i < currentDeck.size(); i++)
+	for (int i = 0; i < allDeckCards.size(); i++)
 	{
-		// if(currentDeck[i]->GetCardType() == card->GetCardType())
+		if (allDeckCards[i]->GetCardType() == card->GetCardType()) currentDeck.erase(currentDeck.begin() + i);
 	}
 }
 
@@ -72,29 +74,34 @@ void CardManager::RemoveCardFromDeck(int index)
 {
 	if (index > currentDeck.size()) return;
 
-	currentDeck.erase(currentDeck.begin() + index);
-	currentDeck.shrink_to_fit(); // sprawdzic pozniej
-	
+	allDeckCards.erase(allDeckCards.begin() + index);
+	allDeckCards.shrink_to_fit();
+
 }
 
 void CardManager::DrawCardToHand(int slot)
 {
-	if (currentHand[slot] != nullptr) return;
+	if (learningCard != nullptr)
+	{
+		currentHand.insert(currentHand.begin() + slot, learningCard);
+		slots[slot]->SetCard(learningCard->GetDisplay());
+		return;
+	}
 
 	ShuffleDeck();
 
 	std::shared_ptr<Card> newCard = currentDeck.back();
 	currentHand.insert(currentHand.begin() + slot, newCard);
-	// slots[slot]->SetCard(newCard->getUI());
+	slots[slot]->SetCard(newCard->GetDisplay());
 	currentDeck.pop_back();
 
 }
 
 void CardManager::DrawCardsToHand()
 {
-	for (int i = 0; i < currentHand.size(); i++)
+	for (int i = 0; i < slots.size(); i++)
 	{
-		if (currentHand[i] == nullptr) DrawCardToHand(i);
+		DrawCardToHand(i);
 	}
 }
 
@@ -104,21 +111,45 @@ void CardManager::UseCard(int index)
 	if (currentHand[index] == nullptr) return;
 
 	currentHand[index]->Use();
+	currentHand[index] = nullptr;
 	slots[index]->RemoveCard();
 	
 	if (drawOnHandEmpty) DrawCardToHand(index);
 	else if (IsEmpty()) DrawCardsToHand();
 
-	
+}
 
+void CardManager::ReachCheckpoint()
+{
+	learningCard = nullptr;
+	RefreshCurrentDeck();
+}
+
+void CardManager::LearnCard(shared_ptr<Card> card)
+{
+	learningCard = card;
+	DrawCardsToHand();
+}
+
+void CardManager::RefreshCurrentDeck()
+{
+	currentDeck = allDeckCards;
+	ShuffleDeck();
+	DrawCardsToHand();
 }
 
 void CardManager::ShuffleDeck()
 {
-	return; //TBD
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(currentDeck.begin(), currentDeck.end(), g);
 }
 
 bool CardManager::IsEmpty()
 {
-	return currentHand.empty();
+	for (auto& card : currentHand)
+		if (card != nullptr)
+			return false;
+	return true;
 }
+
