@@ -18,3 +18,18 @@ void Card::Use()
     used = true;
     Deactivate();
 }
+
+void Card::SetDisplay(std::shared_ptr<CardUI> value)
+{
+    display = value;
+}
+
+std::shared_ptr<CardUI> Card::GetDisplay()
+{
+    return display;
+}
+
+CardType Card::GetCardType()
+{
+    return type;
+}
