@@ -31,10 +31,6 @@ public:
     Card(const unordered_map<string, std::any>&);
     Card(CardType type);
 
-    //virtual void UseCard();
-
-    //virtual void CheckUseCard();
-
     std::shared_ptr<CardUI> GetDisplay();
     void SetDisplay(std::shared_ptr<CardUI> value);
 
@@ -51,6 +47,7 @@ public:
 
     void Deactivate();
 
+    bool CheckUse();
     void Use();
 };
 

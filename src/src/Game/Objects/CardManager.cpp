@@ -109,6 +109,7 @@ void CardManager::UseCard(int index)
 {
 	if (index > maxHandSize) return;
 	if (currentHand[index] == nullptr) return;
+	if (!currentHand[index]->CheckUse()) return;
 
 	currentHand[index]->Use();
 	currentHand[index] = nullptr;

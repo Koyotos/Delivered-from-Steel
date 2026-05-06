@@ -8,6 +8,16 @@ void Card::Deactivate()
     
 }
 
+bool Card::CheckUse()
+{
+    if (type == CardType::WallJump)
+    {
+		return IsNextToWall();
+    }
+	// tbd: integracja z player movementem, sprawdzanie czy jest na ziemi itd
+    return true;
+}
+
 void Card::Use()
 {
     if (DestroyAfterUsed)
