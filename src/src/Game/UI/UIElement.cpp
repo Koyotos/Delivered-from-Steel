@@ -145,6 +145,7 @@ UIElement::UIElement() : Object2D() {
 }
 
 void UIElement::Process() {
+	Object2D::Process();
 	UpdateTweens(Globals::GetGlobals().GetDeltaTime());
 }
 

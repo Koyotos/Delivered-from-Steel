@@ -13,6 +13,13 @@ class Object2D : public PhysicsNode {
     shared_ptr<Sprite> sprite;
     bool reqPerspecive;
 
+    string currentAnimation;
+    float animTimer;
+    int currentFrameIndex;
+    bool animPlaying;
+    bool animLoop;
+    float animSpeed;
+
     public:
 
     string Type() override;
@@ -49,6 +56,13 @@ class Object2D : public PhysicsNode {
     @return void
     */
     void SetSprite(shared_ptr<Sprite>);
+
+    void Play(const string& animName, float frameDuration = 0.1f, bool loop = true);
+    void Stop();
+    bool IsPlaying() const;
+    string GetCurrentAnimation() const;
+
+    virtual void Process() override;
 
     /*
     @brief Basic constructor. Creates empty Object2D.
