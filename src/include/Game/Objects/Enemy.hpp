@@ -59,7 +59,7 @@ public:
 
 	virtual void AttackState(float) {};
 
-	void DetectPlayer();
+	virtual void DetectPlayer();
 
 	void Init(shared_ptr<Scene>) override;
 };

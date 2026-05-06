@@ -14,6 +14,7 @@
 #include "include/Game/Objects/HookEnemy.hpp"
 #include "include/Game/Objects/Bullet.hpp"
 #include "include/Game/Objects/Hook.hpp"
+#include "include/Game/Objects/Drone.hpp"
 #include "include/Game/Objects/Platform.hpp"
 #include "include/Game/Objects/NPC.hpp"
 #include "include/Game/Objects/Button.hpp"
@@ -68,6 +69,7 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<TurretEnemy>("TurretEnemy"),
     RegisterObjectType<Bullet>("Bullet"),
     RegisterObjectType<Hook>("Hook"),
+    RegisterObjectType<Drone>("Drone"),
     RegisterObjectType<Platform>("Platform"),
     RegisterObjectType<Item>("Item"),
     RegisterObjectType<NPC>("NPC"),
