@@ -22,7 +22,7 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	spotLight->data1 = GetTransform().GetTranslation();
 	spotLight->data4 = glm::cos(glm::radians(visionAngle / 2.0f));
 	spotLight->data2 = vec3(0.0f, -1.0f, 0.0f);
-	spotLight->colorDiffuse = vec3(1.0f, 0.2f, 0.2f);
+	spotLight->colorDiffuse = vec3(1.0f, 0.6f, 0.8f);
 	spotLight->data3 = vec3(1.0f, 0.09f, 0.032f);
 
 	AddChild(spotLight);
@@ -115,28 +115,12 @@ void Drone::Chase(float dt) {
 		return;
 	}
 	vec3 moveStep = vec3(currentDiveVelocity.x, currentDiveVelocity.y, 0.0f) * dt;
-	//float stepLen = glm::length(moveStep);
-
-	//vec2 rayDir = vec2(-diveDir.y, diveDir.x) * 0.1f;
-	//vec2 rayOrigins[3] = { vec2(0.0f, 0.0f),rayDir,-rayDir };
-
-	//for (int i = 0; i < 3; i++) {
-	//	auto hitWall = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Wall);
-	//	auto hitTrap = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Trap);
-	//	auto hitBreakable = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::BreakableWall);
-	//	auto hitEnemy = Raycast(rayOrigins[i], diveDir, stepLen, ObjectType::Enemy);
-
-	//	if (hitWall.has_value() || hitTrap.has_value() || hitBreakable.has_value() || hitEnemy.has_value()) {
-	//		Explode();
-	//		return;
-	//	}
-	//}
 
 	Transform t = GetTransform();
 	t.SetTranslation(currentPos + moveStep);
-	int newDirection = (currentDiveVelocity.x > 0) ? 1 : -1;
+	direction = (currentDiveVelocity.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
-	scale.x = std::abs(scale.x) * newDirection;
+	scale.x = std::abs(scale.x) * direction;
 	t.SetScale(scale);
 	SetTransform(t);
 }
@@ -176,19 +160,7 @@ void Drone::Patrol(float dt) {
 	Transform t = GetTransform();
 	t.SetTranslation(currentPos + moveStep);
 
-	int newDirection = (dir.x > 0) ? 1 : -1;
-	if (newDirection != direction) {
-		float spriteWorldWidth = GetSprite()->GetSize().x * std::abs(t.GetScale().x);
-		float shift = spriteWorldWidth * -newDirection;
-
-		vec3 pos = t.GetTranslation();
-		pos.x += shift;
-		t.SetTranslation(pos);
-		startPos.x += shift;
-		endPos.x += shift;
-		targetPos.x += shift;
-	}
-	direction = newDirection;
+	direction = (dir.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
 	scale.x = std::abs(scale.x) * direction;
 	t.SetScale(scale);
