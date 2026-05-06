@@ -4,33 +4,30 @@
 #include "include/Core/Scene.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
 
-
 class PhysicsManager {
 
-private:
+	private:
 	shared_ptr<Scene> currentScene;
 	vector<shared_ptr<PhysicsNode>> currentNodes;
+	void UpdateNode(shared_ptr<Node> node);
 
-	void updateNode(shared_ptr<Node> node);
-
-
-public:
+	public:
 	void Update(shared_ptr<Scene> scene, float dt);
 
 	static PhysicsManager& GetPhysicsManager();
 
-	std::optional<RaycastHit> raycast(
-		const glm::vec2& origin,
-		const glm::vec2& direction,
+	optional<RaycastHit> Raycast(
+		const vec2& origin,
+		const vec2& direction,
 		float maxDistance,
-		std::shared_ptr<Collider> collider,
+		shared_ptr<Collider> collider,
 		ObjectType type);
 
-	std::vector<RaycastHit> raycastAll(
-		const glm::vec2& origin,
-		const glm::vec2& direction,
+	vector<RaycastHit> RaycastAll(
+		const vec2& origin,
+		const vec2& direction,
 		float maxDistance,
-		std::shared_ptr<Collider> collider,
+		shared_ptr<Collider> collider,
 		ObjectType type);
 
 	PhysicsManager() = default;

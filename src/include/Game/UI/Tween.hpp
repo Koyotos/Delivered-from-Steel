@@ -1,15 +1,14 @@
-enum class EaseType
-{
-    Linear,
+#include <glm/ext/vector_float2.hpp>
+#include <glm/ext/vector_float3.hpp>
 
+enum class EaseType {
+    Linear,
     InSine,
     OutSine,
     InOutSine,
-
     InQuad,
     OutQuad,
     InOutQuad,
-
 };
 
 

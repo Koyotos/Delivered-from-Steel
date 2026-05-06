@@ -1,13 +1,12 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 
-
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	// jesli scena sie zmienila to pobierz nowe PhysicsNode'y
 	if (currentScene != scene) {
 		currentScene = scene;
 		currentNodes.clear();
-		updateNode(scene->root);
+		UpdateNode(scene->root);
 	}
 
 	// ruch
@@ -19,30 +18,42 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 		}
 	}
 
-	// kolizje
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		auto col = currentNodes[i]->GetCollider();
 		if (col) {
-			if (!currentNodes[i]->getStatic()) {
-				col->updatePosition(currentNodes[i]->GetTransform());
-			}
+			currentNodes[i]->processCollisions();
 		}
+	}
+
+	// przeliczenie pozycji globalnych
+
+	Transform t;
+
+	scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
 
 
+	// kolizje
+
+	for (size_t i = 0; i < currentNodes.size(); ++i) {
+		auto col = currentNodes[i]->GetCollider();
+		if (col) {
+			col->UpdatePosition(currentNodes[i]->GetTransform());
+		}
+	}
+
+
+	for (size_t i = 0; i < currentNodes.size(); ++i) {
+		auto col = currentNodes[i]->GetCollider();
 		for (size_t j = 0; j < currentNodes.size(); ++j) {
 			if (i == j) continue;
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
-		}
-
-		if (col) {
-			currentNodes[i]->processCollisions();
 		}
 	}
 
 	return;
 }
 
-void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
+void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
 	if (physicsNode) {
 		currentNodes.push_back(physicsNode);
@@ -50,7 +61,7 @@ void PhysicsManager::updateNode(std::shared_ptr<Node> node) {
 	}
 
 	for (const auto& child : node->GetChildren()) {
-		updateNode(child);
+		UpdateNode(child);
 	}	
 }
 
@@ -60,7 +71,7 @@ PhysicsManager& PhysicsManager::GetPhysicsManager()
 	return instance;
 }
 
-std::optional<RaycastHit> PhysicsManager::raycast(
+std::optional<RaycastHit> PhysicsManager::Raycast(
 	const glm::vec2& origin,
 	const glm::vec2& direction,
 	float maxDistance,
@@ -74,7 +85,7 @@ std::optional<RaycastHit> PhysicsManager::raycast(
 		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
-			auto hit = col->raycast(origin, direction, maxDistance);
+			auto hit = col->Raycast(origin, direction, maxDistance);
 
 			if (hit && hit->distance < closest)
 			{
@@ -87,7 +98,7 @@ std::optional<RaycastHit> PhysicsManager::raycast(
 	return result;
 }
 
-std::vector<RaycastHit> PhysicsManager::raycastAll(
+std::vector<RaycastHit> PhysicsManager::RaycastAll(
 	const glm::vec2& origin,
 	const glm::vec2& direction,
 	float maxDistance,
@@ -101,7 +112,7 @@ std::vector<RaycastHit> PhysicsManager::raycastAll(
 		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
-			auto hit = col->raycast(origin, direction, maxDistance);
+			auto hit = col->Raycast(origin, direction, maxDistance);
 
 			if (hit && hit->distance < closest)
 			{

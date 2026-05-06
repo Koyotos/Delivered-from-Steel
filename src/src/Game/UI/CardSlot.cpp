@@ -19,7 +19,7 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 }
 
 
-void CardSlot::Draw() {	
+void CardSlot::Draw(shared_ptr<Shader> sh) {	
 	UIElement::Draw();
 }
 

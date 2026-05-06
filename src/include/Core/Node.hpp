@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "include/IOManager/InputEvent.hpp"
+#include "include/Renderer/Shader.hpp"
 #include <stdexcept>
 
 #define fromMap(type,key,data) FromMap<type>(data,key)
@@ -24,6 +25,8 @@ T FromMap(const std::unordered_map<std::string, std::any>& data, const std::stri
 }
 
 using namespace std;
+
+class Scene;
 
 /*
 @brief Base class for all in-game objects. Every object that is going to be used inside scene graphs
@@ -125,7 +128,7 @@ class Node {
     @brief Method that draws object's model. Called inside renderer.
     @return void
     */
-    virtual void Draw();
+    virtual void Draw(shared_ptr<Shader> sh = nullptr);
 
     /*
     @brief Method that is responsible for physics related calculations. It's called inside PhysicsManager
@@ -145,7 +148,26 @@ class Node {
     @brief Returns node type as string for renderer.
     @return string - type
     */
-    virtual string RenderType();
+    virtual uint8_t RenderType();
+
+    /**
+    @brief Disables all active behaviours of the node.
+    Simulates destruction without removing it from scene graph.
+    */
+    void Disable() noexcept;
+
+
+	/*
+    * @brief Initializes the node and all its children.
+    * @return void
+    */
+    void InitRecursive(shared_ptr<Scene>);
+
+	/*
+    * @brief Initializes the node.
+    * @return void
+    */
+    virtual void Init(shared_ptr<Scene>) {}
 
     /*
     @brief Basic constructor. Creates empty Node.

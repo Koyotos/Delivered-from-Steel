@@ -61,7 +61,7 @@ class Vignette : public UIElement {
 	*/
 	float GetMaxValue();
 
-	void Draw() override;
+	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
 };
 

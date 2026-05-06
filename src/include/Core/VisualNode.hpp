@@ -25,7 +25,7 @@ class VisualNode : public Node {
     inline bool TestTransformChanged() noexcept override final {return flags[5];};
 
     string Type() override;
-    string RenderType() override;
+    uint8_t RenderType() override;
 
     /*
     @brief Sets z index. 

@@ -1,10 +1,7 @@
 #ifndef FE_OBJECT_3D
 #define FE_OBJECT_3D
 
-#include "include/Core/Object2D.hpp"
-#include "include/Core/VisualNode.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
-
 
 /*
 @brief Base class for every 3D game object. It combines physics and visuals. This class is on it's own
@@ -20,10 +17,10 @@ class Object3D : public PhysicsNode {
     @brief Override of Draw() function. It renders object's model with given shader.
     @return void
     */
-    void Draw() override final;
+    void Draw(shared_ptr<Shader> sh = nullptr) override final;
 
     string Type() override;
-    string RenderType() override final;
+    uint8_t RenderType() override final;
 
     /*
     @brief Returns model used by object.

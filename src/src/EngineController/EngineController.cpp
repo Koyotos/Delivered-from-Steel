@@ -1,7 +1,4 @@
 #include "include/EngineController/EngineController.hpp"
-#include "include/Globals/Globals.hpp"
-#include "include/Profiler/Profiler.hpp"
-#include <stdexcept>
 
 void EngineController::Init() {
 
@@ -22,12 +19,19 @@ void EngineController::Init() {
     try {
         scm = make_shared<SceneManager>();
         iom = make_shared<IOManager>();
-        renderer = make_shared<Renderer>();
         rsm = make_shared<ResourceManager>();
+        renderer = make_shared<Renderer>();
         aum = make_shared<AudioManager>();
+        if (!aum->Init()) {
+            globals->Log("Audio failed to initialize. Game will continue without sound.");
+            aum = nullptr;
+        }
+        rsm->SetAudioManager(aum);
+        Globals::GetGlobals().audioManager = aum;
 
-		iom->Init(renderer->GetWindow());
         rsm->ConfigurePaths();
+        renderer->Init(*rsm);
+		iom->Init(renderer->GetWindow());
         globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
 
     } catch(const exception& except) {
@@ -69,6 +73,10 @@ void EngineController::Run() {
 
         shared_ptr<Scene> active = scm->GetActive();
 
+        if (active && aum && active->GetPlayer()) {
+            aum->SetListenerPosition(active->GetPlayer()->GetTransform().GetTranslation());
+        }
+
 		PROFILER_BEGIN_FRAME(static_cast<float>(deltaTime));
 
 		glfwPollEvents();
@@ -86,6 +94,10 @@ void EngineController::Run() {
         }
 
 		PROFILER_END_LOGIC();
+
+        if (aum) {
+            aum->Update();
+        }
 
 		iom->ClearQueue();
 

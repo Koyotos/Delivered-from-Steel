@@ -15,6 +15,13 @@
 using namespace glm;
 using namespace std;
 
+#define TEXTURES_SLOT_DIFFUSE 0
+#define TEXTURES_SLOT_SPECULAR 4
+#define TEXTURES_SLOT_NORMAL 8
+#define TEXTURES_SLOT_SHADOWMAPS 9
+#define TEXTURES_SLOT_SHADOWCUBEMAPS 10
+#define TEXTURES_SLOT_RENDERER_COLOR_BUFFER 11
+
 struct Vertex {
     vec3 position;
     vec3 normal;
@@ -39,5 +46,6 @@ vec3 GLMVec(const aiVector3D& vec);
 vec2 GLMVec(const aiVector2D& vec);
 
 GLuint TextureFromFile(const char*, const char*);
+tuple<GLuint, GLuint, GLuint> CreateQuad(const float& w = 1.0f, const float& h = 1.0f, const bool& ndc = false);
 
 #endif

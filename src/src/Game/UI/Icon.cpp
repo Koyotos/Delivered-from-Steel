@@ -1,6 +1,6 @@
 #include "include/Game/UI/Icon.hpp"
 
-void Icon::Draw() {
+void Icon::Draw(shared_ptr<Shader> sh) {
 	UIElement::Draw();
 }
 

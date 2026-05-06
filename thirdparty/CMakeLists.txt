@@ -22,6 +22,12 @@ set(STB_IMAGE_DIR ${CMAKE_CURRENT_LIST_DIR}/stb_image)
 add_library(stb_image STATIC ${STB_IMAGE_DIR}/stb_image.cpp)
 target_include_directories(stb_image PUBLIC ${STB_IMAGE_DIR})
 
+#stb_vorbis
+set(STB_VORBIS_DIR ${CMAKE_CURRENT_LIST_DIR}/stb_vorbis)
+add_library(stb_vorbis STATIC ${STB_VORBIS_DIR}/stb_vorbis.c)
+target_include_directories(stb_vorbis PUBLIC ${STB_VORBIS_DIR})
+
+
 # other deps
 CPMAddPackage("gh:assimp/assimp@5.4.3")
 CPMAddPackage("gh:glfw/glfw#3.3.8")
@@ -44,7 +50,8 @@ if (TARGET freetype)
 endif()
 
 set_target_properties(glad
-                      stb_image 
+                      stb_image
+					  stb_vorbis
                       assimp 
                       glfw 
                       glm 

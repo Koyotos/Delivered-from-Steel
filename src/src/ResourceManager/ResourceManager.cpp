@@ -2,6 +2,7 @@
 #include "include/Core/Node.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/Renderer/TextNode.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <cstdint>
 #include <filesystem>
 
@@ -123,25 +124,50 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
 }
 
 void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,std::any> data) {
-    if(auto obj3d = dynamic_pointer_cast<Object3D>(node)) { // Think about casts, try to replace 
+    if(node->Type() == "Object3D") {
+        auto cast = static_pointer_cast<Object3D>(node);
         if(data.contains("model")) {
-            obj3d->SetModel(LoadModel(fromMap(string,"model",data)));
+            cast->SetModel(LoadModel(fromMap(string,"model",data)));
         }
 
         if(data.contains("shader")) {
-            obj3d->SetShader(LoadShader(fromMap(string,"shader",data)));
+            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
-    } else if(auto obj2d = dynamic_pointer_cast<Object2D>(node)) {
+
+    } else if(node->Type() == "Object2D") {
+        auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("sprite")) {
-            obj2d->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
-            obj2d->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
+            cast->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
+            if (data.contains("active")) {
+                cast->GetSprite()->SetActiveTexture(fromMap(string,"active",data));
+            }
+            if (data.contains("playAnimation")) {
+                float speed = data.contains("animSpeed") ? fromMap(float, "animSpeed", data) : 0.1f;
+                bool loop = data.contains("animLoop") ? fromMap(bool, "animLoop", data) : true;
+                cast->Play(fromMap(string, "playAnimation", data), speed, loop);
+            }
         }
         if(data.contains("shader")) {
-            obj2d->SetShader(LoadShader(fromMap(string,"shader",data)));
+            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
-    } else if(auto textNode = dynamic_pointer_cast<TextNode>(node)) {
+    } else if(node->Type() == "TextNode") {
+        auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("shader")) {
-            textNode->SetShader(LoadShader(fromMap(string,"shader",data)));
+            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
+        }
+    }
+    if (data.contains("sound") && audioManager) {
+        string soundName = fromMap(string, "sound", data);
+        string fullPath = (audioPath / (soundName + ".wav")).string();
+        audioManager->LoadSound(soundName, fullPath);
+    }
+    if (data.contains("sounds") && audioManager) {
+        vector<std::any> soundList = fromMap(vector<std::any>, "sounds", data);
+
+        for (const auto& soundAny : soundList) {
+            string soundName = std::any_cast<string>(soundAny);
+            string fullPath = (audioPath / (soundName + ".wav")).string();
+            audioManager->LoadSound(soundName, fullPath);
         }
     }
 }
@@ -155,6 +181,27 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
             if(currentType==octEntry.first) {
                 shared_ptr<Node> node = octEntry.second(objVarList);
                 ApplyAssets(node, objVarList);
+                if (objVarList.contains("bgm") && audioManager) {
+                    string bgmName = fromMap(string, "bgm", objVarList);
+                    audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
+                }
+                if (objVarList.contains("bgms") && audioManager) {
+                    vector<std::any> bgmList = fromMap(vector<std::any>, "bgms", objVarList);
+
+                    for (const auto& bgmAny : bgmList) {
+                        string bgmName = std::any_cast<string>(bgmAny);
+                        audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
+                    }
+                }
+                if (objVarList.contains("playlist") && audioManager) {
+                    vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", objVarList);
+                    vector<string> playlistNames;
+
+                    for (const auto& song : playlistAny) {
+                        playlistNames.push_back(std::any_cast<string>(song));
+                    }
+                    audioManager->PlayPlaylist(playlistNames, 0.4f);
+                }
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }

@@ -1,5 +1,4 @@
 #include "include/IOManager/IOManager.hpp"
-#include "include/Globals/Globals.hpp"
 
 void IOManager::Init(GLFWwindow* window) {
 	glfwSetWindowUserPointer(window, this);

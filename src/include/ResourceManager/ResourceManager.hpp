@@ -11,6 +11,9 @@
 #include "include/Game/Objects/Platform.hpp"
 #include "include/Game/Objects/NPC.hpp"
 #include "include/Game/Objects/Button.hpp"
+#include "include/Game/Objects/BreakableWall.hpp"
+#include "include/Game/Objects/SpikePlatform.hpp"
+#include "include/Game/Objects/MovingPlatform.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
@@ -24,6 +27,8 @@
 #include <memory>
 #include <filesystem>
 #include <fstream>
+
+class AudioManager;
 
 using namespace std;
 using namespace filesystem;
@@ -55,6 +60,9 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Item>("Item"),
     RegisterObjectType<NPC>("NPC"),
     RegisterObjectType<Button>("Button"),
+    RegisterObjectType<BreakableWall>("BreakableWall"),
+    RegisterObjectType<SpikePlatform>("SpikePlatform"),
+	RegisterObjectType<MovingPlatform>("MovingPlatform"),
     RegisterObjectType<TextNode>("TextNode"),
     RegisterObjectType<ProfilerNode>("ProfilerNode")
 };
@@ -91,7 +99,6 @@ class ResourceManager {
     // Asset loaders
     inline shared_ptr<Model> LoadModel(const string&);
     inline shared_ptr<Sprite> LoadSprite(const string&);
-    inline shared_ptr<Shader> LoadShader(const string&);
 
     // Helper
     inline string LoadPlainText(const path&);
@@ -105,9 +112,14 @@ class ResourceManager {
     inline vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ParseNodes(unordered_map<string, std::any>&);
     inline void LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>&, shared_ptr<Scene>);
 
+    shared_ptr<AudioManager> audioManager;
+
     public:
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void ConfigurePaths();
+
+    void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
+    shared_ptr<Shader> LoadShader(const string&);
 
     ResourceManager();
     ~ResourceManager();

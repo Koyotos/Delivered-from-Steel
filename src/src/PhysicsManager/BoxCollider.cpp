@@ -1,6 +1,4 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
-#include <algorithm>
-#include "include/PhysicsManager/CapsuleCollider.hpp"
 
 BoxCollider::BoxCollider(const Transform transform, float x, float y, float width, float height)
     : Collider()
@@ -9,11 +7,11 @@ BoxCollider::BoxCollider(const Transform transform, float x, float y, float widt
 
     this->size = vec2(width, height);
 
-    updatePosition(transform);
+    UpdatePosition(transform);
 }
 
 
-void BoxCollider::updatePosition(const Transform transform)
+void BoxCollider::UpdatePosition(const Transform transform)
 {
     mat4 modelMatrix = transform.GetGlobal();
 
@@ -29,15 +27,15 @@ void BoxCollider::updatePosition(const Transform transform)
 }
 
 
-bool BoxCollider::checkCollision(std::shared_ptr<BoxCollider> other) const {
-    return calculateCollisionInfo(other)->collided;
+bool BoxCollider::CheckCollision(std::shared_ptr<BoxCollider> other) const {
+    return CalculateCollisionInfo(other)->collided;
 }
 
-bool BoxCollider::checkCollision(std::shared_ptr<CapsuleCollider> other) const {
-    return calculateCollisionInfo(other)->collided;
+bool BoxCollider::CheckCollision(std::shared_ptr<CapsuleCollider> other) const {
+    return CalculateCollisionInfo(other)->collided;
 }
 
-std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
+std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
     std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     float overlapX = std::min(max.x, other->max.x) - std::max(min.x, other->min.x);
@@ -62,7 +60,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
     return info;
 }
 
-std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
+std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
     std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     glm::vec2 closest = {
@@ -75,7 +73,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
         std::clamp(closest.y, min.y, max.y)
     };
 
-    float distSq = distanceSquared(closest, closestOnBox);
+    float distSq = DistanceSquared(closest, closestOnBox);
 
     if (distSq <= other->radius * other->radius) {
         info->collided = true;
@@ -108,7 +106,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::calculateCollisionInfo(std::shared_p
     }
 }
 
-std::optional<RaycastHit> BoxCollider::raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
+std::optional<RaycastHit> BoxCollider::Raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
 
     glm::vec2 invDir = 1.0f / dir;
 

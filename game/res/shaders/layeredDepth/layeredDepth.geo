@@ -1,0 +1,24 @@
+#version 420
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 18) out;
+
+in vec3 WorldPos[];
+
+uniform mat4 shadowMatrices[6];
+uniform int lightIndex;
+
+void main()
+{
+    for (int face = 0; face < 6; face++)
+    {
+        gl_Layer = lightIndex * 6 + face;
+
+        for (int i = 0; i < 3; i++)
+        {
+            gl_Position = shadowMatrices[face] * vec4(WorldPos[i], 1.0);
+            EmitVertex();
+        }
+        EndPrimitive();
+    }
+}

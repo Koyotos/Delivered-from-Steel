@@ -7,6 +7,8 @@
 #include <memory>
 #include <unordered_map>
 
+class AudioManager;
+
 using namespace std;
 using namespace filesystem;
 
@@ -38,6 +40,7 @@ class Globals {
     inline path GetExecPathInternal();
 
     public:
+    std::shared_ptr<AudioManager> audioManager;
     /*
     @brief Returns instance of Globals class.
     @return Globals& - globals instance
