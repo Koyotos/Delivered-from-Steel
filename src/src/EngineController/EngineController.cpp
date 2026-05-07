@@ -33,6 +33,7 @@ void EngineController::Init() {
         rsm->ConfigurePaths();
         renderer->Init(*rsm);
 		iom->Init(renderer->GetWindow());
+		crm->Init(rsm);
         globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
 
     } catch(const exception& except) {
@@ -121,6 +122,8 @@ shared_ptr<Scene> EngineController::LoadScene(const string& name) {
 }
 
 void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
+    scm->AddScene(crm->GetCardScene());
+    scn->GetRoot()->AddChild(crm->GetCardScene()->GetRoot());
     scm->SetActive(scn);
 }
 

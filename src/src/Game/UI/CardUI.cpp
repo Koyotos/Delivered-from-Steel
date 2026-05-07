@@ -28,3 +28,7 @@ CardUI::CardUI(const std::unordered_map<std::string, std::any>& data) : UIElemen
 CardType CardUI::GetCardType() {
 	return type;
 }
+
+string CardUI::Type() {
+	return "CardUI";
+}

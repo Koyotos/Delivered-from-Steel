@@ -166,3 +166,30 @@ void CardManager::Process()
 CardManager::~CardManager()
 {
 }
+
+void CardManager::Init(shared_ptr<ResourceManager> rsm)
+{
+	cardScene = rsm->LoadScene("res/scenes/cardsUI.json");
+	shared_ptr<Node> root = cardScene->GetRoot();
+	FindNodes(root);
+
+}
+
+void CardManager::FindNodes(shared_ptr<Node> node)
+{
+	if (auto cast = dynamic_pointer_cast<CardSlot>(node)) {
+		slots.push_back(cast);
+	}
+	else if (auto cast = dynamic_pointer_cast<CardUI>(node)) {
+		cardDisplays.push_back(cast);
+	}
+
+	for (auto& k : node->GetChildren()) {
+		FindNodes(k);
+	}
+}
+
+std::shared_ptr<Scene> CardManager::GetCardScene()
+{
+	return cardScene;
+}

@@ -18,6 +18,8 @@ class CardUI : public UIElement {
 
 	CardType GetCardType();
 
+	string Type() override;
+
 	CardUI();
 	CardUI(const std::unordered_map<std::string, std::any>& data);
 

@@ -7,7 +7,6 @@ void Game::Init() {
     gameScene->GetRoot()->AddChild(engine.LoadScene("res/scenes/test3d.json")->GetRoot());
     gameScene->GetRoot()->AddChild(engine.LoadScene("res/scenes/test2d.json")->GetRoot());
     gameScene->GetRoot()->AddChild(engine.LoadScene("res/scenes/testUI.json")->GetRoot());
-    gameScene->GetRoot()->AddChild(engine.LoadScene("res/scenes/cardsUI.json")->GetRoot());
 
 
     engine.SetActiveScene(gameScene);

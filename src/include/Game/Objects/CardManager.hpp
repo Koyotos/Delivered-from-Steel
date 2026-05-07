@@ -4,6 +4,7 @@
 #include "include/Core/Node.hpp"
 #include "include/Game/Objects/Card.hpp"
 #include "include/Game/UI/CardSlot.hpp"
+#include "include/ResourceManager/ResourceManager.hpp"
 
 class CardManager : public Node
 {
@@ -17,7 +18,10 @@ private:
 	std::vector<shared_ptr<Card>> allDeckCards;
 	std::vector<shared_ptr<Card>> currentDeck;
 	std::vector<shared_ptr<Card>> currentHand;
+	std::vector<shared_ptr<CardUI>> cardDisplays;
 	shared_ptr<Card> learningCard;
+
+	shared_ptr<Scene> cardScene;
 
 	std::vector<shared_ptr<CardSlot>> slots;
 
@@ -25,10 +29,14 @@ private:
 	void SortHand();
 	bool IsEmpty();
 
+	void FindNodes(shared_ptr<Node> node);
+
 
 public:
 	CardManager();
 	~CardManager();
+
+	void Init(shared_ptr<ResourceManager> rsm);
 
 	std::vector<shared_ptr<Card>> GetUnlockedCards();
 	std::vector<shared_ptr<Card>> GetCurrentDeck();
@@ -42,6 +50,8 @@ public:
 	
 	void SetMaxHandSize(int value);
 	int GetMaxHandSize();
+
+	std::shared_ptr<Scene> GetCardScene();
 
 	void LearnCard(shared_ptr<Card> card);
 	

@@ -21,6 +21,8 @@ class CardSlot : public UIElement {
 	CardSlot();
 	CardSlot(const std::unordered_map<std::string, std::any>& data);
 
+	string Type() override;
+
 	/*
 	* @brief Removes the current card from the slot with an animation. It moves the card up and fades it out before setting the pointer to null.
 	*/

@@ -28,3 +28,8 @@ CardSlot::CardSlot(const std::unordered_map<std::string, std::any>& data) : UIEl
 	SetDraw(true);
 }
 
+string CardSlot::Type()
+{
+	return "CardSlot";
+}
+
