@@ -3,7 +3,6 @@
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/Shader.hpp"
 #include "include/Renderer/Utils.hpp"
-#include <iostream>
 
 void Renderer::Init(ResourceManager& rsm) {
     if (!glfwInit())
@@ -14,7 +13,7 @@ void Renderer::Init(ResourceManager& rsm) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    window = glfwCreateWindow(DEF_WIN_W, DEF_WIN_H, "Game", nullptr, nullptr);
+    window = glfwCreateWindow(DEF_WIN_W, DEF_WIN_H, "Delivered From Steel", nullptr, nullptr);
     if (!window)
         throw runtime_error("Can't create window");
 
@@ -120,7 +119,7 @@ void Renderer::GenShadowMaps() {
     glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
 
     glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24,
-                SHADOW_WIDTH, SHADOW_HEIGHT, MAX_LIGHTS_POINT * 6);
+                shadowW, shadowH, MAX_LIGHTS_POINT * 6);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -140,8 +139,8 @@ void Renderer::GenShadowMaps() {
         GL_TEXTURE_2D_ARRAY,
         1,
         GL_DEPTH_COMPONENT24,
-        SHADOW_WIDTH,
-        SHADOW_HEIGHT,
+        shadowW,
+        shadowH,
         MAX_LIGHTS_DIR_AND_SPOT
     );
 
@@ -150,6 +149,52 @@ void Renderer::GenShadowMaps() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::Reconfigure(const RendererCommand& command, const int16_t& value) {
+    switch(command) {
+        case RCMD_RESIZE_W: { 
+            windowW = value;
+            break;
+        }
+        case RCMD_RESIZE_H: { 
+            windowH = value;
+            break;
+        }
+        case RCMD_REMAKE_WINDOW: {
+            glfwDestroyWindow(window);
+            window = glfwCreateWindow(windowW, windowH, "Delivered From Steel", nullptr, nullptr);
+            break;
+        }
+        case RCMD_SHADOW_QUALITY: {
+            switch (value) {
+                case RCMDVAL_SHADOWS_LOW:
+                    shadowW = 512;
+                    shadowH = 512;
+                    break;
+                case RCMDVAL_SHADOWS_MEDIUM:
+                    shadowW = 1024;
+                    shadowH = 1024;
+                    break;
+                case RCMDVAL_SHADOWS_HIGH:
+                    shadowW = 2048;
+                    shadowH = 2048;
+                    break;
+            }
+            glDeleteTextures(1,&depthMaps2DArray);
+            glDeleteTextures(1,&depthCubeArray);
+            GenShadowMaps();
+            break;
+        }
+        case RCMD_BLOOM: {
+            postProcessingShader->SetBool("bloom", value);
+            break;
+        }
+        case RCMD_GOD_RAYS: {
+            postProcessingShader->SetBool("godRays", value);
+            break;
+        }
+    }
 }
 
 void Renderer::ComputeFrustum() {
@@ -230,7 +275,7 @@ void Renderer::DepthPass() {
                 break;
             }
             case LIGHT_SPOT: {
-                projection = perspective(light->data4, 1.f, 0.1f, 20.f);
+                projection = perspective(light->data4, 1.f, 0.1f, 10.f);
                 view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
                 lightSpaceMatrices[i] = projection * view;
 
@@ -255,7 +300,7 @@ void Renderer::DepthPass() {
         shared_ptr<Light> light = lightsPosPoint[i].first;
         mat4 projection, view;
         vec3 pos = light->data1;
-        projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
+        projection = perspective(radians(90.f), 1.f, 0.1f, 10.f);
         depthShaderLayered->Use();
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
         mat4 shadowMatrices[6];
@@ -273,7 +318,7 @@ void Renderer::DepthPass() {
             PROFILER_ADD_OBJECT();
             obj->Draw(depthShaderLayered);
         }
-        farPlanes[i] = 20.0f;
+        farPlanes[i] = 10.0f;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,windowW, windowH);
@@ -419,7 +464,7 @@ bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
 
     for (int i = 0; i < 6; i++) {
         const glm::vec4& p = frustumPlanes[i];
-        if (glm::dot(glm::vec3(p), pos) + p.w < -radius)
+        if (glm::dot(glm::vec3(p), pos) + p.w > -radius)
             return false;
     }
     return true;

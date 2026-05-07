@@ -39,6 +39,23 @@ enum NodeRenderType {
     NRT_TEXTNODE = 5
 };
 
+enum RendererCommandValue {
+    RCMDVAL_FALSE = 0, 
+    RCMDVAL_TRUE = 1,
+    RCMDVAL_SHADOWS_LOW = 2,
+    RCMDVAL_SHADOWS_MEDIUM = 3,
+    RCMDVAL_SHADOWS_HIGH = 4
+};
+
+enum RendererCommand {
+    RCMD_RESIZE_W = 0,
+    RCMD_RESIZE_H = 1,
+    RCMD_REMAKE_WINDOW = 2,
+    RCMD_SHADOW_QUALITY = 3,
+    RCMD_BLOOM = 4,
+    RCMD_GOD_RAYS = 5,
+};
+
 class Renderer {
     private: 
     // Window
@@ -64,6 +81,8 @@ class Renderer {
     vector<Shader*> updatedShaders;
  
     // Depth Pass
+    int16_t shadowW = SHADOW_WIDTH;
+    int16_t shadowH = SHADOW_HEIGHT;
     int shadow2DUnit;
     int shadowCubeUnit;
     GLuint depthMaps2DArray;
@@ -133,6 +152,7 @@ class Renderer {
     inline void DrawDebug();
 
     public:
+    void Reconfigure(const RendererCommand&, const int16_t&);
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();
     void Init(ResourceManager&);
