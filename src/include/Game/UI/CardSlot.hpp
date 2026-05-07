@@ -35,6 +35,8 @@ class CardSlot : public UIElement {
 	void SetCard(std::shared_ptr<CardUI> newCard);
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
+	void Process() override;
+
 
 };
 

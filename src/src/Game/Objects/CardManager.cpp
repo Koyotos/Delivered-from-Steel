@@ -1,6 +1,7 @@
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/Globals/Globals.hpp"
 #include <random>
+#include <iostream>
 
 #include "GLFW/glfw3.h"
 
@@ -166,8 +167,8 @@ bool CardManager::IsEmpty()
 
 CardManager::CardManager()
 {
-	currentHand.reserve(maxHandSize);
-	currentDeck.reserve(maxDeckSize);
+	currentHand.resize(maxHandSize, nullptr);
+
 }
 
 void CardManager::Process()
@@ -211,7 +212,19 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	shared_ptr<Node> root = cardScene->GetRoot();
 	FindNodes(root);
 
-	unlockedCards.push_back(CreateCard(CardType::WallJump));
+	UnlockCard(CreateCard(CardType::WallJump));
+	auto c1 = CreateCard(CardType::WallJump);
+	auto c2 = CreateCard(CardType::WallJump);
+	auto c3 = CreateCard(CardType::WallJump);
+
+	allDeckCards.push_back(c1);
+	allDeckCards.push_back(c2);
+	allDeckCards.push_back(c3);
+
+	currentDeck = allDeckCards;
+
+	DrawCardsToHand();
+
 
 }
 
