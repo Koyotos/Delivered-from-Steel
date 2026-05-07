@@ -1,5 +1,8 @@
 #include "include/Game/Objects/CardManager.hpp"
+#include "include/Globals/Globals.hpp"
 #include <random>
+
+#include "GLFW/glfw3.h"
 
 std::vector<shared_ptr<Card>> CardManager::GetCurrentDeck()
 {
@@ -81,9 +84,10 @@ void CardManager::RemoveCardFromDeck(int index)
 
 void CardManager::DrawCardToHand(int slot)
 {
+	if (currentDeck.empty()) return;
 	if (learningCard != nullptr)
 	{
-		currentHand.insert(currentHand.begin() + slot, learningCard);
+		currentHand[slot] = learningCard;
 		slots[slot]->SetCard(learningCard->GetDisplay());
 		return;
 	}
@@ -91,7 +95,7 @@ void CardManager::DrawCardToHand(int slot)
 	ShuffleDeck();
 
 	std::shared_ptr<Card> newCard = currentDeck.back();
-	currentHand.insert(currentHand.begin() + slot, newCard);
+	currentHand[slot] = newCard;
 	slots[slot]->SetCard(newCard->GetDisplay());
 	currentDeck.pop_back();
 
@@ -107,18 +111,24 @@ void CardManager::DrawCardsToHand()
 
 void CardManager::UseCard(int index)
 {
-	if (index > maxHandSize) return;
+	if (index < 0 || index >= currentHand.size()) return;
 	if (currentHand[index] == nullptr) return;
 	if (!currentHand[index]->CheckUse()) return;
 
 	currentHand[index]->Use();
 	currentHand[index] = nullptr;
 	slots[index]->RemoveCard();
-	
-	if (drawOnHandEmpty) DrawCardToHand(index);
-	else if (IsEmpty()) DrawCardsToHand();
 
+	if (drawOnHandEmpty)
+	{
+		DrawCardToHand(index);
+	}
+	else if (IsEmpty())
+	{
+		DrawCardsToHand();
+	}
 }
+
 
 void CardManager::ReachCheckpoint()
 {
@@ -160,7 +170,33 @@ CardManager::CardManager()
 
 void CardManager::Process()
 {
-	return; //TBD
+	return;
+}
+
+bool CardManager::Input(InputEvent& event)
+{
+	if(!event.handled)
+	{
+		if (event.type == InputType::GAMEPAD_BUTTON)
+		{
+			switch (event.key)
+			{
+			case GLFW_GAMEPAD_BUTTON_X: UseCard(0); break;
+			case GLFW_GAMEPAD_BUTTON_Y: UseCard(1); break;
+			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); break;
+			}
+		}
+		if (event.type == InputType::KEYBOARD)
+		{
+			switch (event.key)
+			{
+			case GLFW_KEY_J: UseCard(0); break;
+			case GLFW_KEY_K: UseCard(1); break;
+			case GLFW_KEY_L: UseCard(2); break;
+			}
+		}
+	}
+	return false;
 }
 
 CardManager::~CardManager()

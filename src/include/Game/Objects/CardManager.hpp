@@ -67,8 +67,7 @@ public:
 	void RefreshCurrentDeck();
 
 	void Process() override;
-
-
+	bool Input(InputEvent& event) override;
 
 
 };

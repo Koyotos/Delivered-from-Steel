@@ -116,7 +116,7 @@ void EngineController::EndFrame() {
 }
 
 shared_ptr<Scene> EngineController::LoadScene(const string& name) {
-    shared_ptr<Scene> scn = rsm->LoadScene(name);
+    shared_ptr<Scene> scn = rsm->LoadScene(name);;
     scm->AddScene(scn);
     return scn;
 }
@@ -124,6 +124,7 @@ shared_ptr<Scene> EngineController::LoadScene(const string& name) {
 void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
     scm->AddScene(crm->GetCardScene());
     scn->GetRoot()->AddChild(crm->GetCardScene()->GetRoot());
+    scn->GetRoot()->AddChild(crm);
     scm->SetActive(scn);
 }
 
