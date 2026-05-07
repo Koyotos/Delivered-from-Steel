@@ -31,6 +31,8 @@ private:
 
 	void FindNodes(shared_ptr<Node> node);
 
+	shared_ptr<Card> CreateCard(CardType type);
+
 
 public:
 	CardManager();

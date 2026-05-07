@@ -3,6 +3,11 @@
 Card::Card(const unordered_map<string, std::any>& data) : Object2D(data) {
 }
 
+Card::Card(CardType type)
+{
+	this->type = type;
+}
+
 void Card::Deactivate()
 {
     

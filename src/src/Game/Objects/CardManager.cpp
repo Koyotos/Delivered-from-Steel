@@ -166,6 +166,8 @@ bool CardManager::IsEmpty()
 
 CardManager::CardManager()
 {
+	currentHand.reserve(maxHandSize);
+	currentDeck.reserve(maxDeckSize);
 }
 
 void CardManager::Process()
@@ -209,6 +211,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	shared_ptr<Node> root = cardScene->GetRoot();
 	FindNodes(root);
 
+	unlockedCards.push_back(CreateCard(CardType::WallJump));
+
 }
 
 void CardManager::FindNodes(shared_ptr<Node> node)
@@ -229,3 +233,17 @@ std::shared_ptr<Scene> CardManager::GetCardScene()
 {
 	return cardScene;
 }
+
+shared_ptr<Card> CardManager::CreateCard(CardType type)
+{
+	shared_ptr<Card> newCard = make_shared<Card>(type);
+	for (auto& ui : cardDisplays) {
+		if (ui->GetCardType() == type) {
+			newCard->SetDisplay(make_shared<CardUI>(*ui));
+			break;
+		}
+	}
+	return newCard;
+}
+
+
