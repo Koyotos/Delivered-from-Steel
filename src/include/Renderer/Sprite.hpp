@@ -20,7 +20,6 @@ class Sprite {
     private:
     string directory;
     GLuint VAO, VBO, EBO;
-    GLuint active;
     vec2 size;
 
     vector<Texture> textures;
@@ -30,14 +29,12 @@ class Sprite {
     void LoadTextures();
 
     public:
-    void SetActiveTexture(const GLuint&);
-    void SetActiveTexture(const string&);
 
     vec2 GetSize();
 
-    Texture& GetActiveTexture();
+    Texture& GetTexture(GLuint index);
     const string& GetDir() const noexcept;
-    void Draw(Shader&);
+    void Draw(Shader&, GLuint textureToDraw);
 
     const AnimationData* GetAnimation(const string& name) const;
     bool HasAnimation(const string& name) const;

@@ -20,8 +20,9 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	spotLight->colorAmbient = vec3(0.0f, 0.0f, 0.0f);
 	spotLight->colorSpecular = vec3(0.0f, 0.0f, 0.0f);
 	spotLight->data1 = GetTransform().GetTranslation();
-	spotLight->data4 = glm::cos(glm::radians(visionAngle / 2.0f));
-	spotLight->data2 = vec3(0.0f, -1.0f, 0.0f);
+	//spotLight->data4 = glm::radians(visionAngle);
+	spotLight->data4 = glm::cos(glm::radians(visionAngle) / 2.0f); 
+	spotLight->data2 = vec3(0.001f, -1.0f, 0.0f);
 	spotLight->colorDiffuse = vec3(1.0f, 0.6f, 0.8f);
 	spotLight->data3 = vec3(1.0f, 0.09f, 0.032f);
 

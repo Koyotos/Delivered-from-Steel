@@ -9,7 +9,7 @@ void Object2D::Draw(shared_ptr<Shader> sh) {
     if(reqPerspecive) {
         sh->SetVec2("spriteSize", sprite->GetSize());
     }
-    sprite->Draw(*sh);
+    sprite->Draw(*sh, currentTextureID);
 }
 
 void Object2D::Process() {
@@ -32,7 +32,7 @@ void Object2D::Process() {
                         animPlaying = false;
                     }
                 }
-                sprite->SetActiveTexture(anim->frames[currentFrameIndex]);
+                currentTextureID = anim->frames[currentFrameIndex];
             }
         }
     }
@@ -51,7 +51,7 @@ void Object2D::Play(const string& animName, float frameDuration, bool loop) {
 
     const AnimationData* anim = sprite->GetAnimation(currentAnimation);
     if (anim && !anim->frames.empty()) {
-        sprite->SetActiveTexture(anim->frames[0]);
+        currentTextureID = anim->frames[currentFrameIndex];
     }
 }
 
@@ -104,6 +104,7 @@ Object2D::Object2D(const unordered_map<string, std::any>& data) : PhysicsNode(da
     reqPerspecive = fromMap(bool, "reqPerspective", data);
     animPlaying = false;
     currentFrameIndex = 0;
+	currentTextureID = 0;
     animTimer = 0.0f;
     animSpeed = 0.1f;
     animLoop = false;

@@ -20,6 +20,9 @@ class Object2D : public PhysicsNode {
     bool animLoop;
     float animSpeed;
 
+    protected:
+    GLuint currentTextureID = 0;
+
     public:
 
     string Type() override;
