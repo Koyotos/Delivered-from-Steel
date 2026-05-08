@@ -6,12 +6,14 @@ ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enem
 	speed = 0.8f;
 	chargingSpeed = 3.0f;
 	damage = 100.0f;
-	raycastOffsetX = 0.5f;
+	raycastOffsetX = 0.326f;
 	raycastOffsetY = 0.0f;
-	groundCheckDistance = 0.461f;
-	wallCheckDistance = 0.38f;
+	groundCheckDistance = 0.61f;
+	wallCheckDistance = 0.58f;
 
-	chargeRaycastOffsetX = 0.11;
+	raycastGroundCheckOffsetX = raycastOffsetX + 0.3f;
+
+	chargeRaycastOffsetX = raycastOffsetX;
 	stunDuration = 1.0f;
 }
 
@@ -54,7 +56,17 @@ void ChargingEnemy::Chase(float dt) {
 		ObjectType::Trap
 	);
 
-	if (enemyHit.has_value() || wallHit.has_value() || trapHit.has_value()) {
+	auto playerHit = Raycast(
+		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
+		glm::vec2(0.0f, -1.0f),
+		wallCheckDistance,
+		ObjectType::Player
+	);
+
+	if (enemyHit.has_value() || wallHit.has_value() || trapHit.has_value() || playerHit.has_value()) {
+		if (playerHit.has_value()) {
+			player->takeDamage(damage);
+		}
 		stunned = true;
 		state = EnemyState::Patrol;
 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));

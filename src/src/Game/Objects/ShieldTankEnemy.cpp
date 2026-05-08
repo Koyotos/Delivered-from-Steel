@@ -7,15 +7,17 @@ ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : 
 	speed = 0.3f;
 	damage = 0.0f;
 
-	raycastOffsetX = 0.5f;
+	raycastOffsetX = 0.211f;
 	raycastOffsetY = 0.0f;
 
-	groundCheckDistance = 0.461f;
-	wallCheckDistance = 0.1f;
+	groundCheckDistance = 0.581f;
+	wallCheckDistance = 0.57f;
 
-	shieldRaycastOffsetX = 0.11f;
+	shieldRaycastOffsetX = raycastOffsetX + 0.02f;
 
 	shieldCooldown = 0.1f;
+
+	raycastGroundCheckOffsetX = raycastOffsetX + 0.2f;
 
 	chaseTime = 2.0f;
 }
@@ -84,7 +86,14 @@ void ShieldTankEnemy::Chase(float dt) {
 		ObjectType::Wall
 	);
 
-	if (groundHit.has_value()) {
+	auto enemyHit = Raycast(
+		glm::vec2(raycastOffsetX * direction, 0.0f),
+		glm::vec2(0.0f, -1.0f),
+		wallCheckDistance,
+		ObjectType::Enemy
+	);
+
+	if (groundHit.has_value() && !enemyHit.has_value()) {
 		SetVelocity(glm::vec2(dir.x * speed, GetVelocity().y));
 	}
 	else {
@@ -103,7 +112,7 @@ void ShieldTankEnemy::AttackState(float dt) {
 	if (shieldHit.has_value() && !shieldOnCooldown) {
 		shieldOnCooldown = true;
 		player->takeDamage(damage);
-		player->SetVelocity( player->GetVelocity() + glm::vec2(direction * 5.0f, 0.0f));
+		player->SetVelocity(vec2(direction * 5.0f, player->GetVelocity().y));
 	}
 }
 

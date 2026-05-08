@@ -8,9 +8,7 @@
 enum class EnemyState {
 	Patrol,
 	Chase,
-	Attack,
-	Search,
-	Dead
+	Attack
 };
 
 class Enemy :
@@ -23,6 +21,7 @@ protected:
 	float speed;
 
 	float raycastOffsetX;
+	float raycastGroundCheckOffsetX;
 	float raycastOffsetY;
 
 	float groundCheckDistance;

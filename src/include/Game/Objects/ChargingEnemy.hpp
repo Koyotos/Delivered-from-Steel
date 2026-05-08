@@ -21,6 +21,8 @@ public:
     void Update(float deltaTime) override;
 
     void ChangeState(shared_ptr<Player> player) override;
+
+    void Attack(shared_ptr<Player> player) override {};
 };
 
 #endif // FE_CHARGINGENEMY

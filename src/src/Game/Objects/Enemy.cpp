@@ -11,6 +11,7 @@ Enemy::Enemy(const unordered_map<string, std::any>& data) : Object2D(data) {
 
 	raycastOffsetX = 0.5f;
 	raycastOffsetY = 0.0f;
+	raycastGroundCheckOffsetX = 0.6f;
 
 	groundCheckDistance = 0.461f;
 	wallCheckDistance = 0.1f;
@@ -132,27 +133,27 @@ void Enemy::Patrol(float dt) {
 
 	auto wallHit = Raycast(
 		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
-		dir,
+		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
 		ObjectType::Wall
 	);
 
 	auto enemyHit = Raycast(
 		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
-		dir,
+		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
 		ObjectType::Enemy
 	);
 
 	auto trapHit = Raycast(
 		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
-		dir,
+		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
 		ObjectType::Trap
 	);
 
 	auto groundHit = Raycast(
-		glm::vec2(raycastOffsetX * direction, 0.0f),
+		glm::vec2(raycastGroundCheckOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		groundCheckDistance,
 		ObjectType::Wall
