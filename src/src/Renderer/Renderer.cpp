@@ -340,11 +340,13 @@ void Renderer::Draw() {
         node->Draw();
     }
     glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
     for(auto& node : drawVectorUI) {
         PROFILER_ADD_OBJECT();
         node->Draw();
     }
     glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

@@ -14,6 +14,7 @@ class CardSlot : public UIElement {
 	private:
 
 	std::shared_ptr<CardUI> card;
+	std::shared_ptr<CardUI> removedCard;
 	std::shared_ptr<Icon> icon;
 
 	public:

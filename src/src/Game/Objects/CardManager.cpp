@@ -20,6 +20,11 @@ std::vector<shared_ptr<Card>> CardManager::GetUnlockedCards()
 	return unlockedCards;
 }
 
+std::vector<shared_ptr<Card>> CardManager::GetAllDeckCards()
+{
+	return allDeckCards;
+}
+
 void CardManager::SetDrawOnHandEmpty(bool value) 
 {
 	drawOnHandEmpty = value;
@@ -76,7 +81,7 @@ void CardManager::RemoveCardFromDeck(std::shared_ptr<Card> card)
 
 void CardManager::RemoveCardFromDeck(int index)
 {
-	if (index > currentDeck.size()) return;
+	if (index > allDeckCards.size()) return;
 
 	allDeckCards.erase(allDeckCards.begin() + index);
 	allDeckCards.shrink_to_fit();
@@ -120,7 +125,7 @@ void CardManager::UseCard(int index)
 	currentHand[index] = nullptr;
 	slots[index]->RemoveCard();
 
-	if (drawOnHandEmpty)
+	if (!drawOnHandEmpty)
 	{
 		DrawCardToHand(index);
 	}
@@ -184,18 +189,18 @@ bool CardManager::Input(InputEvent& event)
 		{
 			switch (event.key)
 			{
-			case GLFW_GAMEPAD_BUTTON_X: UseCard(0); break;
-			case GLFW_GAMEPAD_BUTTON_Y: UseCard(1); break;
-			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); break;
+			case GLFW_GAMEPAD_BUTTON_X: UseCard(0); event.handled = true; break;
+			case GLFW_GAMEPAD_BUTTON_Y: UseCard(1); event.handled = true; break;
+			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); event.handled = true; break;
 			}
 		}
 		if (event.type == InputType::KEYBOARD)
 		{
 			switch (event.key)
 			{
-			case GLFW_KEY_J: UseCard(0); break;
-			case GLFW_KEY_K: UseCard(1); break;
-			case GLFW_KEY_L: UseCard(2); break;
+			case GLFW_KEY_J: UseCard(0); event.handled = true; break;
+			case GLFW_KEY_K: UseCard(1); event.handled = true; break;
+			case GLFW_KEY_L: UseCard(2); event.handled = true; break;
 			}
 		}
 	}
@@ -216,12 +221,20 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	auto c1 = CreateCard(CardType::WallJump);
 	auto c2 = CreateCard(CardType::WallJump);
 	auto c3 = CreateCard(CardType::WallJump);
+	auto c4 = CreateCard(CardType::Dash);
+	auto c5 = CreateCard(CardType::Dash);
+	auto c6 = CreateCard(CardType::Dash);
 
 	allDeckCards.push_back(c1);
 	allDeckCards.push_back(c2);
 	allDeckCards.push_back(c3);
+	allDeckCards.push_back(c4);
+	allDeckCards.push_back(c5);
+	allDeckCards.push_back(c6);
 
 	currentDeck = allDeckCards;
+
+	ShuffleDeck();
 
 	DrawCardsToHand();
 

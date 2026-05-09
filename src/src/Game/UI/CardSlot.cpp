@@ -7,6 +7,7 @@ void CardSlot::RemoveCard() {
 	card->MoveTo(glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y - 100.0f), 0.5f, EaseType::OutQuad);
 	card->FadeOut(0.5f, EaseType::OutQuad);
 
+	removedCard = card;
 	card = nullptr;
 }
 
@@ -15,9 +16,10 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 
 	card = newCard;
 	card->SetVisible(true);
-	card->SetTransform(this->GetTransform());
+	Transform t = this->GetTransform();
+	card->SetTransform(t);
 	card->SetAlpha(0.0f);
-	card->FadeIn(0.5f, EaseType::OutQuad);
+	card->FadeIn(0.25f, EaseType::OutQuad);
 }
 
 
@@ -25,7 +27,13 @@ void CardSlot::Draw(shared_ptr<Shader> sh) {
 	UIElement::Draw();
 	if (icon) icon->Draw(sh);
 	if (card) card->Draw(GetShader()); 
-
+	if (removedCard)
+	{
+		removedCard->Draw(GetShader());
+		if (removedCard->GetAlpha() <= 0.01f) {
+			removedCard = nullptr;
+		}
+	}
 }	
 
 
@@ -42,5 +50,6 @@ void CardSlot::Process() {
 	UIElement::Process();
 	if (icon) icon->Process();
 	if (card) card->Process();
+	if (removedCard) removedCard->Process();
 }
 
