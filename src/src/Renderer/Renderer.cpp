@@ -299,7 +299,6 @@ void Renderer::DepthPass() {
 
                 for(auto& obj : potentialCasters){
                     if(!AffectsLight(obj, light)) continue;
-
                     PROFILER_ADD_OBJECT();
                     obj->Draw(depthShaderNormal);
                 }
