@@ -151,14 +151,14 @@ void Renderer::GenShadowMaps() {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Renderer::Reconfigure(const RendererCommand& command, const int16_t& value) {
+void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, const float& fv) {
     switch(command) {
         case RCMD_RESIZE_W: { 
-            windowW = value;
+            windowW = iv;
             break;
         }
         case RCMD_RESIZE_H: { 
-            windowH = value;
+            windowH = iv;
             break;
         }
         case RCMD_REMAKE_WINDOW: {
@@ -167,7 +167,7 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& value)
             break;
         }
         case RCMD_SHADOW_QUALITY: {
-            switch (value) {
+            switch (iv) {
                 case RCMDVAL_SHADOWS_LOW:
                     shadowW = 512;
                     shadowH = 512;
@@ -187,11 +187,23 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& value)
             break;
         }
         case RCMD_BLOOM: {
-            postProcessingShader->SetBool("bloom", value);
+            postProcessingShader->SetBool("bloom", iv);
             break;
         }
         case RCMD_GOD_RAYS: {
-            postProcessingShader->SetBool("godRays", value);
+            postProcessingShader->SetBool("godRays", iv);
+            break;
+        }
+        case RCMD_POINT_CULL_DIST: {
+            pointCull = fv;
+            break;
+        }
+        case RCMD_SPOT_CULL_DIST: {
+            spotCull = fv;
+            break;
+        }
+        case RCMD_DIR_DISTANCE: {
+            dirDistance = fv;
             break;
         }
     }
@@ -215,23 +227,21 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
     float radius = obj->GetCullRadius();
     switch(light->type) {
         case LIGHT_POINT: {
-            float maxDist = 40.0f;
             float dist2 = glm::length2(objPos - light->data1);
-            float r = maxDist + radius + 2.0f;
+            float r = pointCull + radius + 2.0f;
             return dist2 < r * r;
         }
         case LIGHT_SPOT: {
             vec3 toObj = objPos - light->data1;
             float dist = glm::length(toObj);
 
-            float maxDist = 20.0f;
-            if(dist > maxDist + radius) return false;
+            if(dist > spotCull + radius) return false;
 
             vec3 dir = normalize(light->data2);
             float angle = dot(normalize(toObj), dir);
 
-            float cutoff = light->data4;
-            return angle > cutoff - 0.1f;
+            float cutoffCos = cos(light->data4);
+            return angle > cutoffCos;
         }
         default : break;
     }
@@ -255,7 +265,7 @@ void Renderer::DepthPass() {
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
                 vec3 center = vec3(0.0f);
-                vec3 pos = center - dir * 30.0f;
+                vec3 pos = center - dir * dirDistance;
 
                 projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
                 view = lookAt(pos, center, vec3(0, 1, 0));
@@ -275,8 +285,10 @@ void Renderer::DepthPass() {
                 break;
             }
             case LIGHT_SPOT: {
+                vec3 dir = normalize(light->data2);
+                vec3 up = abs(dot(dir, vec3(0,1,0))) > 0.999f ? vec3(0,0,1) : vec3(0,1,0);
                 projection = perspective(light->data4, 1.f, 0.1f, 10.f);
-                view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
+                view = lookAt(light->data1,light->data1 + dir,up);
                 lightSpaceMatrices[i] = projection * view;
 
                 depthShaderNormal->Use();
@@ -325,7 +337,7 @@ void Renderer::DepthPass() {
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
-    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
     lightsPosPoint.clear();
@@ -333,6 +345,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     drawVectorUI.clear();
     potentialCasters.clear();
     updatedShaders.clear();
+    sunExists = false;
 
     frameVP = scene->sceneCam->GetVP(1);
     frameVO = scene->sceneCam->GetVP(0);
@@ -404,6 +417,7 @@ void Renderer::PostProcessingPass() {
     postProcessingShader->SetFloat("exposure", 0.6);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
+    postProcessingShader->SetBool("sunExists", sunExists);
     postProcessingShader->SetInt("depthBuffer", 1);
     postProcessingShader->SetMat4("invProjection", inverse(frameP));
     postProcessingShader->SetMat4("invView", inverse(frameV));
@@ -460,11 +474,11 @@ bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
     const float radius = node->GetCullRadius();
     if (radius < CULL_RADIUS_ALWAYS_TRUE)
         return true;
-    const glm::vec3 pos = node->GetTransform().GetGlobal()[3];
+    const vec3 pos = node->GetTransform().GetGlobal()[3];
 
     for (int i = 0; i < 6; i++) {
-        const glm::vec4& p = frustumPlanes[i];
-        if (glm::dot(glm::vec3(p), pos) + p.w > -radius)
+        const vec4& p = frustumPlanes[i];
+        if (dot(vec3(p), pos) + p.w > -radius)
             return false;
     }
     return true;
@@ -524,6 +538,7 @@ void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
         case LIGHT_DIRECTIONAL: {
             sunDir = light->data1;
             lightsPos.push_back({light,0});
+            sunExists = true;
             break;
         }
         case LIGHT_POINT: {
