@@ -39,6 +39,26 @@ enum NodeRenderType {
     NRT_TEXTNODE = 5
 };
 
+enum RendererCommandValue {
+    RCMDVAL_FALSE = 0, 
+    RCMDVAL_TRUE = 1,
+    RCMDVAL_SHADOWS_LOW = 2,
+    RCMDVAL_SHADOWS_MEDIUM = 3,
+    RCMDVAL_SHADOWS_HIGH = 4
+};
+
+enum RendererCommand {
+    RCMD_RESIZE_W = 0,
+    RCMD_RESIZE_H = 1,
+    RCMD_REMAKE_WINDOW = 2,
+    RCMD_SHADOW_QUALITY = 3,
+    RCMD_BLOOM = 4,
+    RCMD_GOD_RAYS = 5,
+    RCMD_POINT_CULL_DIST = 6,
+    RCMD_SPOT_CULL_DIST = 7,
+    RCMD_DIR_DISTANCE = 8
+};
+
 class Renderer {
     private: 
     // Window
@@ -64,6 +84,8 @@ class Renderer {
     vector<Shader*> updatedShaders;
  
     // Depth Pass
+    int16_t shadowW = SHADOW_WIDTH;
+    int16_t shadowH = SHADOW_HEIGHT;
     int shadow2DUnit;
     int shadowCubeUnit;
     GLuint depthMaps2DArray;
@@ -71,6 +93,9 @@ class Renderer {
     shared_ptr<Shader> depthShaderLayered;
     shared_ptr<Shader> depthShaderNormal;
     vector<shared_ptr<VisualNode>> potentialCasters; 
+    float pointCull = 40.0f;
+    float spotCull = 20.0f;
+    float dirDistance = 30.0f;
 
     // Post processing
     GLuint screenQuadVAO;
@@ -80,6 +105,7 @@ class Renderer {
     shared_ptr<Shader> blurShader;
     vec3 sunDir;
     mat4 sunMatrix;
+    bool sunExists;
 
     static constexpr vec3 dirs[6] = {
                     {1,0,0},{-1,0,0},
@@ -133,6 +159,7 @@ class Renderer {
     inline void DrawDebug();
 
     public:
+    void Reconfigure(const RendererCommand&, const int16_t& iv = 0, const float& fv = 0.0);
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();
     void Init(ResourceManager&);

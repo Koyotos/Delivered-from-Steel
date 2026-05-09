@@ -3,7 +3,6 @@
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/Shader.hpp"
 #include "include/Renderer/Utils.hpp"
-#include <iostream>
 
 void Renderer::Init(ResourceManager& rsm) {
     if (!glfwInit())
@@ -14,7 +13,7 @@ void Renderer::Init(ResourceManager& rsm) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    window = glfwCreateWindow(DEF_WIN_W, DEF_WIN_H, "Game", nullptr, nullptr);
+    window = glfwCreateWindow(DEF_WIN_W, DEF_WIN_H, "Delivered From Steel", nullptr, nullptr);
     if (!window)
         throw runtime_error("Can't create window");
 
@@ -120,7 +119,7 @@ void Renderer::GenShadowMaps() {
     glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, depthCubeArray);
 
     glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24,
-                SHADOW_WIDTH, SHADOW_HEIGHT, MAX_LIGHTS_POINT * 6);
+                shadowW, shadowH, MAX_LIGHTS_POINT * 6);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -140,8 +139,8 @@ void Renderer::GenShadowMaps() {
         GL_TEXTURE_2D_ARRAY,
         1,
         GL_DEPTH_COMPONENT24,
-        SHADOW_WIDTH,
-        SHADOW_HEIGHT,
+        shadowW,
+        shadowH,
         MAX_LIGHTS_DIR_AND_SPOT
     );
 
@@ -150,6 +149,64 @@ void Renderer::GenShadowMaps() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, const float& fv) {
+    switch(command) {
+        case RCMD_RESIZE_W: { 
+            windowW = iv;
+            break;
+        }
+        case RCMD_RESIZE_H: { 
+            windowH = iv;
+            break;
+        }
+        case RCMD_REMAKE_WINDOW: {
+            glfwDestroyWindow(window);
+            window = glfwCreateWindow(windowW, windowH, "Delivered From Steel", nullptr, nullptr);
+            break;
+        }
+        case RCMD_SHADOW_QUALITY: {
+            switch (iv) {
+                case RCMDVAL_SHADOWS_LOW:
+                    shadowW = 512;
+                    shadowH = 512;
+                    break;
+                case RCMDVAL_SHADOWS_MEDIUM:
+                    shadowW = 1024;
+                    shadowH = 1024;
+                    break;
+                case RCMDVAL_SHADOWS_HIGH:
+                    shadowW = 2048;
+                    shadowH = 2048;
+                    break;
+            }
+            glDeleteTextures(1,&depthMaps2DArray);
+            glDeleteTextures(1,&depthCubeArray);
+            GenShadowMaps();
+            break;
+        }
+        case RCMD_BLOOM: {
+            postProcessingShader->SetBool("bloom", iv);
+            break;
+        }
+        case RCMD_GOD_RAYS: {
+            postProcessingShader->SetBool("godRays", iv);
+            break;
+        }
+        case RCMD_POINT_CULL_DIST: {
+            pointCull = fv;
+            break;
+        }
+        case RCMD_SPOT_CULL_DIST: {
+            spotCull = fv;
+            break;
+        }
+        case RCMD_DIR_DISTANCE: {
+            dirDistance = fv;
+            break;
+        }
+    }
 }
 
 void Renderer::ComputeFrustum() {
@@ -170,23 +227,21 @@ bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<
     float radius = obj->GetCullRadius();
     switch(light->type) {
         case LIGHT_POINT: {
-            float maxDist = 5.0f;
             float dist2 = glm::length2(objPos - light->data1);
-            float r = maxDist + radius + 2.0f;
+            float r = pointCull + radius + 2.0f;
             return dist2 < r * r;
         }
         case LIGHT_SPOT: {
             vec3 toObj = objPos - light->data1;
             float dist = glm::length(toObj);
 
-            float maxDist = 20.0f;
-            if(dist > maxDist + radius) return false;
+            if(dist > spotCull + radius) return false;
 
             vec3 dir = normalize(light->data2);
             float angle = dot(normalize(toObj), dir);
 
-            float cutoff = light->data4;
-            return angle > cutoff - 0.1f;
+            float cutoffCos = cos(light->data4);
+            return angle > cutoffCos;
         }
         default : break;
     }
@@ -210,7 +265,7 @@ void Renderer::DepthPass() {
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
                 vec3 center = vec3(0.0f);
-                vec3 pos = center - dir * 30.0f;
+                vec3 pos = center - dir * dirDistance;
 
                 projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
                 view = lookAt(pos, center, vec3(0, 1, 0));
@@ -230,8 +285,10 @@ void Renderer::DepthPass() {
                 break;
             }
             case LIGHT_SPOT: {
-                projection = perspective(light->data4, 1.f, 0.1f, 20.f);
-                view = lookAt(light->data1, light->data1 + light->data2, vec3(0,1,0));
+                vec3 dir = normalize(light->data2);
+                vec3 up = abs(dot(dir, vec3(0,1,0))) > 0.999f ? vec3(0,0,1) : vec3(0,1,0);
+                projection = perspective(light->data4, 1.f, 0.1f, 10.f);
+                view = lookAt(light->data1,light->data1 + dir,up);
                 lightSpaceMatrices[i] = projection * view;
 
                 depthShaderNormal->Use();
@@ -254,7 +311,7 @@ void Renderer::DepthPass() {
         shared_ptr<Light> light = lightsPosPoint[i].first;
         mat4 projection, view;
         vec3 pos = light->data1;
-        projection = perspective(radians(90.f), 1.f, 0.1f, 20.f);
+        projection = perspective(radians(90.f), 1.f, 0.1f, 10.f);
         depthShaderLayered->Use();
         glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
         mat4 shadowMatrices[6];
@@ -272,14 +329,14 @@ void Renderer::DepthPass() {
             PROFILER_ADD_OBJECT();
             obj->Draw(depthShaderLayered);
         }
-        farPlanes[i] = 20.0f;
+        farPlanes[i] = 10.0f;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,windowW, windowH);
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
-    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
     lightsPosPoint.clear();
@@ -287,6 +344,7 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     drawVectorUI.clear();
     potentialCasters.clear();
     updatedShaders.clear();
+    sunExists = false;
 
     frameVP = scene->sceneCam->GetVP(1);
     frameVO = scene->sceneCam->GetVP(0);
@@ -358,6 +416,7 @@ void Renderer::PostProcessingPass() {
     postProcessingShader->SetFloat("exposure", 0.6);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
+    postProcessingShader->SetBool("sunExists", sunExists);
     postProcessingShader->SetInt("depthBuffer", 1);
     postProcessingShader->SetMat4("invProjection", inverse(frameP));
     postProcessingShader->SetMat4("invView", inverse(frameV));
@@ -414,11 +473,11 @@ bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
     const float radius = node->GetCullRadius();
     if (radius < CULL_RADIUS_ALWAYS_TRUE)
         return true;
-    const glm::vec3 pos = node->GetTransform().GetGlobal()[3];
+    const vec3 pos = node->GetTransform().GetGlobal()[3];
 
     for (int i = 0; i < 6; i++) {
-        const glm::vec4& p = frustumPlanes[i];
-        if (glm::dot(glm::vec3(p), pos) + p.w > -radius)
+        const vec4& p = frustumPlanes[i];
+        if (dot(vec3(p), pos) + p.w > -radius)
             return false;
     }
     return true;
@@ -478,6 +537,7 @@ void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
         case LIGHT_DIRECTIONAL: {
             sunDir = light->data1;
             lightsPos.push_back({light,0});
+            sunExists = true;
             break;
         }
         case LIGHT_POINT: {

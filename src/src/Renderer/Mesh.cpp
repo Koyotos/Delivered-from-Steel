@@ -36,7 +36,7 @@ void Mesh::Draw(Shader& shader) {
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
         shader.SetInt((name), slot);
     }
-    PROFILER_ADD_DRAW_CALL(1);
+    PROFILER_ADD_DRAW_CALL(vertices.size()/3);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
