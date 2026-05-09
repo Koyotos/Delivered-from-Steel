@@ -12,6 +12,13 @@ void Model::Draw(Shader& sh) {
     }
 }
 
+void Model::DrawInstanced(Shader& shader, vector<mat4>& matrices) {
+    shader.Use();
+    for(auto& k : meshes) {
+        k->DrawInstanced(shader, matrices);
+    }
+}
+
 void Model::ProcessNode(aiNode *node, const aiScene *scene) {
     for(GLuint i = 0; i < node->mNumMeshes; i++) {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]]; 
