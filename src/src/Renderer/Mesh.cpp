@@ -57,6 +57,7 @@ void Mesh::DrawInstanced(Shader& shader, vector<mat4>& matrices) {
         shader.SetInt((name), slot);
     }
     
+    glBindVertexArray(VAO);
     glGenBuffers(1, &transformBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, transformBuffer);
     glBufferData(GL_ARRAY_BUFFER, matrices.size() * sizeof(glm::mat4), &matrices[0], GL_STATIC_DRAW);

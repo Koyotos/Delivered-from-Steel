@@ -162,8 +162,11 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, co
             break;
         }
         case RCMD_REMAKE_WINDOW: {
-            glfwDestroyWindow(window);
-            window = glfwCreateWindow(windowW, windowH, "Delivered From Steel", nullptr, nullptr);
+            glfwSetWindowSize(window, windowW, windowH);
+            glViewport(0, 0, windowW, windowH);
+            DestroyBuffers();
+            GenFramebuffers();
+            GenShadowMaps();
             break;
         }
         case RCMD_SHADOW_QUALITY: {
@@ -206,6 +209,10 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, co
             dirDistance = fv;
             break;
         }
+        case RCMD_LIGHT_CULL_RADIUS: {
+            lightCullRadius = fv;
+            break;
+        }
     }
 }
 
@@ -220,32 +227,6 @@ void Renderer::ComputeFrustum() {
     for(auto& p : frustumPlanes) {
         p*=1.0f/length(p);
     }
-}
-
-bool Renderer::AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light) {
-    vec3 objPos = obj->GetTransform().GetGlobal()[3];
-    float radius = obj->GetCullRadius();
-    switch(light->type) {
-        case LIGHT_POINT: {
-            float dist2 = glm::length2(objPos - light->data1);
-            float r = pointCull + radius + 2.0f;
-            return dist2 < r * r;
-        }
-        case LIGHT_SPOT: {
-            vec3 toObj = objPos - light->data1;
-            float dist = glm::length(toObj);
-
-            if(dist > spotCull + radius) return false;
-
-            vec3 dir = normalize(light->data2);
-            float angle = dot(normalize(toObj), dir);
-
-            float cutoffCos = cos(light->data4);
-            return angle > cutoffCos;
-        }
-        default : break;
-    }
-    return true;
 }
 
 void Renderer::DepthPass() {
@@ -298,7 +279,6 @@ void Renderer::DepthPass() {
                 glClear(GL_DEPTH_BUFFER_BIT);
 
                 for(auto& data : potentialCasters) {
-                    //if(!AffectsLight(obj, light)) continue;
                     PROFILER_ADD_OBJECT();
                     data.model->DrawInstanced(*depthShaderNormal, data.matrices);
                 }
@@ -325,7 +305,6 @@ void Renderer::DepthPass() {
         depthShaderLayered->SetInt("lightIndex", i);
         glClear(GL_DEPTH_BUFFER_BIT);
         for(auto& data : potentialCasters){
-            //if(!AffectsLight(obj, light)) continue;
             PROFILER_ADD_OBJECT();
             data.model->DrawInstanced(*depthShaderLayered, data.matrices);
         }
@@ -489,7 +468,10 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         shared_ptr<VisualNode> cast = static_pointer_cast<VisualNode>(node);
         PrepareDrawNode(cast, t);
         if(node->RenderType() == NRT_OBJECT3D) {
-            CreateRenderData(static_pointer_cast<Object3D>(node), potentialCasters);
+            float dist = distance(vec2(currentScene->sceneCam->GetPos()),vec2(cast->GetTransform().GetGlobal()[3]));
+            if(dist < lightCullRadius) {
+                CreateRenderData(static_pointer_cast<Object3D>(node), potentialCasters);
+            }
         }
         
     } else if(node->Type() == "Light") {
@@ -640,6 +622,18 @@ void Renderer::EndFrame() {
     glfwSwapBuffers(window);
 }
 
+void Renderer::DestroyBuffers() {
+    glDeleteBuffers(1,&mainColorBuffer);
+    glDeleteBuffers(1,&depthColorBuffer);
+    glDeleteBuffers(1,&brightColorBuffer);
+    glDeleteBuffers(2,blurColorBuffers);
+    glDeleteFramebuffers(1,&mainFBO);
+    glDeleteFramebuffers(1,&depthFBO);
+    glDeleteFramebuffers(2,blurFBOs);
+    glDeleteTextures(1,&depthMaps2DArray);
+    glDeleteTextures(1,&depthCubeArray);
+}
+
 Renderer::Renderer(uint16_t windowW , uint16_t windowH) {
     this->windowW = windowW;
     this->windowH = windowH;
@@ -650,13 +644,5 @@ Renderer::~Renderer() {
     glDeleteBuffers(1,&screenQuadVBO);
     glDeleteVertexArrays(1,&screenQuadVAO);
     glDeleteBuffers(1,&screenQuadEBO);
-    glDeleteBuffers(1,&mainColorBuffer);
-    glDeleteBuffers(1,&depthColorBuffer);
-    glDeleteBuffers(1,&brightColorBuffer);
-    glDeleteBuffers(2,blurColorBuffers);
-    glDeleteFramebuffers(1,&mainFBO);
-    glDeleteFramebuffers(1,&depthFBO);
-    glDeleteFramebuffers(2,blurFBOs);
-    glDeleteTextures(1,&depthMaps2DArray);
-    glDeleteTextures(1,&depthCubeArray);
+    DestroyBuffers();
 }

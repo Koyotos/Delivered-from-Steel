@@ -56,7 +56,8 @@ enum RendererCommand {
     RCMD_GOD_RAYS = 5,
     RCMD_POINT_CULL_DIST = 6,
     RCMD_SPOT_CULL_DIST = 7,
-    RCMD_DIR_DISTANCE = 8
+    RCMD_DIR_DISTANCE = 8,
+    RCMD_LIGHT_CULL_RADIUS = 9
 };
 
 struct RenderData { 
@@ -88,6 +89,7 @@ class Renderer {
     mat4 frameV;
     mat4 frameP;
     vector<Shader*> updatedShaders;
+    float lightCullRadius = 15.0f;
  
     // Depth Pass
     int16_t shadowW = SHADOW_WIDTH;
@@ -153,7 +155,6 @@ class Renderer {
     inline void ComputeFrustum();
     inline bool Cull(const shared_ptr<VisualNode>&);
     inline void ResolveZ();
-    inline bool AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light);
 
     inline void PrepareLights();
     inline void PrepareShaders();
@@ -165,6 +166,8 @@ class Renderer {
     // Draws
     inline void Draw();
     inline void DrawDebug();
+
+    inline void DestroyBuffers();
 
     public:
     void Reconfigure(const RendererCommand&, const int16_t& iv = 0, const float& fv = 0.0);
