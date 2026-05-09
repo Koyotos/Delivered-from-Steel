@@ -16,12 +16,16 @@ class Mesh {
     vector<Texture> textures;
 
     GLuint VAO, VBO, EBO;
+    GLuint transformBuffer;
+
+    const size_t vec4size = sizeof(vec4);
 
     void SetupMesh(const bool&);
 
     public:
 
     void Draw(Shader&);
+    void DrawInstanced(Shader&, vector<mat4>&);
 
     Mesh(vector<Vertex>, vector<GLuint>, vector<Texture>, const bool&);
     ~Mesh();

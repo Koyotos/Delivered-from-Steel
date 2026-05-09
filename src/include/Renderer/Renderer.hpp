@@ -56,7 +56,14 @@ enum RendererCommand {
     RCMD_GOD_RAYS = 5,
     RCMD_POINT_CULL_DIST = 6,
     RCMD_SPOT_CULL_DIST = 7,
-    RCMD_DIR_DISTANCE = 8
+    RCMD_DIR_DISTANCE = 8,
+    RCMD_LIGHT_CULL_RADIUS = 9
+};
+
+struct RenderData { 
+    shared_ptr<Model> model;
+    shared_ptr<Shader> shader;
+    vector<mat4> matrices;
 };
 
 class Renderer {
@@ -82,6 +89,7 @@ class Renderer {
     mat4 frameV;
     mat4 frameP;
     vector<Shader*> updatedShaders;
+    float lightCullRadius = 15.0f;
  
     // Depth Pass
     int16_t shadowW = SHADOW_WIDTH;
@@ -92,7 +100,7 @@ class Renderer {
     GLuint depthCubeArray;
     shared_ptr<Shader> depthShaderLayered;
     shared_ptr<Shader> depthShaderNormal;
-    vector<shared_ptr<VisualNode>> potentialCasters; 
+    vector<RenderData> potentialCasters; 
     float pointCull = 40.0f;
     float spotCull = 20.0f;
     float dirDistance = 30.0f;
@@ -123,7 +131,7 @@ class Renderer {
 
     // Drawing
     shared_ptr<Scene> currentScene;
-    vector<shared_ptr<VisualNode>> drawVector;
+    vector<RenderData> drawVector;
     vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
     vector<pair<shared_ptr<Light>,float>> lightsPosPoint;
@@ -138,6 +146,7 @@ class Renderer {
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&);
     inline void PrepareDrawLight(shared_ptr<Light>);
+    inline void CreateRenderData(shared_ptr<Object3D>, vector<RenderData>&);
    
     inline void DepthPass();
     inline void PostProcessingPass();
@@ -146,17 +155,19 @@ class Renderer {
     inline void ComputeFrustum();
     inline bool Cull(const shared_ptr<VisualNode>&);
     inline void ResolveZ();
-    inline bool AffectsLight(const shared_ptr<VisualNode>& obj, const shared_ptr<Light>& light);
 
     inline void PrepareLights();
     inline void PrepareShaders();
-    inline void ConfigureShader(shared_ptr<VisualNode>);
+    inline void ConfigureShader2D(shared_ptr<VisualNode>);
+    inline void ConfigureShader(shared_ptr<Shader> shader, const NodeRenderType& type, const bool info2D);
     inline void SetLight(shared_ptr<Light>, shared_ptr<Shader>,const int8_t&);
     inline void BindShadowTextures();
 
     // Draws
     inline void Draw();
     inline void DrawDebug();
+
+    inline void DestroyBuffers();
 
     public:
     void Reconfigure(const RendererCommand&, const int16_t& iv = 0, const float& fv = 0.0);
