@@ -14,6 +14,9 @@ uniform vec3 lightDir;
 uniform vec3 lightColor;
 uniform mat4 sunMatrix;
 
+uniform bool godRays;
+uniform bool sunExists;
+
 vec3 reconstructWorldPos(vec2 uv, float depth) {
     float z = depth * 2.0 - 1.0;
 
@@ -61,6 +64,10 @@ vec3 computeVolumetric(vec2 uv) {
 }
 
 void main() {
+    if(!godRays || !sunExists) {
+        FragColor = vec4(texture(hdrBuffer, TexCoords).rgb, 1.0);
+        return;
+    }
     vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
 
     vec3 volumetric = computeVolumetric(TexCoords);

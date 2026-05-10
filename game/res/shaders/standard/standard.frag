@@ -192,14 +192,16 @@ vec3 SpotLight(int i, Light light, vec3 normal, vec3 viewDirection)
     float dist = length(light.data1 - FragPos);
     float attenuation = 1.0 / (light.data3.x + light.data3.y * dist + light.data3.z * dist * dist);
 
-    // Spotlight cutoff
-    float innerCutoff = light.data4;
+    float innerAngle = light.data4;
+    float outerAngle = innerAngle + radians(5.0);
 
-    // Derive outer cutoff = inner + 5 degrees
-    float outerCutoff = cos(acos(innerCutoff) + radians(5.0));
+    float innerCutoff = cos(innerAngle);
+    float outerCutoff = cos(outerAngle);
 
     float theta = dot(lightDir, normalize(-light.data2));
+
     float epsilon = innerCutoff - outerCutoff;
+
     float intensity = clamp((theta - outerCutoff) / epsilon, 0.0, 1.0);
 
     // Combine lighting

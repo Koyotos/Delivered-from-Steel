@@ -26,7 +26,8 @@ class Model {
     
     public:
     Model(string);
-    void Draw(Shader &shader);	
+    void Draw(Shader& shader);	
+    void DrawInstanced(Shader&, vector<mat4>&);
     const string& GetDir() const noexcept;
 };
 

@@ -7,7 +7,14 @@ in vec2 TexCoords;
 uniform sampler2D image;
 uniform bool horizontal;
 
+uniform bool bloom;
+
 void main() {
+    if(!bloom) {
+        FragColor = vec4(texture(image, TexCoords).rgb, 1.0);
+        return;
+    }
+
     vec2 tex_offset = 1.0 / textureSize(image, 0);
 
     float weights[5] = float[](
