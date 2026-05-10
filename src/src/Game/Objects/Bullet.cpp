@@ -5,7 +5,7 @@ Bullet::Bullet(const std::unordered_map<std::string, std::any>& data)
     : Object2D(data)
 {
 	objectType = ObjectType::Enemy;
-	speed = 100.0f;
+	speed = 2.0f;
 	damage = 40.0f;
 	direction = vec2(0.0f, 0.0f);
 	lifeTime = 5.0f;

@@ -34,8 +34,9 @@ bool Player::CheckGrounded() {
 	float offsetY = -0.41f;
 
 	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitEnemy = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Enemy);
 
-	return hitRight.has_value();
+	return hitRight.has_value() || hitEnemy.has_value();
 }
 
 bool Player::CheckCeiling() {
