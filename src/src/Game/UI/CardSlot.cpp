@@ -19,7 +19,7 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 	Transform t = this->GetTransform();
 	card->SetTransform(t);
 	card->SetAlpha(0.0f);
-	card->FadeIn(0.25f, EaseType::OutQuad);
+	card->FadeIn(0.5f, EaseType::InQuad);
 }
 
 

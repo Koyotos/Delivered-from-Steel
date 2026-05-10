@@ -185,7 +185,7 @@ bool CardManager::Input(InputEvent& event)
 {
 	if(!event.handled)
 	{
-		if (event.type == InputType::GAMEPAD_BUTTON)
+		if (event.type == InputType::GAMEPAD_BUTTON && event.action == GLFW_PRESS)
 		{
 			switch (event.key)
 			{
@@ -194,7 +194,7 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); event.handled = true; break;
 			}
 		}
-		if (event.type == InputType::KEYBOARD)
+		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS)
 		{
 			switch (event.key)
 			{
