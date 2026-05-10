@@ -5,7 +5,9 @@
 #include "include/Game/UI/CardUI.hpp"
 #include "include/Game/CardType.hpp"
 
-
+/*
+ * @brief clas that represents card logic 
+ */
 class Card :
     public Object2D
 {
@@ -22,23 +24,38 @@ public:
     Card(const unordered_map<string, std::any>&);
     Card(CardType type);
 
+    /*
+     * @brief function that returns card's UI representation
+     * @return shared_ptr<CardUI> : CardUI object representing UI display of card
+     */ 
     std::shared_ptr<CardUI> GetDisplay();
+
+    /*
+	 * @brief Set card's UI representation
+	 * @param shared_ptr<CardUI> : CardUI object representing UI display of card
+	 */ 
     void SetDisplay(std::shared_ptr<CardUI> value);
 
+    /* 
+     * @brief returns the type of card (eg. Dash, bounce etc)
+     * @param CardType enum
+     */ 
 	CardType GetCardType();
-   
 
-    void select();
-
-    void reject();
-
-    bool IsNextToWall();
-
-    bool IsNextToGround();
 
     void Deactivate();
 
+    /*
+     * @brief function for checking if card can be used.
+     * for example, is the player next to a wall
+     * @return bool
+     */ 
     bool CheckUse();
+
+    /*
+     * @brief function for executing cards logic.
+     * CALL FUNCTIONS LIKE DASH, BOUNCE ETC IN THIS FUNCTION
+     */
     void Use();
 };
 
