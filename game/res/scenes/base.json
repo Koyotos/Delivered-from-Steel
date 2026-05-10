@@ -48,8 +48,9 @@
     "colliderType": true,
     "height": 0.2,
     "radius": 0.1,
-    "cull" : 0.0,
-    "zIndex" : 0
+    "cull": 0.0,
+    "zIndex": 0, 
+    "ResolveCollision":  true
   },
   "4": {
     "parent": 1,
@@ -76,7 +77,8 @@
     "physics": false,
     "draw": false,
     "ignoreParent": true,
-    "cull" : 0.0,
-    "zIndex" : 0
+    "cull": 0.0,
+    "zIndex": 0,
+    "ResolveCollision":  true
   }
 }

@@ -400,6 +400,8 @@ void AudioManager::StopAll() {
 	for (ALuint source : audioSources) {
 		alSourceStop(source);
 	}
+	StopAllBGM();
+	isPlaylistActive = false;
 }
 
 void AudioManager::PlayPlaylist(const std::vector<std::string>& trackNames, float volume) {

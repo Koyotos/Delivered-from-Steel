@@ -5,32 +5,24 @@ const string& Sprite::GetDir() const noexcept {
     return directory;
 }
 
-void Sprite::SetActiveTexture(const GLuint& index) {
-    if (index < textures.size())
-        active = index;
-}
 
-void Sprite::SetActiveTexture(const string& name) {
-    for(uint8_t i = 0; i < textures.size(); i++) {
-        if(textures[i].type == name) {
-            active = i;
-            return;
-        }
+Texture& Sprite::GetTexture(GLuint index) {
+    if (index < textures.size()) {
+        return textures[index];
     }
-}
-
-Texture& Sprite::GetActiveTexture() {
-    return textures[active];
+    return textures[0];
 }
 
 vec2 Sprite::GetSize() {
     return size;
 }
 
-void Sprite::Draw(Shader& shader) {
+void Sprite::Draw(Shader& shader, GLuint textureToDraw) {
     shader.Use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textures[active].id);
+    if (textureToDraw < textures.size()) {
+        glBindTexture(GL_TEXTURE_2D, textures[textureToDraw].id);
+    }
     glBindVertexArray(VAO);
     PROFILER_ADD_DRAW_CALL(2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -99,7 +91,6 @@ bool Sprite::HasAnimation(const string& name) const {
     
 Sprite::Sprite(const string& path) {
     directory = path;
-	active = 0;
     LoadTextures();
     SetupSprite();
 }

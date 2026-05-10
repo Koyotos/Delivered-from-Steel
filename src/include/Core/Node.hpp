@@ -156,6 +156,11 @@ class Node {
     */
     void Disable() noexcept;
 
+    /**
+    @brief Enables all previously disabled behaviours of the node.
+    @return void
+    */
+    void Enable() noexcept;
 
 	/*
     * @brief Initializes the node and all its children.

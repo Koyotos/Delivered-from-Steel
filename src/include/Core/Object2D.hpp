@@ -20,6 +20,9 @@ class Object2D : public PhysicsNode {
     bool animLoop;
     float animSpeed;
 
+    protected:
+    GLuint currentTextureID = 0;
+
     public:
 
     string Type() override;
@@ -77,6 +80,7 @@ class Object2D : public PhysicsNode {
     @return Object2D
     */
     Object2D(const unordered_map<string, std::any>&);
+    virtual ~Object2D() = default;
 };
 
 #endif

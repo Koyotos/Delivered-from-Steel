@@ -8,22 +8,33 @@
 enum class EnemyState {
 	Patrol,
 	Chase,
-	Attack,
-	Search,
-	Dead
+	Attack
 };
 
 class Enemy :
-    public Object2D
+	public Object2D
 {
-private:
-	float hpMax = 100.0f;
+protected:
+	float hpMax;
 	float hp = hpMax;
 
-	float damage = 100.0f;
-	float atakDystanse = 0.5f;
+	float speed;
+
+	float raycastOffsetX;
+	float raycastGroundCheckOffsetX;
+	float raycastOffsetY;
+
+	float groundCheckDistance;
+	float wallCheckDistance;
+
+	float visiblityAngle;
+	float visiblityDistance;
+
+	float damage;
+	float atakDystanse;
 
 	bool seePlayer = false;
+	int direction = 1;
 	EnemyState state = EnemyState::Patrol;
 
 	shared_ptr<Player> player;
@@ -41,13 +52,13 @@ public:
 
 	virtual void ChangeState(shared_ptr<Player> player);
 
-	virtual void Patrol(float) {};
+	virtual void Patrol(float);
 
 	virtual void Chase(float) {};
 
 	virtual void AttackState(float) {};
 
-	void DetectPlayer();
+	virtual void DetectPlayer();
 
 	void Init(shared_ptr<Scene>) override;
 };

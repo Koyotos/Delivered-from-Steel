@@ -3,6 +3,7 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/Core/Scene.hpp"
 #include "include/Game/Objects/Player.hpp"
+#include "include/Game/Objects/Enemy.hpp"
 
 MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Platform(data) {
 	state = MovingPlatformState::StopStart;
@@ -69,17 +70,6 @@ void MovingPlatform::Update(float deltaTime) {
     velocityDelta = newPosition - lastPosition;
     velocity = velocityDelta / deltaTime;
 
-    if (playerHangingOnPlatform) {
-        if (player.lock()->IsHanging()) {
-            Transform playerTrans = player.lock()->GetTransform();
-            playerTrans.SetTranslation(GetTransform().GetTranslation() + relativePositionToPlatform);
-			player.lock()->SetTransform(playerTrans);
-        }
-        else {
-            playerHangingOnPlatform = false;
-        }
-    }
-
     SetVelocity(vec2(velocity.x, 0));
 
     lastPosition = newPosition;
@@ -105,16 +95,19 @@ void MovingPlatform::OnCollisionStay(std::shared_ptr<Collider> other) {
                 trans.SetTranslation(pos);
                 playerNode->SetTransform(trans);
             }
-            if (playerNode->IsHanging()) {
-                if (!playerHangingOnPlatform) {
-                    playerHangingOnPlatform = true;
-                    relativePositionToPlatform = playerNode->GetTransform().GetTranslation() - GetTransform().GetTranslation();
-                    relativePositionToPlatform.x = sign(relativePositionToPlatform.x) * (static_pointer_cast<BoxCollider>(GetCollider())->size.x / 2 + capsule->radius + 0.001f);
-                }
-            }
-            else {
-                playerHangingOnPlatform = false;
-            }
+        }
+    }
+
+    if (owner->GetObjectType() == ObjectType::Enemy) {
+        std::shared_ptr<Enemy> enemyNode = std::static_pointer_cast<Enemy>(owner);
+        if (enemyNode) {
+            Transform trans = enemyNode->GetTransform();
+
+            vec3 pos = trans.GetTranslation();
+            pos += velocityDelta;
+
+            trans.SetTranslation(pos);
+            enemyNode->SetTransform(trans);
         }
     }
 }
@@ -131,7 +124,26 @@ void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
 			float platformTop = static_pointer_cast<BoxCollider>(GetCollider())->getMax().y;
 
             if (playerBottom >= platformTop) {
-                playerNode->addPlatformVelocity(velocity);
+                Transform trans = playerNode->GetTransform();
+
+                vec3 pos = trans.GetTranslation();
+
+                pos += vec3(0.0f, velocityDelta.y * 1.0f,0.0f);
+
+                trans.SetTranslation(pos);
+                playerNode->SetTransform(trans);
+            }
+
+            if (playerBottom + 0.05f >= platformTop) {
+                Transform trans = playerNode->GetTransform();
+
+                vec3 pos = trans.GetTranslation();
+
+                pos += vec3(velocityDelta.x * 1.0f, velocityDelta.y * 1.0f, 0.0f);
+
+                trans.SetTranslation(pos);
+                playerNode->SetTransform(trans);
+                playerNode->addPlatformVelocity(velocity * 1.0f);
             }
         }
     }

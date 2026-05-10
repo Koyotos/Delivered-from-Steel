@@ -63,7 +63,7 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 
     glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
 
-    if (!this->isStatic) {
+    if (!this->isStatic && isResolveCollision && other.isResolveCollision) {
         Transform t = this->GetTransform();
         t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
 
@@ -92,7 +92,7 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 
     glm::vec2 impulse = j * info->normal;
 
-    if (!this->isStatic) {
+    if (!this->isStatic && isResolveCollision && other.isResolveCollision) {
         this->applyForce(-impulse);
     }
     //if (!other.isStatic) {
@@ -112,6 +112,7 @@ PhysicsNode::PhysicsNode() {
 
 PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) : VisualNode(data) {
     isStatic = fromMap(bool, "static", data);
+    isResolveCollision = fromMap(bool, "ResolveCollision", data);
     velocity = glm::vec2(0.0f, 0.0f);
 
     bool addCollider = fromMap(bool, "addCollider", data);

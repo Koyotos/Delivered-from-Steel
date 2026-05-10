@@ -4,27 +4,91 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+	static float PlayerMoveTowards(float current, float target, float maxDelta) {
+		if (std::abs(target - current) <= maxDelta) {
+			return target;
+		}
+		return current + std::copysign(maxDelta, target - current);
+	}
+
+	static constexpr PlayerRaycastConfig raycastConfig{
+		0.19f, {1.0f, 0.0f}, -0.095f, -0.41f,
+		0.1f,  {1.0f, 0.0f}, -0.05f,  0.01f,
+		0.38f, {0.0f, -1.0f}, 0.11f, -0.01f,
+		0.05f, 0.1f, -0.1f, 0.1f
+	};
+}
+
+template<typename T>
+T GetSafe(const std::unordered_map<std::string, std::any>& data,
+	const std::string& key,
+	const T& defaultValue)
+{
+	auto it = data.find(key);
+	if (it != data.end()) {
+		try {
+			return std::any_cast<T>(it->second);
+		}
+		catch (const std::bad_any_cast&) {
+			return defaultValue;
+		}
+	}
+	return defaultValue;
+}
+
 Player::Player() : Object2D() {
 	SetProcess(true);
 	SetInput(true);
 	SetDraw(true);
 }
 
-Player::Player(const unordered_map<string, std::any>& data) : Object2D(data) {
+Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D(data) {
 	objectType = ObjectType::Player;
-	Transform t = Transform(fromMap(vector<std::any>, "transform", data));
+	Transform t = Transform(fromMap(std::vector<std::any>, "transform", data));
 	respawnPoint = t.GetTranslation();
+
+	stats.maxWalkSpeed = GetSafe<float>(data, "maxWalkSpeed", 2.5f);
+	stats.groundAcceleration = GetSafe<float>(data, "groundAcceleration", 10.0f);
+	stats.groundDeceleration = GetSafe<float>(data, "groundDeceleration", 10.0f);
+	stats.airAcceleration = GetSafe<float>(data, "airAcceleration", 8.0f);
+	stats.airDeceleration = GetSafe<float>(data, "airDeceleration", 8.0f);
+	stats.jumpForce = GetSafe<float>(data, "jumpForce", 4.5f);
+	stats.jumpCutMultiplier = GetSafe<float>(data, "jumpCutMultiplier", 0.5f);
+	stats.fallGravityMultiplier = GetSafe<float>(data, "fallGravityMultiplier", 2.0f);
+	stats.enableWallSlide = GetSafe<bool>(data, "enableWallSlide", true);
+	stats.wallSlideSpeed = GetSafe<float>(data, "wallSlideSpeed", 1.5f);
+	stats.enableCoyoteTime = GetSafe<bool>(data, "enableCoyoteTime", true);
+	stats.coyoteTime = GetSafe<float>(data, "coyoteTime", 0.15f);
+	stats.enableJumpBuffer = GetSafe<bool>(data, "enableJumpBuffer", true);
+	stats.jumpBufferTime = GetSafe<float>(data, "jumpBufferTime", 0.15f);
+
+	PlayerCameraConfig camConfig;
+	camConfig.deadZone.x = GetSafe<float>(data, "deadZoneX", 0.8f);
+	camConfig.deadZone.y = GetSafe<float>(data, "deadZoneY", 0.8f);
+	camConfig.lookAheadDistance = GetSafe<float>(data, "lookAheadDistance", 1.5f);
+	camConfig.lookAheadSpeed = GetSafe<float>(data, "lookAheadSpeed", 4.0f);
+	camConfig.lookAheadReturnSpeed = GetSafe<float>(data, "lookAheadReturnSpeed", 10.0f);
+	camConfig.defaultSmoothTime = GetSafe<float>(data, "defaultSmoothTime", 0.15f);
+	camConfig.rightStickSmoothTime = GetSafe<float>(data, "rightStickSmoothTime", 0.4f);
+	camConfig.fastFallSmoothTime = GetSafe<float>(data, "fastFallSmoothTime", 0.1f);
+	camConfig.airSmoothTime = GetSafe<float>(data, "airSmoothTime", 0.2f);
+	camConfig.smoothTimeTransitionSpeed = GetSafe<float>(data, "smoothTimeTransitionSpeed", 2.0f);
+	camConfig.airThresholdYSmooth = GetSafe<float>(data, "airThresholdYSmooth", -10.0f);
+	camConfig.fallCameraShakeThreshold = GetSafe<float>(data, "fallCameraShakeThreshold", -15.0f);
+	camConfig.verticalOffset = GetSafe<float>(data, "verticalOffset", 0.2f);
+	camConfig.rightStickDistance = GetSafe<float>(data, "rightStickDistance", 5.0f);
+	camConfig.maxCameraSpeed = GetSafe<float>(data, "maxCameraSpeed", 10000.0f);
+
+	cameraController.SetConfig(camConfig);
 }
 
-void Player::SetCamera(shared_ptr<Camera> cam) {
-	camera = cam;
+void Player::SetCamera(std::shared_ptr<Camera> cam) {
+	cameraController.SetCamera(cam);
 }
 
-float Player::MoveTowards(float current, float target, float maxDelta) {
-	if (std::abs(target - current) <= maxDelta) {
-		return target;
-	}
-	return current + std::copysign(maxDelta, target - current);
+void Player::TriggerCameraShake(float duration, float intensity) {
+	cameraController.TriggerCameraShake(duration, intensity);
 }
 
 bool Player::CheckGrounded() {
@@ -33,114 +97,71 @@ bool Player::CheckGrounded() {
 	float offsetX = -0.095f;
 	float offsetY = -0.41f;
 
-	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitRight = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, ObjectType::Wall);
+	auto hitEnemy = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, ObjectType::Enemy);
 
-	return hitRight.has_value();
+	return hitRight.has_value() || hitEnemy.has_value();
 }
 
 bool Player::CheckCeiling() {
-	float rayLength = 0.1f;
-	glm::vec2 rayDir(1.0f, 0.0f);
-	float offsetX = -0.05f;
-	float offsetY = 0.01f;
-
-	auto hitCenter = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
-
+	auto hitCenter = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Wall);
 	return hitCenter.has_value();
 }
 
 bool Player::CheckLeftWalled() {
-	float rayLength = 0.38f;
-	glm::vec2 rayDir(0.0f, -1.0f);
-	float offsetX = 0.11f;
-	float offsetY = -0.01f;
-	auto hitLeft = Raycast(glm::vec2(-offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
 	return hitLeft.has_value();
 }
 
 bool Player::CheckRightWalled() {
-	float rayLength = 0.38f;
-	glm::vec2 rayDir(0.0f, -1.0f);
-	float offsetX = 0.11f;
-	float offsetY = -0.01f;
-	auto hitRight = Raycast(glm::vec2(offsetX, offsetY), rayDir, rayLength, ObjectType::Wall);
+	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
 	return hitRight.has_value();
 }
 
 bool Player::CheckLedge() {
 	if (ledgeDropCooldown > 0.0f) return false;
-
-	float rayLength = 0.05f;
 	glm::vec2 rayDir(facingDirection, 0.0f);
-	float offsetX = 0.1f;
-
-	auto hitLower = Raycast(glm::vec2((offsetX - 0.02f) * facingDirection, -0.1f), rayDir, rayLength, ObjectType::Wall);
-	auto hitUpper = Raycast(glm::vec2((offsetX - 0.02f) * facingDirection, 0.1f), rayDir, rayLength, ObjectType::Wall);
-
+	auto hitLower = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeLowerY), rayDir, raycastConfig.ledgeRayLength, ObjectType::Wall);
+	auto hitUpper = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeUpperY), rayDir, raycastConfig.ledgeRayLength, ObjectType::Wall);
 	return hitLower.has_value() && !hitUpper.has_value();
 }
 
-void Player::Process() {
-	Object2D::Process();
-	float deltaTime = Globals::GetGlobals().GetDeltaTime();
-	if (isDead) {
-		moveInput = 0.0f;
-		respawnTimer -= deltaTime;
-		if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
-		SetVelocity(glm::vec2(0.0f));
-		if (respawnTimer <= 0.0f) {
-			Transform t = GetTransform();
-			t.SetTranslation(respawnPoint);
-			SetTransform(t);
-			hp = hpMax;
-			glm::vec2 currentVelocity = GetVelocity();
-			isDead = false;
-		}
-		return;
-	}
-	if (!canTakeDamage) {
-		damageTimer -= deltaTime;
-		if (damageTimer <= 0.0f) {
-			canTakeDamage = true;
-		}
-	}
-
+void Player::GatherInput(float deltaTime) {
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
-	if (currentJumpRaw && !lastJumpInput) {
-		if (timeSinceLastRelease > 0.08f) {
-			jumpPressed = true;
+	if (currentJumpRaw && !inputState.lastJumpInput) {
+		if (inputState.timeSinceLastRelease > 0.08f) {
+			inputState.jumpPressed = true;
 		}
 	}
 
-	if (!currentJumpRaw && lastJumpInput) {
-		jumpReleased = true;
-		timeSinceLastRelease = 0.0f;
+	if (!currentJumpRaw && inputState.lastJumpInput) {
+		inputState.jumpReleased = true;
+		inputState.timeSinceLastRelease = 0.0f;
 	}
 	else {
-		timeSinceLastRelease += deltaTime;
+		inputState.timeSinceLastRelease += deltaTime;
 	}
 
-	jumpHeld = currentJumpRaw;
-	lastJumpInput = currentJumpRaw;
+	inputState.jumpHeld = currentJumpRaw;
+	inputState.lastJumpInput = currentJumpRaw;
+	inputState.moveInput = 0.0f;
 
-
-	moveInput = 0.0f;
 	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_D)) {
-		moveInput = 1.0f;
+		inputState.moveInput = 1.0f;
 	}
 	if (Globals::GetGlobals().GetKeyState(GLFW_KEY_A)) {
-		moveInput = -1.0f;
+		inputState.moveInput = -1.0f;
 	}
 
 	float leftX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_X);
 	if (std::abs(leftX) > 0.1f) {
 		float normalizedSpeed = std::clamp((std::abs(leftX) - 0.1f) / (0.9f - 0.1f), 0.0f, 1.0f);
-		moveInput = normalizedSpeed * std::copysign(1.0f, leftX);
+		inputState.moveInput = normalizedSpeed * std::copysign(1.0f, leftX);
 	}
 
-	if (!isHanging && std::abs(moveInput) > 0.01f) {
-		facingDirection = std::copysign(1.0f, moveInput);
+	if (!isHanging && std::abs(inputState.moveInput) > 0.01f) {
+		facingDirection = std::copysign(1.0f, inputState.moveInput);
 		Transform t = GetTransform();
 		glm::vec3 scale = t.GetScale();
 		scale.x = std::abs(scale.x) * facingDirection;
@@ -148,10 +169,33 @@ void Player::Process() {
 		SetTransform(t);
 	}
 
-	wantsToDrop = Globals::GetGlobals().GetKeyState(GLFW_KEY_S) || Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_Y) > 0.5f;
+	inputState.wantsToDrop = Globals::GetGlobals().GetKeyState(GLFW_KEY_S) || Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_Y) > 0.5f;
+	inputState.rightStick.x = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_X);
+	inputState.rightStick.y = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_Y);
 }
 
-void Player::Update(float deltaTime) {
+void Player::Process() {
+	Object2D::Process();
+	float deltaTime = Globals::GetGlobals().GetDeltaTime();
+
+	if (health.IsDead()) {
+		inputState.moveInput = 0.0f;
+		if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
+		SetVelocity(glm::vec2(0.0f));
+
+		if (health.CheckAndResetRespawn(deltaTime)) {
+			Transform t = GetTransform();
+			t.SetTranslation(respawnPoint);
+			SetTransform(t);
+		}
+		return;
+	}
+
+	health.Update(deltaTime);
+	GatherInput(deltaTime);
+}
+
+bool Player::HandleMovement(float deltaTime) {
 	if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
 
 	glm::vec2 currentVelocity = GetVelocity();
@@ -160,12 +204,13 @@ void Player::Update(float deltaTime) {
 	bool isWalledLeft = CheckLeftWalled();
 	bool isWalledRight = CheckRightWalled();
 	isWalled = isWalledRight || isWalledLeft;
+
 	if (isWalledRight && isWalledLeft) {
 		Shatter();
 	}
 
 	if (isGrounded) {
-		coyoteTimeCounter = coyoteTime;
+		coyoteTimeCounter = stats.coyoteTime;
 		if (CheckCeiling()) {
 			Shatter();
 		}
@@ -174,14 +219,14 @@ void Player::Update(float deltaTime) {
 		coyoteTimeCounter -= deltaTime;
 	}
 
-	if (jumpPressed) {
-		jumpBufferCounter = jumpBufferTime;
+	if (inputState.jumpPressed) {
+		jumpBufferCounter = stats.jumpBufferTime;
 	}
 	else {
 		jumpBufferCounter -= deltaTime;
 	}
 
-	bool wantsToJump = (enableJumpBuffer && jumpBufferCounter > 0.0f) || (!enableJumpBuffer && jumpPressed);
+	bool wantsToJump = (stats.enableJumpBuffer && jumpBufferCounter > 0.0f) || (!stats.enableJumpBuffer && inputState.jumpPressed);
 
 	if (!isGrounded && currentVelocity.y < 0.0f && !isHanging) {
 		if (CheckLedge()) {
@@ -200,17 +245,17 @@ void Player::Update(float deltaTime) {
 			Transform t = GetTransform();
 			t.SetTranslation(t.GetTranslation() + glm::vec3(0.0f, 0.1f, 0.0f));
 			SetTransform(t);
-			currentVelocity.y = jumpForce;
+			currentVelocity.y = stats.jumpForce;
 			currentVelocity.x = -facingDirection * 2.0f;
 			canCutJump = true;
-			jumpReleased = false;
+			inputState.jumpReleased = false;
 			facingDirection = -facingDirection;
 			ledgeDropCooldown = 0.3f;
-			jumpPressed = false;
+			inputState.jumpPressed = false;
 			jumpBufferCounter = 0.0f;
 			coyoteTimeCounter = 0.0f;
 		}
-		else if (wantsToDrop) {
+		else if (inputState.wantsToDrop) {
 			isHanging = false;
 			ledgeDropCooldown = 0.3f;
 		}
@@ -218,48 +263,48 @@ void Player::Update(float deltaTime) {
 		SetVelocity(currentVelocity);
 
 		if (isHanging) {
-			SetVelocity(vec2(0.0f, 0.0f));
-
+			SetVelocity(glm::vec2(0.0f, 0.0f));
 			Transform t = GetTransform();
 			glm::vec3 scale = t.GetScale();
 			scale.x = std::abs(scale.x) * facingDirectionHang;
 			t.SetScale(scale);
 			SetTransform(t);
-			UpdateCamera(deltaTime);
-			return;
+			cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
+			return true;
 		}
 	}
 
+	bool isSlidingDownWall = stats.enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
+	isWallSliding = isSlidingDownWall && inputState.moveInput != 0.0f;
 
-	bool isSlidingDownWall = enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
-	isWallSliding = isSlidingDownWall && moveInput != 0.0f;
-
-	bool canJump = (enableCoyoteTime && coyoteTimeCounter > 0.0f) || (!enableCoyoteTime && isGrounded);
+	bool canJump = (stats.enableCoyoteTime && coyoteTimeCounter > 0.0f) || (!stats.enableCoyoteTime && isGrounded);
 
 	if (wantsToJump && canJump) {
-		currentVelocity.y = jumpForce;
+		currentVelocity.y = stats.jumpForce;
 		canCutJump = true;
-		jumpReleased = false;
+		inputState.jumpReleased = false;
 		jumpBufferCounter = 0.0f;
 		coyoteTimeCounter = 0.0f;
 		isGrounded = false;
-		if (!jumpHeld) {
-			currentVelocity.y = jumpForce * jumpCutMultiplier;
+
+		if (!inputState.jumpHeld) {
+			currentVelocity.y = stats.jumpForce * stats.jumpCutMultiplier;
 		}
 	}
-	else if (jumpReleased && currentVelocity.y > 0 && canCutJump) {
-		currentVelocity.y *= jumpCutMultiplier;
+	else if (inputState.jumpReleased && currentVelocity.y > 0 && canCutJump) {
+		currentVelocity.y *= stats.jumpCutMultiplier;
 		coyoteTimeCounter = 0.0f;
 		canCutJump = false;
 	}
 
-	float targetSpeed = moveInput * maxWalkSpeed;
-	float acceleration = isGrounded ? (moveInput != 0.0f ? groundAcceleration : groundDeceleration) : (moveInput != 0.0f ? airAcceleration : airDeceleration);
+	float targetSpeed = inputState.moveInput * stats.maxWalkSpeed;
+	float acceleration = isGrounded ?
+		(inputState.moveInput != 0.0f ? stats.groundAcceleration : stats.groundDeceleration) : (inputState.moveInput != 0.0f ? stats.airAcceleration : stats.airDeceleration);
 
-	currentVelocity.x = MoveTowards(currentVelocity.x, targetSpeed, acceleration * deltaTime);
+	currentVelocity.x = PlayerMoveTowards(currentVelocity.x, targetSpeed, acceleration * deltaTime);
 
 	if (currentVelocity.y < 0) {
-		currentVelocity.y -= 10.0f * fallGravityMultiplier * deltaTime;
+		currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
 	}
 	else {
 		currentVelocity.y -= 10.0f * deltaTime;
@@ -269,12 +314,11 @@ void Player::Update(float deltaTime) {
 		if (GetCurrentAnimation() != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
 		}
-		currentVelocity.y = std::max(currentVelocity.y, -wallSlideSpeed);
+		currentVelocity.y = std::max(currentVelocity.y, -stats.wallSlideSpeed);
 	}
 	else {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
 	}
-
 
 	currentVelocity = currentVelocity + platformVelocity;
 	platformVelocity = glm::vec2(0, 0);
@@ -285,11 +329,18 @@ void Player::Update(float deltaTime) {
 	t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
 	this->SetTransform(t);
 
-	jumpPressed = false;
-	jumpReleased = false;
-	UpdateCamera(deltaTime);
+	inputState.jumpPressed = false;
+	inputState.jumpReleased = false;
 
+	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
+
+	return false;
+}
+
+void Player::HandleAnimations() {
+	glm::vec2 currentVelocity = GetVelocity();
 	bool isJumpPlaying = (GetCurrentAnimation() == "CourierJump" && IsPlaying());
+
 	if (!isGrounded) {
 		if (currentVelocity.y > 0.0f) {
 			if (GetCurrentAnimation() != "CourierJump" && GetCurrentAnimation() != "CourierAirUp") {
@@ -316,7 +367,7 @@ void Player::Update(float deltaTime) {
 	}
 	else if (!(GetCurrentAnimation() == "CourierFall" && IsPlaying())) {
 		bool isStopping = (GetCurrentAnimation() == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
-		if (moveInput != 0.0f || isStopping) {
+		if (inputState.moveInput != 0.0f || isStopping) {
 			if (std::abs(currentVelocity.x) > 0.01f) {
 				Play("CourierWalk", 0.1f, true);
 			}
@@ -327,140 +378,22 @@ void Player::Update(float deltaTime) {
 	}
 }
 
+void Player::Update(float deltaTime) {
+	if (HandleMovement(deltaTime)) return;
+	HandleAnimations();
+}
+
 bool Player::Input(InputEvent& event) {
-	if (!event.handled) {
-		//karty
-	}
 	return false;
 }
 
 void Player::takeDamage(float damage) {
-	if (!canTakeDamage || isDead) return;
-
-	hp -= damage;
-
-	canTakeDamage = false;
-	damageTimer = damageCooldown;
-
-	if (hp <= 0.0f) {
-		Shatter();
-	}
+	health.TakeDamage(damage);
 }
 
 void Player::Shatter() {
-	hp = 0.0f;
-	isDead = true;
-	respawnTimer = respawnDelay;
+	health.Shatter();
 	Globals::GetGlobals().Log("Shatter");
-	hp = hpMax;
-}
-
-
-float Player::SmoothDamp(float current, float target, float& currentVelocity, float smoothTime, float maxSpeed, float deltaTime) {
-	smoothTime = std::max(0.0001f, smoothTime);
-	float omega = 2.0f / smoothTime;
-	float x = omega * deltaTime;
-	float exp = 1.0f / (1.0f + x + 0.48f * x * x + 0.235f * x * x * x);
-	float change = current - target;
-	float originalTo = target;
-	float maxChange = maxSpeed * smoothTime;
-	change = std::clamp(change, -maxChange, maxChange);
-	target = current - change;
-	float temp = (currentVelocity + omega * change) * deltaTime;
-	currentVelocity = (currentVelocity - omega * temp) * exp;
-	float output = target + (change + temp) * exp;
-	if ((originalTo - current > 0.0f) == (output > originalTo)) {
-		output = originalTo;
-		currentVelocity = (output - originalTo) / deltaTime;
-	}
-	return output;
-}
-
-glm::vec2 Player::SmoothDamp(glm::vec2 current, glm::vec2 target, glm::vec2& currentVelocity, float smoothTime, float maxSpeed, float deltaTime) {
-	float vx = currentVelocity.x;
-	float vy = currentVelocity.y;
-	float rx = SmoothDamp(current.x, target.x, vx, smoothTime, maxSpeed, deltaTime);
-	float ry = SmoothDamp(current.y, target.y, vy, smoothTime, maxSpeed, deltaTime);
-	currentVelocity = glm::vec2(vx, vy);
-	return glm::vec2(rx, ry);
-}
-
-void Player::UpdateCamera(float deltaTime) {
-	if (!camera) return;
-
-	glm::vec3 playerPos3D = GetTransform().GetTranslation();
-	glm::vec2 playerPos = glm::vec2(playerPos3D.x, playerPos3D.y);
-	glm::vec2 playerVel = GetVelocity();
-
-	if (!isCameraInitialized) {
-		cameraTargetPos = playerPos;
-		isCameraInitialized = true;
-	}
-
-	float targetSmoothTime = 0.15f;
-	float targetLookAheadX = 0.0f;
-
-	if (std::abs(playerVel.x) > 1.0f && std::abs(moveInput) > 0.01f) {
-		targetLookAheadX = std::copysign(1.0f, playerVel.x) * 1.5f;
-	}
-
-	float currentSpeed = (targetLookAheadX == 0.0f) ? 10.0f : 4.0f;
-	currentLookAheadX = MoveTowards(currentLookAheadX, targetLookAheadX, currentSpeed * deltaTime);
-
-	glm::vec2 focusPosition = playerPos;
-	focusPosition.x += currentLookAheadX;
-
-	float xDistance = focusPosition.x - cameraTargetPos.x;
-	float yDistance = focusPosition.y - cameraTargetPos.y;
-
-	if (std::abs(xDistance) > deadZone.x)
-		cameraTargetPos.x = focusPosition.x - std::copysign(deadZone.x, xDistance);
-
-	if (std::abs(yDistance) > deadZone.y)
-		cameraTargetPos.y = focusPosition.y - std::copysign(deadZone.y, yDistance);
-
-	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, 0.2f);
-
-	float rightX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_X);
-	float rightY = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_Y);
-	glm::vec2 rightStick(rightX, -rightY);
-
-	if (glm::length(rightStick) > 0.1f) {
-		desiredPosition += rightStick * 5.0f;
-		targetSmoothTime = 0.4f;
-	}
-
-	if (playerVel.y < -15.0f) {
-		TriggerCameraShake(0.1f, 0.1f);
-	}
-
-	if (std::abs(playerVel.y) > 0.1f) {
-		if (playerVel.y < -10.0f) {
-			targetSmoothTime = 0.1f;
-		}
-		else {
-			targetSmoothTime = 0.2f;
-		}
-	}
-
-	activeSmoothTime = MoveTowards(activeSmoothTime, targetSmoothTime, 2.0f * deltaTime);
-
-	glm::vec2 currentCamPos = camera->GetPos();
-	glm::vec2 smoothedPosition = SmoothDamp(currentCamPos, desiredPosition, cameraVelocity, activeSmoothTime, 10000.0f, deltaTime);
-
-	if (cameraShakeTimer > 0.0f) {
-		float randX = ((rand() % 100) / 100.0f - 0.5f) * 2.0f * cameraShakeIntensity;
-		float randY = ((rand() % 100) / 100.0f - 0.5f) * 2.0f * cameraShakeIntensity;
-		smoothedPosition += glm::vec2(randX, randY);
-		cameraShakeTimer -= deltaTime;
-	}
-
-	camera->SetPos(smoothedPosition);
-}
-
-void Player::TriggerCameraShake(float duration, float intensity) {
-	cameraShakeTimer = duration;
-	cameraShakeIntensity = intensity;
 }
 
 bool Player::IsHanging() {
