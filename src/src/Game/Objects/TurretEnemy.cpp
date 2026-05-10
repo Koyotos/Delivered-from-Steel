@@ -11,7 +11,7 @@ TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(da
 	visiblityAngle = 1 / tan(radians(90.0f));
 	visiblityDistance = 2.0f;
 
-	barrelLockTime = 0.3f;
+	barrelLockTime = 0.5f;
 
 	rotationSpeed = 5.0f;
 
