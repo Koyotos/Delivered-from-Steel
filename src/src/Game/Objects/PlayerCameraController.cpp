@@ -40,10 +40,6 @@ namespace {
 	}
 }
 
-void PlayerCameraController::SetCamera(std::shared_ptr<Camera> cam) {
-	camera = cam;
-}
-
 void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& playerPos, const glm::vec2& playerVel, float moveInput, const glm::vec2& rightStick) {
 	if (!camera) return;
 
@@ -52,14 +48,14 @@ void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& play
 		isCameraInitialized = true;
 	}
 
-	float targetSmoothTime = 0.15f;
+	float targetSmoothTime = config.defaultSmoothTime;
 	float targetLookAheadX = 0.0f;
 
 	if (std::abs(playerVel.x) > 1.0f && std::abs(moveInput) > 0.01f) {
-		targetLookAheadX = std::copysign(1.0f, playerVel.x) * 1.5f;
+		targetLookAheadX = std::copysign(1.0f, playerVel.x) * config.lookAheadDistance;
 	}
 
-	float currentSpeed = (targetLookAheadX == 0.0f) ? 10.0f : 4.0f;
+	float currentSpeed = (targetLookAheadX == 0.0f) ? config.lookAheadReturnSpeed : config.lookAheadSpeed;
 	currentLookAheadX = MoveTowards(currentLookAheadX, targetLookAheadX, currentSpeed * deltaTime);
 
 	glm::vec2 focusPosition = playerPos;
@@ -68,36 +64,36 @@ void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& play
 	float xDistance = focusPosition.x - cameraTargetPos.x;
 	float yDistance = focusPosition.y - cameraTargetPos.y;
 
-	if (std::abs(xDistance) > deadZone.x)
-		cameraTargetPos.x = focusPosition.x - std::copysign(deadZone.x, xDistance);
+	if (std::abs(xDistance) > config.deadZone.x)
+		cameraTargetPos.x = focusPosition.x - std::copysign(config.deadZone.x, xDistance);
 
-	if (std::abs(yDistance) > deadZone.y)
-		cameraTargetPos.y = focusPosition.y - std::copysign(deadZone.y, yDistance);
+	if (std::abs(yDistance) > config.deadZone.y)
+		cameraTargetPos.y = focusPosition.y - std::copysign(config.deadZone.y, yDistance);
 
-	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, 0.2f);
+	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, config.verticalOffset);
 
 	if (glm::length(rightStick) > 0.1f) {
-		desiredPosition += glm::vec2(rightStick.x, -rightStick.y) * 5.0f;
-		targetSmoothTime = 0.4f;
+		desiredPosition += glm::vec2(rightStick.x, -rightStick.y) * config.rightStickDistance;
+		targetSmoothTime = config.rightStickSmoothTime;
 	}
 
-	if (playerVel.y < -15.0f) {
+	if (playerVel.y < config.fallCameraShakeThreshold) {
 		TriggerCameraShake(0.1f, 0.1f);
 	}
 
 	if (std::abs(playerVel.y) > 0.1f) {
-		if (playerVel.y < -10.0f) {
-			targetSmoothTime = 0.1f;
+		if (playerVel.y < config.airThresholdYSmooth) {
+			targetSmoothTime = config.fastFallSmoothTime;
 		}
 		else {
-			targetSmoothTime = 0.2f;
+			targetSmoothTime = config.airSmoothTime;
 		}
 	}
 
-	activeSmoothTime = MoveTowards(activeSmoothTime, targetSmoothTime, 2.0f * deltaTime);
+	activeSmoothTime = MoveTowards(activeSmoothTime, targetSmoothTime, config.smoothTimeTransitionSpeed * deltaTime);
 
 	glm::vec2 currentCamPos = camera->GetPos();
-	glm::vec2 smoothedPosition = SmoothDampVec2(currentCamPos, desiredPosition, cameraVelocity, activeSmoothTime, 10000.0f, deltaTime);
+	glm::vec2 smoothedPosition = SmoothDampVec2(currentCamPos, desiredPosition, cameraVelocity, activeSmoothTime, config.maxCameraSpeed, deltaTime);
 
 	if (cameraShakeTimer > 0.0f) {
 		float randX = ((rand() % 100) / 100.0f - 0.5f) * 2.0f * cameraShakeIntensity;

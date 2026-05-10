@@ -62,6 +62,25 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	stats.coyoteTime = GetSafe<float>(data, "coyoteTime", 0.15f);
 	stats.enableJumpBuffer = GetSafe<bool>(data, "enableJumpBuffer", true);
 	stats.jumpBufferTime = GetSafe<float>(data, "jumpBufferTime", 0.15f);
+
+	PlayerCameraConfig camConfig;
+	camConfig.deadZone.x = GetSafe<float>(data, "deadZoneX", 0.8f);
+	camConfig.deadZone.y = GetSafe<float>(data, "deadZoneY", 0.8f);
+	camConfig.lookAheadDistance = GetSafe<float>(data, "lookAheadDistance", 1.5f);
+	camConfig.lookAheadSpeed = GetSafe<float>(data, "lookAheadSpeed", 4.0f);
+	camConfig.lookAheadReturnSpeed = GetSafe<float>(data, "lookAheadReturnSpeed", 10.0f);
+	camConfig.defaultSmoothTime = GetSafe<float>(data, "defaultSmoothTime", 0.15f);
+	camConfig.rightStickSmoothTime = GetSafe<float>(data, "rightStickSmoothTime", 0.4f);
+	camConfig.fastFallSmoothTime = GetSafe<float>(data, "fastFallSmoothTime", 0.1f);
+	camConfig.airSmoothTime = GetSafe<float>(data, "airSmoothTime", 0.2f);
+	camConfig.smoothTimeTransitionSpeed = GetSafe<float>(data, "smoothTimeTransitionSpeed", 2.0f);
+	camConfig.airThresholdYSmooth = GetSafe<float>(data, "airThresholdYSmooth", -10.0f);
+	camConfig.fallCameraShakeThreshold = GetSafe<float>(data, "fallCameraShakeThreshold", -15.0f);
+	camConfig.verticalOffset = GetSafe<float>(data, "verticalOffset", 0.2f);
+	camConfig.rightStickDistance = GetSafe<float>(data, "rightStickDistance", 5.0f);
+	camConfig.maxCameraSpeed = GetSafe<float>(data, "maxCameraSpeed", 10000.0f);
+
+	cameraController.SetConfig(camConfig);
 }
 
 void Player::SetCamera(std::shared_ptr<Camera> cam) {

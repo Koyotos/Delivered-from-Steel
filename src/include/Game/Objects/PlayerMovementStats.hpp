@@ -53,4 +53,21 @@ struct PlayerInputState {
 	glm::vec2 rightStick = { 0.0f, 0.0f };
 };
 
+struct PlayerCameraConfig {
+	glm::vec2 deadZone = { 0.8f, 0.8f };
+	float lookAheadDistance = 1.5f;
+	float lookAheadSpeed = 4.0f;
+	float lookAheadReturnSpeed = 10.0f;
+	float defaultSmoothTime = 0.15f;
+	float rightStickSmoothTime = 0.4f;
+	float fastFallSmoothTime = 0.1f;
+	float airSmoothTime = 0.2f;
+	float smoothTimeTransitionSpeed = 2.0f;
+	float airThresholdYSmooth = -10.0f;
+	float fallCameraShakeThreshold = -15.0f;
+	float verticalOffset = 0.2f;
+	float rightStickDistance = 5.0f;
+	float maxCameraSpeed = 10000.0f;
+};
+
 #endif
