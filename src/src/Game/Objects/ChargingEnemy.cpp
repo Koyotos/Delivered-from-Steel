@@ -63,10 +63,10 @@ void ChargingEnemy::Chase(float dt) {
 		ObjectType::Player
 	);
 
-	if (enemyHit.has_value() || wallHit.has_value() || trapHit.has_value() || playerHit.has_value()) {
-		if (playerHit.has_value()) {
-			player->takeDamage(damage);
-		}
+	if (playerHit.has_value()) {
+		player->takeDamage(damage);
+	}
+	if (enemyHit.has_value() || wallHit.has_value() || trapHit.has_value()) {
 		stunned = true;
 		state = EnemyState::Patrol;
 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));

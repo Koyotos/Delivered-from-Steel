@@ -42,15 +42,15 @@ protected:
 public:
 	Enemy(const unordered_map<string, std::any>&);
 
-	void OnCollisionStay(shared_ptr<Collider> other) override;
+	void OnCollisionStay(shared_ptr<Collider>) override;
 
-	void Update(float deltaTime) override;
+	void Update(float) override;
 
 	void UpdateState(float);
 
-	virtual void Attack(shared_ptr<Player> player);
+	virtual void Attack(shared_ptr<Player>);
 
-	virtual void ChangeState(shared_ptr<Player> player);
+	virtual void ChangeState(shared_ptr<Player>);
 
 	virtual void Patrol(float);
 
@@ -61,6 +61,8 @@ public:
 	virtual void DetectPlayer();
 
 	void Init(shared_ptr<Scene>) override;
+
+	bool AllRaycast(int);
 };
 
 #endif // FE_ENEMY
