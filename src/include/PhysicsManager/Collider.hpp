@@ -7,6 +7,7 @@
 #include "include/Core/Node.hpp"
 #include "include/Core/Transform.hpp"
 #include "include/PhysicsManager/CollisionInfo.hpp"
+#include "include/PhysicsManager/AABB.hpp"
 #include <optional>
 #include "include/PhysicsManager/RaycastHit.hpp"
 
@@ -41,6 +42,8 @@ class Collider
     virtual shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<CapsuleCollider> other) const = 0;
 
     virtual optional<RaycastHit> Raycast(const vec2& origin, const vec2& dir, float maxDist) = 0;
+
+    virtual AABB GetBounds() const = 0;
 
 	bool GetTrigger() const;
 
