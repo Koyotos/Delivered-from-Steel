@@ -41,10 +41,10 @@ void ShieldTankEnemy::Chase(float dt) {
 
 		if (playerJumpingOver) {
 			float dist = length(dir);
-			if (dist > 2.0f || dir.y < 0.0f) {
+			if (dist > 2.0f) {
 				playerJumpingOver = false;
 			}
-			else {
+			else if(player->GetTransform().GetTranslation().y < transform.GetTranslation().y + 0.2f) {
 				auto hit = Raycast(
 					glm::vec2(0.0f),
 					dir,
@@ -62,6 +62,7 @@ void ShieldTankEnemy::Chase(float dt) {
 					scale.x = std::abs(scale.x) * direction;
 					t.SetScale(scale);
 					SetTransform(t);
+					playerJumpingOver = false;
 				}
 			}
 
@@ -94,7 +95,7 @@ void ShieldTankEnemy::Chase(float dt) {
 	);
 
 	if (groundHit.has_value() && !enemyHit.has_value()) {
-		SetVelocity(glm::vec2(dir.x * speed, GetVelocity().y));
+		SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
 	}
 	else {
  		SetVelocity(glm::vec2(0.0f, GetVelocity().y));

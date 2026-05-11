@@ -22,6 +22,7 @@ void HealthComponent::TakeDamage(float damage) {
 
 void HealthComponent::Shatter() {
 	hp = 0.0f;
+	if (isDead) return;
 	isDead = true;
 	respawnTimer = respawnDelay;
 }

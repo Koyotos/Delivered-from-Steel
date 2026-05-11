@@ -128,9 +128,7 @@ void Enemy::DetectPlayer() {
 	}
 }
 
-void Enemy::Patrol(float dt) {
-	glm::vec2 dir(direction, 0.0f);
-
+bool Enemy::AllRaycast(int direction) {
 	auto wallHit = Raycast(
 		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
 		glm::vec2(0.0f, -1.0f),
@@ -159,7 +157,11 @@ void Enemy::Patrol(float dt) {
 		ObjectType::Wall
 	);
 
-	if (enemyHit.has_value() || wallHit.has_value() || trapHit.has_value() || !groundHit.has_value()) {
+	return enemyHit.has_value() || wallHit.has_value() || trapHit.has_value() || !groundHit.has_value();
+}
+
+void Enemy::Patrol(float dt) {
+	if (AllRaycast(direction) && !AllRaycast(-direction)) {
 		direction *= -1.0f;
 
 		Transform t = GetTransform();

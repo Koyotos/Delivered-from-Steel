@@ -105,17 +105,23 @@ bool Player::CheckGrounded() {
 
 bool Player::CheckCeiling() {
 	auto hitCenter = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Wall);
-	return hitCenter.has_value();
+	auto hitEnemy = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Enemy);
+
+	return hitCenter.has_value() || hitEnemy.has_value();
 }
 
 bool Player::CheckLeftWalled() {
 	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
-	return hitLeft.has_value();
+	auto hitEnemy = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Enemy);
+
+	return hitLeft.has_value() || hitEnemy.has_value();
 }
 
 bool Player::CheckRightWalled() {
 	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
-	return hitRight.has_value();
+	auto hitEnemy = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Enemy);
+
+	return hitRight.has_value() || hitEnemy.has_value();
 }
 
 bool Player::CheckLedge() {
