@@ -44,7 +44,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		auto col = currentNodes[i]->GetCollider();
-		for (size_t j = 0; j < currentNodes.size(); ++j) {
+		for (size_t j = i + 1; j < currentNodes.size(); ++j) {
 			if (i == j) continue;
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
 		}
