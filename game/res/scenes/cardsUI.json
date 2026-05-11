@@ -40,7 +40,10 @@
 		"alpha" : 1.0,
 		"states" : 2.0,
         "addCollider": false,
-        "cardType": "WallJump"
+        "cardType": "WallJump",
+        "cull" : 0.0,
+        "zIndex" : 0,
+        "ResolveCollision": false
 	},
        "3": {
         "parent": 1,
@@ -73,7 +76,10 @@
         "height" : 50.0,
 		"visible" : true,
 		"alpha" : 1.0,
-        "addCollider": true
+        "addCollider": true,
+        "cull" : 0.0,
+        "zIndex" : 0,
+        "ResolveCollision": false
 		},
 	"4": {
         "parent": 1,
@@ -106,7 +112,10 @@
         "height" : 50.0,
 		"visible" : true,
 		"alpha" : 1.0,
-        "addCollider": true
+        "addCollider": true,
+        "cull" : 0.0,
+        "zIndex" : 0,
+        "ResolveCollision": false
 		},
 	"5": {
         "parent": 1,
@@ -139,7 +148,10 @@
         "height" : 50.0,
 		"visible" : true,
 		"alpha" : 1.0,
-        "addCollider": true
+        "addCollider": true,
+        "cull" : 0.0,
+        "zIndex" : 0,
+        "ResolveCollision": false
 		},
         "7": {
 		"parent": 1,
@@ -174,7 +186,10 @@
 		"alpha" : 1.0,
 		"states" : 2.0,
         "addCollider": false,
-        "cardType": "Dash"
+        "cardType": "Dash",
+        "cull" : 0.0,
+        "zIndex" : 0,
+        "ResolveCollision": false
 	}
 	
 }
