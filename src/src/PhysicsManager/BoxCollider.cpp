@@ -134,3 +134,13 @@ std::optional<RaycastHit> BoxCollider::Raycast(const glm::vec2& origin, const gl
     hit->collider = shared_from_this();
     return hit;
 }
+
+AABB BoxCollider::GetBounds() const
+{
+    vec2 half = size * 0.5f;
+
+    return {
+        transform - half,
+        transform + half
+    };
+}
