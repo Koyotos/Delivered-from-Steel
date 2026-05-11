@@ -3,12 +3,27 @@
 Card::Card(const unordered_map<string, std::any>& data) : Object2D(data) {
 }
 
+Card::Card(CardType type)
+{
+	this->type = type;
+}
+
 void Card::Deactivate()
 {
     
 }
 
-void Card::Used()
+bool Card::CheckUse()
+{
+    if (type == CardType::WallJump)
+    {
+		// return IsNextToWall();
+    }
+	// tbd: integracja z player movementem, sprawdzanie czy jest na ziemi itd
+    return true;
+}
+
+void Card::Use()
 {
     if (DestroyAfterUsed)
     {
@@ -17,4 +32,19 @@ void Card::Used()
     }
     used = true;
     Deactivate();
+}
+
+void Card::SetDisplay(std::shared_ptr<CardUI> value)
+{
+    display = value;
+}
+
+std::shared_ptr<CardUI> Card::GetDisplay()
+{
+    return display;
+}
+
+CardType Card::GetCardType()
+{
+    return type;
 }

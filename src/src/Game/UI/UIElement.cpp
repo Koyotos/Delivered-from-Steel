@@ -34,6 +34,10 @@ void UIElement::UpdateTweens(float dt) {
 		if(t >= 1.0f) {
 			t = 1.0f;
 			tween.finished = true;
+
+			if (tween.type == Tween::Type::Fade && tween.targetAlpha == 0.0f) {
+				// SetVisible(false);
+			}
 		}
 		float easedT = Ease(tween.ease, t);
 		switch (tween.type) {
@@ -77,7 +81,7 @@ void UIElement::FadeIn(float time, EaseType ease)
 	t.duration = time;
 	t.elapsed = 0.0f;
 	t.ease = ease;
-	t.startAlpha = alpha;
+	t.startAlpha = 0.0f;
 	t.targetAlpha = 1.0f;
 	tweens.push_back(t);
 }

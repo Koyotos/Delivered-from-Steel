@@ -14,12 +14,15 @@ class CardSlot : public UIElement {
 	private:
 
 	std::shared_ptr<CardUI> card;
+	std::shared_ptr<CardUI> removedCard;
 	std::shared_ptr<Icon> icon;
 
 	public:
 
 	CardSlot();
 	CardSlot(const std::unordered_map<std::string, std::any>& data);
+
+	string Type() override;
 
 	/*
 	* @brief Removes the current card from the slot with an animation. It moves the card up and fades it out before setting the pointer to null.
@@ -32,6 +35,8 @@ class CardSlot : public UIElement {
 	*/
 	void SetCard(std::shared_ptr<CardUI> newCard);
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
+
+	void Process() override;
 
 
 };

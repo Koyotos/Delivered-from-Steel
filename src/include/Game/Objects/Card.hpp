@@ -2,32 +2,61 @@
 #define FE_CARD
 
 #include "include/Core/Object2D.hpp"
+#include "include/Game/UI/CardUI.hpp"
+#include "include/Game/CardType.hpp"
+
+/*
+ * @brief clas that represents card logic 
+ */
 class Card :
     public Object2D
 {
 private:
+    CardType type;
     int maxEquippedDeck;
     bool used = false;
 
     bool DestroyAfterUsed = false;
+
+    shared_ptr<CardUI> display;
+
 public:
     Card(const unordered_map<string, std::any>&);
+    Card(CardType type);
 
-    //virtual void UseCard();
+    /*
+     * @brief function that returns card's UI representation
+     * @return shared_ptr<CardUI> : CardUI object representing UI display of card
+     */ 
+    std::shared_ptr<CardUI> GetDisplay();
 
-    //virtual void CheckUseCard();
+    /*
+	 * @brief Set card's UI representation
+	 * @param shared_ptr<CardUI> : CardUI object representing UI display of card
+	 */ 
+    void SetDisplay(std::shared_ptr<CardUI> value);
 
-    void select();
+    /* 
+     * @brief returns the type of card (eg. Dash, bounce etc)
+     * @param CardType enum
+     */ 
+	CardType GetCardType();
 
-    void reject();
-
-    bool IsNextToWall();
-
-    bool IsNextToGround();
 
     void Deactivate();
 
-    void Used();
+    /*
+     * @brief function for checking if card can be used.
+     * for example, is the player next to a wall
+     * @return bool
+     */ 
+    bool CheckUse();
+
+    /*
+     * @brief function for executing cards logic.
+     * CALL FUNCTIONS LIKE DASH, BOUNCE ETC IN THIS FUNCTION
+     */
+    void Use();
 };
 
 #endif // FE_CARD

@@ -134,7 +134,7 @@ void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,st
             cast->SetShader(LoadShader(fromMap(string,"shader",data)));
         }
 
-    } else if(node->Type() == "Object2D") {
+    } else if(node->Type() == "Object2D" || node->Type() == "CardSlot" || node->Type() == "CardUI") {
         auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("sprite")) {
             cast->SetSprite(LoadSprite(fromMap(string,"sprite",data)));

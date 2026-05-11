@@ -21,6 +21,7 @@ void EngineController::Init() {
         iom = make_shared<IOManager>();
         rsm = make_shared<ResourceManager>();
         renderer = make_shared<Renderer>();
+		crm = make_shared<CardManager>();
         aum = make_shared<AudioManager>();
         if (!aum->Init()) {
             globals->Log("Audio failed to initialize. Game will continue without sound.");
@@ -32,6 +33,7 @@ void EngineController::Init() {
         rsm->ConfigurePaths();
         renderer->Init(*rsm);
 		iom->Init(renderer->GetWindow());
+		crm->Init(rsm);
         globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
 
     } catch(const exception& except) {
@@ -114,12 +116,15 @@ void EngineController::EndFrame() {
 }
 
 shared_ptr<Scene> EngineController::LoadScene(const string& name) {
-    shared_ptr<Scene> scn = rsm->LoadScene(name);
+    shared_ptr<Scene> scn = rsm->LoadScene(name);;
     scm->AddScene(scn);
     return scn;
 }
 
 void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
+    scm->AddScene(crm->GetCardScene());
+    scn->GetRoot()->AddChild(crm->GetCardScene()->GetRoot());
+    scn->GetRoot()->AddChild(crm);
     scm->SetActive(scn);
 }
 
