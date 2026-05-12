@@ -7,11 +7,22 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
         currentScene = scene;
         currentNodes.clear();
         UpdateNode(scene->root);
+
+        WorldBounds.min = vec2(FLT_MAX);
+        WorldBounds.max = vec2(-FLT_MAX);
+
+        for (auto& node : currentNodes) {
+            auto col = node->GetCollider();
+            if (!col) continue;
+
+            auto b = col->GetBounds();
+            WorldBounds.min = glm::min(WorldBounds.min, b.min);
+            WorldBounds.max = glm::max(WorldBounds.max, b.max);
+        }
     }
 
-    //
-    // 1. Update physics (movement, velocity, forces)
-    //
+    
+    // 1. Update physics 
     for (auto& node : currentNodes) {
         node->Update(dt);
         if (!node->getStatic()) {
@@ -20,54 +31,32 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
         }
     }
 
-    //
+    
     // 2. Recompute global transforms
-    //
     Transform t;
     scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
 
-    //
     // 3. Update collider bounds (AABB)
-    //
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (col)
             col->UpdatePosition(node->GetTransform());
     }
 
-    //
-    // 4. Compute world bounds dynamically
-    //
-    AABB world;
-    world.min = vec2(FLT_MAX);
-    world.max = vec2(-FLT_MAX);
 
-    for (auto& node : currentNodes) {
-        auto col = node->GetCollider();
-        if (!col) continue;
-
-        auto b = col->GetBounds();
-        world.min = glm::min(world.min, b.min);
-        world.max = glm::max(world.max, b.max);
-    }
-
-    //
     // 5. Build quadtree ONCE
-    //
-    quadTree = QuadTree(0, world);
+    quadTree = QuadTree(0, WorldBounds);
 
-    //
+    
     // 6. Insert nodes into quadtree
-    //
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (col)
             quadTree.Insert(node);
     }
 
-    //
+    
     // 7. Query + resolve collisions
-    //
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (!col)
