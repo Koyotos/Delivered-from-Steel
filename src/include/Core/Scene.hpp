@@ -29,7 +29,8 @@ class Scene {
     shared_ptr<Camera> sceneCam;
     shared_ptr<Player> scenePlayer;
 
-    vector<shared_ptr<Model>> sceneModels; // TODO optimizations with unloading
+    vector<shared_ptr<Model>> sceneModels;
+    vector<shared_ptr<Sprite>> sceneSprites;
     vector<shared_ptr<Shader>> sceneShaders;
 
     inline void FindCam(shared_ptr<Node>) noexcept;
