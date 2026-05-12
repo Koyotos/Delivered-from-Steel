@@ -1,47 +1,90 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 
-void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
+void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
+{
+    // If scene changed, rebuild node list
+    if (currentScene != scene) {
+        currentScene = scene;
+        currentNodes.clear();
+        UpdateNode(scene->root);
+    }
 
-	// jesli scena sie zmienila to pobierz nowe PhysicsNode'y
-	if (currentScene != scene) {
-		currentScene = scene;
-		currentNodes.clear();
-		UpdateNode(scene->root);
-	}
+    //
+    // 1. Update physics (movement, velocity, forces)
+    //
+    for (auto& node : currentNodes) {
+        node->Update(dt);
+        if (!node->getStatic()) {
+            node->ResetGlobal();
+            node->SetTransformChanged(true);
+        }
+    }
 
-	// ruch
-	for (const auto& physicsNode : currentNodes) {
-		physicsNode->Update(dt);
-		if (!physicsNode->getStatic()) {
-			physicsNode->ResetGlobal();
-			physicsNode->SetTransformChanged(true);
-		}
-	}
+    //
+    // 2. Recompute global transforms
+    //
+    Transform t;
+    scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
 
-	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		auto col = currentNodes[i]->GetCollider();
-		if (col) {
-			currentNodes[i]->processCollisions();
-		}
-	}
+    //
+    // 3. Update collider bounds (AABB)
+    //
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (col)
+            col->UpdatePosition(node->GetTransform());
+    }
 
-	// przeliczenie pozycji globalnych
+    //
+    // 4. Compute world bounds dynamically
+    //
+    AABB world;
+    world.min = vec2(FLT_MAX);
+    world.max = vec2(-FLT_MAX);
 
-	Transform t;
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (!col) continue;
 
-	scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
+        auto b = col->GetBounds();
+        world.min = glm::min(world.min, b.min);
+        world.max = glm::max(world.max, b.max);
+    }
 
+    //
+    // 5. Build quadtree ONCE
+    //
+    quadTree = QuadTree(0, world);
 
-	// kolizje
+    //
+    // 6. Insert nodes into quadtree
+    //
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (col)
+            quadTree.Insert(node);
+    }
 
-	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		auto col = currentNodes[i]->GetCollider();
-		if (col) {
-			col->UpdatePosition(currentNodes[i]->GetTransform());
-		}
-	}
+    //
+    // 7. Query + resolve collisions
+    //
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (!col)
+            continue;
 
+        std::vector<std::shared_ptr<PhysicsNode>> candidates;
+        quadTree.Query(col->GetBounds(), candidates);
 
+        for (auto& other : candidates) {
+            if (node.get() >= other.get())
+                continue;
+
+            node->resolveCollision(*other);
+        }
+    }
+
+    /*
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		auto col = currentNodes[i]->GetCollider();
 		for (size_t j = i + 1; j < currentNodes.size(); ++j) {
@@ -49,9 +92,9 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 			currentNodes[i]->resolveCollision(*currentNodes[j]);
 		}
 	}
-
-	return;
+    */
 }
+
 
 void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);

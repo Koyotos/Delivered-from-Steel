@@ -31,9 +31,9 @@ public:
 
     void Insert(std::shared_ptr<PhysicsNode> node);
 
-    void Query(
-        const AABB& area,
-        std::vector<std::shared_ptr<PhysicsNode>>& result);
+    void Query(const AABB& area, std::vector<std::shared_ptr<PhysicsNode>>& result);
+
+    QuadTree() = default;
 
 private:
 

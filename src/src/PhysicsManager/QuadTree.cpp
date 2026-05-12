@@ -61,26 +61,26 @@ void QuadTree::Split()
 
 int QuadTree::GetIndex(const AABB& rect)
 {
-    float verticalMidpoint = bounds.min.x + (bounds.max.x - bounds.min.x) * 0.5f;
-	float horizontalMidpoint = bounds.min.y + (bounds.max.y - bounds.min.y) * 0.5f;
+    float verticalMid = bounds.min.x + (bounds.max.x - bounds.min.x) * 0.5f;
+    float horizontalMid = bounds.min.y + (bounds.max.y - bounds.min.y) * 0.5f;
 
-    bool top = rect.min.y >= horizontalMidpoint;
-    bool bottom = rect.max.y <= horizontalMidpoint;
+    bool left = rect.max.x < verticalMid;
+    bool right = rect.min.x > verticalMid;
+    bool bottom = rect.max.y < horizontalMid;
+    bool top = rect.min.y > horizontalMid;
 
-    if (rect.max.x <= verticalMidpoint)
-    {
-        if (top) return 2;
+    if (left) {
         if (bottom) return 0;
+        if (top) return 2;
     }
-
-    else if (rect.min.x >= verticalMidpoint)
-    {
-        if (top) return 3;
+    else if (right) {
         if (bottom) return 1;
+        if (top) return 3;
     }
 
     return -1;
 }
+
 
 void QuadTree::Insert(std::shared_ptr<PhysicsNode> node)
 {
