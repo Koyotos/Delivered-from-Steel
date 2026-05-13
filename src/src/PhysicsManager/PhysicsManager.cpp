@@ -2,27 +2,22 @@
 
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
 {
-    // If scene changed, rebuild node list
     if (currentScene != scene) {
         currentScene = scene;
         currentNodes.clear();
         UpdateNode(scene->root);
-
         WorldBounds.min = vec2(FLT_MAX);
         WorldBounds.max = vec2(-FLT_MAX);
-
         for (auto& node : currentNodes) {
             auto col = node->GetCollider();
             if (!col) continue;
-
             auto b = col->GetBounds();
             WorldBounds.min = glm::min(WorldBounds.min, b.min);
             WorldBounds.max = glm::max(WorldBounds.max, b.max);
         }
     }
 
-    
-    // 1. Update physics 
+    // Update physics
     for (auto& node : currentNodes) {
         node->Update(dt);
         if (!node->getStatic()) {
@@ -31,57 +26,45 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
         }
     }
 
-    
-    // 2. Recompute global transforms
+    // Process collisions
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (col)
+            node->processCollisions();
+    }
+
+    // Recompute global transforms
     Transform t;
     scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
 
-    // 3. Update collider bounds (AABB)
+    // Update collider positions
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (col)
             col->UpdatePosition(node->GetTransform());
     }
 
-
-    // 5. Build quadtree ONCE
+    // Build quadtree
     quadTree = QuadTree(0, WorldBounds);
-
-    
-    // 6. Insert nodes into quadtree
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (col)
             quadTree.Insert(node);
     }
 
-    
-    // 7. Query + resolve collisions
+    // Query + resolve collisions
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (!col)
             continue;
-
         std::vector<std::shared_ptr<PhysicsNode>> candidates;
         quadTree.Query(col->GetBounds(), candidates);
-
         for (auto& other : candidates) {
-            if (node.get() >= other.get())
+            if (node.get() == other.get())
                 continue;
-
             node->resolveCollision(*other);
         }
     }
-
-    /*
-	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		auto col = currentNodes[i]->GetCollider();
-		for (size_t j = i + 1; j < currentNodes.size(); ++j) {
-			if (i == j) continue;
-			currentNodes[i]->resolveCollision(*currentNodes[j]);
-		}
-	}
-    */
 }
 
 
