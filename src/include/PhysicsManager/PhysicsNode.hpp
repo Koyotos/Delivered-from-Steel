@@ -13,6 +13,7 @@ enum class ObjectType {
     Trap,
     Wall,
     BreakableWall,
+    Bullet,
     Null
 };
 

@@ -44,6 +44,8 @@ public:
 
 	void OnCollisionStay(shared_ptr<Collider>) override;
 
+	void OnCollisionExit(shared_ptr<Collider>) override;
+
 	void Update(float) override;
 
 	void UpdateState(float);
