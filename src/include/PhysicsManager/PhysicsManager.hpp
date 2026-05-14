@@ -3,6 +3,8 @@
 
 #include "include/Core/Scene.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
+#include "include/PhysicsManager/AABB.hpp"
+#include "include/PhysicsManager/QuadTree.hpp"
 
 class PhysicsManager {
 
@@ -10,6 +12,8 @@ class PhysicsManager {
 	shared_ptr<Scene> currentScene;
 	vector<shared_ptr<PhysicsNode>> currentNodes;
 	void UpdateNode(shared_ptr<Node> node);
+	AABB WorldBounds;
+	QuadTree quadTree;
 
 	public:
 	void Update(shared_ptr<Scene> scene, float dt);

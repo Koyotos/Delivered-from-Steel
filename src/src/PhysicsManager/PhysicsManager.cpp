@@ -1,57 +1,72 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 
-void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
+void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
+{
+    if (currentScene != scene) {
+        currentScene = scene;
+        currentNodes.clear();
+        UpdateNode(scene->root);
+        WorldBounds.min = vec2(FLT_MAX);
+        WorldBounds.max = vec2(-FLT_MAX);
+        for (auto& node : currentNodes) {
+            auto col = node->GetCollider();
+            if (!col) continue;
+            auto b = col->GetBounds();
+            WorldBounds.min = glm::min(WorldBounds.min, b.min);
+            WorldBounds.max = glm::max(WorldBounds.max, b.max);
+        }
+    }
 
-	// jesli scena sie zmienila to pobierz nowe PhysicsNode'y
-	if (currentScene != scene) {
-		currentScene = scene;
-		currentNodes.clear();
-		UpdateNode(scene->root);
-	}
+    // Update physics
+    for (auto& node : currentNodes) {
+        node->Update(dt);
+        if (!node->getStatic()) {
+            node->ResetGlobal();
+            node->SetTransformChanged(true);
+        }
+    }
 
-	// ruch
-	for (const auto& physicsNode : currentNodes) {
-		physicsNode->Update(dt);
-		if (!physicsNode->getStatic()) {
-			physicsNode->ResetGlobal();
-			physicsNode->SetTransformChanged(true);
-		}
-	}
+    // Process collisions
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (col)
+            node->processCollisions();
+    }
 
-	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		auto col = currentNodes[i]->GetCollider();
-		if (col) {
-			currentNodes[i]->processCollisions();
-		}
-	}
+    // Recompute global transforms
+    Transform t;
+    scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
 
-	// przeliczenie pozycji globalnych
+    // Update collider positions
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (col)
+            col->UpdatePosition(node->GetTransform());
+    }
 
-	Transform t;
+    // Build quadtree
+    quadTree = QuadTree(0, WorldBounds);
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (col)
+            quadTree.Insert(node);
+    }
 
-	scene->UpdateTransforms(static_pointer_cast<PhysicsNode>(scene->root), t);
-
-
-	// kolizje
-
-	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		auto col = currentNodes[i]->GetCollider();
-		if (col) {
-			col->UpdatePosition(currentNodes[i]->GetTransform());
-		}
-	}
-
-
-	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		auto col = currentNodes[i]->GetCollider();
-		for (size_t j = 0; j < currentNodes.size(); ++j) {
-			if (i == j) continue;
-			currentNodes[i]->resolveCollision(*currentNodes[j]);
-		}
-	}
-
-	return;
+    // Query + resolve collisions
+    for (auto& node : currentNodes) {
+        auto col = node->GetCollider();
+        if (!col)
+            continue;
+        std::vector<std::shared_ptr<PhysicsNode>> candidates;
+        quadTree.Query(col->GetBounds(), candidates);
+        for (auto& other : candidates) {
+            if (node.get() == other.get())
+                continue;
+            node->resolveCollision(*other);
+        }
+    }
 }
+
 
 void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
