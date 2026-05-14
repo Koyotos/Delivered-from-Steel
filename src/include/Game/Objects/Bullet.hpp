@@ -9,7 +9,7 @@ private:
     float speed;
 	vec2 direction;
     bool isVisible;
-	float damage = 40.0f;
+	float damage;
 
 	float lifeTime;
 	float currentLifeTime = 0.0f;
@@ -24,9 +24,11 @@ public:
     void SetVisible(bool visible);
     bool GetVisible() const;
 
-    void OnCollisionStay(std::shared_ptr<Collider>) override;
+    void OnCollisionEnter(std::shared_ptr<Collider>) override;
     void Attack(std::shared_ptr<Player> player);
-    
+
+	float GetSpeed() const { return speed; }
+
 };
 
 #endif // FE_BULLET

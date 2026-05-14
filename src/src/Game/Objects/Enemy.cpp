@@ -75,6 +75,19 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		Attack(player);
+
+		auto trans = player->GetTransform();
+		trans.SetTranslation(trans.GetTranslation() + vec3(GetVelocity() * 1.0f/60.0f, 0.0f));
+
+		player->SetTransform(trans);
+	}
+}
+
+void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (owner->GetObjectType() == ObjectType::Player) {
+
+		player->addPlatformVelocity(GetVelocity());
 	}
 }
 
@@ -86,6 +99,12 @@ void Enemy::Attack(shared_ptr<Player> player) {
 
 void Enemy::Init(shared_ptr<Scene> scene) {
 	player = scene->GetPlayer();
+
+	Transform t = GetTransform();
+	glm::vec3 scale = t.GetScale();
+	scale.x = std::abs(scale.x) * direction;
+	t.SetScale(scale);
+	SetTransform(t);
 }
 
 void Enemy::Update(float deltaTime) {
