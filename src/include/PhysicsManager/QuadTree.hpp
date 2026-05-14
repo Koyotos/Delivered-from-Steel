@@ -12,7 +12,7 @@ class QuadTree
 {
 private:
 
-    static constexpr int MAX_OBJECTS = 4;
+    static constexpr int MAX_OBJECTS = 8;
     static constexpr int MAX_LEVELS = 5;
 
     int level;
