@@ -133,6 +133,7 @@ bool Player::CheckLedge() {
 }
 
 void Player::GatherInput(float deltaTime) {
+	if (isDashing) return;
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
 	if (currentJumpRaw && !inputState.lastJumpInput) {
@@ -223,6 +224,58 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		coyoteTimeCounter -= deltaTime;
+	}
+
+	if (isBounceActive) {
+		float minBounceSpeed = 0.5f;
+		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
+			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
+			isBounceActive = false;
+			isDashing = false;
+		}
+		else if (isWalledLeft && lastSpeedForBounceX < -minBounceSpeed) {
+			currentVelocity.x = std::max(stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			isBounceActive = false;
+			isDashing = false;
+		}
+		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
+			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			isBounceActive = false;
+			isDashing = false;
+		}
+
+		lastSpeedForBounceY = currentVelocity.y;
+		lastSpeedForBounceX = currentVelocity.x;
+	}
+
+	if (isDashing) {
+		dashTimer -= deltaTime;
+		if (dashTimer <= 0.0f) {
+			isDashing = false;
+			currentVelocity.x = beforeDashVelocityX;
+		}
+		else {
+			currentVelocity.y = 0.0f;
+			currentVelocity.x = facingDirection * stats.dashSpeed;
+			SetVelocity(currentVelocity);
+
+			Transform t = this->GetTransform();
+			t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
+			this->SetTransform(t);
+			return false;
+		}
+	}
+
+	if (isFeatherFalling) {
+		featherFallingTimer -= deltaTime;
+		if (featherFallingTimer <= 0.0f) {
+			isFeatherFalling = false;
+			currentVelocity.y = 0.0f;
+		}
+		else {
+			currentVelocity.y = std::max(currentVelocity.y, -stats.maxFeatherFallingSpeed);
+			SetVelocity(currentVelocity);
+		}
 	}
 
 	if (inputState.jumpPressed) {
@@ -404,4 +457,50 @@ void Player::Shatter() {
 
 bool Player::IsHanging() {
 	return isHanging;
+}
+
+void Player::ExecuteDash() {
+    isDashing = true;
+    dashTimer = stats.dashDuration;
+	beforeDashVelocityX = GetVelocity().x;
+    SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
+}
+
+void Player::ExecuteBounce() {
+	isBounceActive = true;
+	lastSpeedForBounceY = 0;
+	lastSpeedForBounceX = 0;
+}
+
+void Player::ExecuteFeatherFalling() {
+    isFeatherFalling = true;
+	featherFallingTimer = stats.featherFallingDuration;
+}
+
+void Player::ExecuteDoubleJump() {
+	isDashing = false;
+    glm::vec2 vel = GetVelocity();
+    vel.y = stats.jumpForce;
+    SetVelocity(vel);
+    hasDoubleJumped = true;
+    canCutJump = true;
+}
+
+void Player::ExecuteWallJump() {
+	isDashing = false;
+    glm::vec2 vel = GetVelocity();
+    
+    float jumpDir = 0.0f;
+    if (CheckLeftWalled()) jumpDir = 1.0f;
+    else if (CheckRightWalled()) jumpDir = -1.0f;
+
+    if (jumpDir != 0.0f) {
+        vel.y = stats.wallJumpForceY;
+        vel.x = jumpDir * stats.wallJumpForceX;
+        facingDirection = jumpDir;
+        SetVelocity(vel);
+        
+        coyoteTimeCounter = 0.0f;
+        jumpBufferCounter = 0.0f;
+    }
 }

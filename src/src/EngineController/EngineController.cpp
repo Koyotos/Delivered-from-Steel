@@ -43,6 +43,14 @@ void EngineController::Init() {
     PROFILER_INIT();
 }
 
+void EngineController::LinkSceneObjects() {
+    shared_ptr<Scene> active = scm->GetActive();
+
+    active->GetRoot()->InitRecursive(active);
+
+    crm->AssignPlayer(active->GetPlayer());
+}
+
 void EngineController::ProcessNode(shared_ptr<Node> node) {
 	if (!node) return;
 

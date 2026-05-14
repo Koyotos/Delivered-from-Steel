@@ -46,6 +46,11 @@ void Bullet::SetVisible(bool visible)
 	else {
 		Disable();
 		SetVelocity(vec2(0.0f));
+
+		Transform t = GetTransform();
+		t.SetTranslation(vec3(1000.0f,1000.0f,-5.0f));
+		SetTransform(t);
+
 	}
 }
 

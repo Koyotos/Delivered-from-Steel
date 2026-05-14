@@ -199,6 +199,12 @@ public:
 	 */
 	void RefreshCurrentDeck();
 
+	/*
+	 * @brief Assigns player to all cards in deck, so they can use player-related functions
+	 * @param shared_ptr<Player> : player to be assigned
+	 */
+	void AssignPlayer(shared_ptr<Player> player);
+
 	void Process() override;
 	bool Input(InputEvent& event) override;
 
