@@ -6,6 +6,7 @@
 #include "include/Game/Objects/PlayerMovementStats.hpp"
 #include "include/Game/Objects/HealthComponent.hpp"
 #include "include/Game/Objects/PlayerCameraController.hpp"
+#include "include/Game/Objects/ParticleEmitterNode.hpp"
 
 class Player final : public Object2D {
 private:
@@ -13,12 +14,14 @@ private:
 	PlayerInputState inputState;
 	HealthComponent health;
 	PlayerCameraController cameraController;
+	std::shared_ptr<ParticleEmitterNode> dustEmitter;
 
 	bool isGrounded = false;
 	bool isWalled = false;
 	bool isWallSliding = false;
 	bool isHanging = false;
 	bool canCutJump = false;
+	bool wasDead = false;
 
 	float facingDirection = 1.0f;
 	float facingDirectionHang = 1.0f;

@@ -136,9 +136,7 @@ void Player::GatherInput(float deltaTime) {
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
 	if (currentJumpRaw && !inputState.lastJumpInput) {
-		if (inputState.timeSinceLastRelease > 0.08f) {
-			inputState.jumpPressed = true;
-		}
+		inputState.jumpPressed = true;
 	}
 
 	if (!currentJumpRaw && inputState.lastJumpInput) {
@@ -385,8 +383,28 @@ void Player::HandleAnimations() {
 }
 
 void Player::Update(float deltaTime) {
-	if (HandleMovement(deltaTime)) return;
-	HandleAnimations();
+	if (!dustEmitter) {
+		for (auto& child : GetChildren()) {
+			if (child->Type() == "ParticleEmitterNode") {
+				dustEmitter = std::dynamic_pointer_cast<ParticleEmitterNode>(child);
+				break;
+			}
+		}
+	}
+
+	bool skipAnimations = HandleMovement(deltaTime);
+
+	if (!skipAnimations) {
+		HandleAnimations();
+	}
+
+	if (dustEmitter) {
+		if (!wasDead && health.IsDead()) {
+			dustEmitter->Burst(10);
+		}
+	}
+
+	wasDead = health.IsDead();
 }
 
 bool Player::Input(InputEvent& event) {
