@@ -161,4 +161,10 @@ std::optional<RaycastHit> CapsuleCollider::Raycast(const glm::vec2& origin, cons
     }
 
     return result;
-}   
+}
+
+AABB CapsuleCollider::GetBounds() const {
+    vec2 center = (a + b) * 0.5f;
+    vec2 extents = vec2(radius, height * 0.5f + radius);
+    return { center - extents, center + extents };
+}

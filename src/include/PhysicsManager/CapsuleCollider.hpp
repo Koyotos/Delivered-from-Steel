@@ -23,6 +23,9 @@ class CapsuleCollider : public Collider, public std::enable_shared_from_this<Cap
     shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<BoxCollider> other) const override;
     shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<CapsuleCollider> other) const override;
 
+
+    AABB GetBounds() const override; 
+
 	optional<RaycastHit> Raycast(const vec2& origin, const vec2& dir, float maxDist) override;
 };
 #endif
