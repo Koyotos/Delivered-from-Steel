@@ -91,13 +91,13 @@ std::optional<RaycastHit> PhysicsManager::Raycast(
 	const glm::vec2& direction,
 	float maxDistance,
 	std::shared_ptr<Collider> collider,
-	ObjectType type)
+    uint32_t type)
 {
 	float closest = maxDistance;
 	std::optional<RaycastHit> result;
 
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
+        if ((static_cast<uint32_t>(currentNodes[i]->GetObjectType()) & type) == 0 && type != static_cast<uint32_t>(ObjectType::Null)) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
 			auto hit = col->Raycast(origin, direction, maxDistance);
@@ -118,13 +118,13 @@ std::vector<RaycastHit> PhysicsManager::RaycastAll(
 	const glm::vec2& direction,
 	float maxDistance,
 	std::shared_ptr<Collider> collider,
-	ObjectType type)
+    uint32_t type)
 {
 	float closest = maxDistance;
 	std::vector<RaycastHit> result;
 
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
-		if (currentNodes[i]->GetObjectType() != type && type != ObjectType::Null) continue;
+		if ((static_cast<uint32_t>(currentNodes[i]->GetObjectType()) & type) == 0 && type != static_cast<uint32_t>(ObjectType::Null)) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
 			auto hit = col->Raycast(origin, direction, maxDistance);

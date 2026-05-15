@@ -25,14 +25,14 @@ class PhysicsManager {
 		const vec2& direction,
 		float maxDistance,
 		shared_ptr<Collider> collider,
-		ObjectType type);
+		uint32_t type);
 
 	vector<RaycastHit> RaycastAll(
 		const vec2& origin,
 		const vec2& direction,
 		float maxDistance,
 		shared_ptr<Collider> collider,
-		ObjectType type);
+		uint32_t type);
 
 	PhysicsManager() = default;
 	PhysicsManager(const PhysicsManager&) = delete;

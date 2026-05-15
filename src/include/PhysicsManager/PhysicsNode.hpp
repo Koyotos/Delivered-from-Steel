@@ -6,15 +6,15 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/Core/VisualNode.hpp"
 
-enum class ObjectType {
-	Default,
-    Player,
-    Enemy,
-    Trap,
-    Wall,
-    BreakableWall,
-    Bullet,
-    Null
+enum class ObjectType : uint32_t {
+    Null = 0,
+	Default = 1 << 0, // 1
+    Wall = 1 << 1, // 2
+    Enemy = 1 << 2, // 4
+    Player = 1 << 3, // 8
+    Trap = 1 << 4, // 16
+    BreakableWall = 1 << 5,  // 32
+	Bullet = 1 << 6 // 64
 };
 
 class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNode> {
@@ -81,7 +81,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
      * @return RaycastHit if an object is hit, otherwise std::nullopt.
      */
 
-    optional<RaycastHit> Raycast(const vec2&, const vec2&, float, ObjectType type = ObjectType::Null);
+    optional<RaycastHit> Raycast(const vec2&, const vec2&, float, uint32_t type = static_cast<uint32_t>(ObjectType::Null));
 
     /**
     * Performs a raycast from a world-space position.
@@ -90,7 +90,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
     * @param maxDistance Maximum distance the ray can travel.
     * @return RaycastHit if an object is hit, otherwise std::nullopt.
     */
-    optional<RaycastHit> Raycast(const vec2&, float, ObjectType type = ObjectType::Null);
+    optional<RaycastHit> Raycast(const vec2&, float, uint32_t type = static_cast<uint32_t>(ObjectType::Null));
 
     /**
      * Performs a raycast that returns all hits along the ray from a world-space position with an explicit offset.
@@ -101,7 +101,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
      * @param type Filter for object types to include in the raycast.
      * @return A vector of all RaycastHit results sorted by distance (if implemented that way).
      */
-    vector<RaycastHit> RaycastAll(const vec2&, const vec2&, float, ObjectType type = ObjectType::Null);
+    vector<RaycastHit> RaycastAll(const vec2&, const vec2&, float, uint32_t type = static_cast<uint32_t>(ObjectType::Null));
 
     /**
 	 * Performs a raycast that returns all hits along the ray from a world-space.
@@ -111,7 +111,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
      * @param type Filter for object types to include in the raycast.
      * @return A vector of all RaycastHit results sorted by distance (if implemented that way).
      */
-    vector<RaycastHit> RaycastAll(const vec2&, float, ObjectType type = ObjectType::Null);
+    vector<RaycastHit> RaycastAll(const vec2&, float, uint32_t type = static_cast<uint32_t>(ObjectType::Null));
 };
 
 #endif

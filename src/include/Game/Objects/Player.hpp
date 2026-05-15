@@ -42,6 +42,10 @@ private:
 	bool HandleMovement(float deltaTime);
 	void HandleAnimations();
 
+	uint32_t obstacleMask = static_cast<uint32_t>(ObjectType::Wall) |
+		static_cast<uint32_t>(ObjectType::Enemy) |
+		static_cast<uint32_t>(ObjectType::BreakableWall);
+
 public:
 	bool CheckGrounded();
 	bool CheckRightWalled();

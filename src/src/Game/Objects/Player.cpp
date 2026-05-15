@@ -1,4 +1,5 @@
 #include "include/Game/Objects/Player.hpp"
+#include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Globals/Globals.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -97,38 +98,35 @@ bool Player::CheckGrounded() {
 	float offsetX = -0.095f;
 	float offsetY = -0.41f;
 
-	auto hitRight = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, ObjectType::Enemy);
+	auto hitRight = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, obstacleMask);
 
-	return hitRight.has_value() || hitEnemy.has_value();
+	return hitRight.has_value();
 }
 
 bool Player::CheckCeiling() {
-	auto hitCenter = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Enemy);
+	auto hitCenter = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, obstacleMask);
 
-	return hitCenter.has_value() || hitEnemy.has_value();
+	return hitCenter.has_value();
 }
 
 bool Player::CheckLeftWalled() {
-	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Enemy);
+	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
 
-	return hitLeft.has_value() || hitEnemy.has_value();
+	return hitLeft.has_value();
 }
 
 bool Player::CheckRightWalled() {
-	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Enemy);
+	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
 
-	return hitRight.has_value() || hitEnemy.has_value();
+	return hitRight.has_value();
 }
 
 bool Player::CheckLedge() {
+	return false;
 	if (ledgeDropCooldown > 0.0f) return false;
 	glm::vec2 rayDir(facingDirection, 0.0f);
-	auto hitLower = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeLowerY), rayDir, raycastConfig.ledgeRayLength, ObjectType::Wall);
-	auto hitUpper = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeUpperY), rayDir, raycastConfig.ledgeRayLength, ObjectType::Wall);
+	auto hitLower = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeLowerY), rayDir, raycastConfig.ledgeRayLength, static_cast<uint32_t>(ObjectType::Wall));
+	auto hitUpper = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeUpperY), rayDir, raycastConfig.ledgeRayLength, static_cast<uint32_t>(ObjectType::Wall));
 	return hitLower.has_value() && !hitUpper.has_value();
 }
 
@@ -262,6 +260,30 @@ bool Player::HandleMovement(float deltaTime) {
 			Transform t = this->GetTransform();
 			t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
 			this->SetTransform(t);
+
+			if (isWalled) {
+				if (isWalledLeft && facingDirection == -1.0f) {
+					auto hitBreakableWall = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
+					if (hitBreakableWall.has_value()) {
+						shared_ptr<BreakableWall> breakableWall = std::static_pointer_cast<BreakableWall>(hitBreakableWall->collider->GetOwner());
+						if (breakableWall) {
+							breakableWall->BreakWall();
+						}
+					}
+					isDashing = false;
+				}
+				else if (isWalledRight && facingDirection == 1.0f) {
+					auto hitBreakableWall = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
+					if (hitBreakableWall.has_value()) {
+						shared_ptr<BreakableWall> breakableWall = std::static_pointer_cast<BreakableWall>(hitBreakableWall->collider->GetOwner());
+						if (breakableWall) {
+							breakableWall->BreakWall();
+						}
+					}
+					isDashing = false;
+				}
+			}
+
 			return false;
 		}
 	}
@@ -411,7 +433,7 @@ void Player::HandleAnimations() {
 		}
 		else {
 			float anticipationDistance = 0.1f;
-			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, ObjectType::Wall);
+			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, static_cast<uint32_t>(ObjectType::Wall));
 			if (hitGroundSoon.has_value()) {
 				if (GetCurrentAnimation() != "CourierFall") {
 					Play("CourierFall", 0.1f, false);
