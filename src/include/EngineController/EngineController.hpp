@@ -44,6 +44,13 @@ class EngineController {
     */
     void Init();
 
+
+    /**
+    @brief Resolves references and links objects inside the active scene.
+    @return void
+    */
+    void LinkSceneObjects();
+
     /*
     @brief Starts the engine.
     @return void

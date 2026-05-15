@@ -4,6 +4,8 @@
 #include "include/Core/Object2D.hpp"
 #include "include/Game/UI/CardUI.hpp"
 #include "include/Game/CardType.hpp"
+#include "include/Game/Objects/Player.hpp"
+#include "include/Core/Scene.hpp"
 
 /*
  * @brief clas that represents card logic 
@@ -19,6 +21,8 @@ private:
     bool DestroyAfterUsed = false;
 
     shared_ptr<CardUI> display;
+
+	shared_ptr<Player> player;
 
 public:
     Card(const unordered_map<string, std::any>&);
@@ -57,6 +61,8 @@ public:
      * CALL FUNCTIONS LIKE DASH, BOUNCE ETC IN THIS FUNCTION
      */
     void Use();
+
+	void AssignPlayer(shared_ptr<Player> player);
 };
 
 #endif // FE_CARD

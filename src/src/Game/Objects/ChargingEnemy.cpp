@@ -39,34 +39,20 @@ void ChargingEnemy::Chase(float dt) {
 		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
 		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
-		ObjectType::Wall
-	);
-
-	auto enemyHit = Raycast(
-		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
-		glm::vec2(0.0f, -1.0f),
-		wallCheckDistance,
-		ObjectType::Enemy
-	);
-
-	auto trapHit = Raycast(
-		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
-		glm::vec2(0.0f, -1.0f),
-		wallCheckDistance,
-		ObjectType::Trap
+		obstacleMask
 	);
 
 	auto playerHit = Raycast(
 		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
 		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
-		ObjectType::Player
+		static_cast<uint32_t>(ObjectType::Player)
 	);
 
 	if (playerHit.has_value()) {
 		player->takeDamage(damage);
 	}
-	if (enemyHit.has_value() || wallHit.has_value() || trapHit.has_value()) {
+	if (wallHit.has_value()) {
 		stunned = true;
 		state = EnemyState::Patrol;
 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));

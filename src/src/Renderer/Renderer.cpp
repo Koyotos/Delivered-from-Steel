@@ -499,7 +499,6 @@ void Renderer::DrawDebug() {
 void Renderer::ResolveZ() {
     sort(drawVectorUI.begin(), drawVectorUI.end(),[](const shared_ptr<VisualNode>& a, 
         const shared_ptr<VisualNode>& b) {
-            return a->GetZIndex() > b->GetZIndex();
     });
 }
 

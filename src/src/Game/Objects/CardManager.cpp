@@ -272,4 +272,12 @@ shared_ptr<Card> CardManager::CreateCard(CardType type)
 	return newCard;
 }
 
+void CardManager::AssignPlayer(shared_ptr<Player> player)
+{
+	for (auto& card : allDeckCards)
+	{
+		card->AssignPlayer(player);
+	}	
+}
+
 
