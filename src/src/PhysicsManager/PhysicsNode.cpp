@@ -226,7 +226,7 @@ std::optional<RaycastHit> PhysicsNode::Raycast(
     const glm::vec2& offset,
     const glm::vec2& direction,
     float maxDistance,
-    ObjectType type)
+    uint32_t type)
 {
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
@@ -238,7 +238,7 @@ std::optional<RaycastHit> PhysicsNode::Raycast(
 std::optional<RaycastHit> PhysicsNode::Raycast(
     const glm::vec2& direction,
     float maxDistance,
-    ObjectType type)
+    uint32_t type)
 {
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
@@ -251,7 +251,7 @@ std::vector<RaycastHit> PhysicsNode::RaycastAll(
     const glm::vec2& offset,
     const glm::vec2& direction,
     float maxDistance,
-    ObjectType type)
+    uint32_t type)
 {
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
@@ -262,7 +262,7 @@ std::vector<RaycastHit> PhysicsNode::RaycastAll(
 std::vector<RaycastHit> PhysicsNode::RaycastAll(
     const glm::vec2& direction,
     float maxDistance,
-    ObjectType type)
+    uint32_t type)
 {
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);

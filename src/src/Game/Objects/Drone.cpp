@@ -65,11 +65,8 @@ void Drone::DetectPlayer() {
 	float angleToPlayer = glm::degrees(glm::acos(glm::dot(lookDir, dirToPlayer)));
 
 	if (angleToPlayer <= visionAngle / 2.0f) {
-		auto hitWall = Raycast(dirToPlayer, dist, ObjectType::Wall);
-		auto hitTrap = Raycast(dirToPlayer, dist, ObjectType::Trap);
-		auto hitBreakable = Raycast(dirToPlayer, dist, ObjectType::BreakableWall);
-		auto hitEnemy = Raycast(dirToPlayer, dist, ObjectType::Enemy);
-		if (!hitWall.has_value() && !hitTrap.has_value() && !hitBreakable.has_value() && !hitEnemy.has_value()) {
+		auto hitWall = Raycast(dirToPlayer, dist, obstacleMask);
+		if (!hitWall.has_value()) {
 			seePlayer = true;
 			diveTarget = vec3(playerPos.x, playerPos.y, GetTransform().GetTranslation().z);
 		}
@@ -140,11 +137,8 @@ void Drone::Patrol(float dt) {
 	}
 
 	dir /= dist;
-	auto hitWall = Raycast(vec2(dir.x, 0.0f), 0.2f, ObjectType::Wall);
-	auto hitTrap = Raycast(vec2(dir.x, 0.0f), 0.2f, ObjectType::Trap);
-	auto hitBreakable = Raycast(vec2(dir.x, 0.0f), 0.2f, ObjectType::BreakableWall);
-	auto hitEnemy = Raycast(vec2(dir.x, 0.0f), 0.2f, ObjectType::Enemy);
-	if (hitWall.has_value() || hitTrap.has_value() || hitBreakable.has_value() || hitEnemy.has_value()) {
+	auto hitWall = Raycast(vec2(dir.x, 0.0f), 0.2f, obstacleMask);
+	if (hitWall.has_value()) {
 		ReversePatrol();
 		return;
 	}

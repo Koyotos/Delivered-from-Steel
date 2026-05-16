@@ -39,10 +39,17 @@ protected:
 
 	shared_ptr<Player> player;
 
+	uint32_t obstacleMask = static_cast<uint32_t>(ObjectType::Wall) |
+		static_cast<uint32_t>(ObjectType::Enemy) |
+		static_cast<uint32_t>(ObjectType::Trap) |
+		static_cast<uint32_t>(ObjectType::BreakableWall);
+
 public:
 	Enemy(const unordered_map<string, std::any>&);
 
 	void OnCollisionStay(shared_ptr<Collider>) override;
+
+	void OnCollisionExit(shared_ptr<Collider>) override;
 
 	void Update(float) override;
 
@@ -63,6 +70,8 @@ public:
 	void Init(shared_ptr<Scene>) override;
 
 	bool AllRaycast(int);
+
+	void ScaleToDirection();
 };
 
 #endif // FE_ENEMY

@@ -11,7 +11,7 @@ void Game::Init() {
 
     engine.SetActiveScene(gameScene);
 
-    gameScene->GetRoot()->InitRecursive(gameScene);
+    engine.LinkSceneObjects();
 }
 
 void Game::Start() {
