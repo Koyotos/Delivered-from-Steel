@@ -29,7 +29,7 @@ bool Card::CheckUse()
     case CardType::WallJump:
         return (player->CheckLeftWalled() || player->CheckRightWalled()) && !player->CheckGrounded();
     case CardType::WallSnap:
-        return true;
+		return player->CheckWallSnap();
     default:
         return true;
     }
@@ -57,6 +57,8 @@ void Card::Use()
     case CardType::WallJump:
         player->ExecuteWallJump();
         break;
+	case CardType::WallSnap:
+		player->ExecuteWallSnap();
     }
 
 
