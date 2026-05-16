@@ -14,7 +14,8 @@ private:
 	PlayerInputState inputState;
 	HealthComponent health;
 	PlayerCameraController cameraController;
-	std::shared_ptr<ParticleEmitterNode> dustEmitter;
+	std::shared_ptr<ParticleEmitterNode> deathEmitter;
+	std::shared_ptr<ParticleEmitterNode> pixelEmitter;
 
 	bool isGrounded = false;
 	bool isWalled = false;
@@ -46,6 +47,7 @@ public:
 	Player();
 	Player(const std::unordered_map<std::string, std::any>& data);
 
+	void Init(std::shared_ptr<Scene> scene) override;
 	void Update(float deltaTime) override;
 	void Process() override;
 	bool Input(InputEvent& event) override;

@@ -20,7 +20,12 @@ ParticleEmitterNode::ParticleEmitterNode(const std::unordered_map<std::string, s
 	if (data.find("variationX") == data.end()) varX = 0.5f;
 	if (data.find("variationY") == data.end()) varY = 0.5f;
 	velocityVariation = glm::vec3(varX, varY, 0.0f);
-	startColor = glm::vec4(1.0f);
+	float r = data.find("colorR") != data.end() ? fromMap(float, "colorR", data) : 1.0f;
+	float g = data.find("colorG") != data.end() ? fromMap(float, "colorG", data) : 1.0f;
+	float b = data.find("colorB") != data.end() ? fromMap(float, "colorB", data) : 1.0f;
+	float a = data.find("colorA") != data.end() ? fromMap(float, "colorA", data) : 1.0f;
+	startColor = glm::vec4(r, g, b, a);
+	targetSystemName = fromMap(std::string, "targetSystemName", data);
 }
 
 std::string ParticleEmitterNode::Type() {
@@ -30,8 +35,10 @@ std::string ParticleEmitterNode::Type() {
 void ParticleEmitterNode::FindSystem(std::shared_ptr<Node> node) {
 	if (!targetSystem) {
 		if (auto sys = std::dynamic_pointer_cast<ParticleSystemNode>(node)) {
-			targetSystem = sys;
-			return;
+			if (sys->GetName() == targetSystemName) {
+				targetSystem = sys;
+				return;
+			}
 		}
 		for (auto& child : node->GetChildren()) {
 			FindSystem(child);

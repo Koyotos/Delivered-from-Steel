@@ -25,6 +25,7 @@ private:
 	glm::vec3 velocityVariation;
 	glm::vec3 baseVelocity;
 	glm::vec4 startColor;
+	std::string targetSystemName;
 
 	void FindSystem(std::shared_ptr<Node> node);
 	float RandomFloat(float min, float max);
