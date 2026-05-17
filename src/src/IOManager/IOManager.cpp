@@ -97,11 +97,14 @@ void IOManager::ProcessEvent(const InputEvent& event) {
 	}
 }
 
-void IOManager::ProcessInput(shared_ptr<Node> node) {
+void IOManager::ProcessInput(shared_ptr<Node> node, Renderer* rnd) {
 	if (!node) return;
 
 	if (node->TestInput()) {
 		for (auto& event : eventQueue) {
+			if(event.key == GLFW_KEY_C && event.action == GLFW_PRESS) {
+				rnd->debugEnableCulling = !rnd->debugEnableCulling;
+			}
 			if (node->Input(event)) {
 				event.handled = true;
 			}
@@ -109,7 +112,7 @@ void IOManager::ProcessInput(shared_ptr<Node> node) {
 	}
 
 	for (auto& child : node->GetChildren()) {
-		ProcessInput(child);
+		ProcessInput(child, rnd);
 	}
 }
 

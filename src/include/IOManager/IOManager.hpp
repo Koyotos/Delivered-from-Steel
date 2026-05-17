@@ -4,6 +4,7 @@
 #include "include/IOManager/InputEvent.hpp"
 #include "include/Core/Node.hpp"
 #include "include/Globals/Globals.hpp"
+#include "include/Renderer/Renderer.hpp"
 #include <vector>
 #include <memory>
 #include <GLFW/glfw3.h>
@@ -22,7 +23,7 @@ private:
 public:
 	void Init(GLFWwindow* window);
 	void ProcessEvent(const InputEvent& event);
-	void ProcessInput(shared_ptr<Node> root);
+	void ProcessInput(shared_ptr<Node> root, Renderer* rnd);
 
 	void PollGamepad();
 

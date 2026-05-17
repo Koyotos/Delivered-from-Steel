@@ -451,6 +451,9 @@ void Renderer::PrepareShaders() {
 }
 
 bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
+    if(!debugEnableCulling) {
+        return true;
+    }
     const float radius = node->GetCullRadius();
     if (radius < CULL_RADIUS_ALWAYS_TRUE)
         return true;
@@ -471,7 +474,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         PrepareDrawNode(cast, t);
         if(node->RenderType() == NRT_OBJECT3D) {
             float dist = distance(vec2(currentScene->sceneCam->GetPos()),vec2(cast->GetTransform().GetGlobal()[3]));
-            if(dist < lightCullRadius) {
+            if(dist < lightCullRadius && debugEnableCulling) {
                 CreateRenderData(static_pointer_cast<Object3D>(node), potentialCasters);
             }
         }

@@ -170,6 +170,7 @@ class Renderer {
     inline void DestroyBuffers();
 
     public:
+    bool debugEnableCulling = true;
     void Reconfigure(const RendererCommand&, const int16_t& iv = 0, const float& fv = 0.0);
     void DrawScene(shared_ptr<Scene>);
     void EndFrame();
