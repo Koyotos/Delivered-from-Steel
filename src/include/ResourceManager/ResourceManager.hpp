@@ -4,6 +4,7 @@
 #include "include/Core/Object2D.hpp"
 #include "include/Core/Object3D.hpp"
 #include "include/Core/Scene.hpp"
+#include "include/Core/VisualNode.hpp"
 #include "include/Game/Objects/Player.hpp"
 #include "include/Game/Objects/Trap.hpp"
 #include "include/Game/Objects/Item.hpp"
@@ -110,6 +111,8 @@ class ResourceManager {
     vector<RefCountShader> shaders;
     vector<shared_ptr<Scene>> scenes;
 
+    shared_ptr<Scene> currentlyLoading;
+
     // Asset loaders
     inline shared_ptr<Model> LoadModel(const string&);
     inline shared_ptr<Sprite> LoadSprite(const string&);
@@ -122,7 +125,9 @@ class ResourceManager {
     inline unordered_map<string, std::any> LoadJSON(const path&);
 
     // Node parser helpers
-    inline void ApplyAssets(shared_ptr<Node>, unordered_map<string,std::any>);
+    inline void ApplyAssetsGFX(shared_ptr<Node>, unordered_map<string,std::any>);
+    inline void ApplyAssetsSFX(shared_ptr<Node>, unordered_map<string,std::any>);
+    inline void ManageAudio(unordered_map<string,std::any>);
     inline vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ParseNodes(unordered_map<string, std::any>&);
     inline void LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>>&, shared_ptr<Scene>);
 
@@ -130,6 +135,7 @@ class ResourceManager {
 
     public:
     shared_ptr<Scene> LoadScene(const path&) noexcept;
+    void UnloadScene(shared_ptr<Scene>);
     void ConfigurePaths();
 
     void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }

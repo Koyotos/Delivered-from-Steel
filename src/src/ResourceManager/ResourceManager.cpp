@@ -1,11 +1,4 @@
 #include "include/ResourceManager/ResourceManager.hpp"
-#include "include/Core/Node.hpp"
-#include "include/Globals/Globals.hpp"
-#include "include/Renderer/TextNode.hpp"
-#include "include/AudioManager/AudioManager.hpp"
-#include <cstdint>
-#include <filesystem>
-
 
 void ResourceManager::ConfigurePaths() {
     path pth = Globals::GetGlobals().GetExecDir()/"res";
@@ -123,50 +116,77 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
     }
 }
 
-void ResourceManager::ApplyAssets(shared_ptr<Node> node, unordered_map<string,std::any> data) {
-    if(node->Type() == "Object3D") {
-        auto cast = static_pointer_cast<Object3D>(node);
-        if(data.contains("model")) {
-            cast->SetModel(LoadModel(fromMap(string,"model",data)));
-        }
-
-        if(data.contains("shader")) {
-            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
-        }
-
-    } else if(node->Type() == "Object2D" || node->Type() == "CardSlot" || node->Type() == "CardUI" || node->Type() == "ParticleSystemNode") {
-        auto cast = static_pointer_cast<Object2D>(node);
-        if(data.contains("sprite")) {
-            cast->SetSprite(LoadSprite(fromMap(string,"sprite",data)));
-            if (data.contains("playAnimation")) {
-                float speed = data.contains("animSpeed") ? fromMap(float, "animSpeed", data) : 0.1f;
-                bool loop = data.contains("animLoop") ? fromMap(bool, "animLoop", data) : true;
-                cast->Play(fromMap(string, "playAnimation", data), speed, loop);
-            }
-        }
-        if(data.contains("shader")) {
-            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
-        }
-    } else if(node->Type() == "TextNode") {
-        auto cast = static_pointer_cast<Object2D>(node);
-        if(data.contains("shader")) {
-            cast->SetShader(LoadShader(fromMap(string,"shader",data)));
-        }
-    }
-    if (data.contains("sound") && audioManager) {
+void ResourceManager::ApplyAssetsSFX(shared_ptr<Node> node, unordered_map<string,std::any> data) {
+    if(data.contains("sound") && audioManager) {
         string soundName = fromMap(string, "sound", data);
         string fullPath = (audioPath / (soundName + ".wav")).string();
         audioManager->LoadSound(soundName, fullPath);
     }
-    if (data.contains("sounds") && audioManager) {
+    if(data.contains("sounds") && audioManager) {
         vector<std::any> soundList = fromMap(vector<std::any>, "sounds", data);
-
         for (const auto& soundAny : soundList) {
             string soundName = std::any_cast<string>(soundAny);
             string fullPath = (audioPath / (soundName + ".wav")).string();
             audioManager->LoadSound(soundName, fullPath);
         }
     }
+}
+
+void ResourceManager::ApplyAssetsGFX(shared_ptr<Node> node, unordered_map<string,std::any> data) {
+    if(node->Type() == "Node") {
+        return;
+    }
+   
+    if(data.contains("shader")) {
+        shared_ptr<VisualNode> cast = static_pointer_cast<VisualNode>(node);
+        shared_ptr<Shader> sh = LoadShader(fromMap(string,"shader",data));
+        cast->SetShader(LoadShader(fromMap(string,"shader",data)));
+        currentlyLoading->sceneShaders.push_back(sh);
+    }
+
+    if(node->Type() == "Object3D") {
+        auto cast = static_pointer_cast<Object3D>(node);
+        if(data.contains("model")) {
+            shared_ptr<Model> mdl = LoadModel(fromMap(string,"model",data));
+            cast->SetModel(mdl);
+            currentlyLoading->sceneModels.push_back(mdl);
+        }
+
+    } else if(node->Type() == "Object2D" || node->Type() == "CardSlot" || node->Type() == "CardUI" || node->Type() == "ParticleSystemNode") {
+        auto cast = static_pointer_cast<Object2D>(node);
+        if(data.contains("sprite")) {
+            shared_ptr<Sprite> spr = LoadSprite(fromMap(string,"sprite",data));
+            cast->SetSprite(spr);
+            currentlyLoading->sceneSprites.push_back(spr);
+            if (data.contains("playAnimation")) {
+                float speed = data.contains("animSpeed") ? fromMap(float, "animSpeed", data) : 0.1f;
+                bool loop = data.contains("animLoop") ? fromMap(bool, "animLoop", data) : true;
+                cast->Play(fromMap(string, "playAnimation", data), speed, loop);
+            }
+        }
+    } 
+}
+
+void ResourceManager::ManageAudio(unordered_map<string,std::any> data) {
+    if(data.contains("bgm") && audioManager) {
+            string bgmName = fromMap(string, "bgm", data);
+            audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
+        }
+        if (data.contains("bgms") && audioManager) {
+            vector<std::any> bgmList = fromMap(vector<std::any>, "bgms", data);
+            for (const auto& bgmAny : bgmList) {
+                string bgmName = std::any_cast<string>(bgmAny);
+                audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
+            }
+        }
+        if (data.contains("playlist") && audioManager) {
+            vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", data);
+            vector<string> playlistNames;
+            for (const auto& song : playlistAny) {
+                playlistNames.push_back(std::any_cast<string>(song));
+            }
+            audioManager->PlayPlaylist(playlistNames, 0.4f);
+        }
 }
 
 vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(unordered_map<string, std::any>& data) {
@@ -177,28 +197,8 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
         for(auto& octEntry : objectClassTable) {
             if(currentType==octEntry.first) {
                 shared_ptr<Node> node = octEntry.second(objVarList);
-                ApplyAssets(node, objVarList);
-                if (objVarList.contains("bgm") && audioManager) {
-                    string bgmName = fromMap(string, "bgm", objVarList);
-                    audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
-                }
-                if (objVarList.contains("bgms") && audioManager) {
-                    vector<std::any> bgmList = fromMap(vector<std::any>, "bgms", objVarList);
-
-                    for (const auto& bgmAny : bgmList) {
-                        string bgmName = std::any_cast<string>(bgmAny);
-                        audioManager->RegisterBGM(bgmName, (audioPath / (bgmName + ".ogg")).string());
-                    }
-                }
-                if (objVarList.contains("playlist") && audioManager) {
-                    vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", objVarList);
-                    vector<string> playlistNames;
-
-                    for (const auto& song : playlistAny) {
-                        playlistNames.push_back(std::any_cast<string>(song));
-                    }
-                    audioManager->PlayPlaylist(playlistNames, 0.4f);
-                }
+                ApplyAssetsGFX(node, objVarList);
+                ApplyAssetsSFX(node, objVarList);
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }
@@ -218,6 +218,17 @@ void ResourceManager::LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>
             }
         }
     }
+    auto& mVec =  currentlyLoading->sceneModels;
+    auto resized = unique(mVec.begin(), mVec.end());
+    mVec.resize(std::distance(mVec.begin(), resized));
+
+    auto& sVec =  currentlyLoading->sceneSprites;
+    auto resized2 = unique(sVec.begin(), sVec.end());
+    sVec.resize(std::distance(sVec.begin(), resized2));
+
+    auto& shVec =  currentlyLoading->sceneShaders;
+    auto resized3 = unique(shVec.begin(), shVec.end());
+    shVec.resize(std::distance(shVec.begin(), resized3));
     scene->SetRoot(root);
 }
 
@@ -227,19 +238,61 @@ shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
         return nullptr;
     }
 
-    shared_ptr<Scene> loadedScene = make_shared<Scene>();
+    currentlyLoading = make_shared<Scene>();
     
     try {
         unordered_map<string, std::any> sceneData = LoadJSON(scenePath);
-        loadedScene->name = fromMap(string,"name",sceneData);
+        currentlyLoading->name = fromMap(string,"name",sceneData);
         sceneData.erase(sceneData.find("name"));
         auto nodes = ParseNodes(sceneData);
-        LinkScene(nodes, loadedScene);
-        scenes.push_back(loadedScene);
-        return loadedScene;
+        LinkScene(nodes, currentlyLoading);
+        scenes.push_back(currentlyLoading);
+        return currentlyLoading;
     } catch(const exception& except) {
         Globals::GetGlobals().Log(string("Can't load scene : ") + except.what());
         return nullptr;
+    }
+}
+
+void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
+    for(auto& model : scene->sceneModels) {
+        for(uint16_t i = 0; i < models.size(); i++) {
+            if(model == models[i].model) {
+                models[i].refCount--;
+                if(models[i].refCount == 0) {
+                    models.erase(models.begin()+i);
+                }
+            }
+        }
+    }
+
+    for(auto& shader : scene->sceneShaders) {
+        for(uint16_t i = 0; i < shaders.size(); i++) {
+            if(shader == shaders[i].shader) {
+                shaders[i].refCount--;
+                if(shaders[i].refCount == 0) {
+                    shaders.erase(shaders.begin()+i);
+                }
+            }
+        }
+    }
+
+    for(auto& sprite : scene->sceneSprites) {
+        for(uint16_t i = 0; i < sprites.size(); i++) {
+            if(sprite == sprites[i].sprite) {
+                sprites[i].refCount--;
+                if(sprites[i].refCount == 0) {
+                    sprites.erase(sprites.begin()+i);
+                }
+            }
+        }
+    }
+
+    for(uint8_t i = 0; i < scenes.size(); i++) {
+        if(scenes[i] == scene) {
+            scenes.erase(scenes.begin()+i);
+            return;
+        }
     }
 }
 
