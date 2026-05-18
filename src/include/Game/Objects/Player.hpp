@@ -6,6 +6,7 @@
 #include "include/Game/Objects/PlayerMovementStats.hpp"
 #include "include/Game/Objects/HealthComponent.hpp"
 #include "include/Game/Objects/PlayerCameraController.hpp"
+#include "include/Game/Objects/ParticleEmitterNode.hpp"
 
 class Player final : public Object2D {
 private:
@@ -13,12 +14,15 @@ private:
 	PlayerInputState inputState;
 	HealthComponent health;
 	PlayerCameraController cameraController;
+	std::shared_ptr<ParticleEmitterNode> deathEmitter;
+	std::shared_ptr<ParticleEmitterNode> pixelEmitter;
 
 	bool isGrounded = false;
 	bool isWalled = false;
 	bool isWallSliding = false;
 	bool isHanging = false;
 	bool canCutJump = false;
+	bool wasDead = false;
 	bool isDashing = false;
 	bool hasDoubleJumped = false;
 	bool isBounceActive = false;
@@ -56,6 +60,7 @@ public:
 	Player();
 	Player(const std::unordered_map<std::string, std::any>& data);
 
+	void Init(std::shared_ptr<Scene> scene) override;
 	void Update(float deltaTime) override;
 	void Process() override;
 	bool Input(InputEvent& event) override;

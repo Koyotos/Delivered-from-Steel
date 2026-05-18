@@ -38,6 +38,8 @@ class Node {
     bool flags[6];
     vector<shared_ptr<Node>> children;
 
+    string name;
+
     public:
     // Internal stuff to communication between nodes and EngineController. This part is not needed anywhere else. Don't look here. Go away. //
     const uint8_t& GetFlags() const noexcept;
@@ -191,6 +193,12 @@ class Node {
     @brief Generic destructor.
     */
     virtual ~Node();
+
+    /*
+    @brief Returns node name (empty if not set).
+    @return string - name
+    */
+    const string& GetName() const { return name; }
 
 };
 
