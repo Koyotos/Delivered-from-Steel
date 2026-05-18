@@ -4,25 +4,24 @@
 #include "include/PhysicsManager/Collider.hpp"
 #include <algorithm>
 
-class BoxCollider;
-
-class CapsuleCollider : public Collider, public std::enable_shared_from_this<CapsuleCollider> {
+class CapsuleCollider : public Collider, public enable_shared_from_this<CapsuleCollider> {
     public:
 	vec2 a; // one end of the capsule
 	vec2 b; // other end of the capsule
     float radius;
     float height;
 
+    uint8_t Type() const noexcept override;
+
     CapsuleCollider(const Transform transform, float x, float y, float radius, float height);
 
     void UpdatePosition(const Transform transform) override;
 
-    bool CheckCollision(shared_ptr<CapsuleCollider> other) const override;
-    bool CheckCollision(shared_ptr<BoxCollider> other) const override;
+    bool CheckCollision(shared_ptr<Collider> other) const override;
 
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<BoxCollider> other) const override;
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<CapsuleCollider> other) const override;
+    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<Collider> other) const override;
 
+    optional<float> RayVsCircle(const vec2& origin, const vec2& dir, const vec2& center, float radius);
 
     AABB GetBounds() const override; 
 

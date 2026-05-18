@@ -5,6 +5,7 @@
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/Core/VisualNode.hpp"
+#include "include/PhysicsManager/PhysicsManager.hpp"
 
 enum class ObjectType : uint32_t {
     Null = 0,
@@ -22,8 +23,8 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
 	bool isStatic = false;
 	bool isResolveCollision = true;
 
-    shared_ptr<Collider> collider;
     vec2 velocity;
+    shared_ptr<Collider> collider;
     shared_ptr<Shader> debugShader;
 
     protected:
@@ -39,21 +40,21 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
     void SetCollider(shared_ptr<Collider> col);
     shared_ptr<Collider> GetCollider();
 
-    void setStatic(bool value);
-    bool getStatic() const;
+    void SetStatic(bool value);
+    bool GetStatic() const;
 
-    virtual void Update(float dt);
+    void Physics(const float& dt) override;
 
-    void resolveCollision(PhysicsNode& other);
+    void ResolveCollision(PhysicsNode& other);
 
-    void applyForce(const vec2& force);
+    void ApplyForce(const vec2& force);
 
-	void drawDebug();
-    void drawBox();
-    void drawCapsule();
+	void DrawDebug();
+    void DrawBox();
+    void DrawCapsule();
 
-	void setDebugShader(shared_ptr<Shader> shader);
-    shared_ptr<Shader> getDebugShader() const { return debugShader; };
+	void SetDebugShader(shared_ptr<Shader> shader);
+    shared_ptr<Shader> GetDebugShader() const { return debugShader; };
 
     virtual void OnCollisionEnter(shared_ptr<Collider> other) {}
     virtual void OnCollisionStay(shared_ptr<Collider> other) {}

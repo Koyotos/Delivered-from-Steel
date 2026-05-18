@@ -1,5 +1,4 @@
 #include "include/PhysicsManager/PhysicsNode.hpp"
-#include "include/PhysicsManager/PhysicsManager.hpp"
 
 string PhysicsNode::Type() {
     return "PhysicsNode";
@@ -13,20 +12,19 @@ void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
     collider = col;
 }
 
-std::shared_ptr<Collider> PhysicsNode::GetCollider() {
+shared_ptr<Collider> PhysicsNode::GetCollider() {
     return collider;
 }
 
-void PhysicsNode::setStatic(bool value) {
+void PhysicsNode::SetStatic(bool value) {
     isStatic = value;
 }
 
-bool PhysicsNode::getStatic() const {
+bool PhysicsNode::GetStatic() const {
     return isStatic;
 }
 
-void PhysicsNode::Update(float dt)
-{
+void PhysicsNode::Physics(const float& dt) {
     if (isStatic) return;
 
     // testowa symulacja grawitacji
@@ -38,16 +36,15 @@ void PhysicsNode::Update(float dt)
 	this->SetTransform(t);
 }
 
-void PhysicsNode::resolveCollision(PhysicsNode& other)
-{
+void PhysicsNode::ResolveCollision(PhysicsNode& other) {
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
     
 	if (!collider || !other.collider) return;
 
-    if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(other.collider)) {
+    if (auto capsule = dynamic_pointer_cast<CapsuleCollider>(other.collider)) {
         info = collider->CalculateCollisionInfo(capsule);
     }
-    else if (auto box = std::dynamic_pointer_cast<BoxCollider>(other.collider)) {
+    else if (auto box = dynamic_pointer_cast<BoxCollider>(other.collider)) {
         info = collider->CalculateCollisionInfo(box);
     }
 
@@ -58,30 +55,21 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
 	other.collider->GetCurrentCollisions().insert(collider);
 
     float totalInverseMass = 1;
-    //totalInverseMass = (this->isStatic ? 0.0f : 1.0f) + (other.isStatic ? 0.0f : 1.0f);
 
-
-    glm::vec2 separation = info->normal * (info->depth / totalInverseMass);
+    vec2 separation = info->normal * (info->depth / totalInverseMass);
 
     if (!this->isStatic && isResolveCollision && other.isResolveCollision) {
         Transform t = this->GetTransform();
-        t.SetTranslation(t.GetTranslation() + glm::vec3(separation.x, separation.y, 0.0f));
+        t.SetTranslation(t.GetTranslation() + vec3(separation.x, separation.y, 0.0f));
 
         this->SetTransform(t);
         this->ResetGlobal();
         if (collider) collider->UpdatePosition(this->GetTransform());
     }
-    //if (!other.isStatic) {
-    //    Transform t = other.GetTransform();
-    //    t.SetTranslation(t.GetTranslation() - glm::vec3(separation.x, separation.y, 0.0f));
 
-    //    other.SetTransform(t);
-    //}
-    
+    vec2 relativeVelocity = other.velocity - this->velocity;
 
-    glm::vec2 relativeVelocity = other.velocity - this->velocity;
-
-    float velocityAlongNormal = glm::dot(relativeVelocity, info->normal);
+    float velocityAlongNormal = dot(relativeVelocity, info->normal);
 
     if (velocityAlongNormal < 0) return;
 
@@ -90,18 +78,15 @@ void PhysicsNode::resolveCollision(PhysicsNode& other)
     float j = -(1.0f + e) * velocityAlongNormal;
     j /= totalInverseMass;
 
-    glm::vec2 impulse = j * info->normal;
+    vec2 impulse = j * info->normal;
 
     if (!this->isStatic && isResolveCollision && other.isResolveCollision) {
-        this->applyForce(-impulse);
+        this->ApplyForce(-impulse);
     }
-    //if (!other.isStatic) {
-    //    other.applyForce(impulse);
-    //}
     return;
 }
 
-void PhysicsNode::applyForce(const glm::vec2& force) {
+void PhysicsNode::ApplyForce(const vec2& force) {
     if (isStatic) return;
     velocity += force;
 }
@@ -113,7 +98,7 @@ PhysicsNode::PhysicsNode() {
 PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) : VisualNode(data) {
     isStatic = fromMap(bool, "static", data);
     isResolveCollision = fromMap(bool, "ResolveCollision", data);
-    velocity = glm::vec2(0.0f, 0.0f);
+    velocity = vec2(0.0f, 0.0f);
 
     bool addCollider = fromMap(bool, "addCollider", data);
     if (!addCollider) return;
@@ -125,43 +110,26 @@ PhysicsNode::PhysicsNode(const std::unordered_map<std::string, std::any>& data) 
     if(colliderType) {
         float radius = fromMap(float, "radius", data);
         float height = fromMap(float, "height", data);
-		collider = std::make_shared<CapsuleCollider>(GetTransform(), x, y, radius, height);
+		collider = make_shared<CapsuleCollider>(GetTransform(), x, y, radius, height);
         
     } else {
         float width = fromMap(float, "width", data);
         float height = fromMap(float, "height", data);
-        collider = std::make_shared<BoxCollider>(GetTransform(), x, y, width, height);
+        collider = make_shared<BoxCollider>(GetTransform(), x, y, width, height);
     }
     
 }
 
-void PhysicsNode::drawDebug() {
-    #if defined(DEBUG)
-    if (collider) {
-		shader->Use();
-        shader->SetBool("isDebug", true);
-        if (auto capsule = std::dynamic_pointer_cast<CapsuleCollider>(collider)) {
-            drawCapsule();
-        }
-        else if (auto box = std::dynamic_pointer_cast<BoxCollider>(collider)) {
-            drawBox();
-        }
-		shader->SetBool("isDebug", false);
-
-    }
-    #endif
-}
-
-void PhysicsNode::setDebugShader(std::shared_ptr<Shader> shader) {
+void PhysicsNode::SetDebugShader(shared_ptr<Shader> shader) {
     debugShader = shader;
 }
 
-void PhysicsNode::drawCapsule() {
+void PhysicsNode::DrawCapsule() {
     return;
 }
 
-void PhysicsNode::drawBox() {
-    auto box = std::dynamic_pointer_cast<BoxCollider>(collider);
+void PhysicsNode::DrawBox() {
+    auto box = dynamic_pointer_cast<BoxCollider>(collider);
     if (!box) return;
 
     float halfW = box->size.x / 2.0f;
@@ -191,25 +159,19 @@ void PhysicsNode::drawBox() {
     glDeleteVertexArrays(1, &VAO);
 }
 
-void PhysicsNode::processCollisions()
-{
-    for (auto& current : collider->GetCurrentCollisions())
-    {
-        if (collider->GetPreviousCollisions().find(current) == collider->GetPreviousCollisions().end())
-        {
+void PhysicsNode::processCollisions() {
+    for (auto& current : collider->GetCurrentCollisions()) {
+        if (collider->GetPreviousCollisions().find(current) == collider->GetPreviousCollisions().end()) {
             OnCollisionEnter(current);
             OnCollisionStay(current);
         }
-        else
-        {
+        else {
             OnCollisionStay(current);
         }
     }
 
-    for (auto& prev : collider->GetPreviousCollisions())
-    {
-        if (collider->GetCurrentCollisions().find(prev) == collider->GetCurrentCollisions().end())
-        {
+    for (auto& prev : collider->GetPreviousCollisions()) {
+        if (collider->GetCurrentCollisions().find(prev) == collider->GetCurrentCollisions().end()) {
             OnCollisionExit(prev);
         }
     }
@@ -222,12 +184,9 @@ void PhysicsNode::Init() {
     }
 }
 
-std::optional<RaycastHit> PhysicsNode::Raycast(
-    const glm::vec2& offset,
-    const glm::vec2& direction,
-    float maxDistance,
-    uint32_t type)
-{
+optional<RaycastHit> PhysicsNode::Raycast(const vec2& offset, const vec2& direction,
+    float maxDistance, uint32_t type) {
+
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
 
@@ -235,11 +194,9 @@ std::optional<RaycastHit> PhysicsNode::Raycast(
     return hit;
 }
 
-std::optional<RaycastHit> PhysicsNode::Raycast(
-    const glm::vec2& direction,
-    float maxDistance,
-    uint32_t type)
-{
+optional<RaycastHit> PhysicsNode::Raycast( const vec2& direction, float maxDistance,
+    uint32_t type) {
+
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
 
@@ -247,23 +204,18 @@ std::optional<RaycastHit> PhysicsNode::Raycast(
     return hit;
 }
 
-std::vector<RaycastHit> PhysicsNode::RaycastAll(
-    const glm::vec2& offset,
-    const glm::vec2& direction,
-    float maxDistance,
-    uint32_t type)
-{
+vector<RaycastHit> PhysicsNode::RaycastAll(const vec2& offset, const vec2& direction,
+    float maxDistance, uint32_t type) {
+
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
     auto hits = PhysicsManager::GetPhysicsManager().RaycastAll(origin, direction, maxDistance, collider, type);
     return hits;
 }
 
-std::vector<RaycastHit> PhysicsNode::RaycastAll(
-    const glm::vec2& direction,
-    float maxDistance,
-    uint32_t type)
-{
+vector<RaycastHit> PhysicsNode::RaycastAll(const vec2& direction, float maxDistance,
+    uint32_t type) {
+
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
     auto hits = PhysicsManager::GetPhysicsManager().RaycastAll(origin, direction, maxDistance, collider, type);

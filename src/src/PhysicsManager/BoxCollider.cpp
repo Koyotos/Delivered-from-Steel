@@ -1,18 +1,15 @@
 #include "include/PhysicsManager/BoxCollider.hpp"
 
 BoxCollider::BoxCollider(const Transform transform, float x, float y, float width, float height)
-    : Collider()
-{
+    : Collider() {
+
 	this->transform = vec2(x, y);
-
     this->size = vec2(width, height);
-
     UpdatePosition(transform);
 }
 
 
-void BoxCollider::UpdatePosition(const Transform transform)
-{
+void BoxCollider::UpdatePosition(const Transform transform) {
     mat4 modelMatrix = transform.GetGlobal();
 
     boxCenter = vec2(modelMatrix[3].x + this->transform.x, modelMatrix[3].y + this->transform.y);
@@ -26,13 +23,16 @@ void BoxCollider::UpdatePosition(const Transform transform)
     this->min = boxCenter - direction;
 }
 
-
-bool BoxCollider::CheckCollision(std::shared_ptr<BoxCollider> other) const {
-    return CalculateCollisionInfo(other)->collided;
+uint8_t BoxCollider::Type() const noexcept {
+    return 1;
 }
 
-bool BoxCollider::CheckCollision(std::shared_ptr<CapsuleCollider> other) const {
-    return CalculateCollisionInfo(other)->collided;
+bool BoxCollider::CheckCollision(std::shared_ptr<Collider> other) const {
+    if(other->Type() == 1) {
+        return CalculateCollisionInfo(static_pointer_cast<BoxCollider>(other))->collided;
+    } else {
+         return CalculateCollisionInfo(static_pointer_cast<CapsuleCollider>(other))->collided;
+    }
 }
 
 std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
