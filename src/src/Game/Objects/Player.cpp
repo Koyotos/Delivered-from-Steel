@@ -92,6 +92,24 @@ void Player::TriggerCameraShake(float duration, float intensity) {
 	cameraController.TriggerCameraShake(duration, intensity);
 }
 
+void Player::Init(std::shared_ptr<Scene> scene) {
+	Node::Init(scene);
+	Object2D::Init();
+
+	for (auto& child : GetChildren()) {
+		if (child->Type() == "ParticleEmitterNode") {
+			auto emitter = std::dynamic_pointer_cast<ParticleEmitterNode>(child);
+
+			if (child->GetName() == "DeathEmitter") {
+				deathEmitter = emitter;
+			}
+			else if (child->GetName() == "PixelEmitter") {
+				pixelEmitter = emitter;
+			}
+		}
+	}
+}
+
 bool Player::CheckGrounded() {
 	float rayLength = 0.19f;
 	glm::vec2 rayDir(1.0f, 0.0f);
@@ -135,9 +153,7 @@ void Player::GatherInput(float deltaTime) {
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
 	if (currentJumpRaw && !inputState.lastJumpInput) {
-		if (inputState.timeSinceLastRelease > 0.08f) {
-			inputState.jumpPressed = true;
-		}
+		inputState.jumpPressed = true;
 	}
 
 	if (!currentJumpRaw && inputState.lastJumpInput) {
@@ -489,8 +505,28 @@ void Player::HandleAnimations() {
 }
 
 void Player::Update(float deltaTime) {
-	if (HandleMovement(deltaTime)) return;
-	HandleAnimations();
+	bool skipAnimations = HandleMovement(deltaTime);
+
+	if (!skipAnimations) {
+		HandleAnimations();
+	}
+
+	if (deathEmitter) {
+		if (!wasDead && health.IsDead()) {
+			deathEmitter->Burst(10);
+		}
+	}
+
+	if (pixelEmitter) {
+		if (!wasDead && health.IsDead()) {
+			pixelEmitter->isEmitting = true;
+		}
+		else if (!health.IsDead()) {
+			pixelEmitter->isEmitting = false;
+		}
+	}
+
+	wasDead = health.IsDead();
 }
 
 bool Player::Input(InputEvent& event) {

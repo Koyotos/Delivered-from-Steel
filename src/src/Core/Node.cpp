@@ -64,6 +64,14 @@ Node::Node(const unordered_map<string, std::any>& data) {
     flags[0] = fromMap(bool, "process", data);
     flags[1] = fromMap(bool, "input", data);
     flags[2] = fromMap(bool, "physics", data);
+
+    name.clear();
+    auto it = data.find("name");
+    if (it != data.end()) {
+        if (const std::string* s = std::any_cast<std::string>(&it->second)) {
+            name = *s;
+        }
+    }
 }
 
 Node::~Node() {
