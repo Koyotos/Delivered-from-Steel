@@ -18,6 +18,16 @@ struct PlayerMovementStats {
 	float coyoteTime = 0.15f;
 	bool enableJumpBuffer = true;
 	float jumpBufferTime = 0.15f;
+	float dashSpeed = 8.0f;
+	float dashDuration = 0.2f;
+	float bounceForce = 6.0f;
+	float maxFeatherFallingSpeed = 1.0f;
+	float featherFallingDuration = 4.0f;
+	float wallJumpForceY = 5.5f;
+	float wallJumpForceX = 2.0f;
+	float wallSnapSpeed = 4.0f;
+	float wallSnapDistance = 5.0f;
+	float wallSnapJump = 3.0f;
 };
 
 struct PlayerRaycastConfig {

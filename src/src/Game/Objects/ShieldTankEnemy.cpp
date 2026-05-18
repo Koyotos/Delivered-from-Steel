@@ -49,7 +49,7 @@ void ShieldTankEnemy::Chase(float dt) {
 					glm::vec2(0.0f),
 					dir,
 					dist,
-					ObjectType::Wall
+					obstacleMask
 				);
 				if (hit.has_value()) {
 					playerJumpingOver = false;
@@ -57,12 +57,7 @@ void ShieldTankEnemy::Chase(float dt) {
 				else if (direction != sign(dir.x)) {
 					direction = sign(dir.x);
 
-					Transform t = GetTransform();
-					glm::vec3 scale = t.GetScale();
-					scale.x = std::abs(scale.x) * direction;
-					t.SetScale(scale);
-					SetTransform(t);
-					playerJumpingOver = false;
+					ScaleToDirection();
 				}
 			}
 
@@ -84,14 +79,14 @@ void ShieldTankEnemy::Chase(float dt) {
 		glm::vec2(shieldRaycastOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		groundCheckDistance,
-		ObjectType::Wall
+		static_cast<uint32_t>(ObjectType::Wall)
 	);
 
 	auto enemyHit = Raycast(
 		glm::vec2(raycastOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
-		ObjectType::Enemy
+		static_cast<uint32_t>(ObjectType::Enemy)
 	);
 
 	if (groundHit.has_value() && !enemyHit.has_value()) {
@@ -108,7 +103,7 @@ void ShieldTankEnemy::AttackState(float dt) {
 		glm::vec2(shieldRaycastOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		groundCheckDistance,
-		ObjectType::Player
+		static_cast<uint32_t>(ObjectType::Player)
 	);
 	if (shieldHit.has_value() && !shieldOnCooldown) {
 		shieldOnCooldown = true;

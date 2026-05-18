@@ -151,7 +151,8 @@ void ResourceManager::ApplyAssetsGFX(shared_ptr<Node> node, unordered_map<string
             cast->SetModel(mdl);
             currentlyLoading->sceneModels.push_back(mdl);
         }
-    } else if(node->Type() == "Object2D" || node->Type() == "CardSlot" || node->Type() == "CardUI") {
+
+    } else if(node->Type() == "Object2D" || node->Type() == "CardSlot" || node->Type() == "CardUI" || node->Type() == "ParticleSystemNode") {
         auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("sprite")) {
             shared_ptr<Sprite> spr = LoadSprite(fromMap(string,"sprite",data));

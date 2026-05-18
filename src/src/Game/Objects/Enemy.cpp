@@ -45,7 +45,7 @@ void Enemy::ChangeState(shared_ptr<Player> player) {
 		break;
 	}
 	case EnemyState::Attack: {
-		//  to latwiej bedzie ustawic w AttackState(dt);
+		//  enemy will stay in attack state as long as player is in attack distance, otherwise it will switch to chase or patrol depending on if it sees the player
 		break;
 	}
 	}
@@ -75,6 +75,19 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		Attack(player);
+
+		auto trans = player->GetTransform();
+		trans.SetTranslation(trans.GetTranslation() + vec3(GetVelocity() * 1.0f/60.0f, 0.0f));
+
+		player->SetTransform(trans);
+	}
+}
+
+void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (owner->GetObjectType() == ObjectType::Player) {
+
+		player->addPlatformVelocity(GetVelocity());
 	}
 }
 
@@ -86,6 +99,8 @@ void Enemy::Attack(shared_ptr<Player> player) {
 
 void Enemy::Init(shared_ptr<Scene> scene) {
 	player = scene->GetPlayer();
+
+	ScaleToDirection();
 }
 
 void Enemy::Update(float deltaTime) {
@@ -117,7 +132,7 @@ void Enemy::DetectPlayer() {
 				glm::vec2(0.0f),
 				dir,
 				dist,
-				ObjectType::Wall
+				static_cast<uint32_t>(ObjectType::Wall)
 			);
 
 			seePlayer = !hit.has_value();
@@ -133,43 +148,32 @@ bool Enemy::AllRaycast(int direction) {
 		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
 		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
-		ObjectType::Wall
-	);
-
-	auto enemyHit = Raycast(
-		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
-		glm::vec2(0.0f, -1.0f),
-		wallCheckDistance,
-		ObjectType::Enemy
-	);
-
-	auto trapHit = Raycast(
-		glm::vec2(raycastOffsetX * direction, raycastOffsetY),
-		glm::vec2(0.0f, -1.0f),
-		wallCheckDistance,
-		ObjectType::Trap
+		obstacleMask
 	);
 
 	auto groundHit = Raycast(
 		glm::vec2(raycastGroundCheckOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		groundCheckDistance,
-		ObjectType::Wall
+		static_cast<uint32_t>(ObjectType::Wall)
 	);
 
-	return enemyHit.has_value() || wallHit.has_value() || trapHit.has_value() || !groundHit.has_value();
+	return wallHit.has_value() || !groundHit.has_value();
 }
 
 void Enemy::Patrol(float dt) {
 	if (AllRaycast(direction) && !AllRaycast(-direction)) {
 		direction *= -1.0f;
-
-		Transform t = GetTransform();
-		glm::vec3 scale = t.GetScale();
-		scale.x = std::abs(scale.x) * direction;
-		t.SetScale(scale);
-		SetTransform(t);
+		ScaleToDirection();
 	}
 
 	SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
+}
+
+void Enemy::ScaleToDirection() {
+	Transform t = GetTransform();
+	glm::vec3 scale = t.GetScale();
+	scale.x = std::abs(scale.x) * direction;
+	t.SetScale(scale);
+	SetTransform(t);
 }

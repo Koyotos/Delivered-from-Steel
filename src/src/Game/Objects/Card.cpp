@@ -15,16 +15,53 @@ void Card::Deactivate()
 
 bool Card::CheckUse()
 {
-    if (type == CardType::WallJump)
+    switch (type)
     {
-		// return IsNextToWall();
+    case CardType::Dash:
+        return true;
+    case CardType::Bounce:
+        //return !player->CheckGrounded();
+        return true;
+    case CardType::FeatherFalling:
+        return true;
+    case CardType::DoubleJump:
+        return !player->CheckGrounded();
+    case CardType::WallJump:
+        return (player->CheckLeftWalled() || player->CheckRightWalled()) && !player->CheckGrounded();
+    case CardType::WallSnap:
+		return player->CheckWallSnap();
+    default:
+        return true;
     }
-	// tbd: integracja z player movementem, sprawdzanie czy jest na ziemi itd
     return true;
 }
 
 void Card::Use()
 {
+    if (!CheckUse()) return;
+
+    switch (type)
+    {
+    case CardType::Dash:
+        player->ExecuteDash();
+        break;
+    case CardType::Bounce:
+        player->ExecuteBounce();
+        break;
+    case CardType::FeatherFalling:
+        player->ExecuteFeatherFalling();
+        break;
+    case CardType::DoubleJump:
+        player->ExecuteDoubleJump();
+        break;
+    case CardType::WallJump:
+        player->ExecuteWallJump();
+        break;
+	case CardType::WallSnap:
+		player->ExecuteWallSnap();
+    }
+
+
     if (DestroyAfterUsed)
     {
         //TODO: destroy card
@@ -47,4 +84,9 @@ std::shared_ptr<CardUI> Card::GetDisplay()
 CardType Card::GetCardType()
 {
     return type;
+}
+
+void Card::AssignPlayer(shared_ptr<Player> player)
+{
+    this->player = player;
 }

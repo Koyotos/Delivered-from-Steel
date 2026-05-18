@@ -28,10 +28,8 @@
 #include "include/Game/UI/CardUI.hpp"
 #include "include/Game/UI/Vignette.hpp"
 #include "include/Profiler/ProfilerNode.hpp"
-#include "include/Renderer/TextNode.hpp"
-#include "include/AudioManager/AudioManager.hpp"
-#include <cstdint>
-#include <filesystem>
+#include "include/Renderer/ParticleSystemNode.hpp"
+#include "include/Game/Objects/ParticleEmitterNode.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
@@ -79,7 +77,9 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<SpikePlatform>("SpikePlatform"),
 	RegisterObjectType<MovingPlatform>("MovingPlatform"),
     RegisterObjectType<TextNode>("TextNode"),
-    RegisterObjectType<ProfilerNode>("ProfilerNode")
+    RegisterObjectType<ProfilerNode>("ProfilerNode"),
+    RegisterObjectType<ParticleSystemNode>("ParticleSystemNode"),
+    RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode")
 };
 
 struct RefCountModel {

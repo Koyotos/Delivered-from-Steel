@@ -6,14 +6,14 @@ TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(da
 	speed = 0.0f;
 	damage = 0.0f;
 
-	shotTime = 1.0f;
+	shotTime = 2.0f;
 
 	visiblityAngle = 1 / tan(radians(90.0f));
-	visiblityDistance = 2.0f;
+	visiblityDistance = 4.0f;
 
-	barrelLockTime = 0.5f;
+	barrelLockTime = 0.2f;
 
-	rotationSpeed = 5.0f;
+	rotationSpeed = 2.0f;
 
 	barrelLocked = false;
 
@@ -24,10 +24,17 @@ void TurretEnemy::AttackState(float dt) {
 	RotateBarrel(dt);
 	if (!isWaiting) {
 		if (!bullet->GetVisible() && playerInSight) {
-			glm::vec2 dir = normalize(player->GetTransform().GetTranslation() - transform.GetTranslation());
-			bullet->SetDirection(dir);
-			bullet->SetVisible(true);
 			Transform bulletTransform = bullet->GetTransform();
+
+			vec3 rotation = barrel->GetTransform().GetRotation();
+			float angle = rotation.z;
+			glm::vec2 dir = glm::vec2(
+				cos(angle - radians(90.0f)),
+				sign(GetTransform().GetScale().y) * sin(angle - radians(90.0f))
+			);
+			bullet->SetDirection(normalize(dir));
+
+			bullet->SetVisible(true);
 			bulletTransform.SetTranslation(barrel->GetTransform().GetTranslation() * GetTransform().GetScale().y + GetTransform().GetTranslation());
 			bullet->SetTransform(bulletTransform);
 			barrelLocked = true;
@@ -53,13 +60,10 @@ void TurretEnemy::Update(float dt) {
 		}
 	}
 	if (barrelLocked) {
-		if (currentBarrelLock > 0.0f)
-		{
-			currentBarrelLock -= dt;
+		currentBarrelLock -= dt;
 
-			if (currentBarrelLock <= 0.0f)
-				barrelLocked = false;
-		}
+		if (currentBarrelLock <= 0.0f)
+			barrelLocked = false;
 	}
 	Enemy::Update(dt);
 }
@@ -74,6 +78,7 @@ void TurretEnemy::ChangeState(shared_ptr<Player> player) {
 	}
 	case EnemyState::Attack: {
 		if (!seePlayer) {
+			playerInSight = false;
 			state = EnemyState::Patrol;
 		}
 		break;
@@ -92,7 +97,21 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 	vec2 playerPos = vec2(player->GetTransform().GetTranslation());
 
-	vec2 direction = normalize(playerPos - barrelPos);
+	float bulletSpeed =
+		bullet->GetSpeed();
+
+	vec2 playerVelocity =player->GetVelocity();
+	playerVelocity.y = 0.0f;
+
+	float travelTime = length(playerPos - barrelPos) / bulletSpeed;
+
+	vec2 targetPos = playerPos + playerVelocity * travelTime;
+
+	travelTime = length(targetPos - barrelPos) / bulletSpeed;
+
+	targetPos =	playerPos + playerVelocity * travelTime;
+
+	vec2 direction = normalize(targetPos - barrelPos);
 
 	float targetAngle = sign(GetTransform().GetScale().y) * atan2(direction.y, direction.x) + radians(90.0f);
 
@@ -107,9 +126,15 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 		cos(targetAngle - currentAngle)
 	);
 
-	float newAngle =
-		currentAngle +
-		angleDiff * rotationSpeed * deltaTime;
+	float maxStep = rotationSpeed * deltaTime;
+
+	float step = glm::clamp(angleDiff, -maxStep, maxStep);
+
+	float newAngle = currentAngle + step;
+
+	//float newAngle =
+	//	currentAngle +
+	//	angleDiff * rotationSpeed * deltaTime;
 
 	if (abs(cos(targetAngle - newAngle)) > aimTolerance) {
 		playerInSight = true;

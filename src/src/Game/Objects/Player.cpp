@@ -1,4 +1,5 @@
 #include "include/Game/Objects/Player.hpp"
+#include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Globals/Globals.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -91,54 +92,65 @@ void Player::TriggerCameraShake(float duration, float intensity) {
 	cameraController.TriggerCameraShake(duration, intensity);
 }
 
+void Player::Init(std::shared_ptr<Scene> scene) {
+	for (auto& child : GetChildren()) {
+		if (child->Type() == "ParticleEmitterNode") {
+			auto emitter = std::dynamic_pointer_cast<ParticleEmitterNode>(child);
+
+			if (child->GetName() == "DeathEmitter") {
+				deathEmitter = emitter;
+			}
+			else if (child->GetName() == "PixelEmitter") {
+				pixelEmitter = emitter;
+			}
+		}
+	}
+}
+
 bool Player::CheckGrounded() {
 	float rayLength = 0.19f;
 	glm::vec2 rayDir(1.0f, 0.0f);
 	float offsetX = -0.095f;
 	float offsetY = -0.41f;
 
-	auto hitRight = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, ObjectType::Enemy);
+	auto hitRight = Raycast(glm::vec2(raycastConfig.groundedOffsetX, raycastConfig.groundedOffsetY), raycastConfig.groundedRayDir, raycastConfig.groundedRayLength, obstacleMask);
 
-	return hitRight.has_value() || hitEnemy.has_value();
+	return hitRight.has_value();
 }
 
 bool Player::CheckCeiling() {
-	auto hitCenter = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, ObjectType::Enemy);
+	auto hitCenter = Raycast(glm::vec2(raycastConfig.ceilingOffsetX, raycastConfig.ceilingOffsetY), raycastConfig.ceilingRayDir, raycastConfig.ceilingRayLength, obstacleMask);
 
-	return hitCenter.has_value() || hitEnemy.has_value();
+	return hitCenter.has_value();
 }
 
 bool Player::CheckLeftWalled() {
-	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Enemy);
+	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
 
-	return hitLeft.has_value() || hitEnemy.has_value();
+	return hitLeft.has_value();
 }
 
 bool Player::CheckRightWalled() {
-	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Wall);
-	auto hitEnemy = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, ObjectType::Enemy);
+	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
 
-	return hitRight.has_value() || hitEnemy.has_value();
+	return hitRight.has_value();
 }
 
 bool Player::CheckLedge() {
+	return false;
 	if (ledgeDropCooldown > 0.0f) return false;
 	glm::vec2 rayDir(facingDirection, 0.0f);
-	auto hitLower = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeLowerY), rayDir, raycastConfig.ledgeRayLength, ObjectType::Wall);
-	auto hitUpper = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeUpperY), rayDir, raycastConfig.ledgeRayLength, ObjectType::Wall);
+	auto hitLower = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeLowerY), rayDir, raycastConfig.ledgeRayLength, static_cast<uint32_t>(ObjectType::Wall));
+	auto hitUpper = Raycast(glm::vec2((raycastConfig.ledgeOffsetX - 0.02f) * facingDirection, raycastConfig.ledgeUpperY), rayDir, raycastConfig.ledgeRayLength, static_cast<uint32_t>(ObjectType::Wall));
 	return hitLower.has_value() && !hitUpper.has_value();
 }
 
 void Player::GatherInput(float deltaTime) {
+	if (isDashing) return;
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
 	if (currentJumpRaw && !inputState.lastJumpInput) {
-		if (inputState.timeSinceLastRelease > 0.08f) {
-			inputState.jumpPressed = true;
-		}
+		inputState.jumpPressed = true;
 	}
 
 	if (!currentJumpRaw && inputState.lastJumpInput) {
@@ -206,6 +218,10 @@ bool Player::HandleMovement(float deltaTime) {
 
 	glm::vec2 currentVelocity = GetVelocity();
 
+	Transform t = this->GetTransform();
+
+	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
+
 	isGrounded = CheckGrounded();
 	bool isWalledLeft = CheckLeftWalled();
 	bool isWalledRight = CheckRightWalled();
@@ -223,6 +239,110 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		coyoteTimeCounter -= deltaTime;
+	}
+
+	if (isWallSnaping) {
+		currentVelocity.y = 0.0f;
+		currentVelocity.x = facingDirection * stats.dashSpeed;
+		SetVelocity(currentVelocity);
+
+		Transform t = this->GetTransform();
+		t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
+		this->SetTransform(t);
+
+		if (isWalled) {
+			if (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f) {
+				currentVelocity.x = beforeCardVelocityX;
+				currentVelocity.y = stats.wallSnapJump;
+				SetVelocity(currentVelocity);
+				isWallSnaping = false;
+				return false;
+			}
+		}
+		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || (facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
+			currentVelocity.x = beforeCardVelocityX;
+			currentVelocity.y = stats.wallSnapJump;
+			SetVelocity(currentVelocity);
+			isWallSnaping = false;
+		}
+
+		return false;
+	}
+
+	if (isBounceActive) {
+		float minBounceSpeed = 0.5f;
+		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
+			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
+			isBounceActive = false;
+			isDashing = false;
+		}
+		else if (isWalledLeft && lastSpeedForBounceX < -minBounceSpeed) {
+			currentVelocity.x = std::max(stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			isBounceActive = false;
+			isDashing = false;
+		}
+		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
+			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			isBounceActive = false;
+			isDashing = false;
+		}
+
+		lastSpeedForBounceY = currentVelocity.y;
+		lastSpeedForBounceX = currentVelocity.x;
+	}
+
+	if (isDashing) {
+		dashTimer -= deltaTime;
+		if (dashTimer <= 0.0f) {
+			isDashing = false;
+			currentVelocity.x = beforeCardVelocityX;
+		}
+		else {
+			currentVelocity.y = 0.0f;
+			currentVelocity.x = facingDirection * stats.dashSpeed;
+			SetVelocity(currentVelocity);
+
+			Transform t = this->GetTransform();
+			t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
+			this->SetTransform(t);
+
+			if (isWalled) {
+				if (isWalledLeft && facingDirection == -1.0f) {
+					auto hitBreakableWall = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
+					if (hitBreakableWall.has_value()) {
+						shared_ptr<BreakableWall> breakableWall = std::static_pointer_cast<BreakableWall>(hitBreakableWall->collider->GetOwner());
+						if (breakableWall) {
+							breakableWall->BreakWall();
+						}
+					}
+					isDashing = false;
+				}
+				else if (isWalledRight && facingDirection == 1.0f) {
+					auto hitBreakableWall = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
+					if (hitBreakableWall.has_value()) {
+						shared_ptr<BreakableWall> breakableWall = std::static_pointer_cast<BreakableWall>(hitBreakableWall->collider->GetOwner());
+						if (breakableWall) {
+							breakableWall->BreakWall();
+						}
+					}
+					isDashing = false;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	if (isFeatherFalling) {
+		featherFallingTimer -= deltaTime;
+		if (featherFallingTimer <= 0.0f) {
+			isFeatherFalling = false;
+			currentVelocity.y = 0.0f;
+		}
+		else {
+			currentVelocity.y = std::max(currentVelocity.y, -stats.maxFeatherFallingSpeed);
+			SetVelocity(currentVelocity);
+		}
 	}
 
 	if (inputState.jumpPressed) {
@@ -331,14 +451,11 @@ bool Player::HandleMovement(float deltaTime) {
 
 	SetVelocity(currentVelocity);
 
-	Transform t = this->GetTransform();
 	t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
 	this->SetTransform(t);
 
 	inputState.jumpPressed = false;
 	inputState.jumpReleased = false;
-
-	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
 
 	return false;
 }
@@ -358,7 +475,7 @@ void Player::HandleAnimations() {
 		}
 		else {
 			float anticipationDistance = 0.1f;
-			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, ObjectType::Wall);
+			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, static_cast<uint32_t>(ObjectType::Wall));
 			if (hitGroundSoon.has_value()) {
 				if (GetCurrentAnimation() != "CourierFall") {
 					Play("CourierFall", 0.1f, false);
@@ -385,8 +502,28 @@ void Player::HandleAnimations() {
 }
 
 void Player::Update(float deltaTime) {
-	if (HandleMovement(deltaTime)) return;
-	HandleAnimations();
+	bool skipAnimations = HandleMovement(deltaTime);
+
+	if (!skipAnimations) {
+		HandleAnimations();
+	}
+
+	if (deathEmitter) {
+		if (!wasDead && health.IsDead()) {
+			deathEmitter->Burst(10);
+		}
+	}
+
+	if (pixelEmitter) {
+		if (!wasDead && health.IsDead()) {
+			pixelEmitter->isEmitting = true;
+		}
+		else if (!health.IsDead()) {
+			pixelEmitter->isEmitting = false;
+		}
+	}
+
+	wasDead = health.IsDead();
 }
 
 bool Player::Input(InputEvent& event) {
@@ -404,4 +541,80 @@ void Player::Shatter() {
 
 bool Player::IsHanging() {
 	return isHanging;
+}
+
+void Player::ExecuteDash() {
+    isDashing = true;
+	isWallSnaping = false;
+    dashTimer = stats.dashDuration;
+	beforeCardVelocityX = GetVelocity().x;
+    SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
+}
+
+void Player::ExecuteBounce() {
+	isBounceActive = true;
+	lastSpeedForBounceY = 0;
+	lastSpeedForBounceX = 0;
+}
+
+void Player::ExecuteFeatherFalling() {
+    isFeatherFalling = true;
+	featherFallingTimer = stats.featherFallingDuration;
+}
+
+void Player::ExecuteDoubleJump() {
+	isDashing = false;
+    glm::vec2 vel = GetVelocity();
+    vel.y = stats.jumpForce;
+    SetVelocity(vel);
+    canCutJump = true;
+}
+
+void Player::ExecuteWallJump() {
+	isDashing = false;
+    glm::vec2 vel = GetVelocity();
+    
+    float jumpDir = 0.0f;
+    if (CheckLeftWalled()) jumpDir = 1.0f;
+    else if (CheckRightWalled()) jumpDir = -1.0f;
+
+    if (jumpDir != 0.0f) {
+        vel.y = stats.wallJumpForceY;
+        vel.x = jumpDir * stats.wallJumpForceX;
+        facingDirection = jumpDir;
+        SetVelocity(vel);
+        
+        coyoteTimeCounter = 0.0f;
+        jumpBufferCounter = 0.0f;
+    }
+}
+
+bool Player::CheckWallSnap() {
+	glm::vec2 rayDir(facingDirection, 0.0f);
+
+	auto hitDown = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY - raycastConfig.wallRayLength), rayDir, stats.wallSnapDistance);
+	auto hitUp = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY), rayDir, stats.wallSnapDistance);
+	float playerX = GetTransform().GetTranslation().x;
+
+	if (hitDown.has_value()) {
+		float hitX = hitDown->point.x;
+		if (hitUp.has_value()) {
+			wallSnapPosX = hitDown->distance < std::abs(hitUp->distance) ? hitX : hitUp->point.x;
+		}
+		else {
+			wallSnapPosX = hitX;
+		}
+		return true;
+	}
+	else if (hitUp.has_value()) {
+		wallSnapPosX = hitUp->point.x;
+		return true;
+	}
+	return false;
+}
+
+void Player::ExecuteWallSnap() {
+	beforeCardVelocityX = GetVelocity().x;
+	isWallSnaping = true;
+	isDashing = false;
 }
