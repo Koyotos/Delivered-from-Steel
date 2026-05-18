@@ -23,7 +23,7 @@ private:
 public:
 	void Init(GLFWwindow* window);
 	void ProcessEvent(const InputEvent& event);
-	void ProcessInput(shared_ptr<Node> root, Renderer* rnd);
+	void ProcessInput(shared_ptr<Node> root);
 
 	void PollGamepad();
 

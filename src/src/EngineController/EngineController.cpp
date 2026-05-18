@@ -84,7 +84,7 @@ void EngineController::Run() {
 		glfwPollEvents();
 		iom->PollGamepad();
         if (active) {
-		    iom->ProcessInput(active->GetRoot(), renderer.get());
+		    iom->ProcessInput(active->GetRoot());
             ProcessNode(active->GetRoot());
 
             while (accumulator >= fixedDeltaTime) {
