@@ -93,9 +93,6 @@ void Player::TriggerCameraShake(float duration, float intensity) {
 }
 
 void Player::Init(std::shared_ptr<Scene> scene) {
-	Node::Init(scene);
-	Object2D::Init();
-
 	for (auto& child : GetChildren()) {
 		if (child->Type() == "ParticleEmitterNode") {
 			auto emitter = std::dynamic_pointer_cast<ParticleEmitterNode>(child);
@@ -221,6 +218,10 @@ bool Player::HandleMovement(float deltaTime) {
 
 	glm::vec2 currentVelocity = GetVelocity();
 
+	Transform t = this->GetTransform();
+
+	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
+
 	isGrounded = CheckGrounded();
 	bool isWalledLeft = CheckLeftWalled();
 	bool isWalledRight = CheckRightWalled();
@@ -238,6 +239,34 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		coyoteTimeCounter -= deltaTime;
+	}
+
+	if (isWallSnaping) {
+		currentVelocity.y = 0.0f;
+		currentVelocity.x = facingDirection * stats.dashSpeed;
+		SetVelocity(currentVelocity);
+
+		Transform t = this->GetTransform();
+		t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
+		this->SetTransform(t);
+
+		if (isWalled) {
+			if (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f) {
+				currentVelocity.x = beforeCardVelocityX;
+				currentVelocity.y = stats.wallSnapJump;
+				SetVelocity(currentVelocity);
+				isWallSnaping = false;
+				return false;
+			}
+		}
+		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || (facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
+			currentVelocity.x = beforeCardVelocityX;
+			currentVelocity.y = stats.wallSnapJump;
+			SetVelocity(currentVelocity);
+			isWallSnaping = false;
+		}
+
+		return false;
 	}
 
 	if (isBounceActive) {
@@ -266,7 +295,7 @@ bool Player::HandleMovement(float deltaTime) {
 		dashTimer -= deltaTime;
 		if (dashTimer <= 0.0f) {
 			isDashing = false;
-			currentVelocity.x = beforeDashVelocityX;
+			currentVelocity.x = beforeCardVelocityX;
 		}
 		else {
 			currentVelocity.y = 0.0f;
@@ -422,14 +451,11 @@ bool Player::HandleMovement(float deltaTime) {
 
 	SetVelocity(currentVelocity);
 
-	Transform t = this->GetTransform();
 	t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
 	this->SetTransform(t);
 
 	inputState.jumpPressed = false;
 	inputState.jumpReleased = false;
-
-	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
 
 	return false;
 }
@@ -519,8 +545,9 @@ bool Player::IsHanging() {
 
 void Player::ExecuteDash() {
     isDashing = true;
+	isWallSnaping = false;
     dashTimer = stats.dashDuration;
-	beforeDashVelocityX = GetVelocity().x;
+	beforeCardVelocityX = GetVelocity().x;
     SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
 }
 
@@ -540,7 +567,6 @@ void Player::ExecuteDoubleJump() {
     glm::vec2 vel = GetVelocity();
     vel.y = stats.jumpForce;
     SetVelocity(vel);
-    hasDoubleJumped = true;
     canCutJump = true;
 }
 
@@ -561,4 +587,34 @@ void Player::ExecuteWallJump() {
         coyoteTimeCounter = 0.0f;
         jumpBufferCounter = 0.0f;
     }
+}
+
+bool Player::CheckWallSnap() {
+	glm::vec2 rayDir(facingDirection, 0.0f);
+
+	auto hitDown = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY - raycastConfig.wallRayLength), rayDir, stats.wallSnapDistance);
+	auto hitUp = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY), rayDir, stats.wallSnapDistance);
+	float playerX = GetTransform().GetTranslation().x;
+
+	if (hitDown.has_value()) {
+		float hitX = hitDown->point.x;
+		if (hitUp.has_value()) {
+			wallSnapPosX = hitDown->distance < std::abs(hitUp->distance) ? hitX : hitUp->point.x;
+		}
+		else {
+			wallSnapPosX = hitX;
+		}
+		return true;
+	}
+	else if (hitUp.has_value()) {
+		wallSnapPosX = hitUp->point.x;
+		return true;
+	}
+	return false;
+}
+
+void Player::ExecuteWallSnap() {
+	beforeCardVelocityX = GetVelocity().x;
+	isWallSnaping = true;
+	isDashing = false;
 }

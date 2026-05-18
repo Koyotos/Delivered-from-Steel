@@ -24,9 +24,9 @@ private:
 	bool canCutJump = false;
 	bool wasDead = false;
 	bool isDashing = false;
-	bool hasDoubleJumped = false;
 	bool isBounceActive = false;
 	bool isFeatherFalling = false;
+	bool isWallSnaping = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -37,10 +37,11 @@ private:
 	float coyoteTimeCounter = 0.0f;
 	float jumpBufferCounter = 0.0f;
 	float ledgeDropCooldown = 0.0f;
-	float beforeDashVelocityX = 0.0f;
+	float beforeCardVelocityX = 0.0f;
+	float wallSnapPosX = 0.0f;
 
 	glm::vec2 platformVelocity = glm::vec2(0.0f);
-	glm::vec3 respawnPoint = glm::vec3(0.0f);;
+	glm::vec3 respawnPoint = glm::vec3(0.0f);
 
 	void GatherInput(float deltaTime);
 	bool HandleMovement(float deltaTime);
@@ -77,6 +78,8 @@ public:
 	void ExecuteFeatherFalling();
 	void ExecuteDoubleJump();
 	void ExecuteWallJump();
+	void ExecuteWallSnap();
+	bool CheckWallSnap();
 };
 
 #endif
