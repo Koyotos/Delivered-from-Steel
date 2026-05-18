@@ -93,9 +93,6 @@ void Player::TriggerCameraShake(float duration, float intensity) {
 }
 
 void Player::Init(std::shared_ptr<Scene> scene) {
-	Node::Init(scene);
-	Object2D::Init();
-
 	for (auto& child : GetChildren()) {
 		if (child->Type() == "ParticleEmitterNode") {
 			auto emitter = std::dynamic_pointer_cast<ParticleEmitterNode>(child);
