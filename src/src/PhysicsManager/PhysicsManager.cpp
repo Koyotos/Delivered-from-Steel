@@ -1,7 +1,7 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
+#include "include/Core/Scene.hpp"
 
-void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
-{
+void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     if (currentScene != scene) {
         currentScene = scene;
         currentNodes.clear();
@@ -19,8 +19,8 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
 
     // Update physics
     for (auto& node : currentNodes) {
-        node->Update(dt);
-        if (!node->getStatic()) {
+        node->Physics(dt);
+        if (!node->GetStatic()) {
             node->ResetGlobal();
             node->SetTransformChanged(true);
         }
@@ -57,16 +57,15 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
         auto col = node->GetCollider();
         if (!col)
             continue;
-        std::vector<std::shared_ptr<PhysicsNode>> candidates;
+        vector<shared_ptr<PhysicsNode>> candidates;
         quadTree.Query(col->GetBounds(), candidates);
         for (auto& other : candidates) {
             if (node.get() == other.get())
                 continue;
-            node->resolveCollision(*other);
+            node->ResolveCollision(*other);
         }
     }
 }
-
 
 void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
@@ -80,62 +79,45 @@ void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	}	
 }
 
-PhysicsManager& PhysicsManager::GetPhysicsManager()
-{
+PhysicsManager& PhysicsManager::GetPhysicsManager() {
 	static PhysicsManager instance;
 	return instance;
 }
 
-std::optional<RaycastHit> PhysicsManager::Raycast(
-	const glm::vec2& origin,
-	const glm::vec2& direction,
-	float maxDistance,
-	std::shared_ptr<Collider> collider,
-    uint32_t type)
-{
-	float closest = maxDistance;
-	std::optional<RaycastHit> result;
+optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& direction, float maxDistance,
+	shared_ptr<Collider> collider, uint32_t type) {
 
+	float closest = maxDistance;
+	optional<RaycastHit> result;
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
         if ((static_cast<uint32_t>(currentNodes[i]->GetObjectType()) & type) == 0 && type != static_cast<uint32_t>(ObjectType::Null)) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
 			auto hit = col->Raycast(origin, direction, maxDistance);
-
-			if (hit && hit->distance < closest)
-			{
+			if (hit && hit->distance < closest) {
 				closest = hit->distance;
 				result = hit;
 			}			
 		}
 	}
-
 	return result;
 }
 
-std::vector<RaycastHit> PhysicsManager::RaycastAll(
-	const glm::vec2& origin,
-	const glm::vec2& direction,
-	float maxDistance,
-	std::shared_ptr<Collider> collider,
-    uint32_t type)
-{
-	float closest = maxDistance;
-	std::vector<RaycastHit> result;
+vector<RaycastHit> PhysicsManager::RaycastAll(const vec2& origin, const vec2& direction, float maxDistance,
+	shared_ptr<Collider> collider, uint32_t type) {
 
+	float closest = maxDistance;
+	vector<RaycastHit> result;
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
 		if ((static_cast<uint32_t>(currentNodes[i]->GetObjectType()) & type) == 0 && type != static_cast<uint32_t>(ObjectType::Null)) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
 			auto hit = col->Raycast(origin, direction, maxDistance);
-
-			if (hit && hit->distance < closest)
-			{
+			if (hit && hit->distance < closest) {
 				closest = hit->distance;
 				result.push_back(*hit);
 			}
 		}
 	}
-
 	return result;
 }

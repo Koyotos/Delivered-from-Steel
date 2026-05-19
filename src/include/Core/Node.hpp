@@ -165,8 +165,8 @@ class Node {
     void Enable() noexcept;
 
 	/*
-    * @brief Initializes the node and all its children.
-    * @return void
+    @brief Initializes the node and all its children.
+    @return void
     */
     void InitRecursive(shared_ptr<Scene>);
 

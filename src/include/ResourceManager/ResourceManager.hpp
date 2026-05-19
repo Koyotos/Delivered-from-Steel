@@ -30,6 +30,7 @@
 #include "include/Profiler/ProfilerNode.hpp"
 #include "include/Renderer/ParticleSystemNode.hpp"
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>

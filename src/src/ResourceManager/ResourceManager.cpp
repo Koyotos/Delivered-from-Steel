@@ -144,7 +144,7 @@ void ResourceManager::ApplyAssetsGFX(shared_ptr<Node> node, unordered_map<string
         currentlyLoading->sceneShaders.push_back(sh);
     }
 
-    if(node->Type() == "Object3D") {
+    if(node->RenderType() == 4) {
         auto cast = static_pointer_cast<Object3D>(node);
         if(data.contains("model")) {
             shared_ptr<Model> mdl = LoadModel(fromMap(string,"model",data));
@@ -152,7 +152,7 @@ void ResourceManager::ApplyAssetsGFX(shared_ptr<Node> node, unordered_map<string
             currentlyLoading->sceneModels.push_back(mdl);
         }
 
-    } else if(node->Type() == "Object2D" || node->Type() == "CardSlot" || node->Type() == "CardUI" || node->Type() == "ParticleSystemNode") {
+    } else if(node->RenderType() >= 3) {
         auto cast = static_pointer_cast<Object2D>(node);
         if(data.contains("sprite")) {
             shared_ptr<Sprite> spr = LoadSprite(fromMap(string,"sprite",data));

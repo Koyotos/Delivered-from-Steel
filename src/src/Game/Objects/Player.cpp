@@ -209,7 +209,7 @@ void Player::Process() {
 		return;
 	}
 
-	health.Update(deltaTime);
+	health.Physics(deltaTime);
 	GatherInput(deltaTime);
 }
 
@@ -501,7 +501,7 @@ void Player::HandleAnimations() {
 	}
 }
 
-void Player::Update(float deltaTime) {
+void Player::Physics(const float& deltaTime) {
 	bool skipAnimations = HandleMovement(deltaTime);
 
 	if (!skipAnimations) {

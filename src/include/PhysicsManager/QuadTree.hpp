@@ -1,17 +1,15 @@
-#pragma once
+#ifndef FE_QUADTREE
+#define FE_QUADTREE
+
+#include "include/PhysicsManager/AABB.hpp"
+#include "include/PhysicsManager/PhysicsNode.hpp"
 
 #include <memory>
 #include <vector>
 #include <array>
 
-#include "include/PhysicsManager/AABB.hpp"
-
-class PhysicsNode;
-
-class QuadTree
-{
-private:
-
+class QuadTree {
+    private:
     static constexpr int MAX_OBJECTS = 8;
     static constexpr int MAX_LEVELS = 5;
 
@@ -19,25 +17,19 @@ private:
 
     AABB bounds;
 
-    std::vector<std::shared_ptr<PhysicsNode>> objects;
+    vector<shared_ptr<PhysicsNode>> objects;
+    array<unique_ptr<QuadTree>, 4> children;
 
-    std::array<std::unique_ptr<QuadTree>, 4> children;
-
-public:
-
+    public:
     QuadTree(int level, const AABB& bounds);
-
     void Clear();
-
-    void Insert(std::shared_ptr<PhysicsNode> node);
-
-    void Query(const AABB& area, std::vector<std::shared_ptr<PhysicsNode>>& result);
-
+    void Insert(shared_ptr<PhysicsNode> node);
+    void Query(const AABB& area, vector<shared_ptr<PhysicsNode>>& result);
     QuadTree() = default;
 
-private:
-
+    private:
     void Split();
-
     int GetIndex(const AABB& rect);
 };
+
+#endif

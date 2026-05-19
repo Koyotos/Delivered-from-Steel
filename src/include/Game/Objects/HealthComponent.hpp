@@ -13,7 +13,7 @@ private:
 	bool canTakeDamage = true;
 
 public:
-	void Update(float deltaTime);
+	void Physics(const float& deltaTime);
 	void TakeDamage(float damage);
 	void Shatter();
 	bool CheckAndResetRespawn(float deltaTime);

@@ -1,9 +1,7 @@
 #include "include/PhysicsManager/CapsuleCollider.hpp"
-#include "include/PhysicsManager/BoxCollider.hpp"
 
 CapsuleCollider::CapsuleCollider(const Transform transform, float x, float y, float radius, float height)
-    : Collider()
-{
+    : Collider() {
 	this->transform = vec2(x, y);
 
     this->radius = radius;
@@ -12,8 +10,7 @@ CapsuleCollider::CapsuleCollider(const Transform transform, float x, float y, fl
     UpdatePosition(transform);
 }
 
-void CapsuleCollider::UpdatePosition(const Transform transform)
-{
+void CapsuleCollider::UpdatePosition(const Transform transform) {
     mat4 modelMatrix = transform.GetGlobal();
 
     vec2 center = vec2(modelMatrix[3].x + this->transform.x, modelMatrix[3].y + this->transform.y);
@@ -26,47 +23,40 @@ void CapsuleCollider::UpdatePosition(const Transform transform)
     this->b = center - upDirection * segmentHalfLength;
 }
 
-bool CapsuleCollider::CheckCollision(std::shared_ptr<BoxCollider> other) const {
-	return CalculateCollisionInfo(other)->collided;
-}
-
-bool CapsuleCollider::CheckCollision(std::shared_ptr<CapsuleCollider> other) const {
+bool CapsuleCollider::CheckCollision(shared_ptr<Collider> other) const {
     return CalculateCollisionInfo(other)->collided;
 }
 
-std::shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
-    std::shared_ptr<CollisionInfo> info = other->CalculateCollisionInfo(std::const_pointer_cast<CapsuleCollider>(shared_from_this()));
-	vec2 tempNormal = info->normal;
-	info->normal = -tempNormal;
-    return info;
+uint8_t CapsuleCollider::Type() const noexcept {
+    return 2;
 }
 
-std::shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
-    std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
+shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(shared_ptr<Collider> other) const {
+    if(other->Type() == 1) {
+        shared_ptr<CollisionInfo> info = other->CalculateCollisionInfo(const_pointer_cast<CapsuleCollider>(shared_from_this()));
+        vec2 tempNormal = info->normal;
+        info->normal = -tempNormal;
+        return info;
+    }
+    shared_ptr<CapsuleCollider> capsule = static_pointer_cast<CapsuleCollider>(other);
+    shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
-	glm::vec2 closestCapsule = {
-	   other->a.x,
-	   std::clamp(b.y, other->b.y, other->a.y)
-	};
-
-	glm::vec2 closestCapsuleOther = {
-	   a.x,
-       std::clamp(closestCapsule.y, b.y, a.y)
-	};
+	vec2 closestCapsule = { capsule->a.x, std::clamp(b.y, capsule->b.y, capsule->a.y) };
+	vec2 closestCapsuleOther = { a.x, std::clamp(closestCapsule.y, b.y, a.y) };
 
 	float distSq = DistanceSquared(closestCapsule, closestCapsuleOther);
 
-    if (distSq < (other->radius + radius) * (other->radius + radius)) {
+    if(distSq < (capsule->radius + radius) * (capsule->radius + radius)) {
         info->collided = true;
         float dist = sqrt(distSq);
-        info->depth = (other->radius + radius) - dist;
+        info->depth = (capsule->radius + radius) - dist;
         if (dist > 0) {
             info->normal = -(closestCapsule - closestCapsuleOther) / dist;
         }
         else {
-            info->normal = glm::vec2(0, 1);
+            info->normal = vec2(0, 1);
         }
-		info->collider = other;
+		info->collider = capsule;
         return info;
     }
     else {
@@ -75,13 +65,8 @@ std::shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(std::shar
     }
 }
 
-std::optional<float> rayVsCircle(
-    const glm::vec2& origin,
-    const glm::vec2& dir,
-    const glm::vec2& center,
-    float radius)
-{
-    glm::vec2 oc = origin - center;
+optional<float> CapsuleCollider::RayVsCircle(const vec2& origin, const vec2& dir, const vec2& center, float radius) {
+    vec2 oc = origin - center;
 
     float a = glm::dot(dir, dir);
     float b = 2.0f * glm::dot(oc, dir);
@@ -90,51 +75,44 @@ std::optional<float> rayVsCircle(
     float discriminant = b * b - 4 * a * c;
 
     if (discriminant < 0)
-        return std::nullopt;
+        return nullopt;
 
     float t = (-b - sqrt(discriminant)) / (2.0f * a);
 
     if (t < 0)
-        return std::nullopt;
+        return nullopt;
 
     return t;
 }
 
-std::optional<RaycastHit> CapsuleCollider::Raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
+optional<RaycastHit> CapsuleCollider::Raycast(const vec2& origin, const vec2& dir, float maxDist) {
     float closest = maxDist;
-    std::optional<RaycastHit> result;
+    optional<RaycastHit> result;
 
-    if (auto t = rayVsCircle(origin, dir, a, radius))
-    {
-        if (*t < closest)
-        {
+    if (auto t = RayVsCircle(origin, dir, a, radius)) {
+        if (*t < closest) {
             closest = *t;
             result = RaycastHit();
             result->distance = *t;
             result->point = origin + dir * (*t);
-            result->normal = glm::normalize(result->point - a);
+            result->normal = normalize(result->point - a);
             result->collider = shared_from_this();
         }
     }
 
-    if (auto t = rayVsCircle(origin, dir, b, radius))
-    {
-        if (*t < closest)
-        {
+    if (auto t = RayVsCircle(origin, dir, b, radius)) {
+        if (*t < closest) {
             closest = *t;
             result = RaycastHit();
             result->distance = *t;
             result->point = origin + dir * (*t);
-            result->normal = glm::normalize(result->point - b);
+            result->normal = normalize(result->point - b);
             result->collider = shared_from_this();
         }
     }
-
     float minX = a.x - radius;
     float maxX = a.x + radius;
-
-    if (dir.x != 0.0f)
-    {
+    if (dir.x != 0.0f) {
         float t1 = (minX - origin.x) / dir.x;
         float t2 = (maxX - origin.x) / dir.x;
 
@@ -143,18 +121,16 @@ std::optional<RaycastHit> CapsuleCollider::Raycast(const glm::vec2& origin, cons
 
         float t = tNear;
 
-        if (t >= 0 && t < closest)
-        {
+        if (t >= 0 && t < closest) {
             float y = origin.y + dir.y * t;
 
-            if (y >= b.y && y <= a.y)
-            {
+            if (y >= b.y && y <= a.y) {
                 closest = t;
 
                 result = RaycastHit();
                 result->distance = t;
                 result->point = origin + dir * t;
-                result->normal = (origin.x < a.x) ? glm::vec2(-1, 0) : glm::vec2(1, 0);
+                result->normal = (origin.x < a.x) ? vec2(-1, 0) : vec2(1, 0);
                 result->collider = shared_from_this();
             }
         }

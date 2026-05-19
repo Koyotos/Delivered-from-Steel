@@ -17,7 +17,7 @@ ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enem
 	stunDuration = 1.0f;
 }
 
-void ChargingEnemy::Update(float deltaTime) {
+void ChargingEnemy::Physics(const float& deltaTime) {
 	if (stunned) {
 		SetVelocity(vec2(0, GetVelocity().y));
 		stunTimer += deltaTime;
@@ -26,10 +26,10 @@ void ChargingEnemy::Update(float deltaTime) {
 			stunTimer = 0.0f;
 
 		}
-		PhysicsNode::Update(deltaTime);
+		PhysicsNode::Physics(deltaTime);
 	}
 	else {
-		Enemy::Update(deltaTime);
+		Enemy::Physics(deltaTime);
 	}
 }
 

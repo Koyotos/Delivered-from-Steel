@@ -5,8 +5,6 @@
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 #include <algorithm>
 
-class CapsuleCollider;
-
 class BoxCollider : public Collider, public enable_shared_from_this<BoxCollider> {
     private:
     vec2 min;
@@ -16,18 +14,21 @@ class BoxCollider : public Collider, public enable_shared_from_this<BoxCollider>
     public:
     vec2 size;
 
-	vec2 getMin() const { return min; }
-	vec2 getMax() const { return max; }
+	vec2 GetMin() const { return min; }
+	vec2 GetMax() const { return max; }
+
+    uint8_t Type() const noexcept override;
 
     BoxCollider(const Transform transform, float x, float y, float width, float height);
 
 	void UpdatePosition(const Transform transform) override;
 
-    bool CheckCollision(shared_ptr<BoxCollider> other) const override;
-    bool CheckCollision(shared_ptr<CapsuleCollider> other) const override;
+    bool CheckCollision(shared_ptr<Collider> other) const override;
 
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<BoxCollider> other) const override;
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<CapsuleCollider> other) const override;
+    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<Collider> other) const override;
+
+    shared_ptr<CollisionInfo> CalculateCollisionInfoB(shared_ptr<BoxCollider> other) const;
+    shared_ptr<CollisionInfo> CalculateCollisionInfoC(shared_ptr<CapsuleCollider> other) const;
 
     AABB GetBounds() const override;
 

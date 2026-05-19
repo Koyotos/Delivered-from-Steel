@@ -1,7 +1,6 @@
 #ifndef FE_PHYSICS_MANAGER
 #define FE_PHYSICS_MANAGER
 
-#include "include/Core/Scene.hpp"
 #include "include/PhysicsManager/PhysicsNode.hpp"
 #include "include/PhysicsManager/AABB.hpp"
 #include "include/PhysicsManager/QuadTree.hpp"

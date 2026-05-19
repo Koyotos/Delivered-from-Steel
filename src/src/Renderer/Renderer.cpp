@@ -217,16 +217,37 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, co
 }
 
 void Renderer::ComputeFrustum() {
-    frustumPlanes[0] = frameVP[3] + frameVP[0];
-    frustumPlanes[1] = frameVP[3] - frameVP[0];
-    frustumPlanes[2] = frameVP[3] + frameVP[1];
-    frustumPlanes[3] = frameVP[3] - frameVP[1];
-    frustumPlanes[4] = frameVP[3] + frameVP[2];
-    frustumPlanes[5] = frameVP[3] - frameVP[2];
+    const mat4& m = frameVP;
 
-    for(auto& p : frustumPlanes) {
-        p*=1.0f/length(p);
+    vec4 row0(m[0][0], m[1][0], m[2][0], m[3][0]);
+    vec4 row1(m[0][1], m[1][1], m[2][1], m[3][1]);
+    vec4 row2(m[0][2], m[1][2], m[2][2], m[3][2]);
+    vec4 row3(m[0][3], m[1][3], m[2][3], m[3][3]);
+
+    frustumPlanes[0] = row3 + row0; // left
+    frustumPlanes[1] = row3 - row0; // right
+    frustumPlanes[2] = row3 + row1; // bottom
+    frustumPlanes[3] = row3 - row1; // top
+    frustumPlanes[4] = row3 + row2; // near
+    frustumPlanes[5] = row3 - row2; // far
+
+    for (auto& p : frustumPlanes) {
+        p /= length(vec3(p));
     }
+}
+
+bool Renderer::Cull(const shared_ptr<VisualNode>& node) {
+    float radius = node->GetCullRadius();
+    if (radius < CULL_RADIUS_ALWAYS_TRUE)
+        return true;
+    vec3 pos = vec3(node->GetTransform().GetGlobal()[3]);
+    for(int i = 0; i < 6; ++i) {
+        const vec4& p = frustumPlanes[i];
+        if(dot(vec3(p), pos) + p.w < -radius)
+            return false;
+    }
+
+    return true;
 }
 
 void Renderer::DepthPass() {
@@ -448,20 +469,6 @@ void Renderer::PrepareShaders() {
     for(auto& node : drawVectorUI) {
         ConfigureShader2D(node);
     }
-}
-
-bool Renderer::Cull(const std::shared_ptr<VisualNode>& node) {
-    const float radius = node->GetCullRadius();
-    if (radius < CULL_RADIUS_ALWAYS_TRUE)
-        return true;
-    const vec3 pos = node->GetTransform().GetGlobal()[3];
-
-    for (int i = 0; i < 6; i++) {
-        const vec4& p = frustumPlanes[i];
-        if (dot(vec3(p), pos) + p.w > -radius)
-            return false;
-    }
-    return true;
 }
 
 void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
