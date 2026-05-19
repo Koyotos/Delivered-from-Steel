@@ -23,7 +23,7 @@ void MovingPlatform::Init(shared_ptr<Scene> scene) {
     player = scene->GetPlayer();
 }
 
-void MovingPlatform::Physics(float deltaTime) {
+void MovingPlatform::Physics(const float& deltaTime) {
     timer += deltaTime;
 
     vec3 from = (state == MovingPlatformState::MovingToEnd) ? startPosition : endPosition;

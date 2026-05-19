@@ -103,7 +103,7 @@ void Enemy::Init(shared_ptr<Scene> scene) {
 	ScaleToDirection();
 }
 
-void Enemy::Physics(float deltaTime) {
+void Enemy::Physics(const float& deltaTime) {
 	PhysicsNode::Physics(deltaTime);
 	UpdateState(deltaTime);
 }

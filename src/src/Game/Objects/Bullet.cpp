@@ -12,7 +12,7 @@ Bullet::Bullet(const std::unordered_map<std::string, std::any>& data)
 	SetVisible(false);
 }
 
-void Bullet::Physics(float deltaTime)
+void Bullet::Physics(const float& deltaTime)
 {
 	currentLifeTime += deltaTime;
 	if (currentLifeTime >= lifeTime) {

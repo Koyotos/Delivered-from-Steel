@@ -51,7 +51,7 @@ public:
 
 	void OnCollisionExit(shared_ptr<Collider>) override;
 
-	void Physics(float) override;
+	void Physics(const float&) override;
 
 	void UpdateState(float);
 

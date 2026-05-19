@@ -16,7 +16,7 @@ private:
 public:
     Bullet(const std::unordered_map<std::string, std::any>&);
 
-    void Physics(float deltaTime) override;
+    void Physics(const float& deltaTime) override;
     string Type() override;
 
     void SetDirection(vec2 newDirection);

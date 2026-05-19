@@ -501,7 +501,7 @@ void Player::HandleAnimations() {
 	}
 }
 
-void Player::Physics(float deltaTime) {
+void Player::Physics(const float& deltaTime) {
 	bool skipAnimations = HandleMovement(deltaTime);
 
 	if (!skipAnimations) {

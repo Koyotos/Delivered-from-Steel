@@ -36,7 +36,7 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	endPos = targetPos;
 }
 
-void Drone::Physics(float deltaTime) {
+void Drone::Physics(const float& deltaTime) {
 	if (spotLight) {
 		spotLight->data1 = GetTransform().GetTranslation();
 	}

@@ -26,7 +26,7 @@ bool PhysicsNode::GetStatic() const {
     return isStatic;
 }
 
-void PhysicsNode::Physics(float dt) {
+void PhysicsNode::Physics(const float& dt) {
     if (isStatic) return;
 
     // testowa symulacja grawitacji

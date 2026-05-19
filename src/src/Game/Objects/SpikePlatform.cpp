@@ -24,7 +24,7 @@ float Lerp(float a, float b, float t)
 
 }
 
-void SpikePlatform::Physics(float dt)
+void SpikePlatform::Physics(const float& dt)
 {
     if (childrenDirty)
     {

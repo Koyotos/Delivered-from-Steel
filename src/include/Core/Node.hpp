@@ -138,7 +138,7 @@ class Node {
     @param1 const float& - time since last frame
     @return void
     */
-    virtual void Physics(float);
+    virtual void Physics(const float&);
 
     /*
     @brief Returns node type as string.

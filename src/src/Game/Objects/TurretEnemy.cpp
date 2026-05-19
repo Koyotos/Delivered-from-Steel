@@ -50,7 +50,7 @@ void TurretEnemy::Patrol(float dt) {
 	direction = sign(dir);
 }
 
-void TurretEnemy::Physics(float dt) {
+void TurretEnemy::Physics(const float& dt) {
 	if (isWaiting) {
 		shotTimer += dt;
 		if (shotTimer >= shotTime) {

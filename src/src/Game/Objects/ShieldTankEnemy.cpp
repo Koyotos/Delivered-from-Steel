@@ -112,7 +112,7 @@ void ShieldTankEnemy::AttackState(float dt) {
 	}
 }
 
-void ShieldTankEnemy::Physics(float deltaTime) {
+void ShieldTankEnemy::Physics(const float& deltaTime) {
 	if (shieldOnCooldown) {
 		shieldCooldownTimer += deltaTime;
 		if (shieldCooldownTimer >= shieldOnCooldown) {

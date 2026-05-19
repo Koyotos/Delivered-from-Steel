@@ -41,7 +41,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
     void SetStatic(bool value);
     bool GetStatic() const;
 
-    void Physics(float dt) override;
+    void Physics(const float& dt) override;
 
     void ResolveCollision(PhysicsNode& other);
 
