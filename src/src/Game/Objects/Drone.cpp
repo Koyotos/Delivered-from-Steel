@@ -2,6 +2,8 @@
 #include "include/Globals/Globals.hpp"
 #include "include/AudioManager/AudioManager.hpp"
 #include "include/Core/Scene.hpp"
+#include "include/SaveManager/WorldStateManager.hpp"
+#include "include/SceneManager/SceneManager.hpp"
 #include <glm/geometric.hpp>
 
 Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
@@ -200,9 +202,17 @@ void Drone::Explode() {
 	//}
 
 	if (spotLight) spotLight->Disable();
-	Disable();
 	Transform t = GetTransform();
 	vec3 outOfBoundsPos(-9999.0f, -9999.0f, -9999.0f);
 	t.SetTranslation(outOfBoundsPos);
 	SetTransform(t);
+	std::string id = this->GetSaveID();
+	if (!id.empty()) {
+		auto& globals = Globals::GetGlobals();
+		if (globals.sceneManager && globals.worldStateManager) {
+			std::string currentSceneName = globals.sceneManager->GetActive()->GetName();
+			globals.worldStateManager->MarkAsDestroyed(currentSceneName, id);
+		}
+	}
+	Disable();
 }

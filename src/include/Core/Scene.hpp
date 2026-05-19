@@ -57,6 +57,8 @@ class Scene {
     * @param parent The parent's transformation.
     */
     void UpdateTransforms(shared_ptr<Node>, Transform);
+
+    std::string GetName() const { return name; }
 };
 
 #endif

@@ -18,6 +18,9 @@ public:
 	void Shatter();
 	bool CheckAndResetRespawn(float deltaTime);
 	bool IsDead() const noexcept { return isDead; }
+
+	float GetHP() const { return hp; }
+	void SetHP(float value) { hp = value; }
 };
 
 #endif

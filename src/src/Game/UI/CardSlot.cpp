@@ -4,6 +4,7 @@
 #include "GLFW/glfw3.h"
 
 void CardSlot::RemoveCard() {
+	if (card == nullptr) return;
 	card->MoveTo(glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y - 100.0f), 0.5f, EaseType::OutQuad);
 	card->FadeOut(0.5f, EaseType::OutQuad);
 

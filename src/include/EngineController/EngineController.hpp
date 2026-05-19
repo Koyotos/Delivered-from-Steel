@@ -9,6 +9,8 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Game/Objects/CardManager.hpp"
+#include "include/SaveManager/SaveManager.hpp"
+#include "include/SaveManager/WorldStateManager.hpp"
 
 /*
 @brief Main engine class that acts as a facade for modules. It hides low-level mechanisms of modules
@@ -26,6 +28,13 @@ class EngineController {
     shared_ptr<ResourceManager> rsm;
     shared_ptr<AudioManager> aum;
 	shared_ptr<CardManager> crm;
+    shared_ptr<SaveManager> svm;
+    shared_ptr<WorldStateManager> wsm;
+
+    shared_ptr<Scene> activeLevelScene = nullptr;
+    shared_ptr<Node> activeLevelNode = nullptr;
+    std::string activeLevelName = "";
+    std::vector<shared_ptr<Node>> levelTrash;
 
     double currentTime;
     double deltaTime; 
@@ -95,6 +104,11 @@ class EngineController {
     @brief Basic destructor.
     */
     ~EngineController();
+
+    void LoadLevel(const string& levelName);
+
+    void SaveGame(const string& filepath);
+    void LoadGame(const string& filepath);
 };
 
 #endif

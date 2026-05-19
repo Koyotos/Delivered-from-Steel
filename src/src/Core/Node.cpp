@@ -1,4 +1,5 @@
 #include "include/Core/Node.hpp"
+#include <algorithm>
 
 vector<shared_ptr<Node>> Node::GetChildren() {
     return children;
@@ -6,6 +7,13 @@ vector<shared_ptr<Node>> Node::GetChildren() {
 
 void Node::AddChild(shared_ptr<Node> node) {
     children.push_back(node);
+}
+
+void Node::RemoveChild(shared_ptr<Node> node) {
+    auto it = std::find(children.begin(), children.end(), node);
+    if (it != children.end()) {
+        children.erase(it);
+    }
 }
 
 void Node::Process() {
@@ -70,6 +78,14 @@ Node::Node(const unordered_map<string, std::any>& data) {
     if (it != data.end()) {
         if (const std::string* s = std::any_cast<std::string>(&it->second)) {
             name = *s;
+        }
+    }
+
+    saveID.clear();
+    auto itSave = data.find("saveID");
+    if (itSave != data.end()) {
+        if (const std::string* s = std::any_cast<std::string>(&itSave->second)) {
+            saveID = *s;
         }
     }
 }
