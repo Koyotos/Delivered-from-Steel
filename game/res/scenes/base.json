@@ -52,35 +52,6 @@
     "zIndex": 0, 
     "ResolveCollision":  true
   },
-  "4": {
-    "parent": 1,
-    "class": "ProfilerNode",
-    "shader": "text",
-    "transform": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0,
-      1.0,
-      1.0
-    ],
-    "color": [ 1.0, 0.55, 0.0 ],
-    "size": [ 0, 20 ],
-    "pos": [ 20, 850 ],
-    "scale": 1.0,
-    "content": "",
-    "process": true,
-    "input": false,
-    "physics": false,
-    "draw": false,
-    "ignoreParent": true,
-    "cull": 0.0,
-    "zIndex": 0,
-    "ResolveCollision":  true
-  },
   "5": {
     "name": "DeathParticles",
     "class": "ParticleSystemNode",

@@ -5,7 +5,7 @@
 #include <chrono>
 #include <glad/glad.h>
 
-#define FE_ENABLE_PROFILER 
+//#define FE_ENABLE_PROFILER 
 
 using namespace std;
 using namespace std::chrono;
