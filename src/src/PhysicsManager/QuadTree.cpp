@@ -1,29 +1,19 @@
 #include "include/PhysicsManager/QuadTree.hpp"
-#include "include/PhysicsManager/PhysicsNode.hpp"
-#include "include/PhysicsManager/Collider.hpp"
 
-QuadTree::QuadTree(int level, const AABB& bounds) :
-    level(level),
-    bounds(bounds)
-{
+QuadTree::QuadTree(int level, const AABB& bounds) : level(level), bounds(bounds) {
 }
 
-void QuadTree::Clear()
-{
+void QuadTree::Clear() {
     objects.clear();
-
-    for (auto& child : children)
-    {
-        if (child)
-        {
+    for (auto& child : children) {
+        if (child) {
             child->Clear();
             child.reset();
         }
     }
 }
 
-void QuadTree::Split()
-{
+void QuadTree::Split() {
     float halfWidth = (bounds.max.x - bounds.min.x) * 0.5f;
     float halfHeight = (bounds.max.y - bounds.min.y) * 0.5f;
 
@@ -59,8 +49,7 @@ void QuadTree::Split()
         });
 }
 
-int QuadTree::GetIndex(const AABB& rect)
-{
+int QuadTree::GetIndex(const AABB& rect) {
     float verticalMid = bounds.min.x + (bounds.max.x - bounds.min.x) * 0.5f;
     float horizontalMid = bounds.min.y + (bounds.max.y - bounds.min.y) * 0.5f;
 
@@ -81,9 +70,7 @@ int QuadTree::GetIndex(const AABB& rect)
     return -1;
 }
 
-
-void QuadTree::Insert(std::shared_ptr<PhysicsNode> node)
-{
+void QuadTree::Insert(std::shared_ptr<PhysicsNode> node) {
     auto collider = node->GetCollider();
 
     if (!collider)
@@ -91,12 +78,10 @@ void QuadTree::Insert(std::shared_ptr<PhysicsNode> node)
 
     AABB rect = collider->GetBounds();
 
-    if (children[0])
-    {
+    if (children[0]) {
         int index = GetIndex(rect);
 
-        if (index != -1)
-        {
+        if (index != -1) {
             children[index]->Insert(node);
             return;
         }
@@ -104,65 +89,52 @@ void QuadTree::Insert(std::shared_ptr<PhysicsNode> node)
 
     objects.push_back(node);
 
-    if (objects.size() > MAX_OBJECTS &&
-        level < MAX_LEVELS)
-    {
+    if(objects.size() > MAX_OBJECTS && level < MAX_LEVELS) {
         if (!children[0])
             Split();
 
         size_t i = 0;
 
-        while (i < objects.size())
-        {
+        while (i < objects.size()) {
             auto objCollider =
                 objects[i]->GetCollider();
 
-            if (!objCollider)
-            {
+            if(!objCollider) {
                 i++;
                 continue;
             }
 
             int index = GetIndex(objCollider->GetBounds());
 
-            if (index != -1)
-            {
+            if(index != -1) {
                 children[index]->Insert(objects[i]);
 
                 objects.erase(objects.begin() + i);
             }
-            else
-            {
+            else {
                 i++;
             }
         }
     }
 }
 
-void QuadTree::Query(const AABB& area, std::vector<std::shared_ptr<PhysicsNode>>& result)
-{
-    if (!Intersects(bounds, area))
+void QuadTree::Query(const AABB& area, std::vector<std::shared_ptr<PhysicsNode>>& result) {
+    if(!Intersects(bounds, area))
         return;
 
-    for (auto& object : objects)
-    {
+    for(auto& object : objects) {
         auto collider = object->GetCollider();
 
-        if (!collider)
+        if(!collider)
             continue;
 
-        if (Intersects(
-            collider->GetBounds(),
-            area))
-        {
+        if(Intersects(collider->GetBounds(), area)) {
             result.push_back(object);
         }
     }
 
-    for (auto& child : children)
-    {
-        if (child)
-        {
+    for(auto& child : children) {
+        if(child) {
             child->Query(area, result);
         }
     }

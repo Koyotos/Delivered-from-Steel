@@ -8,7 +8,6 @@ BoxCollider::BoxCollider(const Transform transform, float x, float y, float widt
     UpdatePosition(transform);
 }
 
-
 void BoxCollider::UpdatePosition(const Transform transform) {
     mat4 modelMatrix = transform.GetGlobal();
 
@@ -27,12 +26,12 @@ uint8_t BoxCollider::Type() const noexcept {
     return 1;
 }
 
-bool BoxCollider::CheckCollision(std::shared_ptr<Collider> other) const {
+bool BoxCollider::CheckCollision(shared_ptr<Collider> other) const {
     return CalculateCollisionInfo(other)->collided;
 }
 
-std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(std::shared_ptr<BoxCollider> other) const {
-    std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
+shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(shared_ptr<BoxCollider> other) const {
+    shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     float overlapX = std::min(max.x, other->max.x) - std::max(min.x, other->min.x);
     float overlapY = std::min(max.y, other->max.y) - std::max(min.y, other->min.y);
@@ -46,28 +45,21 @@ std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(std::shared_
 
     if (overlapX < overlapY) {
         info->depth = overlapX;
-        info->normal = (boxCenter.x < other->boxCenter.x) ? glm::vec2(-1, 0) : glm::vec2(1, 0);
+        info->normal = (boxCenter.x < other->boxCenter.x) ? vec2(-1, 0) : vec2(1, 0);
     }
     else {
         info->depth = overlapY;
-        info->normal = (boxCenter.y < other->boxCenter.y) ? glm::vec2(0, -1) : glm::vec2(0, 1);
+        info->normal = (boxCenter.y < other->boxCenter.y) ? vec2(0, -1) : vec2(0, 1);
     }
     info->collider = other;
     return info;
 }
 
-std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(std::shared_ptr<CapsuleCollider> other) const {
-    std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
+shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(shared_ptr<CapsuleCollider> other) const {
+    shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
-    glm::vec2 closest = {
-        other->a.x,
-        std::clamp(boxCenter.y, other->b.y, other->a.y)
-    };
-
-    glm::vec2 closestOnBox = {
-        std::clamp(closest.x, min.x, max.x),
-        std::clamp(closest.y, min.y, max.y)
-    };
+    vec2 closest = { other->a.x, std::clamp(boxCenter.y, other->b.y, other->a.y)};
+    vec2 closestOnBox = {std::clamp(closest.x, min.x, max.x), std::clamp(closest.y, min.y, max.y)};
 
     float distSq = DistanceSquared(closest, closestOnBox);
 
@@ -86,10 +78,10 @@ std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(std::shared_
 
             float minDist = std::min({ distTop, distBottom, distLeft, distRight });
 
-            if (minDist == distTop) info->normal = glm::vec2(0, -1);
-            else if (minDist == distBottom) info->normal = glm::vec2(0, 1);
-            else if (minDist == distLeft) info->normal = glm::vec2(1, 0);
-            else info->normal = glm::vec2(-1, 0);
+            if (minDist == distTop) info->normal = vec2(0, -1);
+            else if (minDist == distBottom) info->normal = vec2(0, 1);
+            else if (minDist == distLeft) info->normal = vec2(1, 0);
+            else info->normal = vec2(-1, 0);
 
             info->depth = other->radius + minDist;
         }
@@ -102,30 +94,30 @@ std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(std::shared_
     }
 }
 
-std::optional<RaycastHit> BoxCollider::Raycast(const glm::vec2& origin, const glm::vec2& dir, float maxDist) {
+optional<RaycastHit> BoxCollider::Raycast(const vec2& origin, const vec2& dir, float maxDist) {
 
-    glm::vec2 invDir = 1.0f / dir;
+    vec2 invDir = 1.0f / dir;
 
-    glm::vec2 t1 = (min - origin) * invDir;
-    glm::vec2 t2 = (max - origin) * invDir;
+    vec2 t1 = (min - origin) * invDir;
+    vec2 t2 = (max - origin) * invDir;
 
-    glm::vec2 tmin = glm::min(t1, t2);
-    glm::vec2 tmax = glm::max(t1, t2);
+    vec2 tmin = glm::min(t1, t2);
+    vec2 tmax = glm::max(t1, t2);
 
     float tNear = std::max(tmin.x, tmin.y);
     float tFar = std::min(tmax.x, tmax.y);
 
     if (tNear > tFar || tFar < 0 || tNear > maxDist)
-        return std::nullopt;
+        return nullopt;
 
     optional<RaycastHit> hit = RaycastHit();
     hit->distance = tNear;
     hit->point = origin + dir * tNear;
 
     if (tmin.x > tmin.y)
-        hit->normal = (dir.x < 0) ? glm::vec2(1, 0) : glm::vec2(-1, 0);
+        hit->normal = (dir.x < 0) ? vec2(1, 0) : vec2(-1, 0);
     else
-        hit->normal = (dir.y < 0) ? glm::vec2(0, 1) : glm::vec2(0, -1);
+        hit->normal = (dir.y < 0) ? vec2(0, 1) : vec2(0, -1);
 
     hit->collider = shared_from_this();
     return hit;

@@ -33,7 +33,7 @@ void PhysicsNode::Physics(const float& dt) {
     velocity.y = std::clamp(velocity.y - 10.0f * dt, -maxFallSpeed, maxFallSpeed);
     Transform t = this->GetTransform(); 
 
-    t.SetTranslation(t.GetTranslation() + glm::vec3(velocity * dt, 0.0f));
+    t.SetTranslation(t.GetTranslation() + vec3(velocity * dt, 0.0f));
 
 	this->SetTransform(t);
 }
