@@ -528,6 +528,7 @@ void Player::Physics(const float& deltaTime) {
 
 bool Player::Input(InputEvent& event) {
 	if (!event.handled) {
+		//test save/load
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
 			if (event.key == GLFW_KEY_F5) {
 				Globals::GetGlobals().wantsToSave = true;

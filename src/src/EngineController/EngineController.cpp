@@ -128,6 +128,7 @@ void EngineController::Run() {
 		PROFILER_END_RENDER();
 
 		EndFrame();
+		//test save/load
 		if (Globals::GetGlobals().wantsToSave) {
 			SaveGame("save_0.json");
 			Globals::GetGlobals().Log("TEST: Game Saved (F5)");
@@ -182,6 +183,8 @@ EngineController::~EngineController() {
 
 void EngineController::LoadLevel(const string& levelName) {
 	activeLevelName = levelName;
+	Globals::GetGlobals().activeLevelName = levelName;
+
 	string fullPath = "res/scenes/" + levelName + ".json";
 
 	if (activeLevelNode) {

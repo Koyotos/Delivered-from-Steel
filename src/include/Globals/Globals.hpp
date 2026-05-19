@@ -49,6 +49,8 @@ class Globals {
     bool wantsToSave = false;
     bool wantsToLoad = false;
 
+    std::string activeLevelName = "";
+
     /*
     @brief Returns instance of Globals class.
     @return Globals& - globals instance

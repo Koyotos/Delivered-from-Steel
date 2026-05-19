@@ -1,6 +1,5 @@
 #include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Globals/Globals.hpp"
-#include "include/SceneManager/SceneManager.hpp"
 #include "include/SaveManager/WorldStateManager.hpp"
 
 BreakableWall::BreakableWall(const unordered_map<string, std::any>& data)
@@ -13,9 +12,9 @@ void BreakableWall::BreakWall() {
 	std::string id = this->GetSaveID();
 	if (!id.empty()) {
 		auto& globals = Globals::GetGlobals();
-		if (globals.sceneManager && globals.worldStateManager) {
-			std::string currentSceneName = globals.sceneManager->GetActive()->GetName();
-			globals.worldStateManager->MarkAsDestroyed(currentSceneName, id);
+		if (globals.worldStateManager) {
+			std::string currentLevel = globals.activeLevelName;
+			globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
 		}
 	}
 	Disable();
