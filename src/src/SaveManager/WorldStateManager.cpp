@@ -1,7 +1,10 @@
 #include "include/SaveManager/WorldStateManager.hpp"
 
 void WorldStateManager::MarkAsDestroyed(const std::string& sceneName, const std::string& objectID) {
-	graveyard[sceneName].push_back(objectID);
+	auto& destroyedList = graveyard[sceneName];
+	if (std::find(destroyedList.begin(), destroyedList.end(), objectID) == destroyedList.end()) {
+		destroyedList.push_back(objectID);
+	}
 }
 
 bool WorldStateManager::IsDestroyed(const std::string& sceneName, const std::string& objectID) const {
