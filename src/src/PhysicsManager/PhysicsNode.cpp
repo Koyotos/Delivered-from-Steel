@@ -10,7 +10,7 @@ uint8_t PhysicsNode::RenderType() {
     return 2;
 }
 
-void PhysicsNode::SetCollider(std::shared_ptr<Collider> col) {
+void PhysicsNode::SetCollider(shared_ptr<Collider> col) {
     collider = col;
 }
 
