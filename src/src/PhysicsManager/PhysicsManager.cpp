@@ -57,7 +57,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
         auto col = node->GetCollider();
         if (!col)
             continue;
-        std::vector<std::shared_ptr<PhysicsNode>> candidates;
+        vector<shared_ptr<PhysicsNode>> candidates;
         quadTree.Query(col->GetBounds(), candidates);
         for (auto& other : candidates) {
             if (node.get() == other.get())
@@ -66,7 +66,6 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
         }
     }
 }
-
 
 void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
