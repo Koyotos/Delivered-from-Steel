@@ -18,7 +18,7 @@ public:
 
     ChargingEnemy(const unordered_map<string, std::any>&);
 
-    void Update(float deltaTime) override;
+    void Physics(float deltaTime) override;
 
     void ChangeState(shared_ptr<Player> player) override;
 

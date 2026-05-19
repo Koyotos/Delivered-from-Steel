@@ -25,8 +25,10 @@ class BoxCollider : public Collider, public enable_shared_from_this<BoxCollider>
 
     bool CheckCollision(shared_ptr<Collider> other) const override;
 
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<BoxCollider> other) const;
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<CapsuleCollider> other) const;
+    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<Collider> other) const override;
+
+    shared_ptr<CollisionInfo> CalculateCollisionInfoB(shared_ptr<BoxCollider> other) const;
+    shared_ptr<CollisionInfo> CalculateCollisionInfoC(shared_ptr<CapsuleCollider> other) const;
 
     AABB GetBounds() const override;
 

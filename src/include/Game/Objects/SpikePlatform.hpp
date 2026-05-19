@@ -34,7 +34,7 @@ class SpikePlatform :
     public:
 		SpikePlatform(const unordered_map<string, std::any>&);
 
-        void Update(float deltaTime) override;
+        void Physics(float deltaTime) override;
 };
 
 #endif // FE_SPIKE_PLATFORM

@@ -12,7 +12,7 @@ Bullet::Bullet(const std::unordered_map<std::string, std::any>& data)
 	SetVisible(false);
 }
 
-void Bullet::Update(float deltaTime)
+void Bullet::Physics(float deltaTime)
 {
 	currentLifeTime += deltaTime;
 	if (currentLifeTime >= lifeTime) {
@@ -24,6 +24,10 @@ void Bullet::Update(float deltaTime)
 		currentTransform.SetTranslation(currentTransform.GetTranslation() + vec3(direction * speed * deltaTime, 0.0f));
 		SetTransform(currentTransform);
 	}
+}
+
+string Bullet::Type() {
+	return "Bullet";
 }
 
 void Bullet::SetDirection(vec2 newDirection)

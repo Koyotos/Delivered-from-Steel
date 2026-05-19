@@ -50,7 +50,7 @@ void TurretEnemy::Patrol(float dt) {
 	direction = sign(dir);
 }
 
-void TurretEnemy::Update(float dt) {
+void TurretEnemy::Physics(float dt) {
 	if (isWaiting) {
 		shotTimer += dt;
 		if (shotTimer >= shotTime) {
@@ -65,7 +65,7 @@ void TurretEnemy::Update(float dt) {
 		if (currentBarrelLock <= 0.0f)
 			barrelLocked = false;
 	}
-	Enemy::Update(dt);
+	Enemy::Physics(dt);
 }
 
 void TurretEnemy::ChangeState(shared_ptr<Player> player) {
@@ -154,13 +154,13 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 void TurretEnemy::Init(shared_ptr<Scene> scene) {
 	Enemy::Init(scene);
-	if (static_pointer_cast<PhysicsNode>(GetChildren()[0])->GetObjectType() == ObjectType::Enemy) {
-		barrel = static_pointer_cast<Object2D>(GetChildren()[1]);
-		bullet = static_pointer_cast<Bullet>(GetChildren()[0]);
-	}
-	else {
-		barrel = static_pointer_cast<Object2D>(GetChildren()[0]);
-		bullet = static_pointer_cast<Bullet>(GetChildren()[1]);
+	for(auto& child : GetChildren()) {
+		if(child->Type() == "Bullet") {
+			bullet = static_pointer_cast<Bullet>(child);
+		}
+		if(child->Type() == "Object2D") {
+			barrel = static_pointer_cast<Object2D>(child);
+		}
 	}
 	barrelReal = static_pointer_cast<Object2D>(barrel->GetChildren()[0]);
 }

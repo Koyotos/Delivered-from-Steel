@@ -28,7 +28,7 @@ public:
 
 	void ChangeState(shared_ptr<Player> player) override;
 
-	void Update(float) override;
+	void Physics(float) override;
 };
 
 #endif // FE_SHIELDTANKENEMY

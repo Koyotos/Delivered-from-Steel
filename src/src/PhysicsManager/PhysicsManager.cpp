@@ -1,4 +1,5 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
+#include "include/Core/Scene.hpp"
 
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
 {
@@ -19,8 +20,8 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
 
     // Update physics
     for (auto& node : currentNodes) {
-        node->Update(dt);
-        if (!node->getStatic()) {
+        node->Physics(dt);
+        if (!node->GetStatic()) {
             node->ResetGlobal();
             node->SetTransformChanged(true);
         }
@@ -62,7 +63,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt)
         for (auto& other : candidates) {
             if (node.get() == other.get())
                 continue;
-            node->resolveCollision(*other);
+            node->ResolveCollision(*other);
         }
     }
 }

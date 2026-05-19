@@ -28,14 +28,10 @@ uint8_t BoxCollider::Type() const noexcept {
 }
 
 bool BoxCollider::CheckCollision(std::shared_ptr<Collider> other) const {
-    if(other->Type() == 1) {
-        return CalculateCollisionInfo(static_pointer_cast<BoxCollider>(other))->collided;
-    } else {
-         return CalculateCollisionInfo(static_pointer_cast<CapsuleCollider>(other))->collided;
-    }
+    return CalculateCollisionInfo(other)->collided;
 }
 
-std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(std::shared_ptr<BoxCollider> other) const {
+std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(std::shared_ptr<BoxCollider> other) const {
     std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     float overlapX = std::min(max.x, other->max.x) - std::max(min.x, other->min.x);
@@ -60,7 +56,7 @@ std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(std::shared_p
     return info;
 }
 
-std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(std::shared_ptr<CapsuleCollider> other) const {
+std::shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(std::shared_ptr<CapsuleCollider> other) const {
     std::shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     glm::vec2 closest = {
@@ -139,3 +135,11 @@ AABB BoxCollider::GetBounds() const {
     vec2 half = size * 0.5f;
     return { boxCenter - half, boxCenter + half };
 }
+
+shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(shared_ptr<Collider> other) const {
+    if(other->Type() == 1) {
+        return CalculateCollisionInfoB(static_pointer_cast<BoxCollider>(other));
+    } else {
+        return CalculateCollisionInfoC(static_pointer_cast<CapsuleCollider>(other));
+    }
+}   

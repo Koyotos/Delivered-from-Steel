@@ -65,7 +65,7 @@ shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(shared_ptr<Col
     }
 }
 
-optional<float> RayVsCircle(const vec2& origin, const vec2& dir, const vec2& center, float radius) {
+optional<float> CapsuleCollider::RayVsCircle(const vec2& origin, const vec2& dir, const vec2& center, float radius) {
     vec2 oc = origin - center;
 
     float a = glm::dot(dir, dir);

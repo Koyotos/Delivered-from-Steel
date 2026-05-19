@@ -28,7 +28,7 @@ public:
 	Drone(const unordered_map<string, std::any>& data);
 
 	void Init(shared_ptr<Scene> scene) override;
-	void Update(float deltaTime) override;
+	void Physics(float deltaTime) override;
 
 	void OnCollisionEnter(shared_ptr<Collider> other) override;
 

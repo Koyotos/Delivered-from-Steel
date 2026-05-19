@@ -16,7 +16,8 @@ private:
 public:
     Bullet(const std::unordered_map<std::string, std::any>&);
 
-    void Update(float deltaTime) override;
+    void Physics(float deltaTime) override;
+    string Type() override;
 
     void SetDirection(vec2 newDirection);
     vec2 GetDirection() const;
@@ -28,6 +29,7 @@ public:
     void Attack(std::shared_ptr<Player> player);
 
 	float GetSpeed() const { return speed; }
+
 
 };
 

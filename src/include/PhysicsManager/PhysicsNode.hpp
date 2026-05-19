@@ -1,11 +1,9 @@
 #ifndef FE_PHYSICS_NODE
 #define FE_PHYSICS_NODE
 
-#include "include/PhysicsManager/Collider.hpp"
 #include "include/PhysicsManager/CapsuleCollider.hpp"
 #include "include/PhysicsManager/BoxCollider.hpp"
 #include "include/Core/VisualNode.hpp"
-#include "include/PhysicsManager/PhysicsManager.hpp"
 
 enum class ObjectType : uint32_t {
     Null = 0,
@@ -43,7 +41,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
     void SetStatic(bool value);
     bool GetStatic() const;
 
-    void Physics(const float& dt) override;
+    void Physics(float dt) override;
 
     void ResolveCollision(PhysicsNode& other);
 

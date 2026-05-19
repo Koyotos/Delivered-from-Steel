@@ -36,13 +36,13 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	endPos = targetPos;
 }
 
-void Drone::Update(float deltaTime) {
+void Drone::Physics(float deltaTime) {
 	if (spotLight) {
 		spotLight->data1 = GetTransform().GetTranslation();
 	}
 	vec2 currentVel = GetVelocity();
 	SetVelocity(vec2(currentVel.x, 10.0f * deltaTime));
-	Enemy::Update(deltaTime);
+	Enemy::Physics(deltaTime);
 }
 
 void Drone::DetectPlayer() {

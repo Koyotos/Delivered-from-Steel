@@ -36,7 +36,7 @@ public:
 
     void AttackState(float) override;
 
-    void Update(float) override;
+    void Physics(float) override;
 
     void Attack(shared_ptr<Player> player) override {};
 

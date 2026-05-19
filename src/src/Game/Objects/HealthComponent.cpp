@@ -1,7 +1,7 @@
 #include "include/Game/Objects/HealthComponent.hpp"
 #include "include/Globals/Globals.hpp"
 
-void HealthComponent::Update(float deltaTime) {
+void HealthComponent::Physics(float deltaTime) {
 	if (!canTakeDamage) {
 		damageTimer -= deltaTime;
 		if (damageTimer <= 0.0f) {

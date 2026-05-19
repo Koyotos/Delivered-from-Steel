@@ -23,7 +23,7 @@ void MovingPlatform::Init(shared_ptr<Scene> scene) {
     player = scene->GetPlayer();
 }
 
-void MovingPlatform::Update(float deltaTime) {
+void MovingPlatform::Physics(float deltaTime) {
     timer += deltaTime;
 
     vec3 from = (state == MovingPlatformState::MovingToEnd) ? startPosition : endPosition;
@@ -121,7 +121,7 @@ void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
             std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
 
             float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius * 2 + capsule->height);
-			float platformTop = static_pointer_cast<BoxCollider>(GetCollider())->getMax().y;
+			float platformTop = static_pointer_cast<BoxCollider>(GetCollider())->GetMax().y;
 
             if (playerBottom >= platformTop) {
                 Transform trans = playerNode->GetTransform();

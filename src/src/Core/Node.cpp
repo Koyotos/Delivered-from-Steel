@@ -20,7 +20,7 @@ void Node::Draw(shared_ptr<Shader> sh) {
     return;
 }
 
-void Node::Physics(const float&) {
+void Node::Physics(float) {
     return;
 }
 

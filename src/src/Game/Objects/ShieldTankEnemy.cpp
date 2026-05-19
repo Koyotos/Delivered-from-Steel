@@ -112,7 +112,7 @@ void ShieldTankEnemy::AttackState(float dt) {
 	}
 }
 
-void ShieldTankEnemy::Update(float deltaTime) {
+void ShieldTankEnemy::Physics(float deltaTime) {
 	if (shieldOnCooldown) {
 		shieldCooldownTimer += deltaTime;
 		if (shieldCooldownTimer >= shieldOnCooldown) {
@@ -121,7 +121,7 @@ void ShieldTankEnemy::Update(float deltaTime) {
 
 		}
 	}
-	Enemy::Update(deltaTime);
+	Enemy::Physics(deltaTime);
 }
 
 void ShieldTankEnemy::ChangeState(shared_ptr<Player> player) {

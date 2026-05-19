@@ -1,4 +1,6 @@
 #include "include/PhysicsManager/PhysicsNode.hpp"
+#include "include/PhysicsManager/PhysicsManager.hpp"
+
 
 string PhysicsNode::Type() {
     return "PhysicsNode";
@@ -24,7 +26,7 @@ bool PhysicsNode::GetStatic() const {
     return isStatic;
 }
 
-void PhysicsNode::Physics(const float& dt) {
+void PhysicsNode::Physics(float dt) {
     if (isStatic) return;
 
     // testowa symulacja grawitacji

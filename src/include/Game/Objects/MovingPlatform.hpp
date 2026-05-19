@@ -34,7 +34,7 @@ public:
     vec3 velocity;
     MovingPlatform(const unordered_map<string, std::any>&);
 
-    void Update(float deltaTime) override;
+    void Physics(float deltaTime) override;
 
     void OnCollisionStay(shared_ptr<Collider> other) override;
 
