@@ -216,16 +216,42 @@ void EngineController::SaveGame(const string& filepath) {
 
 
 void EngineController::LoadGame(const string& filepath) {
-	svm->LoadGame(filepath);
-
-	if (scm->GetActive() && scm->GetActive()->GetPlayer()) {
-		crm->AssignPlayer(scm->GetActive()->GetPlayer());
+	if (!svm->LoadFile(filepath)) {
+		Globals::GetGlobals().Log("Failed to open save file: " + filepath);
+		return;
 	}
 
 	string levelToLoad = svm->GetCurrentSceneToLoad();
 	if (levelToLoad.empty()) return;
 
 	LoadLevel(levelToLoad);
+
+	auto active = scm->GetActive();
+	if (active && active->GetRoot()) {
+		std::function<void(shared_ptr<Node>)> registerSerializable = [&](shared_ptr<Node> node) {
+			if (!node) return;
+			auto serializable = std::dynamic_pointer_cast<ISerializable>(node);
+			if (serializable) {
+				svm->Register(serializable);
+			}
+			for (auto& child : node->GetChildren()) {
+				registerSerializable(child);
+			}
+			};
+		registerSerializable(active->GetRoot());
+	}
+
+	if (scm->GetActive() && scm->GetActive()->GetPlayer()) {
+		svm->Register(std::static_pointer_cast<ISerializable>(scm->GetActive()->GetPlayer()));
+	}
+	svm->Register(std::static_pointer_cast<ISerializable>(wsm));
+	svm->Register(std::static_pointer_cast<ISerializable>(crm));
+
+	svm->ApplyLoaded();
+
+	if (scm->GetActive() && scm->GetActive()->GetPlayer()) {
+		crm->AssignPlayer(scm->GetActive()->GetPlayer());
+	}
 
 	std::function<void(shared_ptr<Node>)> disableDestroyed = [&](shared_ptr<Node> node) {
 		if (!node) return;
