@@ -31,28 +31,30 @@ void SaveManager::SaveGame(const std::string& filepath, const std::string& activ
 }
 
 void SaveManager::LoadGame(const std::string& filepath) {
-    std::ifstream file(filepath);
-    if (!file.is_open()) return;
+	currentSceneToLoad.clear();
 
-    nlohmann::json saveFile;
-    file >> saveFile;
-    file.close();
+	std::ifstream file(filepath);
+	if (!file.is_open()) return;
 
-    if (saveFile.contains("active_scene")) {
-        currentSceneToLoad = saveFile["active_scene"];
-    }
+	nlohmann::json saveFile;
+	file >> saveFile;
+	file.close();
 
-    for (auto it = serializables.begin(); it != serializables.end(); ) {
-        auto obj = it->second.lock();
-        if (!obj) {
-            it = serializables.erase(it);
-            continue;
-        }
-        if (saveFile.contains(it->first)) {
-            obj->Deserialize(saveFile[it->first]);
-        }
-        ++it;
-    }
+	if (saveFile.contains("active_scene")) {
+		currentSceneToLoad = saveFile["active_scene"];
+	}
+
+	for (auto it = serializables.begin(); it != serializables.end(); ) {
+		auto obj = it->second.lock();
+		if (!obj) {
+			it = serializables.erase(it);
+			continue;
+		}
+		if (saveFile.contains(it->first)) {
+			obj->Deserialize(saveFile[it->first]);
+		}
+		++it;
+	}
 }
 
 std::string SaveManager::GetCurrentSceneToLoad() const {

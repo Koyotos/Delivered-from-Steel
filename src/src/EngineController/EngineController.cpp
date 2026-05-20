@@ -1,5 +1,6 @@
 #include "include/EngineController/EngineController.hpp"
 #include <functional>
+#include <filesystem>
 
 void EngineController::Init() {
 
@@ -185,7 +186,7 @@ void EngineController::LoadLevel(const string& levelName) {
 	activeLevelName = levelName;
 	Globals::GetGlobals().activeLevelName = levelName;
 
-	string fullPath = "res/scenes/" + levelName + ".json";
+	std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (levelName + ".json");
 
 	if (activeLevelNode) {
 		scm->GetActive()->GetRoot()->RemoveChild(activeLevelNode);
