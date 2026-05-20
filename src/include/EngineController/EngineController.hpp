@@ -41,6 +41,7 @@ class EngineController {
 
     inline void EndFrame();
     inline void ProcessNode(shared_ptr<Node>);
+    void RegisterSceneSerializables(shared_ptr<Scene> scene);
 
     public:
     // Engine API

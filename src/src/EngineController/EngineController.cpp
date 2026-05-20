@@ -154,17 +154,56 @@ shared_ptr<Scene> EngineController::LoadScene(const string& name) {
 	return scn;
 }
 
+void EngineController::RegisterSceneSerializables(shared_ptr<Scene> scene) {
+	if (!scene || !scene->GetRoot()) return;
+
+	std::function<void(shared_ptr<Node>)> registerSerializable = [&](shared_ptr<Node> node) {
+		if (!node) return;
+
+		auto serializable = std::dynamic_pointer_cast<ISerializable>(node);
+		if (serializable) {
+			svm->Register(serializable);
+		}
+
+		for (auto& child : node->GetChildren()) {
+			registerSerializable(child);
+		}
+		};
+
+	registerSerializable(scene->GetRoot());
+}
+
 void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
+	if (!scn) return;
+
+	auto root = scn->GetRoot();
+	if (!root) return;
+
+	shared_ptr<Node> cardRoot = nullptr;
+	if (crm && crm->GetCardScene()) {
+		cardRoot = crm->GetCardScene()->GetRoot();
+	}
+
 	bool hasCards = false;
-	for (auto& child : scn->GetRoot()->GetChildren()) {
+	bool hasCardRoot = false;
+
+	for (auto& child : root->GetChildren()) {
 		if (child == crm) {
 			hasCards = true;
+		}
+		if (cardRoot && child == cardRoot) {
+			hasCardRoot = true;
+		}
+		if (hasCards && hasCardRoot) {
 			break;
 		}
 	}
-	if (!hasCards) {
-		scn->GetRoot()->AddChild(crm->GetCardScene()->GetRoot());
-		scn->GetRoot()->AddChild(crm);
+
+	if (!hasCardRoot && cardRoot) {
+		root->AddChild(cardRoot);
+	}
+	if (!hasCards && crm) {
+		root->AddChild(crm);
 	}
 
 	scm->SetActive(scn);
@@ -227,19 +266,7 @@ void EngineController::LoadGame(const string& filepath) {
 	LoadLevel(levelToLoad);
 
 	auto active = scm->GetActive();
-	if (active && active->GetRoot()) {
-		std::function<void(shared_ptr<Node>)> registerSerializable = [&](shared_ptr<Node> node) {
-			if (!node) return;
-			auto serializable = std::dynamic_pointer_cast<ISerializable>(node);
-			if (serializable) {
-				svm->Register(serializable);
-			}
-			for (auto& child : node->GetChildren()) {
-				registerSerializable(child);
-			}
-			};
-		registerSerializable(active->GetRoot());
-	}
+	RegisterSceneSerializables(active);
 
 	if (scm->GetActive() && scm->GetActive()->GetPlayer()) {
 		svm->Register(std::static_pointer_cast<ISerializable>(scm->GetActive()->GetPlayer()));
