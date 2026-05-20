@@ -62,6 +62,7 @@ void EngineController::LinkSceneObjects() {
 	if (active->GetPlayer()) {
 		svm->Register(std::static_pointer_cast<ISerializable>(active->GetPlayer()));
 	}
+	RegisterSceneSerializables(active);
 }
 
 void EngineController::ProcessNode(shared_ptr<Node> node) {
