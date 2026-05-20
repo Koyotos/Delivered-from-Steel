@@ -34,7 +34,6 @@ class EngineController {
     shared_ptr<Scene> activeLevelScene = nullptr;
     shared_ptr<Node> activeLevelNode = nullptr;
     std::string activeLevelName = "";
-    std::vector<shared_ptr<Node>> levelTrash;
 
     double currentTime;
     double deltaTime; 

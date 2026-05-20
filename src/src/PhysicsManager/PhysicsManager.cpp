@@ -84,6 +84,11 @@ PhysicsManager& PhysicsManager::GetPhysicsManager() {
 	return instance;
 }
 
+void PhysicsManager::Reset() {
+    currentScene = nullptr;
+    currentNodes.clear();
+}
+
 optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& direction, float maxDistance,
 	shared_ptr<Collider> collider, uint32_t type) {
 

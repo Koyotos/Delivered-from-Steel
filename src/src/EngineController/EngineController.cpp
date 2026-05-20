@@ -188,18 +188,12 @@ void EngineController::LoadLevel(const string& levelName) {
 	string fullPath = "res/scenes/" + levelName + ".json";
 
 	if (activeLevelNode) {
-		std::function<void(shared_ptr<Node>)> shutDown = [&](shared_ptr<Node> n) {
-			if (!n) return;
-			n->Disable();
-			for (auto& c : n->GetChildren()) shutDown(c);
-			};
-		shutDown(activeLevelNode);
-
 		scm->GetActive()->GetRoot()->RemoveChild(activeLevelNode);
 
-		levelTrash.push_back(activeLevelNode);
-		activeLevelNode = nullptr;
+		activeLevelNode.reset();
 	}
+
+	psm->Reset();
 
 	shared_ptr<Scene> loadedLevel = rsm->LoadScene(fullPath);
 	if (!loadedLevel) return;
