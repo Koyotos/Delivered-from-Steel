@@ -49,18 +49,19 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (col)
-            quadTree.Insert(node);
+            quadTree.Insert(node.get());
     }
 
     // Query + resolve collisions
+    vector<PhysicsNode*> candidates;
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (!col)
             continue;
-        vector<shared_ptr<PhysicsNode>> candidates;
+        candidates.clear();
         quadTree.Query(col->GetBounds(), candidates);
         for (auto& other : candidates) {
-            if (node.get() == other.get())
+            if (node.get() == other)
                 continue;
             node->ResolveCollision(*other);
         }
