@@ -122,7 +122,7 @@ void QuadTree::Query(const AABB& area, std::vector<PhysicsNode*>& result) {
     if(!Intersects(bounds, area))
         return;
 
-    for(auto& object : objects) {
+    for(PhysicsNode* object : objects) {
         auto collider = object->GetCollider();
 
         if(!collider)

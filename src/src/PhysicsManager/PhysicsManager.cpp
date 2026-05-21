@@ -53,11 +53,20 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     }
 
     // Query + resolve collisions
+    uint32_t environmentMask = static_cast<uint32_t>(ObjectType::Wall) |
+        static_cast<uint32_t>(ObjectType::Trap) |
+        static_cast<uint32_t>(ObjectType::BreakableWall);
+
     vector<PhysicsNode*> candidates;
     for (auto& node : currentNodes) {
         auto col = node->GetCollider();
         if (!col)
             continue;
+
+        uint32_t typeA = static_cast<uint32_t>(node->GetObjectType());
+        if ((typeA & environmentMask) != 0)
+			continue;
+
         candidates.clear();
         quadTree.Query(col->GetBounds(), candidates);
         for (auto& other : candidates) {
