@@ -223,6 +223,12 @@ EngineController::~EngineController() {
 }
 
 void EngineController::LoadLevel(const string& levelName) {
+	auto levelPath = std::filesystem::path(levelName);
+	if (levelPath.is_absolute() || levelPath.has_parent_path()) {
+		Globals::GetGlobals().Log("Invalid level name.");
+		return;
+	}
+
 	activeLevelName = levelName;
 	Globals::GetGlobals().activeLevelName = levelName;
 
@@ -246,23 +252,49 @@ void EngineController::LoadLevel(const string& levelName) {
 
 
 void EngineController::SaveGame(const string& filepath) {
+	auto saveDir = Globals::GetGlobals().GetExecDir() / "saves";
+	std::filesystem::create_directories(saveDir);
+
+	std::filesystem::path inputPath(filepath);
+	if (inputPath.is_absolute() || inputPath.has_parent_path()) {
+		Globals::GetGlobals().Log("Invalid save path.");
+		return;
+	}
+
+	auto finalPath = (saveDir / inputPath).lexically_normal();
+
 	shared_ptr<Scene> active = scm->GetActive();
 	if (active && active->GetPlayer()) {
 		svm->Register(std::static_pointer_cast<ISerializable>(active->GetPlayer()));
 	}
 
-	svm->SaveGame(filepath, activeLevelName);
+	if (!svm->SaveGame(finalPath.string(), activeLevelName)) {
+		Globals::GetGlobals().Log("Failed to save game.");
+	}
 }
 
 
 void EngineController::LoadGame(const string& filepath) {
-	if (!svm->LoadFile(filepath)) {
-		Globals::GetGlobals().Log("Failed to open save file: " + filepath);
+	auto saveDir = Globals::GetGlobals().GetExecDir() / "saves";
+
+	std::filesystem::path inputPath(filepath);
+	if (inputPath.is_absolute() || inputPath.has_parent_path()) {
+		Globals::GetGlobals().Log("Invalid save path.");
+		return;
+	}
+
+	auto finalPath = (saveDir / inputPath).lexically_normal();
+
+	if (!svm->LoadFile(finalPath.string())) {
+		Globals::GetGlobals().Log("Failed to open save file: " + finalPath.string());
 		return;
 	}
 
 	string levelToLoad = svm->GetCurrentSceneToLoad();
-	if (levelToLoad.empty()) return;
+	if (levelToLoad.empty()) {
+		Globals::GetGlobals().Log("Save file missing active_scene.");
+		return;
+	}
 
 	LoadLevel(levelToLoad);
 

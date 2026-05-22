@@ -32,5 +32,13 @@ nlohmann::json WorldStateManager::Serialize() const {
 }
 
 void WorldStateManager::Deserialize(const nlohmann::json& data) {
-	graveyard = data.get<std::unordered_map<std::string, std::vector<std::string>>>();
+	if (!data.is_object()) {
+		return;
+	}
+
+	try {
+		graveyard = data.get<std::unordered_map<std::string, std::vector<std::string>>>();
+	} catch (...) {
+		graveyard.clear();
+	}
 }

@@ -16,12 +16,9 @@ private:
 
 public:
 	void Register(std::shared_ptr<ISerializable> object);
-	void SaveGame(const std::string& filepath, const std::string& activeSceneName);
-
+	bool SaveGame(const std::string& filepath, const std::string& activeSceneName);
 	bool LoadFile(const std::string& filepath);
-
 	void ApplyLoaded();
-
 	void LoadGame(const std::string& filepath);
 	std::string GetCurrentSceneToLoad() const;
 };
