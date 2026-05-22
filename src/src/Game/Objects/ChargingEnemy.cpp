@@ -20,6 +20,7 @@ ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enem
 void ChargingEnemy::Physics(const float& deltaTime) {
 	if (stunned) {
 		SetVelocity(vec2(0, GetVelocity().y));
+		realVelocity = vec2(0, realVelocity.y);
 		stunTimer += deltaTime;
 		if (stunTimer >= stunDuration) {
 			stunned = false;

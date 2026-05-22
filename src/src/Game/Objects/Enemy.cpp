@@ -16,8 +16,7 @@ Enemy::Enemy(const unordered_map<string, std::any>& data) : Object2D(data) {
 	groundCheckDistance = 0.461f;
 	wallCheckDistance = 0.1f;
 
-	visiblityAngle = 2.0f;
-	visiblityAngle = 1/tan(radians(60.0f));
+	visiblityAngle = 1/tan(radians(20.0f));
 	visiblityDistance = 2.0f;
 
 	damage = 100.0f;
@@ -75,10 +74,12 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		Attack(player);
-
+		glm::vec2 pos = GetTransform().GetTranslation();
 		auto trans = player->GetTransform();
-		trans.SetTranslation(trans.GetTranslation() + vec3(GetVelocity() * 1.0f/60.0f, 0.0f));
+		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
 
+
+		lastPosition = pos;
 		player->SetTransform(trans);
 	}
 }
@@ -87,7 +88,7 @@ void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (owner->GetObjectType() == ObjectType::Player) {
 
-		player->addPlatformVelocity(GetVelocity());
+		player->addPlatformVelocity(realVelocity);
 	}
 }
 
@@ -105,6 +106,9 @@ void Enemy::Init(shared_ptr<Scene> scene) {
 
 void Enemy::Physics(const float& deltaTime) {
 	PhysicsNode::Physics(deltaTime);
+	glm::vec2 pos = GetTransform().GetTranslation();
+	realVelocity = pos - lastPosition;
+	lastPosition = pos;
 	UpdateState(deltaTime);
 }
 
@@ -112,6 +116,7 @@ void Enemy::DetectPlayer() {
 	if (player) {
 
 		glm::vec3 enemyPos3 = transform.GetTranslation();
+		enemyPos3.y -= groundCheckDistance/2;
 		glm::vec3 playerPos3 = player->GetTransform().GetTranslation();
 
 		glm::vec2 enemyPos(enemyPos3);
@@ -129,7 +134,7 @@ void Enemy::DetectPlayer() {
 			dir /= dist;
 
 			auto hit = Raycast(
-				glm::vec2(0.0f),
+				glm::vec2(0.0f, -groundCheckDistance / 2),
 				dir,
 				dist,
 				static_cast<uint32_t>(ObjectType::Wall)
