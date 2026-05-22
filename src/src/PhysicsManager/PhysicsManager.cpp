@@ -19,6 +19,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update physics
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         node->Physics(dt);
         if (!node->GetStatic()) {
             node->ResetGlobal();
@@ -28,6 +29,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Process collisions
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             node->processCollisions();
@@ -39,6 +41,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update collider positions
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             col->UpdatePosition(node->GetTransform());
@@ -47,6 +50,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     // Build quadtree
     quadTree = QuadTree(0, WorldBounds);
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             quadTree.Insert(node.get());
@@ -58,21 +62,46 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
         static_cast<uint32_t>(ObjectType::BreakableWall);
 
     vector<PhysicsNode*> candidates;
+    vector<pair<PhysicsNode*, CollisionInfo>> actualHits;
+
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
-        if (!col)
-            continue;
+        if (!col) continue;
 
         uint32_t typeA = static_cast<uint32_t>(node->GetObjectType());
         if ((typeA & environmentMask) != 0)
-			continue;
+            continue;
 
         candidates.clear();
+        actualHits.clear();
         quadTree.Query(col->GetBounds(), candidates);
+
         for (auto& other : candidates) {
-            if (node.get() == other)
-                continue;
-            node->ResolveCollision(*other);
+            if (node.get() == other) continue;
+
+            auto otherCol = other->GetCollider();
+            if (!otherCol) continue;
+
+            shared_ptr<CollisionInfo> info = node->GetCollisionInfo(otherCol);
+
+            if (info && info->collided) {
+                actualHits.push_back({ other, *info });
+            }
+        }
+
+        std::sort(actualHits.begin(), actualHits.end(), [](const pair<PhysicsNode*, CollisionInfo>& a, const pair<PhysicsNode*, CollisionInfo>& b) {
+            bool aIsDown = a.second.normal.y < 0.0f;
+            bool bIsDown = (b.second.normal.y < 0.0f);
+
+            if (aIsDown != bIsDown) {
+                return aIsDown;
+            }
+            return a.second.depth > b.second.depth;
+        });
+
+        for (auto& hit : actualHits) {
+            node->ResolveCollision(*(hit.first));
         }
     }
 }
@@ -80,7 +109,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
 	if (physicsNode) {
-		currentNodes.push_back(physicsNode);
+	    currentNodes.push_back(physicsNode);
 		physicsNode->Init();
 	}
 
@@ -100,6 +129,7 @@ optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& dir
 	float closest = maxDistance;
 	optional<RaycastHit> result;
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
+        if (!currentNodes[i]->TestPhysics()) continue;
         if ((static_cast<uint32_t>(currentNodes[i]->GetObjectType()) & type) == 0 && type != static_cast<uint32_t>(ObjectType::Null)) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {
@@ -119,6 +149,7 @@ vector<RaycastHit> PhysicsManager::RaycastAll(const vec2& origin, const vec2& di
 	float closest = maxDistance;
 	vector<RaycastHit> result;
 	for (size_t i = 0; i < currentNodes.size(); ++i) {
+        if (!currentNodes[i]->TestPhysics()) continue;
 		if ((static_cast<uint32_t>(currentNodes[i]->GetObjectType()) & type) == 0 && type != static_cast<uint32_t>(ObjectType::Null)) continue;
 		auto col = currentNodes[i]->GetCollider();
 		if (col && col != collider) {

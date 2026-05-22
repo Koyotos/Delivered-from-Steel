@@ -38,27 +38,30 @@ void PhysicsNode::Physics(const float& dt) {
 	this->SetTransform(t);
 }
 
+shared_ptr<CollisionInfo> PhysicsNode::GetCollisionInfo(shared_ptr<Collider> other) {
+    if (!collider || !other) return nullptr;
+    if (other->Type() == 2) {
+        auto capsule = static_pointer_cast<CapsuleCollider>(other);
+        return collider->CalculateCollisionInfo(capsule);
+    }
+    else if (other->Type() == 1) {
+        auto box = static_pointer_cast<BoxCollider>(other);
+        return collider->CalculateCollisionInfo(box);
+    }
+    return nullptr;
+}
+
 void PhysicsNode::ResolveCollision(PhysicsNode& other) {
-    shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
+    shared_ptr<CollisionInfo> info = GetCollisionInfo(other.GetCollider());
     
-	if (!collider || !other.collider) return;
-
-    if (auto capsule = dynamic_pointer_cast<CapsuleCollider>(other.collider)) {
-        info = collider->CalculateCollisionInfo(capsule);
-    }
-    else if (auto box = dynamic_pointer_cast<BoxCollider>(other.collider)) {
-        info = collider->CalculateCollisionInfo(box);
-    }
-
+	if (!info) return;
     if (!info->collided) return;
     if (this->isStatic) return;
 
 	collider->GetCurrentCollisions().insert(other.collider);
 	other.collider->GetCurrentCollisions().insert(collider);
 
-    float totalInverseMass = 1;
-
-    vec2 separation = info->normal * (info->depth / totalInverseMass);
+    vec2 separation = info->normal * info->depth;
 
     if (!this->isStatic && isResolveCollision && other.isResolveCollision) {
         Transform t = this->GetTransform();
@@ -75,10 +78,7 @@ void PhysicsNode::ResolveCollision(PhysicsNode& other) {
 
     if (velocityAlongNormal < 0) return;
 
-    float e = 0.0f;
-
-    float j = -(1.0f + e) * velocityAlongNormal;
-    j /= totalInverseMass;
+    float j = -velocityAlongNormal;
 
     vec2 impulse = j * info->normal;
 
