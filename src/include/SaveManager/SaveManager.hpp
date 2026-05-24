@@ -2,25 +2,30 @@
 #define SAVEMANAGER_HPP
 
 #include "include/Core/ISerializable.hpp"
+#include "include/Globals/Globals.hpp"
 #include <unordered_map>
-#include <vector>
 #include <string>
-#include <memory>
+#include <fstream>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 
-class SaveManager {
-private:
-	std::unordered_map<std::string, std::weak_ptr<ISerializable>> serializables;
-	std::string currentSceneToLoad;
-	nlohmann::json loadedSaveFile;
+using namespace std;
+using namespace nlohmann;
+using namespace filesystem;
 
-public:
-	void Register(std::shared_ptr<ISerializable> object);
-	bool SaveGame(const std::string& filepath, const std::string& activeSceneName);
-	bool LoadFile(const std::string& filepath);
+class SaveManager {
+	private:
+	unordered_map<string, weak_ptr<ISerializable>> serializables;
+	string currentSceneToLoad;
+	json loadedSaveFile;
+
+	public:
+	void Register(shared_ptr<ISerializable> object);
+	bool SaveGame(const string& filepath, const string& activeSceneName);
+	bool LoadFile(const string& filepath);
 	void ApplyLoaded();
-	void LoadGame(const std::string& filepath);
-	std::string GetCurrentSceneToLoad() const;
+	void LoadGame(const string& filepath);
+	string GetCurrentSceneToLoad() const;
 };
 
 #endif
