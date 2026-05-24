@@ -67,6 +67,8 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
 
 	ObjectType GetObjectType() const { return objectType; }
 
+	shared_ptr<CollisionInfo> GetCollisionInfo(shared_ptr<Collider> other);
+
     PhysicsNode();
 
     PhysicsNode(const unordered_map<string, std::any>&);
