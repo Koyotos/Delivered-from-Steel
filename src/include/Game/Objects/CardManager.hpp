@@ -18,7 +18,7 @@ class CardManager : public Node
 private:
 	int maxDeckSize = 9;
 	int maxHandSize = 3;
-	bool drawOnHandEmpty = true;
+	bool drawOnHandEmpty = false;
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
