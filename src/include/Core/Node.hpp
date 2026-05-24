@@ -37,6 +37,7 @@ class Node {
     protected:
     bool flags[6];
     vector<shared_ptr<Node>> children;
+    std::string saveID = "";
 
     string name;
 
@@ -68,6 +69,13 @@ class Node {
     @return void
     */
     void AddChild(shared_ptr<Node>);
+
+    /*
+    @brief Removes a child node from the current node.
+    @param1 shared_ptr<Node> - child node to be removed
+    @return void
+    */
+    void RemoveChild(shared_ptr<Node> node);
 
     /*
     @brief Sets Process flag state.
@@ -199,6 +207,19 @@ class Node {
     @return string - name
     */
     const string& GetName() const { return name; }
+
+	/*
+    @brief Sets the save ID for the node.
+    @param1 const std::string& - ID to be set
+    @return void
+    */
+    void SetSaveID(const std::string& id) { saveID = id; }
+
+	/*
+    @brief Returns the save ID of the node.
+    @return std::string - save ID
+    */
+    std::string GetSaveID() const { return saveID; }
 
 };
 

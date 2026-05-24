@@ -7,8 +7,9 @@
 #include "include/Game/Objects/HealthComponent.hpp"
 #include "include/Game/Objects/PlayerCameraController.hpp"
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
+#include "include/Core/ISerializable.hpp"
 
-class Player final : public Object2D {
+class Player final : public Object2D, public ISerializable {
 private:
 	PlayerMovementStats stats;
 	PlayerInputState inputState;
@@ -80,6 +81,10 @@ public:
 	void ExecuteWallJump();
 	void ExecuteWallSnap();
 	bool CheckWallSnap();
+
+	std::string GetSerializeKey() const override;
+	nlohmann::json Serialize() const override;
+	void Deserialize(const nlohmann::json& data) override;
 };
 
 #endif

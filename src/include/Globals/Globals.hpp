@@ -8,6 +8,8 @@
 #include <unordered_map>
 
 class AudioManager;
+class WorldStateManager;
+class SceneManager;
 
 using namespace std;
 using namespace filesystem;
@@ -41,6 +43,14 @@ class Globals {
 
     public:
     std::shared_ptr<AudioManager> audioManager;
+    std::shared_ptr<WorldStateManager> worldStateManager;
+    std::shared_ptr<SceneManager> sceneManager;
+
+    bool wantsToSave = false;
+    bool wantsToLoad = false;
+
+    std::string activeLevelName = "";
+
     /*
     @brief Returns instance of Globals class.
     @return Globals& - globals instance
