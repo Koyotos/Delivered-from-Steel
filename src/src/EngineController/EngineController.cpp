@@ -210,6 +210,24 @@ void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
 	scm->SetActive(scn);
 }
 
+shared_ptr<MenuManager> EngineController::GetMenuManager() const {
+	return mm;
+}	
+
+
+void EngineController::TransitionToMenu() {
+	if (!mm) {
+		mm = make_shared<MenuManager>();
+		mm->Init(rsm);
+		menuScene = rsm->LoadScene("res/scenes/menu.json");
+		scm->AddScene(menuScene);
+		menuScene->GetRoot()->AddChild(mm);
+	}
+
+	menuScene->GetRoot()->InitRecursive(menuScene);
+	scm->SetActive(menuScene);   // raw swap, no crm/cards injected
+}
+
 void EngineController::SetActiveScene(const uint16_t& idx) {
 	scm->SetActive(idx);
 }
@@ -330,3 +348,5 @@ void EngineController::LoadGame(const string& filepath) {
 		disableDestroyed(activeLevelNode);
 	}
 }
+
+

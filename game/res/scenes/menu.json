@@ -1,0 +1,56 @@
+{
+    "name": "testUI",
+    "1": {
+        "parent": 0,
+        "class": "Node",
+        "process": true,
+        "input": false,
+        "physics": false
+    },
+    "2": {
+    "class": "Camera",
+    "parent": 1,
+    "x": 0,
+    "y": 0,
+    "process": true,
+    "input": true,
+    "physics": true
+  },
+    "4": {
+        "parent": 1,
+        "transform": [
+            850.0,
+            800.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            2.0,
+            2.0,
+            1.0
+        ],
+        "sprite": "slot",
+        "class": "CardSlot",
+        "shader": "ui",
+        "active" : "slot",
+        "process": true,
+        "input": true,
+        "physics": false,
+        "draw": true,
+        "ignoreParent": true,
+        "reqPerspective" : false,
+        "static" : true,
+        "colliderPosX" : 100.0,
+        "colliderPosY" : 100.0,
+        "colliderType" : false,
+        "width" : 50.0,
+        "height" : 50.0,
+		"visible" : true,
+		"alpha" : 1.0,
+        "addCollider": true,
+        "cull" : 0.0,
+        "zIndex" : 0,
+        "ResolveCollision": false
+	}
+
+}
