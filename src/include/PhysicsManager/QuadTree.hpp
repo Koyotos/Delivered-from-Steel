@@ -17,14 +17,14 @@ class QuadTree {
 
     AABB bounds;
 
-    vector<shared_ptr<PhysicsNode>> objects;
+    vector<PhysicsNode*> objects;
     array<unique_ptr<QuadTree>, 4> children;
 
     public:
     QuadTree(int level, const AABB& bounds);
     void Clear();
-    void Insert(shared_ptr<PhysicsNode> node);
-    void Query(const AABB& area, vector<shared_ptr<PhysicsNode>>& result);
+    void Insert(PhysicsNode* node);
+    void Query(const AABB& area, vector<PhysicsNode*>& result);
     QuadTree() = default;
 
     private:

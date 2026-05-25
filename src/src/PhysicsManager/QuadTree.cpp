@@ -70,7 +70,7 @@ int QuadTree::GetIndex(const AABB& rect) {
     return -1;
 }
 
-void QuadTree::Insert(std::shared_ptr<PhysicsNode> node) {
+void QuadTree::Insert(PhysicsNode* node) {
     auto collider = node->GetCollider();
 
     if (!collider)
@@ -118,11 +118,11 @@ void QuadTree::Insert(std::shared_ptr<PhysicsNode> node) {
     }
 }
 
-void QuadTree::Query(const AABB& area, std::vector<std::shared_ptr<PhysicsNode>>& result) {
+void QuadTree::Query(const AABB& area, std::vector<PhysicsNode*>& result) {
     if(!Intersects(bounds, area))
         return;
 
-    for(auto& object : objects) {
+    for(PhysicsNode* object : objects) {
         auto collider = object->GetCollider();
 
         if(!collider)

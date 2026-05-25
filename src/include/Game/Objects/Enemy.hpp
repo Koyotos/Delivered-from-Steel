@@ -35,6 +35,10 @@ protected:
 
 	bool seePlayer = false;
 	int direction = 1;
+
+	glm::vec2 lastPosition;
+	glm::vec2 realVelocity;
+
 	EnemyState state = EnemyState::Patrol;
 
 	shared_ptr<Player> player;

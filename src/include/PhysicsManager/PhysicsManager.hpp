@@ -19,6 +19,8 @@ class PhysicsManager {
 
 	static PhysicsManager& GetPhysicsManager();
 
+	void Reset();
+
 	optional<RaycastHit> Raycast(
 		const vec2& origin,
 		const vec2& direction,

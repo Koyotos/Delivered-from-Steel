@@ -15,6 +15,9 @@ ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : 
 
 	shieldRaycastOffsetX = raycastOffsetX + 0.02f;
 
+	visiblityAngle = 1 / tan(radians(90.0f));
+	visiblityDistance = 2.0f;
+
 	shieldCooldown = 0.1f;
 
 	raycastGroundCheckOffsetX = raycastOffsetX + 0.2f;

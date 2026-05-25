@@ -5,6 +5,8 @@
 #include "include/Game/Objects/Card.hpp"
 #include "include/Game/UI/CardSlot.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
+#include "include/Core/ISerializable.hpp"
+
 
 
 /*
@@ -12,7 +14,7 @@
  * It is created inside the EngineController's Init function.
  * It also creates new cards and connects them with UI elements.
  */
-class CardManager : public Node
+class CardManager : public Node, public ISerializable
 {
 
 private:
@@ -208,7 +210,9 @@ public:
 	void Process() override;
 	bool Input(InputEvent& event) override;
 
-
+	std::string GetSerializeKey() const override;
+	nlohmann::json Serialize() const override;
+	void Deserialize(const nlohmann::json& data) override;
 };
 
 

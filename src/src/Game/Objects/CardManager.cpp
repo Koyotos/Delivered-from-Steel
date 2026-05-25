@@ -25,7 +25,7 @@ std::vector<shared_ptr<Card>> CardManager::GetAllDeckCards()
 	return allDeckCards;
 }
 
-void CardManager::SetDrawOnHandEmpty(bool value) 
+void CardManager::SetDrawOnHandEmpty(bool value)
 {
 	drawOnHandEmpty = value;
 }
@@ -276,10 +276,92 @@ shared_ptr<Card> CardManager::CreateCard(CardType type)
 
 void CardManager::AssignPlayer(shared_ptr<Player> player)
 {
-	for (auto& card : allDeckCards)
-	{
-		card->AssignPlayer(player);
-	}	
+	for (auto& card : unlockedCards) if (card) card->AssignPlayer(player);
+	for (auto& card : allDeckCards) if (card) card->AssignPlayer(player);
+	for (auto& card : currentDeck) if (card) card->AssignPlayer(player);
+	for (auto& card : currentHand) if (card) card->AssignPlayer(player);
 }
 
 
+std::string CardManager::GetSerializeKey() const {
+	return "card_manager";
+}
+
+nlohmann::json CardManager::Serialize() const {
+	nlohmann::json j;
+
+	std::vector<int> unlocked;
+	for (const auto& card : unlockedCards) {
+		unlocked.push_back(static_cast<int>(card->GetCardType()));
+	}
+	j["unlockedCards"] = unlocked;
+
+	std::vector<int> allDeck;
+	for (const auto& card : allDeckCards) {
+		allDeck.push_back(static_cast<int>(card->GetCardType()));
+	}
+	j["allDeckCards"] = allDeck;
+
+	std::vector<int> currDeck;
+	for (const auto& card : currentDeck) {
+		currDeck.push_back(static_cast<int>(card->GetCardType()));
+	}
+	j["currentDeck"] = currDeck;
+
+	std::vector<int> hand;
+	for (const auto& card : currentHand) {
+		if (card != nullptr) {
+			hand.push_back(static_cast<int>(card->GetCardType()));
+		}
+		else {
+			hand.push_back(-1);
+		}
+	}
+	j["currentHand"] = hand;
+
+	return j;
+}
+
+void CardManager::Deserialize(const nlohmann::json& data) {
+	if (data.contains("unlockedCards")) {
+		auto loadedUnlocked = data["unlockedCards"].get<std::vector<int>>();
+		unlockedCards.clear();
+		for (int typeVal : loadedUnlocked) {
+			unlockedCards.push_back(CreateCard(static_cast<CardType>(typeVal)));
+		}
+	}
+
+	if (data.contains("allDeckCards")) {
+		auto loadedAll = data["allDeckCards"].get<std::vector<int>>();
+		allDeckCards.clear();
+		for (int typeVal : loadedAll) {
+			allDeckCards.push_back(CreateCard(static_cast<CardType>(typeVal)));
+		}
+	}
+
+	if (data.contains("currentDeck")) {
+		auto loadedCurr = data["currentDeck"].get<std::vector<int>>();
+		currentDeck.clear();
+		for (int typeVal : loadedCurr) {
+			currentDeck.push_back(CreateCard(static_cast<CardType>(typeVal)));
+		}
+	}
+
+	if (data.contains("currentHand")) {
+		auto loadedHand = data["currentHand"].get<std::vector<int>>();
+		currentHand.clear();
+		currentHand.resize(maxHandSize, nullptr);
+
+		for (int i = 0; i < loadedHand.size() && i < slots.size(); i++) {
+			if (loadedHand[i] != -1) {
+				auto newCard = CreateCard(static_cast<CardType>(loadedHand[i]));
+				currentHand[i] = newCard;
+				slots[i]->SetCard(newCard->GetDisplay());
+			}
+			else {
+				currentHand[i] = nullptr;
+				slots[i]->RemoveCard();
+			}
+		}
+	}
+}

@@ -527,6 +527,21 @@ void Player::Physics(const float& deltaTime) {
 }
 
 bool Player::Input(InputEvent& event) {
+	if (!event.handled) {
+		//test save/load
+		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
+			if (event.key == GLFW_KEY_F5) {
+				Globals::GetGlobals().wantsToSave = true;
+				event.handled = true;
+				return true;
+			}
+			if (event.key == GLFW_KEY_F9) {
+				Globals::GetGlobals().wantsToLoad = true;
+				event.handled = true;
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
@@ -544,11 +559,11 @@ bool Player::IsHanging() {
 }
 
 void Player::ExecuteDash() {
-    isDashing = true;
+	isDashing = true;
 	isWallSnaping = false;
-    dashTimer = stats.dashDuration;
+	dashTimer = stats.dashDuration;
 	beforeCardVelocityX = GetVelocity().x;
-    SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
+	SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
 }
 
 void Player::ExecuteBounce() {
@@ -558,35 +573,35 @@ void Player::ExecuteBounce() {
 }
 
 void Player::ExecuteFeatherFalling() {
-    isFeatherFalling = true;
+	isFeatherFalling = true;
 	featherFallingTimer = stats.featherFallingDuration;
 }
 
 void Player::ExecuteDoubleJump() {
 	isDashing = false;
-    glm::vec2 vel = GetVelocity();
-    vel.y = stats.jumpForce;
-    SetVelocity(vel);
-    canCutJump = true;
+	glm::vec2 vel = GetVelocity();
+	vel.y = stats.jumpForce;
+	SetVelocity(vel);
+	canCutJump = true;
 }
 
 void Player::ExecuteWallJump() {
 	isDashing = false;
-    glm::vec2 vel = GetVelocity();
-    
-    float jumpDir = 0.0f;
-    if (CheckLeftWalled()) jumpDir = 1.0f;
-    else if (CheckRightWalled()) jumpDir = -1.0f;
+	glm::vec2 vel = GetVelocity();
 
-    if (jumpDir != 0.0f) {
-        vel.y = stats.wallJumpForceY;
-        vel.x = jumpDir * stats.wallJumpForceX;
-        facingDirection = jumpDir;
-        SetVelocity(vel);
-        
-        coyoteTimeCounter = 0.0f;
-        jumpBufferCounter = 0.0f;
-    }
+	float jumpDir = 0.0f;
+	if (CheckLeftWalled()) jumpDir = 1.0f;
+	else if (CheckRightWalled()) jumpDir = -1.0f;
+
+	if (jumpDir != 0.0f) {
+		vel.y = stats.wallJumpForceY;
+		vel.x = jumpDir * stats.wallJumpForceX;
+		facingDirection = jumpDir;
+		SetVelocity(vel);
+
+		coyoteTimeCounter = 0.0f;
+		jumpBufferCounter = 0.0f;
+	}
 }
 
 bool Player::CheckWallSnap() {
@@ -617,4 +632,33 @@ void Player::ExecuteWallSnap() {
 	beforeCardVelocityX = GetVelocity().x;
 	isWallSnaping = true;
 	isDashing = false;
+}
+
+std::string Player::GetSerializeKey() const {
+	return "player";
+}
+
+nlohmann::json Player::Serialize() const {
+	nlohmann::json j;
+
+	j["hp"] = this->health.GetHP();
+
+	glm::vec3 pos = this->GetTransform().GetTranslation();
+	j["posX"] = pos.x;
+	j["posY"] = pos.y;
+	j["posZ"] = pos.z;
+
+	return j;
+}
+
+void Player::Deserialize(const nlohmann::json& data) {
+	if (data.contains("hp")) {
+		this->health.SetHP(data["hp"]);
+	}
+	if (data.contains("posX") && data.contains("posY") && data.contains("posZ")) {
+		glm::vec3 loadedPos(data["posX"], data["posY"], data["posZ"]);
+		Transform t = this->GetTransform();
+		t.SetTranslation(loadedPos);
+		this->SetTransform(t);
+	}
 }
