@@ -20,18 +20,17 @@ bool Card::CheckUse()
 	switch (type)
 	{
 	case CardType::Dash:
-		return true;
+		return !player->isDead();
 	case CardType::Bounce:
-		//return !player->CheckGrounded();
-		return true;
+		return !player->isDead();
 	case CardType::FeatherFalling:
-		return true;
+		return !player->isDead();
 	case CardType::DoubleJump:
-		return !player->CheckGrounded();
+		return !player->isDead() && !player->CheckGrounded();
 	case CardType::WallJump:
-		return (player->CheckLeftWalled() || player->CheckRightWalled()) && !player->CheckGrounded();
+		return !player->isDead() && (player->CheckLeftWalled() || player->CheckRightWalled()) && !player->CheckGrounded() ;
 	case CardType::WallSnap:
-		return player->CheckWallSnap();
+		return !player->isDead() && player->CheckWallSnap();
 	default:
 		return true;
 	}
