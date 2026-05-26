@@ -1,4 +1,8 @@
 #include "include/Game/UI/MenuManager.hpp"
+#include "include/Globals/Globals.hpp"
+#include <GLFW/glfw3.h>
+
+
 
 void MenuManager::SetOnStartGame(function<void()> cb) {
     onStartGame = cb;
@@ -26,10 +30,19 @@ MenuManager::~MenuManager()
 
 void MenuManager::Process()
 {
-	// TBD
+	//TBD
 }
 
 bool MenuManager::Input(InputEvent& event)
 {
+	if (!event.handled) {
+		if (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_SPACE && event.action == GLFW_PRESS) {
+			event.handled = true;
+			if (onStartGame) {
+				onStartGame();
+			}
+			return true;
+		}
+	}
 	return false;
 }
