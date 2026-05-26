@@ -196,6 +196,23 @@ void Player::Process() {
 	Object2D::Process();
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
+	if (deathEmitter) {
+		if (!wasDead && health.IsDead()) {
+			deathEmitter->Burst(10);
+		}
+	}
+
+	if (pixelEmitter) {
+		if (!wasDead && health.IsDead()) {
+			pixelEmitter->isEmitting = true;
+		}
+		else if (!health.IsDead()) {
+			pixelEmitter->isEmitting = false;
+		}
+	}
+
+	wasDead = health.IsDead();
+
 	if (health.IsDead()) {
 		inputState.moveInput = 0.0f;
 		if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
@@ -205,6 +222,7 @@ void Player::Process() {
 			Transform t = GetTransform();
 			t.SetTranslation(respawnPoint);
 			SetTransform(t);
+			Enable();
 		}
 		return;
 	}
@@ -292,10 +310,10 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isDashing) {
+		wasDashing = true;
 		dashTimer -= deltaTime;
 		if (dashTimer <= 0.0f) {
 			isDashing = false;
-			currentVelocity.x = beforeCardVelocityX;
 		}
 		else {
 			currentVelocity.y = 0.0f;
@@ -307,30 +325,35 @@ bool Player::HandleMovement(float deltaTime) {
 			this->SetTransform(t);
 
 			if (isWalled) {
+				int dir = 0;
 				if (isWalledLeft && facingDirection == -1.0f) {
-					auto hitBreakableWall = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
-					if (hitBreakableWall.has_value()) {
-						shared_ptr<BreakableWall> breakableWall = std::static_pointer_cast<BreakableWall>(hitBreakableWall->collider->GetOwner());
-						if (breakableWall) {
-							breakableWall->BreakWall();
-						}
-					}
-					isDashing = false;
+					dir = -1;
 				}
 				else if (isWalledRight && facingDirection == 1.0f) {
-					auto hitBreakableWall = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
+					dir = 1;
+				}
+
+				if (dir != 0) {
+					auto hitBreakableWall = Raycast(glm::vec2(dir * raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, static_cast<uint32_t>(ObjectType::BreakableWall));
 					if (hitBreakableWall.has_value()) {
 						shared_ptr<BreakableWall> breakableWall = std::static_pointer_cast<BreakableWall>(hitBreakableWall->collider->GetOwner());
 						if (breakableWall) {
 							breakableWall->BreakWall();
 						}
 					}
-					isDashing = false;
+					else {
+						isDashing = false;
+					}
 				}
 			}
 
 			return false;
 		}
+	}
+	else if (wasDashing) {
+		currentVelocity.x = beforeCardVelocityX;
+		beforeCardVelocityX = 0.0f;
+		wasDashing = false;
 	}
 
 	if (isFeatherFalling) {
@@ -508,22 +531,7 @@ void Player::Physics(const float& deltaTime) {
 		HandleAnimations();
 	}
 
-	if (deathEmitter) {
-		if (!wasDead && health.IsDead()) {
-			deathEmitter->Burst(10);
-		}
-	}
-
-	if (pixelEmitter) {
-		if (!wasDead && health.IsDead()) {
-			pixelEmitter->isEmitting = true;
-		}
-		else if (!health.IsDead()) {
-			pixelEmitter->isEmitting = false;
-		}
-	}
-
-	wasDead = health.IsDead();
+	
 }
 
 bool Player::Input(InputEvent& event) {
@@ -547,10 +555,15 @@ bool Player::Input(InputEvent& event) {
 
 void Player::takeDamage(float damage) {
 	health.TakeDamage(damage);
+	if (health.GetHP() <= 0.0f) {
+		Shatter();
+	}
 }
 
 void Player::Shatter() {
 	health.Shatter();
+	SetPhysics(false);
+	SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");
 }
 

@@ -25,6 +25,7 @@ private:
 	bool canCutJump = false;
 	bool wasDead = false;
 	bool isDashing = false;
+	bool wasDashing = false;
 	bool isBounceActive = false;
 	bool isFeatherFalling = false;
 	bool isWallSnaping = false;
@@ -81,6 +82,7 @@ public:
 	void ExecuteWallJump();
 	void ExecuteWallSnap();
 	bool CheckWallSnap();
+	bool isDead() const { return health.IsDead(); }
 
 	std::string GetSerializeKey() const override;
 	nlohmann::json Serialize() const override;
