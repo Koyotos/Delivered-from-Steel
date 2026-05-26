@@ -27,7 +27,7 @@ class Camera : public Node {
     mat4 GetVP(const bool&) const noexcept;
 
     mat4 GetO() const noexcept { return O; }
-    mat4 GetV() const noexcept { return translate(mat4(1.0), -vec3(position.x,position.y,0)); }
+    mat4 GetV() const noexcept { return translate(mat4(1.0), -vec3(position.x,position.y,3)); }
     mat4 GetP() const noexcept { return P; }
 
     vec2 ToWorldCoords(const vec2&) const noexcept;
