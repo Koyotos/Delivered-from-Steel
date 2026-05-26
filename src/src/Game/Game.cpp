@@ -8,7 +8,8 @@ void Game::Init() {
 
     engine.LinkSceneObjects();
 
-    engine.LoadLevel("141_obiektow");
+    //engine.LoadLevel("141_obiektow");
+    engine.LoadLevel("testLevel");
 }
 
 void Game::Start() {

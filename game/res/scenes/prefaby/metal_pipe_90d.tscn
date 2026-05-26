@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://c1su8rf8fsx6b"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_xqtrh"]
+[ext_resource type="ArrayMesh" uid="uid://c8wi1h25qeyrc" path="res://house/Metal_Pipe_90d/Metal_Pipe_90d.obj" id="2_x5ws8"]
+
+[node name="Metal_Pipe_90d" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_xqtrh")
+model_name = "Metal_Pipe_90d"
+collider_pos_y = -0.25
+width = 0.5
+height = 0.5
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = true
+metadata/ResolveCollision = true
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.25
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Pipe_90d"
+metadata/height = 0.5
+metadata/width = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_x5ws8")

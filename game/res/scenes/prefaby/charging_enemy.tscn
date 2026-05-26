@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3 uid="uid://dps4ux161rntj"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_kaeg4"]
+[ext_resource type="Texture2D" uid="uid://d0damy4ef4mlc" path="res://house/Charger.png" id="2_6h7s1"]
+
+[node name="ChargingEnemy" type="Node3D"]
+transform = Transform3D(-0.012, 0, -8.74228e-08, 0, -0.012, 0, -1.04907e-09, 0, 1, 0, 0, -5)
+script = ExtResource("1_kaeg4")
+class_type = "ChargingEnemy"
+model_name = "Charger"
+sprite_name = "Charger"
+is_static = false
+shader = "player"
+collider_pos_y = -0.29
+width = 0.65
+height = 0.59
+metadata/class = "ChargingEnemy"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = false
+metadata/addCollider = true
+metadata/ResolveCollision = true
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.29
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "player"
+metadata/sprite = "Charger"
+metadata/reqPerspective = true
+metadata/height = 0.59
+metadata/width = 0.65
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 0, 0, 0)
+texture = ExtResource("2_6h7s1")
