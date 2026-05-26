@@ -81,14 +81,14 @@ class UIElement : public Object2D {
 	* @param time - Duration of the fade in effect.
 	* @param ease - Easing function to use for the tween (Linear by default).
 	*/
-	void FadeIn(float time, EaseType ease = EaseType::Linear);
+	void FadeIn(float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 
 	/*
 	* @brief Fades out the element by tweening alpha from current value to 0 over specified time.
 	* @param time - Duration of the fade out effect.
 	* @param ease - Easing function to use for the tween (Linear by default).
 	*/
-	void FadeOut(float time, EaseType ease = EaseType::Linear);
+	void FadeOut(float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 
 	/*
 	* @brief Moves the element to a target position by tweening its transform's position over specified time.
@@ -96,7 +96,7 @@ class UIElement : public Object2D {
 	* @param time - Duration of the move effect.
 	* @param ease - Easing function to use for the tween (Linear by default).
 	*/
-	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear);
+	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 
 	/*
 	* @brief Tweens the element's tint color to a target color over specified time.
@@ -104,7 +104,12 @@ class UIElement : public Object2D {
 	* @param time - Duration of the tint effect.
 	* @param ease - Easing function to use for the tween (Linear by default).
 	*/
-	void Tint(glm::vec3 color, float time, EaseType ease = EaseType::Linear);
+	void Tint(glm::vec3 color, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+
+	/*
+	 * @brief Instantly finishes all active tweens, setting the element's properties to their target values.
+	 */
+	void FinishAllTweens();
 
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
 

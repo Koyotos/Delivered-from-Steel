@@ -29,8 +29,13 @@ glm::vec3 UIElement::GetTint() const {
 void UIElement::UpdateTweens(float dt) {
 	for(auto &tween : tweens) {
 		if(tween.finished) continue;
+
 		tween.elapsed += dt;
-		float t = tween.elapsed / tween.duration;
+
+		if (tween.elapsed < tween.delay) continue;
+
+		float localElapsed = tween.elapsed - tween.delay;
+		float t = localElapsed / tween.duration;
 		if(t >= 1.0f) {
 			t = 1.0f;
 			tween.finished = true;
@@ -60,13 +65,14 @@ void UIElement::UpdateTweens(float dt) {
 	);
 }
 
-void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease)
+void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease, float delay)
 {
 	Tween t;
 	t.type = Tween::Type::Move;
 	t.duration = time;
 	t.elapsed = 0.0f;
 	t.ease = ease;
+	t.delay = delay;
 
 	t.startPos = glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y); // get global position
 	t.targetPos = target;
@@ -74,7 +80,7 @@ void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease)
 	tweens.push_back(t);
 }
 
-void UIElement::FadeIn(float time, EaseType ease)
+void UIElement::FadeIn(float time, EaseType ease, float delay)
 {
 	Tween t;
 	t.type = Tween::Type::Fade;
@@ -83,10 +89,11 @@ void UIElement::FadeIn(float time, EaseType ease)
 	t.ease = ease;
 	t.startAlpha = 0.0f;
 	t.targetAlpha = 1.0f;
+	t.delay = delay;
 	tweens.push_back(t);
 }
 
-void UIElement::FadeOut(float time, EaseType ease)
+void UIElement::FadeOut(float time, EaseType ease, float delay)
 {
 	Tween t;
 	t.type = Tween::Type::Fade;
@@ -95,10 +102,11 @@ void UIElement::FadeOut(float time, EaseType ease)
 	t.ease = ease;
 	t.startAlpha = alpha;
 	t.targetAlpha = 0.0f;
+	t.delay = delay;
 	tweens.push_back(t);
 }
 
-void UIElement::Tint(glm::vec3 color, float time, EaseType ease)
+void UIElement::Tint(glm::vec3 color, float time, EaseType ease, float delay)
 {
 	Tween t;
 	t.type = Tween::Type::Tint;
@@ -107,6 +115,7 @@ void UIElement::Tint(glm::vec3 color, float time, EaseType ease)
 	t.ease = ease;
 	t.startTint = tint;
 	t.targetTint = color;
+	t.delay = delay;
 	tweens.push_back(t);
 }
 
@@ -160,4 +169,21 @@ void UIElement::Draw(shared_ptr<Shader> sh) {
 	shader->SetVec3("tint", tint);
 
 	Object2D::Draw();
+}
+
+void UIElement::FinishAllTweens() {
+	for (auto& tween : tweens) {
+		switch (tween.type) {
+		case Tween::Type::Move:
+			SetTransform(Transform(glm::vec3(tween.targetPos, 0.0f), GetTransform().GetRotation(), GetTransform().GetScale()));
+			break;
+		case Tween::Type::Fade:
+			SetAlpha(tween.targetAlpha);
+			break;
+		case Tween::Type::Tint:
+			SetTint(tween.targetTint);
+			break;
+		}
+	}
+	tweens.clear();
 }

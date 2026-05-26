@@ -19,20 +19,20 @@
     "4": {
         "parent": 1,
         "transform": [
-            850.0,
-            800.0,
             0.0,
             0.0,
             0.0,
             0.0,
-            2.0,
-            2.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
             1.0
         ],
-        "sprite": "slot",
-        "class": "CardSlot",
+        "sprite": "background_placeholder",
+        "class": "Icon",
         "shader": "ui",
-        "active" : "slot",
+        "active" : "background_placeholder",
         "process": true,
         "input": true,
         "physics": false,
@@ -50,7 +50,8 @@
         "addCollider": true,
         "cull" : 0.0,
         "zIndex" : 0,
-        "ResolveCollision": false
+        "ResolveCollision": false,
+        "animated" : false
 	}
 
 }

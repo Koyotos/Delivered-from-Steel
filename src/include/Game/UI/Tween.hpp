@@ -17,6 +17,7 @@ struct Tween {
 
     float duration;
     float elapsed;
+    float delay = 0.0f;
     EaseType ease;
 
     // Move
