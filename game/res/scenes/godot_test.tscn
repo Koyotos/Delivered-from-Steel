@@ -3405,30 +3405,6 @@ data1 = Vector3(1, -1, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 23.9882, -5)
 data1 = Vector3(1, -1, 0)
 
-[node name="Concrete_Block1786" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 21.6136, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block2437" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 22.0818, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block2438" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 22.5562, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block1787" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 20.1922, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block2446" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 20.6604, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block2447" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 21.1348, -5)
-data1 = Vector3(1, -1, 0)
-
 [node name="Concrete_Block1809" parent="." instance=ExtResource("3_i4blv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7885, 31.0698, -5)
 data1 = Vector3(1, -1, 0)
