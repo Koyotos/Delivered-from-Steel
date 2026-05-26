@@ -6377,6 +6377,18 @@ metadata/physics = false
 metadata/addCollider = false
 metadata/ResolveCollision = false
 
+[node name="Concrete_Block311" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(150, 0, 0, 0, 150, 0, 0, 0, 1, 14.751, 19.944, -5.9739)
+enable_physics = false
+cull = 150.0
+add_collider = false
+resolve_collision = false
+data1 = Vector3(1, -1, 0)
+metadata/physics = false
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/cull = 150.0
+
 [node name="Concrete_Block906" parent="." instance=ExtResource("3_i4blv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.2486, 11.1264, -5)
 enable_physics = false
