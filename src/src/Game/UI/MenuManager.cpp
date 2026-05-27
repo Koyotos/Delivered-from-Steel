@@ -95,7 +95,12 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		else if (cast->GetName() == "buttonIcon") {
 			buttonIcons.push_back(cast);
 		}
-
+	}
+	if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
+		if (cast->GetName() == "buttonText") {
+			buttonText.push_back(cast);
+			std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
+		}
 	}
 
 	for (auto& k : node->GetChildren()) {
@@ -115,6 +120,12 @@ void MenuManager::ToMainMenu()
 	{
 		// update + fade in
 	}
-	// if (text) fadein + update
+	if (!buttonText.empty())
+	{
+		// update
+		for (auto& text : buttonText) {
+			text->FadeIn(0.5f, EaseType::OutSine, 1.5f);
+		}
+	}
 	toMainMenu = true;
 }

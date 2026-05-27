@@ -5,6 +5,7 @@
 #include "include/Core/Node.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Game/UI/Icon.hpp"
+#include "include/Game/UI/TextUI.hpp"
 
 
 enum class MenuButtonEvent
@@ -26,6 +27,7 @@ private:
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
     vector<shared_ptr<Icon>> buttonIcons;
+	vector<shared_ptr<TextUI>> buttonText;
 
     function<void()> onStartGame;
 	shared_ptr<Scene> menuScene;

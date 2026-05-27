@@ -31,11 +31,13 @@
 #include "include/Renderer/ParticleSystemNode.hpp"
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
 #include "include/AudioManager/AudioManager.hpp"
+#include "include/Game/UI/TextUI.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
 #include <filesystem>
 #include <fstream>
+
 
 class AudioManager;
 
@@ -80,7 +82,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<TextNode>("TextNode"),
     RegisterObjectType<ProfilerNode>("ProfilerNode"),
     RegisterObjectType<ParticleSystemNode>("ParticleSystemNode"),
-    RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode")
+    RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode"),
+    RegisterObjectType<TextUI>("TextUI")
 };
 
 struct RefCountModel {
