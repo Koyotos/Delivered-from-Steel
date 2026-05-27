@@ -40,7 +40,7 @@ void EngineController::Init() {
 		renderer->Init(*rsm);
 		iom->Init(renderer->GetWindow());
 		crm->Init(rsm);
-		globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
+		globals->SetGameFont(Font("res/fonts/8bit_wonder/8-BIT-WONDER.ttf",{0,50}));
 
 		svm->Register(std::static_pointer_cast<ISerializable>(wsm));
 		svm->Register(std::static_pointer_cast<ISerializable>(crm));

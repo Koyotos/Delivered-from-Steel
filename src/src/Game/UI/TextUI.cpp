@@ -27,7 +27,6 @@ void TextUI::SetTextSize(const ivec2& size) {
 
 void TextUI::Draw(shared_ptr<Shader> sh) {
     if (!GetVisible()) return;
-    // UIElement::Draw(sh); // sets VP, alpha, tint uniforms via shader
     textNode.Draw(this->shader);
 }
 
