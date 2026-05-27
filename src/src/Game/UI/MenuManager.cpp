@@ -58,8 +58,7 @@ bool MenuManager::Input(InputEvent& event)
 				{
 					logo->FinishAllTweens();
 				}
-			}
-			if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty() /* || !buttonText->GetActiveTweens().empty()*/)) {
+			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty() /* || !buttonText->GetActiveTweens().empty()*/)) {
 
 				logo->FinishAllTweens();
 				platform->FinishAllTweens();
@@ -70,7 +69,7 @@ bool MenuManager::Input(InputEvent& event)
 
 			} else if (toMainMenu) {
 				switch (selectedButton)
-				{
+				{ 
 					case 0: if (onStartGame) onStartGame(); break;
 					default: break;
 				}
@@ -91,6 +90,7 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		}
 		else if (cast->GetName() == "platform") {
 			platform = cast;
+			platform->SetTint(vec3(0.1, 0.1, 0.1));
 		}
 		else if (cast->GetName() == "buttonIcon") {
 			buttonIcons.push_back(cast);
@@ -108,7 +108,8 @@ void MenuManager::ToMainMenu()
 	if (logo) logo->MoveTo(vec2(logo->GetTransform().GetGlobal()[3].x, 10.0f), 2.0f, EaseType::OutQuad, 0.25f);
 	if (platform)
 	{
-		// tint + move up
+		platform->MoveTo(vec2(platform->GetTransform().GetGlobal()[3].x, 600.0f), 4.0f, EaseType::Linear);
+		// change color
 	}
 	if (!buttonIcons.empty())
 	{
