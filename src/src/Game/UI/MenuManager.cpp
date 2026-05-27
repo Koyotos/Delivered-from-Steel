@@ -58,14 +58,16 @@ bool MenuManager::Input(InputEvent& event)
 				{
 					logo->FinishAllTweens();
 				}
-			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty() /* || !buttonText->GetActiveTweens().empty()*/)) {
+			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty())) {
 
 				logo->FinishAllTweens();
 				platform->FinishAllTweens();
 				for (auto& icon : buttonIcons) {
 					icon->FinishAllTweens();
 				}
-				// buttonText->FinishAllTweens();
+				for (auto& text : buttonText) {
+					text->FinishAllTweens();
+				}
 
 			} else if (toMainMenu) {
 				switch (selectedButton)
@@ -97,10 +99,8 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		}
 	}
 	if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
-		if (cast->GetName() == "buttonText") {
-			buttonText.push_back(cast);
-			std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
-		}
+		buttonText.push_back(cast);
+		std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
 	}
 
 	for (auto& k : node->GetChildren()) {
@@ -110,10 +110,10 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 
 void MenuManager::ToMainMenu()
 {
-	if (logo) logo->MoveTo(vec2(logo->GetTransform().GetGlobal()[3].x, 10.0f), 2.0f, EaseType::OutQuad, 0.25f);
+	if (logo) logo->MoveTo(vec2(logo->GetTransform().GetGlobal()[3].x, 10.0f), 2.0f, EaseType::OutQuad);
 	if (platform)
 	{
-		platform->MoveTo(vec2(platform->GetTransform().GetGlobal()[3].x, 600.0f), 4.0f, EaseType::Linear);
+		platform->MoveTo(vec2(platform->GetTransform().GetGlobal()[3].x, 600.0f), 2.5f, EaseType::Linear);
 		// change color
 	}
 	if (!buttonIcons.empty())
@@ -124,7 +124,7 @@ void MenuManager::ToMainMenu()
 	{
 		// update
 		for (auto& text : buttonText) {
-			text->FadeIn(0.5f, EaseType::OutSine, 1.5f);
+			text->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 		}
 	}
 	toMainMenu = true;

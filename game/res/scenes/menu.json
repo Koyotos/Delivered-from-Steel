@@ -129,7 +129,7 @@
         1.0
     ],
     "class": "TextUI",
-    "shader": "text",
+    "shader": "textUI",
     "process": true,
     "input": false,
     "physics": false,
@@ -164,7 +164,7 @@
         1.0
     ],
     "class": "TextUI",
-    "shader": "text",
+    "shader": "textUI",
     "process": true,
     "input": false,
     "physics": false,
@@ -199,7 +199,7 @@
         1.0
     ],
     "class": "TextUI",
-    "shader": "text",
+    "shader": "textUI",
     "process": true,
     "input": false,
     "physics": false,
