@@ -219,6 +219,8 @@ void Player::Process() {
 		SetVelocity(glm::vec2(0.0f));
 
 		if (health.CheckAndResetRespawn(deltaTime)) {
+			SetVelocity(glm::vec2(0.0f));
+			lastVelocity = glm::vec2(0.0f);
 			Transform t = GetTransform();
 			t.SetTranslation(respawnPoint);
 			SetTransform(t);
@@ -353,6 +355,7 @@ bool Player::HandleMovement(float deltaTime) {
 	else if (wasDashing) {
 		currentVelocity.x = beforeCardVelocityX;
 		beforeCardVelocityX = 0.0f;
+		lastVelocity = currentVelocity;
 		wasDashing = false;
 	}
 
@@ -384,6 +387,11 @@ bool Player::HandleMovement(float deltaTime) {
 			facingDirectionHang = facingDirection;
 		}
 	}
+
+	if (abs(lastVelocity.y) - stats.fallDamageSpeed > abs(currentVelocity.y)) {
+		Shatter();
+	}
+	lastVelocity = currentVelocity;
 
 	if (isHanging) {
 		if (GetCurrentAnimation() != "CourierLedgeGrab") {
@@ -571,11 +579,12 @@ bool Player::IsHanging() {
 	return isHanging;
 }
 
-void Player::ExecuteDash() {
+void Player::ExecuteDash() {	
+	if (!isDashing)
+		beforeCardVelocityX = GetVelocity().x;
 	isDashing = true;
 	isWallSnaping = false;
 	dashTimer = stats.dashDuration;
-	beforeCardVelocityX = GetVelocity().x;
 	SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
 }
 
