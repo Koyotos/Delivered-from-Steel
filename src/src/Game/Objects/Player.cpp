@@ -204,7 +204,7 @@ void Player::Process() {
 
 	if (pixelEmitter) {
 		if (!wasDead && health.IsDead()) {
-			pixelEmitter->isEmitting = true;
+			//pixelEmitter->isEmitting = true;
 		}
 		else if (!health.IsDead()) {
 			pixelEmitter->isEmitting = false;
@@ -349,8 +349,8 @@ bool Player::HandleMovement(float deltaTime) {
 				}
 			}
 
-			return false;
 		}
+		return false;
 	}
 	else if (wasDashing) {
 		currentVelocity.x = beforeCardVelocityX;

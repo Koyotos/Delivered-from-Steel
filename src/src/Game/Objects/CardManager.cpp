@@ -122,8 +122,8 @@ void CardManager::UseCard(int index)
 	if (!currentHand[index]->CheckUse()) return;
 
 	currentHand[index]->Use();
-	currentHand[index] = nullptr;
-	slots[index]->RemoveCard();
+	//currentHand[index] = nullptr;
+	//slots[index]->RemoveCard();
 
 	if (!drawOnHandEmpty)
 	{
@@ -157,9 +157,9 @@ void CardManager::RefreshCurrentDeck()
 
 void CardManager::ShuffleDeck()
 {
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(currentDeck.begin(), currentDeck.end(), g);
+	//std::random_device rd;
+	//std::mt19937 g(rd());
+	//std::shuffle(currentDeck.begin(), currentDeck.end(), g);
 }
 
 bool CardManager::IsEmpty()
@@ -219,44 +219,12 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 
 	UnlockCard(CreateCard(CardType::WallJump));
 	auto c1 = CreateCard(CardType::WallJump);
-	auto c2 = CreateCard(CardType::WallJump);
+	auto c2 = CreateCard(CardType::Dash);
 	auto c3 = CreateCard(CardType::WallJump);
-	auto c4 = CreateCard(CardType::Dash);
-	auto c5 = CreateCard(CardType::Dash);
-	auto c6 = CreateCard(CardType::WallJump);
-	auto c7 = CreateCard(CardType::WallJump);
-	auto c8 = CreateCard(CardType::WallJump);
-	auto c9 = CreateCard(CardType::WallJump);
-	auto c10 = CreateCard(CardType::WallJump);
-	auto c11 = CreateCard(CardType::WallJump);
-	auto c12 = CreateCard(CardType::WallJump);
-	auto c13 = CreateCard(CardType::WallJump);
-	auto c14 = CreateCard(CardType::WallJump);
-	auto c15 = CreateCard(CardType::WallJump);
-	auto c16 = CreateCard(CardType::Dash);
-	auto c17 = CreateCard(CardType::WallJump);
-	auto c18 = CreateCard(CardType::WallJump);
-	auto c19 = CreateCard(CardType::WallJump);
 
 	allDeckCards.push_back(c1);
 	allDeckCards.push_back(c2);
 	allDeckCards.push_back(c3);
-	allDeckCards.push_back(c4);
-	allDeckCards.push_back(c5);
-	allDeckCards.push_back(c6);
-	allDeckCards.push_back(c7);
-	allDeckCards.push_back(c8);
-	allDeckCards.push_back(c9);
-	allDeckCards.push_back(c10);
-	allDeckCards.push_back(c11);
-	allDeckCards.push_back(c12);
-	allDeckCards.push_back(c13);
-	allDeckCards.push_back(c14);
-	allDeckCards.push_back(c15);
-	allDeckCards.push_back(c16);
-	allDeckCards.push_back(c17);
-	allDeckCards.push_back(c18);
-	allDeckCards.push_back(c19);
 
 	currentDeck = allDeckCards;
 
