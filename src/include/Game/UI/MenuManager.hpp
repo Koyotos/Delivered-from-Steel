@@ -24,6 +24,8 @@ private:
 
     int selectedButton = 0;
 
+	vec3 baseButtonColor;
+
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
     vector<shared_ptr<Icon>> buttonIcons;
@@ -33,6 +35,7 @@ private:
 	shared_ptr<Scene> menuScene;
 
 	void FindNodes(shared_ptr<Node> node);
+    void UpdateText();
 
 public:
     MenuManager();
@@ -50,7 +53,6 @@ public:
 
 	shared_ptr<Scene> GetMenuScene();
 
-    void LoadScene();
     void ToOptions();
     void QuitGame();
 

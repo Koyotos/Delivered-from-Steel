@@ -53,12 +53,13 @@ bool MenuManager::Input(InputEvent& event)
 				if (logo->GetActiveTweens().empty())
 				{
 					ToMainMenu();
+					init = false;
 				}
 				else
 				{
 					logo->FinishAllTweens();
 				}
-			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty())) {
+			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() /* || !buttonIcons[0]->GetActiveTweens().empty()*/  || !buttonText[0]->GetActiveTweens().empty())) {
 
 				logo->FinishAllTweens();
 				platform->FinishAllTweens();
@@ -70,10 +71,28 @@ bool MenuManager::Input(InputEvent& event)
 				}
 
 			} else if (toMainMenu) {
-				switch (selectedButton)
-				{ 
-					case 0: if (onStartGame) onStartGame(); break;
-					default: break;
+				bool up = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_UP) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_UP);
+				bool down = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_DOWN) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_DOWN);
+				if (up) {
+					selectedButton = (selectedButton - 1 + buttonText.size()) % buttonText.size();
+					UpdateText();
+				}
+				else if (down) {
+					selectedButton = (selectedButton + 1) % buttonText.size();
+					UpdateText();
+				}
+				else if ((event.type == InputType::KEYBOARD && event.key == GLFW_KEY_ENTER) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A)) {
+					switch (selectedButton) {
+					case 0:
+						if (onStartGame) onStartGame();
+						break;
+					case 1:
+						// ToOptions();
+						break;
+					case 2:
+						// QuitGame();
+						break;
+					}
 				}
 				
 			}
@@ -100,6 +119,7 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 	}
 	if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
 		buttonText.push_back(cast);
+		baseButtonColor = buttonText[0]->GetTint();
 		std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
 	}
 
@@ -122,10 +142,22 @@ void MenuManager::ToMainMenu()
 	}
 	if (!buttonText.empty())
 	{
-		// update
+		UpdateText();
 		for (auto& text : buttonText) {
 			text->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 		}
 	}
 	toMainMenu = true;
+}
+
+void MenuManager::UpdateText() {
+	if (toMainMenu)
+		for (int i=0; i< buttonText.size(); i++) {
+			if (i == selectedButton) {
+				buttonText[i]->SetTint(vec3(1.0f, 0.9f, 0.05f));
+			}
+			else {
+				buttonText[i]->SetTint(baseButtonColor);
+			}
+	}
 }

@@ -28,6 +28,7 @@ void TextUI::SetTextSize(const ivec2& size) {
 void TextUI::Draw(shared_ptr<Shader> sh) {
     if (!GetVisible()) return;
     this->shader->SetFloat("alpha", GetAlpha());
+    textNode.SetColor(GetTint());
     textNode.Draw(this->shader);
 }
 
@@ -39,6 +40,7 @@ TextUI::TextUI(const unordered_map<string, std::any>& data) : UIElement(data) {
     color.x = any_cast<float>(values[0]);
     color.y = any_cast<float>(values[1]);
     color.z = any_cast<float>(values[2]);
+	SetTint(color);
     textNode.SetColor(color);
 
     values = fromMap(vector<std::any>, "textSize", data);
@@ -55,4 +57,6 @@ TextUI::TextUI(const unordered_map<string, std::any>& data) : UIElement(data) {
 
     textNode.SetScale(fromMap(float, "textScale", data));
     textNode.SetContent(fromMap(string, "content", data));
+
+
 }
