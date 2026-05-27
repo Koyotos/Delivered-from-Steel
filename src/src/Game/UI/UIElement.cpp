@@ -187,3 +187,13 @@ void UIElement::FinishAllTweens() {
 	}
 	tweens.clear();
 }
+
+vector<shared_ptr<Tween>> UIElement::GetActiveTweens() const {
+	vector<shared_ptr<Tween>> activeTweens;
+	for (auto& tween : tweens) {
+		if (!tween.finished) {
+			activeTweens.push_back(make_shared<Tween>(tween));
+		}
+	}
+	return activeTweens;
+}

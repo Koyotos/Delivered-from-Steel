@@ -219,9 +219,9 @@ void EngineController::TransitionToMenu() {
 	if (!mm) {
 		mm = make_shared<MenuManager>();
 		mm->Init(rsm);
-		menuScene = rsm->LoadScene("res/scenes/menu.json");
-		scm->AddScene(menuScene);
+		menuScene = mm->GetMenuScene();
 		menuScene->GetRoot()->AddChild(mm);
+		scm->AddScene(menuScene);
 	}
 
 	menuScene->GetRoot()->InitRecursive(menuScene);

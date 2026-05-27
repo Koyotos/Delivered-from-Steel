@@ -111,6 +111,8 @@ class UIElement : public Object2D {
 	 */
 	void FinishAllTweens();
 
+	vector<shared_ptr<Tween>> GetActiveTweens() const;
+
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
 };

@@ -20,7 +20,8 @@ class MenuManager : public Node
 private:
     bool init;
     bool toMainMenu;
-    bool finishTransition;
+
+    int selectedButton = 0;
 
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
@@ -28,6 +29,8 @@ private:
 
     function<void()> onStartGame;
 	shared_ptr<Scene> menuScene;
+
+	void FindNodes(shared_ptr<Node> node);
 
 public:
     MenuManager();
