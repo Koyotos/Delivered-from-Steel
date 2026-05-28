@@ -18,7 +18,8 @@ ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : 
 	visiblityAngle = 1 / tan(radians(90.0f));
 	visiblityDistance = 2.0f;
 
-	shieldCooldown = 0.1f;
+	shieldCooldown = 0.12f;
+	attackDelay = 0.12f;
 
 	raycastGroundCheckOffsetX = raycastOffsetX + 0.2f;
 
@@ -109,20 +110,32 @@ void ShieldTankEnemy::AttackState(float dt) {
 		static_cast<uint32_t>(ObjectType::Player)
 	);
 	if (shieldHit.has_value() && !shieldOnCooldown) {
+		if (GetCurrentAnimation() != "BoilerShove") {
+			Play("BoilerShove", 0.08f, false);
+		}
 		shieldOnCooldown = true;
-		player->takeDamage(damage);
-		player->SetVelocity(vec2(direction * 5.0f, player->GetVelocity().y));
+		attackStarted = true;
 	}
 }
 
 void ShieldTankEnemy::Physics(const float& deltaTime) {
 	if (shieldOnCooldown) {
 		shieldCooldownTimer += deltaTime;
-		if (shieldCooldownTimer >= shieldOnCooldown) {
+		if (attackStarted && attackDelay < shieldCooldownTimer) {
+			player->takeDamage(damage);
+			player->SetVelocity(vec2(direction * 5.0f, player->GetVelocity().y));
+		}
+		if (shieldCooldownTimer >= shieldCooldown) {
 			shieldOnCooldown = false;
 			shieldCooldownTimer = 0.0f;
 
 		}
+	}
+	if (GetVelocity().x == 0.0f && GetCurrentAnimation() != "BoilerIdle" && !(GetCurrentAnimation() == "BoilerShove" && IsPlaying())) {
+		Play("BoilerIdle", 0.12f, true);
+	}
+	if (GetVelocity().x != 0.0f && GetCurrentAnimation() != "BoilerMove" && !(GetCurrentAnimation() == "BoilerShove" && IsPlaying())) {
+		Play("BoilerMove", 0.12f, true);
 	}
 	Enemy::Physics(deltaTime);
 }
