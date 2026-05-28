@@ -60,3 +60,22 @@ TextUI::TextUI(const unordered_map<string, std::any>& data) : UIElement(data) {
 
 
 }
+
+float TextUI::GetLeftBound() const {
+    auto& global = GetTransform().GetGlobal();
+    return global[3].x;
+}
+
+float TextUI::GetRightBound() const {
+    auto& global = GetTransform().GetGlobal();
+    float width = 0.0f;
+
+    Charset charset = Globals::GetGlobals().GetGameFont().GetCharset(textNode.GetSize());
+    for (char c : textNode.GetContent()) {
+        if (c == '\n') break;
+        Character ch = charset.chars[c];
+        width += (ch.advance >> 6) * textNode.GetScale();
+    }
+
+    return global[3].x + width;
+}

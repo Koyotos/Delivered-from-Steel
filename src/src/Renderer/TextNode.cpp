@@ -21,6 +21,18 @@ void TextNode::SetSize(const ivec2& size) {
     this->size = size;
 }
 
+ivec2 TextNode::GetSize() const {
+    return size;
+}
+
+float TextNode::GetScale() const {
+    return scale;
+}
+
+string TextNode::GetContent() const {
+    return content;
+}
+
 string TextNode::Type() {
     return "TextNode";
 }

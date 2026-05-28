@@ -19,7 +19,9 @@ public:
     void SetColor(const vec3& color);
     void SetTextPos(const ivec2& pos);
     void SetTextScale(const float& scale);
-    void SetTextSize(const ivec2& size);
+    void SetTextSize(const ivec2& size); 
+	float GetLeftBound() const;
+    float GetRightBound() const;
 
     void Draw(shared_ptr<Shader> sh = nullptr) override;
 

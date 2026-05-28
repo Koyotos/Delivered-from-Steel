@@ -26,6 +26,8 @@ private:
 
 	vec3 baseButtonColor;
 
+    float iconRotation = 0.0f;
+
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
     vector<shared_ptr<Icon>> buttonIcons;

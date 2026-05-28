@@ -23,6 +23,9 @@ class TextNode : public VisualNode {
     void SetPos(const ivec2&);
     void SetScale(const float&);
     void SetSize(const ivec2&);
+    ivec2 GetSize() const;
+    float GetScale() const;
+    string GetContent() const;
 
     void Draw(shared_ptr<Shader> sh = nullptr) override final;
 

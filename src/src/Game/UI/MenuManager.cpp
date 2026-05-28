@@ -39,11 +39,6 @@ MenuManager::~MenuManager()
 {
 }
 
-void MenuManager::Process()
-{
-	//TBD
-}
-
 bool MenuManager::Input(InputEvent& event)
 {
 	if (!event.handled) {
@@ -138,7 +133,9 @@ void MenuManager::ToMainMenu()
 	}
 	if (!buttonIcons.empty())
 	{
-		// update + fade in
+		for (auto& icon : buttonIcons) {
+			icon->FadeIn(0.5f, EaseType::OutSine, 2.0f);
+		}
 	}
 	if (!buttonText.empty())
 	{
@@ -152,12 +149,20 @@ void MenuManager::ToMainMenu()
 
 void MenuManager::UpdateText() {
 	if (toMainMenu)
-		for (int i=0; i< buttonText.size(); i++) {
+		for (int i = 0; i < buttonText.size(); i++) {
 			if (i == selectedButton) {
-				buttonText[i]->SetTint(vec3(1.0f, 0.9f, 0.05f));
+				buttonText[i]->Tint(vec3(1.0f, 0.9f, 0.05f), 0.2f, EaseType::InOutSine);
+
+				float left = buttonText[i]->GetLeftBound();
+				float right = buttonText[i]->GetRightBound();
+				float y = buttonText[i]->GetTransform().GetGlobal()[3].y;
+				float iconOffset = 39.0f;  
+
+				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y-3.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[1]->MoveTo(vec2(right, y-3.0f), 0.2f, EaseType::InOutSine);
 			}
 			else {
-				buttonText[i]->SetTint(baseButtonColor);
+				buttonText[i]->Tint(baseButtonColor, 0.2f, EaseType::InOutSine);
 			}
-	}
+		}
 }
