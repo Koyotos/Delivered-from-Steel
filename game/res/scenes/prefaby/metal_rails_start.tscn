@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://kxsdbyejp75d"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_8ogdo"]
+[ext_resource type="ArrayMesh" uid="uid://bowsp77jtstgb" path="res://house/Metal_Rails_Start/Metal_Rails_Start.obj" id="2_iiwn3"]
+
+[node name="Metal_Rails_Start" type="Node3D"]
+script = ExtResource("1_8ogdo")
+model_name = "Metal_Rails_Start"
+add_collider = false
+resolve_collision = false
+collider_pos_y = -0.25
+width = 0.5
+height = 0.1
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.25
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Rails_Start"
+metadata/height = 0.1
+metadata/width = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_iiwn3")

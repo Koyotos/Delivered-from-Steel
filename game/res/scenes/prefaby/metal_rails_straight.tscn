@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=3 uid="uid://cc4nguce6ss6c"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_cv2wf"]
+[ext_resource type="ArrayMesh" uid="uid://bsp6clhbv2tb7" path="res://house/Metal_Rails_Straight/Metal_Rails_Straight.obj" id="2_estv6"]
+
+[node name="Metal_Rails_Straight" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_cv2wf")
+model_name = "Metal_Rails_Straight"
+add_collider = false
+resolve_collision = false
+collider_pos_y = -0.25
+width = 0.5
+height = 0.1
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.25
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Rails_Straight"
+metadata/height = 0.1
+metadata/width = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_estv6")

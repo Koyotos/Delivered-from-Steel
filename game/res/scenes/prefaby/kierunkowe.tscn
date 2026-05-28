@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7rw86v0mfon7"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_15odl"]
+
+[node name="kierunkowe" type="Node3D"]
+script = ExtResource("1_15odl")
+class_type = "Light"
+manual_light_direction = true
+color_ambient = Vector3(0.2, 0.25, 0.3)
+color_diffuse = Vector3(0.9, 0.9, 0.8)
+color_specular = Vector3(1, 1, 1)
+metadata/class = "Light"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/type = 0
+metadata/colorAmbient = [0.2, 0.25, 0.3]
+metadata/colorDiffuse = [0.9, 0.9, 0.8]
+metadata/colorSpecular = [1.0, 1.0, 1.0]
+metadata/data1 = [-0.58, -0.58, -0.58]
+metadata/data2 = [0.0, 0.0, 0.0]
+metadata/data3 = [0.0, 0.0, 0.0]
+metadata/data4 = 0.0

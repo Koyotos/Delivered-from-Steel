@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1e0c27sf2xeq"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_cxowj"]
+[ext_resource type="ArrayMesh" uid="uid://c8qvhs7vm5gsr" path="res://house/Metal_Plate/Metal_Plate.obj" id="2_h7ie7"]
+
+[node name="Metal_Plate" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_cxowj")
+model_name = "Metal_Plate"
+collider_pos_y = -0.25
+width = 0.5
+height = 0.1
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = true
+metadata/ResolveCollision = true
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.25
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Plate"
+metadata/height = 0.1
+metadata/width = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_h7ie7")

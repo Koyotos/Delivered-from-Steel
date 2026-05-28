@@ -42,6 +42,7 @@ private:
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
 
+	glm::vec2 lastVelocity = glm::vec2(0.0f);
 	glm::vec2 platformVelocity = glm::vec2(0.0f);
 	glm::vec3 respawnPoint = glm::vec3(0.0f);
 

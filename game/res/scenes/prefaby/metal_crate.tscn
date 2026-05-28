@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://bqktbjqln3g4a"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_l2bfv"]
+[ext_resource type="ArrayMesh" uid="uid://n4mng73qyd2x" path="res://house/Metal_Crate/Metal_Crate.obj" id="2_sk1we"]
+
+[node name="Metal_Crate" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_l2bfv")
+model_name = "Metal_Crate"
+collider_pos_y = -0.25
+width = 0.5
+height = 0.5
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = true
+metadata/ResolveCollision = true
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.25
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Crate"
+metadata/height = 0.5
+metadata/width = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_sk1we")
