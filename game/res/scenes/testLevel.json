@@ -110,9 +110,9 @@
         "diveSpeed": 3.0,
         "visionRange": 4.0,
         "visionAngle": 60.0,
-        "explosionRadius": 1.0,
+        "explosionRadius": 0.6,
         "explosionDamage": 100.0,
-        "turnSpeed": 4.5
+        "turnSpeed": 10.0
     },
     "5": {
         "parent": 1,
@@ -153,9 +153,9 @@
         "diveSpeed": 3.0,
         "visionRange": 4.0,
         "visionAngle": 60.0,
-        "explosionRadius": 1.0,
+        "explosionRadius": 0.6,
         "explosionDamage": 100.0,
-        "turnSpeed": 4.5
+        "turnSpeed": 10.0
     },
     "6": {
         "parent": 1,
@@ -196,9 +196,9 @@
         "diveSpeed": 3.0,
         "visionRange": 4.0,
         "visionAngle": 60.0,
-        "explosionRadius": 1.0,
+        "explosionRadius": 0.6,
         "explosionDamage": 100.0,
-        "turnSpeed": 4.5
+        "turnSpeed": 10.0
     },
     "7": {
         "parent": 1,
