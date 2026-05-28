@@ -15,9 +15,6 @@ void HealthComponent::TakeDamage(float damage) {
 	hp -= damage;
 	canTakeDamage = false;
 	damageTimer = damageCooldown;
-	if (hp <= 0.0f) {
-		Shatter();
-	}
 }
 
 void HealthComponent::Shatter() {
