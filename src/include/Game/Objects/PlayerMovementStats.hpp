@@ -28,6 +28,7 @@ struct PlayerMovementStats {
 	float wallSnapSpeed = 4.0f;
 	float wallSnapDistance = 5.0f;
 	float wallSnapJump = 3.0f;
+	float fallDamageSpeed = 7.9f;
 };
 
 struct PlayerRaycastConfig {

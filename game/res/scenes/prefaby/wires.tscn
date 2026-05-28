@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3 uid="uid://bde8ir1y0quy"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_jg284"]
+[ext_resource type="ArrayMesh" uid="uid://bsn1xjp6uo813" path="res://house/Wires/Wires.obj" id="2_nwoyv"]
+
+[node name="Wires" type="Node3D"]
+script = ExtResource("1_jg284")
+model_name = "Wires"
+add_collider = false
+resolve_collision = false
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = 0.0
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Wires"
+metadata/height = 1.0
+metadata/width = 1.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_nwoyv")

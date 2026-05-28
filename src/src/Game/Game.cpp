@@ -7,19 +7,21 @@ void Game::Init() {
 
     engine.TransitionToMenu();
 
+
     engine.GetMenuManager()->SetOnStartGame([this]() {
         engine.SetActiveScene(gameScene);
         engine.LinkSceneObjects();
-        engine.LoadLevel("141_obiektow");
+        engine.LoadLevel("testLevel");
         });
 
-    /* Jeœli chcesz bez menu do odkomentuj to i zakomentuj to u góry
+    /* Jeï¿½li chcesz bez menu do odkomentuj to i zakomentuj to u gï¿½ry
      * 
      * engine.SetActiveScene(gameScene); 
      * engine.LinkSceneObjects();  
-     * engine.LoadLevel("141_obiektow");
+     * engine.LoadLevel("testLevel");
      */
      
+
 }
 
 

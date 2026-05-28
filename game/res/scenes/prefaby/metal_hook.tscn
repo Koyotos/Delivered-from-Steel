@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://d3ut03sa3jy5p"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_i2fbc"]
+[ext_resource type="ArrayMesh" uid="uid://bsvcd7ygen62p" path="res://house/Metal_Hook/Metal_Hook.obj" id="2_ad0ar"]
+
+[node name="Metal_Hook" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_i2fbc")
+model_name = "Metal_Hook"
+add_collider = false
+resolve_collision = false
+collider_pos_y = -0.05
+width = 0.1
+height = 0.1
+manual_light_direction = null
+data1 = Vector3(1, -1, 0)
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.05
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Hook"
+metadata/height = 0.1
+metadata/width = 0.1
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_ad0ar")

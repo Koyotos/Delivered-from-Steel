@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://ci7t47kptffbk"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_1qegn"]
+[ext_resource type="ArrayMesh" uid="uid://8870graadnnt" path="res://house/Metal_Frame/Metal_Frame.obj" id="2_x1xpe"]
+
+[node name="Metal_Frame" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_1qegn")
+model_name = "Metal_Frame"
+collider_pos_y = -0.25
+width = 0.5
+height = 0.5
+metadata/class = "Platform"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = true
+metadata/ResolveCollision = true
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.25
+metadata/colliderType = false
+metadata/cull = 0.5
+metadata/zIndex = 0
+metadata/shader = "standard"
+metadata/model = "Metal_Frame"
+metadata/height = 0.5
+metadata/width = 0.5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = ExtResource("2_x1xpe")
