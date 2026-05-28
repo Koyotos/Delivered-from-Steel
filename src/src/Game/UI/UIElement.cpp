@@ -55,6 +55,33 @@ void UIElement::UpdateTweens(float dt) {
 			case Tween::Type::Tint:
 				SetTint(glm::mix(tween.startTint, tween.targetTint, easedT));
 				break;
+			case Tween::Type::Rotate:
+				SetTransform(Transform(
+					GetTransform().GetTranslation(),
+					glm::vec3(0.0f, 0.0f, glm::mix(tween.startAngle, tween.targetAngle, easedT)),
+					GetTransform().GetScale()
+				));
+				break;
+
+			case Tween::Type::Scale:
+				SetTransform(Transform(
+					GetTransform().GetTranslation(),
+					GetTransform().GetRotation(),
+					glm::vec3(glm::mix(tween.startScale, tween.targetScale, easedT), 1.0f)
+				));
+				break;
+
+			case Tween::Type::Shake: {
+				float remaining = 1.0f - (tween.elapsed / tween.duration);
+				float offsetX = ((float)(rand() % 200 - 100) / 100.0f) * tween.intensity * remaining;
+				float offsetY = ((float)(rand() % 200 - 100) / 100.0f) * tween.intensity * remaining;
+				SetTransform(Transform(
+					glm::vec3(tween.shakeOrigin.x + offsetX, tween.shakeOrigin.y + offsetY, 0.0f),
+					GetTransform().GetRotation(),
+					GetTransform().GetScale()
+				));
+				break;
+			}
 		}
 	}
 
@@ -183,6 +210,15 @@ void UIElement::FinishAllTweens() {
 		case Tween::Type::Tint:
 			SetTint(tween.targetTint);
 			break;
+		case Tween::Type::Rotate:
+			SetTransform(Transform(GetTransform().GetTranslation(), glm::vec3(0.0f, 0.0f, tween.targetAngle), GetTransform().GetScale()));
+			break;
+		case Tween::Type::Scale:
+			SetTransform(Transform(GetTransform().GetTranslation(), GetTransform().GetRotation(), glm::vec3(tween.targetScale, 1.0f)));
+			break;
+		case Tween::Type::Shake:
+			SetTransform(Transform(glm::vec3(tween.shakeOrigin, 0.0f), GetTransform().GetRotation(), GetTransform().GetScale()));
+			break;
 		}
 	}
 	tweens.clear();
@@ -196,4 +232,43 @@ vector<shared_ptr<Tween>> UIElement::GetActiveTweens() const {
 		}
 	}
 	return activeTweens;
+}
+
+void UIElement::RotateTo(float targetAngle, float time, EaseType ease, float delay)
+{
+	Tween t;
+	t.type = Tween::Type::Rotate;
+	t.duration = time;
+	t.elapsed = 0.0f;
+	t.ease = ease;
+	t.delay = delay;
+	t.startAngle = GetTransform().GetRotation().z;
+	t.targetAngle = targetAngle;
+	tweens.push_back(t);
+}
+
+void UIElement::ScaleTo(glm::vec2 targetScale, float time, EaseType ease, float delay)
+{
+	Tween t;
+	t.type = Tween::Type::Scale;
+	t.duration = time;
+	t.elapsed = 0.0f;
+	t.ease = ease;
+	t.delay = delay;
+	t.startScale = glm::vec2(GetTransform().GetScale());
+	t.targetScale = targetScale;
+	tweens.push_back(t);
+}
+
+void UIElement::Shake(float intensity, float duration, float delay)
+{
+	Tween t;
+	t.type = Tween::Type::Shake;
+	t.duration = duration;
+	t.elapsed = 0.0f;
+	t.ease = EaseType::Linear;
+	t.delay = delay;
+	t.intensity = intensity;
+	t.shakeOrigin = glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y);
+	tweens.push_back(t);
 }

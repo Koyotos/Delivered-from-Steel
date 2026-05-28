@@ -134,7 +134,7 @@ void MenuManager::ToMainMenu()
 	if (platform)
 	{
 		platform->MoveTo(vec2(platform->GetTransform().GetGlobal()[3].x, 600.0f), 2.5f, EaseType::Linear);
-		// change color
+		platform->Tint(vec3(0.0f, 0.0f, 0.0f), 1.0f, EaseType::Linear,  1.5f);
 	}
 	if (!buttonIcons.empty())
 	{
@@ -145,7 +145,7 @@ void MenuManager::ToMainMenu()
 	if (!buttonText.empty())
 	{
 		UpdateText();
-		for (auto& text : buttonText) {
+		for (auto&  text : buttonText) {
 			text->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 		}
 	}
