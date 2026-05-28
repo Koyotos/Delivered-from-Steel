@@ -116,6 +116,7 @@ void Drone::ChangeState(shared_ptr<Player> p) {
 }
 
 void Drone::Chase(float dt) {
+	if (isExploding) return;
 	SetVelocity(vec2(0.0f, 0.0f));
 
 	if (!player) return;
@@ -138,9 +139,6 @@ void Drone::Chase(float dt) {
 		Explode();
 		return;
 	}
-	if (isExploding) {
-		return;
-	}
 	vec3 moveStep = vec3(currentDiveVelocity.x, currentDiveVelocity.y, 0.0f) * dt;
 
 	Transform t = GetTransform();
@@ -153,6 +151,7 @@ void Drone::Chase(float dt) {
 }
 
 void Drone::Patrol(float dt) {
+	if (isExploding) return;
 	SetVelocity(vec2(0.0f, 0.0f));
 
 	vec3 currentPos = GetTransform().GetTranslation();
