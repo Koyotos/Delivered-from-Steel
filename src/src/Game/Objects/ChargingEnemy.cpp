@@ -19,6 +19,9 @@ ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enem
 
 void ChargingEnemy::Physics(const float& deltaTime) {
 	if (stunned) {
+		if (GetCurrentAnimation() != "ChargerIdle") {
+			Play("ChargerIdle", 0.12f, true);
+		}
 		SetVelocity(vec2(0, GetVelocity().y));
 		realVelocity = vec2(0, realVelocity.y);
 		stunTimer += deltaTime;
@@ -30,6 +33,9 @@ void ChargingEnemy::Physics(const float& deltaTime) {
 		PhysicsNode::Physics(deltaTime);
 	}
 	else {
+		if (GetCurrentAnimation() != "ChargerMove") {
+			Play("ChargerMove", 0.12f, true);
+		}
 		Enemy::Physics(deltaTime);
 	}
 }

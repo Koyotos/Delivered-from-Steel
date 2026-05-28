@@ -218,6 +218,11 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	FindNodes(root);
 
 	UnlockCard(CreateCard(CardType::WallJump));
+	UnlockCard(CreateCard(CardType::Dash));
+	UnlockCard(CreateCard(CardType::WallSnap));
+	UnlockCard(CreateCard(CardType::DoubleJump));
+	UnlockCard(CreateCard(CardType::FeatherFalling));
+	UnlockCard(CreateCard(CardType::Bounce));
 	auto c1 = CreateCard(CardType::WallJump);
 	auto c2 = CreateCard(CardType::Dash);
 	auto c3 = CreateCard(CardType::WallJump);
