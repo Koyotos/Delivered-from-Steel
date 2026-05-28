@@ -63,21 +63,21 @@ void Card::Use()
 	}
 
 
-	//if (DestroyAfterUsed)
-	//{
-	//	std::string id = this->GetSaveID();
-	//	if (!id.empty()) {
-	//		auto& globals = Globals::GetGlobals();
-	//		if (globals.worldStateManager) {
-	//			std::string currentLevel = globals.activeLevelName;
-	//			globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
-	//		}
-	//	}
-	//	//TODO: destroy card
-	//	return;
-	//}
-	//used = true;
-	//Deactivate();
+	if (DestroyAfterUsed)
+	{
+		std::string id = this->GetSaveID();
+		if (!id.empty()) {
+			auto& globals = Globals::GetGlobals();
+			if (globals.worldStateManager) {
+				std::string currentLevel = globals.activeLevelName;
+				globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
+			}
+		}
+		//TODO: destroy card
+		return;
+	}
+	used = true;
+	Deactivate();
 }
 
 void Card::SetDisplay(std::shared_ptr<CardUI> value)
