@@ -24,6 +24,12 @@ void TurretEnemy::AttackState(float dt) {
 	RotateBarrel(dt);
 	if (!isWaiting) {
 		if (!bullet->GetVisible() && playerInSight) {
+			if (GetCurrentAnimation() != "TurretBaseAttack" || !IsPlaying()) {
+				Play("TurretBaseAttack", 0.04f, false);
+			}
+			if (barrel->GetCurrentAnimation() != "TurretBarrelAttack" || !barrel->IsPlaying()) {
+				barrel->Play("TurretBarrelAttack", 0.04f, false);
+			}
 			Transform bulletTransform = bullet->GetTransform();
 
 			vec3 rotation = barrel->GetTransform().GetRotation();
@@ -64,6 +70,12 @@ void TurretEnemy::Physics(const float& dt) {
 
 		if (currentBarrelLock <= 0.0f)
 			barrelLocked = false;
+	}
+	if (GetCurrentAnimation() != "TurretBaseIdle" && !IsPlaying()) {
+		Play("TurretBaseIdle", 0.04f, true);
+	}
+	if (barrel->GetCurrentAnimation() != "TurretBarrelIdle" && !barrel->IsPlaying()) {
+		barrel->Play("TurretBarrelIdle", 0.04f, true);
 	}
 	Enemy::Physics(dt);
 }
