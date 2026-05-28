@@ -15,6 +15,7 @@ private:
 	float explosionDamage;
 	float turnSpeed = 2.5f;
 	vec2 currentDiveVelocity = vec2(0.0f);
+	bool isExploding = false;
 
 	vec3 startPos;
 	vec3 endPos;
@@ -29,6 +30,7 @@ public:
 
 	void Init(shared_ptr<Scene> scene) override;
 	void Physics(const float& deltaTime) override;
+	void Process() override;
 
 	void OnCollisionEnter(shared_ptr<Collider> other) override;
 

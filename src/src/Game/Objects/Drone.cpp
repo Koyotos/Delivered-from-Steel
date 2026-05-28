@@ -46,6 +46,31 @@ void Drone::Physics(const float& deltaTime) {
 	Enemy::Physics(deltaTime);
 }
 
+void Drone::Process() {
+	Object2D::Process();
+	if (isExploding) {
+		if (GetCurrentAnimation() == "explosion" && !IsPlaying()) {
+			Disable();
+		}
+		return;
+	}
+
+	switch (state) {
+	case EnemyState::Patrol:
+		if (GetCurrentAnimation() != "droneIdle") {
+			Play("droneIdle", 0.12f, true);
+		}
+		break;
+	case EnemyState::Chase:
+		if (GetCurrentAnimation() != "droneChase") {
+			Play("droneChase", 0.1f, true);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
 void Drone::DetectPlayer() {
 	if (!player) return;
 
@@ -111,6 +136,9 @@ void Drone::Chase(float dt) {
 
 	if (distToPlayer < explosionRadius * 0.4f) {
 		Explode();
+		return;
+	}
+	if (isExploding) {
 		return;
 	}
 	vec3 moveStep = vec3(currentDiveVelocity.x, currentDiveVelocity.y, 0.0f) * dt;
@@ -189,22 +217,22 @@ void Drone::OnCollisionEnter(shared_ptr<Collider> other) {
 }
 
 void Drone::Explode() {
+	if (isExploding) return;
+
+	isExploding = true;
+	Play("explosion", 0.1f, false);
+
 	if (player) {
 		float distToPlayer = glm::length(player->GetTransform().GetTranslation() - GetTransform().GetTranslation());
 		if (distToPlayer <= explosionRadius) {
 			player->takeDamage(explosionDamage);
 		}
 	}
-
 	//if (Globals::GetGlobals().audioManager) {
 	//	Globals::GetGlobals().audioManager->PlaySound3D("drone_explode", GetTransform().GetTranslation());
 	//}
-
 	if (spotLight) spotLight->Disable();
-	Transform t = GetTransform();
-	vec3 outOfBoundsPos(-9999.0f, -9999.0f, -9999.0f);
-	t.SetTranslation(outOfBoundsPos);
-	SetTransform(t);
+
 	std::string id = this->GetSaveID();
 	if (!id.empty()) {
 		auto& globals = Globals::GetGlobals();
@@ -213,5 +241,4 @@ void Drone::Explode() {
 			globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
 		}
 	}
-	Disable();
 }
