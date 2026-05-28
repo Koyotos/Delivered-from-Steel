@@ -39,6 +39,11 @@ MenuManager::~MenuManager()
 {
 }
 
+void MenuManager::Process()
+{
+	
+}
+
 bool MenuManager::Input(InputEvent& event)
 {
 	if (!event.handled) {
