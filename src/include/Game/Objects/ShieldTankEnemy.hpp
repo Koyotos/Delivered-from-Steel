@@ -11,6 +11,8 @@ private:
 	float shieldCooldown;
 	bool shieldOnCooldown = false;
 	float shieldCooldownTimer = 0.0f;
+	float attackDelay;
+	bool attackStarted = false;
 
 	bool playerJumpingOver = false;
 
