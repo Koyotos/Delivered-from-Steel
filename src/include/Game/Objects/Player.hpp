@@ -75,6 +75,7 @@ public:
 	void Shatter();
 	bool IsHanging();
 	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity = velocity; }
+	void SetRespawnPoint(glm::vec3 point) { respawnPoint = point; }
 
 	void ExecuteDash();
 	void ExecuteBounce();
