@@ -1,4 +1,8 @@
 #include "include/Renderer/Renderer.hpp"
+#include "include/Core/VisualNode.hpp"
+#include "include/Renderer/Light.hpp"
+#include "include/Renderer/Shader.hpp"
+#include "include/Renderer/Utils.hpp"
 
 void Renderer::Init(ResourceManager& rsm) {
     if (!glfwInit())
