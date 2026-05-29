@@ -31898,6 +31898,7 @@
         "process": true,
         "input": true,
         "physics": true,
+        "draw": true,
         "type": 0,
         "colorAmbient": [
             0.2,
