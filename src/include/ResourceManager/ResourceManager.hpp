@@ -20,6 +20,7 @@
 #include "include/Game/Objects/SpikePlatform.hpp"
 #include "include/Game/Objects/MovingPlatform.hpp"
 #include "include/Game/Objects/Drone.hpp"
+#include "include/Game/Objects/CardFind.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
@@ -66,6 +67,7 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Trap>("Trap"),
     RegisterObjectType<Enemy>("Enemy"),
     RegisterObjectType<Drone>("Drone"),
+	RegisterObjectType<CardFind>("CardFind"),
     RegisterObjectType<ShieldTankEnemy>("ShieldTankEnemy"),
     RegisterObjectType<ChargingEnemy>("ChargingEnemy"),
     RegisterObjectType<TurretEnemy>("TurretEnemy"),

@@ -62,11 +62,6 @@ private:
 	 */
 	void FindNodes(shared_ptr<Node> node);
 
-	/*
-	 * @brief "factory" function for creating a card of certain type
-	 */
-	shared_ptr<Card> CreateCard(CardType type);
-
 
 public:
 	CardManager();
@@ -142,6 +137,11 @@ public:
 	 * @return shared_ptr<Scene> : shared pointer to card scene
 	 */
 	std::shared_ptr<Scene> GetCardScene();
+
+	/*
+	 * @brief "factory" function for creating a card of certain type
+	 */
+	shared_ptr<Card> CreateCard(CardType type);
 
 	/*
 	 * @brief sets learningCard, when it is not null it draws card only of this type.
