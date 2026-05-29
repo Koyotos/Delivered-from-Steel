@@ -1,8 +1,4 @@
 #include "include/Renderer/Renderer.hpp"
-#include "include/Core/VisualNode.hpp"
-#include "include/Renderer/Light.hpp"
-#include "include/Renderer/Shader.hpp"
-#include "include/Renderer/Utils.hpp"
 
 void Renderer::Init(ResourceManager& rsm) {
     if (!glfwInit())
@@ -211,6 +207,14 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, co
         }
         case RCMD_LIGHT_CULL_RADIUS: {
             lightCullRadius = fv;
+            break;
+        }
+        case RCMD_SATURATION_CONTROL: {
+            postProcessingShader->SetBool("saturationControl", iv);
+            break;
+        }
+        case RCMD_SATURATION_VALUE: {
+            postProcessingShader->SetFloat("saturationValue", fv);
             break;
         }
     }
@@ -483,7 +487,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
             }
         }
         
-    } else if(node->Type() == "Light") {
+    } else if(node->Type() == "Light" && node->TestDraw()) {
         PrepareDrawLight(static_pointer_cast<Light>(node));
     }
     for(auto& k : node->GetChildren()) {
@@ -491,17 +495,6 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         PrepareDraw(k, t);
     }
 } 
-
-void Renderer::DrawDebug() {
-    /*for(auto& node : drawVector) {
-        auto physicsNode = static_pointer_cast<PhysicsNode>(node);
-        if (physicsNode) {
-            physicsNode->drawDebug();
-        } else {
-            node->Draw();
-        }
-    }*/
-}
 
 void Renderer::ResolveZ() {
     sort(drawVectorUI.begin(), drawVectorUI.end(),[](const shared_ptr<VisualNode>& a, 

@@ -3,20 +3,17 @@
 layout(location = 0) in vec2 UV;
 layout(location = 1) in vec3 Normal;
 layout(location = 2) in vec3 FragPos;
+layout(location = 3) in mat3 TBN;
 
 layout(binding = 0) uniform sampler2D material_diffuse;
-layout(binding = 4) uniform sampler2D material_specular;
+layout(binding = 1) uniform sampler2D material_specular;
+layout(binding = 2) uniform sampler2D material_normal;
 
 layout(binding = 9) uniform sampler2DArray shadowMaps2D;
 layout(binding = 10) uniform samplerCubeArray shadowCubemaps;
 
 layout(location = 0) out vec4 FragColor;
 layout(location = 1) out vec4 BrightColor;
-
-struct Material {
-    sampler2D diffuse;
-    sampler2D specular;
-};
 
 struct Light {
     int type;
@@ -230,7 +227,9 @@ vec3 ApplyLight(int i, Light l, vec3 normal, vec3 viewDir) {
 
 void main() {  
     // properties
-    vec3 norm = normalize(Normal);
+    vec3 norm = texture(material_normal, UV).rgb;
+    norm = norm * 2.0 - 1.0;
+    norm = normalize(TBN * norm);
     vec3 viewDir = normalize(viewPos - FragPos);
 
     matDiffuse = texture(material_diffuse, UV).rgb;

@@ -19,6 +19,8 @@ void Mesh::SetupMesh(const bool& drawFlag) {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glEnableVertexAttribArray(3);	
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
     glBindVertexArray(0);
 }
 
@@ -31,6 +33,8 @@ void Mesh::Draw(Shader& shader) {
         }
         else if (name == "texture_specular") {
             slot = TEXTURES_SLOT_SPECULAR;
+        } else if (name == "texture_normal") {
+            slot = TEXTURES_SLOT_NORMAL;
         }
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
@@ -51,6 +55,8 @@ void Mesh::DrawInstanced(Shader& shader, vector<mat4>& matrices) {
         }
         else if (name == "texture_specular") {
             slot = TEXTURES_SLOT_SPECULAR;
+        } else if (name == "texture_normal") {
+            slot = TEXTURES_SLOT_NORMAL;
         }
         glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
@@ -62,19 +68,19 @@ void Mesh::DrawInstanced(Shader& shader, vector<mat4>& matrices) {
     glBindBuffer(GL_ARRAY_BUFFER, transformBuffer);
     glBufferData(GL_ARRAY_BUFFER, matrices.size() * sizeof(glm::mat4), &matrices[0], GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)0);
-    glEnableVertexAttribArray(4); 
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)(1 * vec4size));
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)0);
     glEnableVertexAttribArray(5); 
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)(2 * vec4size));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)(1 * vec4size));
     glEnableVertexAttribArray(6); 
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)(3 * vec4size));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)(2 * vec4size));
+    glEnableVertexAttribArray(7); 
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4size, (void*)(3 * vec4size));
 
-    glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
     glVertexAttribDivisor(5, 1);
     glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(7, 1);
 
     glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, matrices.size());
     glBindVertexArray(0);

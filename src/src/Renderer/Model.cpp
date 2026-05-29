@@ -1,5 +1,4 @@
 #include "include/Renderer/Model.hpp"
-#include "include/Renderer/Mesh.hpp"
 
 const string& Model::GetDir() const noexcept {
     return directory;
@@ -45,6 +44,10 @@ shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
             vertex.uv = GLMVec(mesh->mTextureCoords[0][i]);
         }
 
+        if(mesh->mTangents) {
+            vertex.tangent = GLMVec(mesh->mTangents[i]);
+        }
+
         vertices.push_back(vertex);
     }
 
@@ -61,6 +64,8 @@ shared_ptr<Mesh> Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) {
             textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
             vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+            vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         }  
     }
 
@@ -93,7 +98,7 @@ vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type,
 
 Model::Model(string path) {
     Importer importer;
-    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
     {
         auto dupa = string(importer.GetErrorString());
