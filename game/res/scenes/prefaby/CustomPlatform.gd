@@ -105,8 +105,6 @@ extends Node3D
 	set(v): explosion_damage = v; _update_metadata()
 @export var turn_speed: float = 4.5:
 	set(v): turn_speed = v; _update_metadata()
-@export var save_ID: String = "drone#":
-	set(v): save_ID = v; _update_metadata()
 
 @export_group("Silnik - Światło (Light)")
 @export var manual_light_direction: bool = false:
@@ -147,7 +145,7 @@ func _validate_property(property: Dictionary):
 		if class_type != "MovingPlatform": property.usage = PROPERTY_USAGE_NO_EDITOR
 	elif prop in ["extend_time", "retract_time", "extended_time", "retracted_time", "up_down", "retracted_pos", "extended_pos"]:
 		if class_type != "SpikePlatform": property.usage = PROPERTY_USAGE_NO_EDITOR
-	elif prop in ["direction", "patrol_speed", "patrol_distance", "dive_speed", "vision_range", "vision_angle", "explosion_radius", "explosion_damage", "turn_speed", "save_ID"]:
+	elif prop in ["direction", "patrol_speed", "patrol_distance", "dive_speed", "vision_range", "vision_angle", "explosion_radius", "explosion_damage", "turn_speed"]:
 		if class_type != "Drone": property.usage = PROPERTY_USAGE_NO_EDITOR
 	elif prop in ["light_type_int", "color_ambient", "color_diffuse", "color_specular", "data1", "data2", "data3", "data4"]:
 		if class_type != "Light": property.usage = PROPERTY_USAGE_NO_EDITOR
@@ -236,7 +234,6 @@ func _update_metadata():
 			set_meta("explosionRadius", explosion_radius)
 			set_meta("explosionDamage", explosion_damage)
 			set_meta("turnSpeed", turn_speed)
-			set_meta("saveID", save_ID)
 			
 	elif class_type == "Light":
 		set_meta("input", true)
