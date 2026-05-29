@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://d0damy4ef4mlc" path="res://house/Charger.png" id="2_6h7s1"]
 
 [node name="ChargingEnemy" type="Node3D"]
-transform = Transform3D(-0.012, 0, -8.74228e-08, 0, -0.012, 0, -1.04907e-09, 0, 1, 0, 0, -5)
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 0, 0, -5)
 script = ExtResource("1_kaeg4")
 class_type = "ChargingEnemy"
 model_name = "Charger"
@@ -35,5 +35,5 @@ metadata/height = 0.59
 metadata/width = 0.65
 
 [node name="Sprite3D" type="Sprite3D" parent="."]
-transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(83.3, 0, 0, 0, -83.3, 0, 0, 0, 1, 0, 0, 0)
 texture = ExtResource("2_6h7s1")
