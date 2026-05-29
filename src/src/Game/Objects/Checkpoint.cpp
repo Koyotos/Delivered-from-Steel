@@ -40,6 +40,29 @@ void Checkpoint::Init(std::shared_ptr<Scene> scene) {
     }
 }
 
+std::string Checkpoint::GetSerializeKey() const {
+    glm::vec3 pos = GetTransform().GetTranslation();
+    return "checkpoint_" + std::to_string((int)pos.x) + "_" + std::to_string((int)pos.y);
+}
+
+nlohmann::json Checkpoint::Serialize() const {
+    nlohmann::json j;
+    j["isActivated"] = isActivated;
+    return j;
+}
+
+void Checkpoint::Deserialize(const nlohmann::json& data) {
+    if (data.contains("isActivated")) {
+        isActivated = data["isActivated"];
+
+        if (isActivated) {
+            if (clothObject) {
+                clothObject->Disable();
+            }
+        }
+    }
+}
+
 void Checkpoint::Physics(const float& deltaTime) {
     Object3D::Physics(deltaTime);
 

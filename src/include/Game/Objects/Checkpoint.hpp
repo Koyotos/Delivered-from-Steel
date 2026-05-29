@@ -3,7 +3,7 @@
 #include "include/Renderer/Light.hpp"
 #include "include/Game/Objects/Player.hpp"
 
-class Checkpoint : public Object3D {
+class Checkpoint : public Object3D, public ISerializable {
 private:
     std::shared_ptr<Player> player = nullptr;
     std::shared_ptr<Object3D> clothObject = nullptr;
@@ -26,4 +26,8 @@ public:
     void Init(std::shared_ptr<Scene> scene) override;
     void Physics(const float& deltaTime) override;
     bool Input(InputEvent& event) override;
+
+    std::string GetSerializeKey() const override;
+    nlohmann::json Serialize() const override;
+    void Deserialize(const nlohmann::json& data) override;
 };
