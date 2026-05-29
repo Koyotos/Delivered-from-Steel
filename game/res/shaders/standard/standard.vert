@@ -14,23 +14,23 @@ layout(location = 3) out mat3 TBN;
 uniform mat4 VP;
 
 void main() {
-    // Compute world-space position
+    // World-space position
     vec4 worldPos = instanceMatrix * vec4(vertexPosition, 1.0);
     FragPos = worldPos.xyz;
 
-    // Transform normal into world space
-    Normal = normalize(mat3(transpose(inverse(instanceMatrix))) * normal);
+    // Normal matrix from instanceMatrix
+    mat3 normalMatrix = transpose(inverse(mat3(instanceMatrix)));
+
+    // World-space normal
+    vec3 N = normalize(normalMatrix * normal);
+    Normal = N;
+
+    vec3 T = normalize(normalMatrix * tangent);
+    T = normalize(T - dot(T, N) * N);
+    vec3 B = cross(N, T);
+    TBN = mat3(T, B, N);
 
     UV = textCoords;
 
-    // Project into clip space
     gl_Position = VP * worldPos;
-
-    vec3 T = normalize(vec3(instanceMatrix * vec4(tangent,   0.0)));
-    vec3 N = normalize(vec3(instanceMatrix * vec4(normal,    0.0)));
-
-    T = normalize(T - dot(T, N) * N);
-    vec3 B = cross(N, T);
-
-    TBN = mat3(T, B, N);
 }

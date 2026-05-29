@@ -579,6 +579,7 @@ void Renderer::ConfigureShader(shared_ptr<Shader> shader, const NodeRenderType& 
     uint8_t count = std::min((int)lightsPos.size(),MAX_LIGHTS_DIR_AND_SPOT);
     uint8_t countPoint = std::min((int)lightsPosPoint.size(),MAX_LIGHTS_POINT);
     shader->SetInt("lightsNum", count+countPoint);
+    shader->SetInt("dirSpotCount", count);
     for(uint8_t i = 0; i < count; i++) {
         shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
         SetLight(lightsPos[i].first, shader, i);
