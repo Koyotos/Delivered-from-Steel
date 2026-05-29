@@ -8,6 +8,14 @@ string Light::Type() {
     return "Light";
 }
 
+void Light::SetDraw(const bool& state) noexcept {
+    flags[3] = state;
+}
+
+bool Light::TestDraw() noexcept {
+    return flags[3];
+}
+
 Light::Light(unordered_map<string,std::any> data) : Node(data) {
 
     type = LightType(fromMap(int64_t,"type",data));

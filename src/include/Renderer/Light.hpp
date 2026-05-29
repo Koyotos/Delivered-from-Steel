@@ -33,6 +33,9 @@ class Light : public Node {
 
     string Type();
 
+    inline void SetDraw(const bool&) noexcept override;
+    inline bool TestDraw() noexcept override;
+
     Light();
     Light(unordered_map<string,std::any>);
     ~Light();

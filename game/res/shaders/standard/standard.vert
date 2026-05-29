@@ -25,9 +25,12 @@ void main() {
     vec3 N = normalize(normalMatrix * normal);
     Normal = N;
 
+    // World-space tangent
     vec3 T = normalize(normalMatrix * tangent);
+    // Orthonormalize T against N
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
+
     TBN = mat3(T, B, N);
 
     UV = textCoords;
