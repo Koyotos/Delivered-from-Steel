@@ -5,6 +5,7 @@ void Game::Init() {
     engine.Init();
     gameScene = engine.LoadScene("res/scenes/base.json");
 
+    /*
     engine.TransitionToMenu();
 
 
@@ -13,13 +14,13 @@ void Game::Init() {
         engine.LinkSceneObjects();
         engine.LoadLevel("testLevel");
         });
-
-    /* Jesli chcesz bez menu do odkomentuj to i zakomentuj to u g�ry
-     * 
-     * engine.SetActiveScene(gameScene); 
-     * engine.LinkSceneObjects();  
-     * engine.LoadLevel("testLevel");
-     */
+    */
+    
+     
+     engine.SetActiveScene(gameScene); 
+     engine.LinkSceneObjects();  
+	 engine.LoadLevel("testLevel");
+     
      
 
 }

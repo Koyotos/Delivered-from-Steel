@@ -18,21 +18,19 @@ class CardManager : public Node, public ISerializable
 {
 
 private:
-	int maxDeckSize = 9;
 	int maxHandSize = 3;
-	bool drawOnHandEmpty = false;
+
+	int maxManaPoints = 12;
+	int currentManaPoints = 12;
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
 
-	/* all cards that are in the deck, unshuffled */
-	std::vector<shared_ptr<Card>> allDeckCards;
-
-	/* all cards that are in the deck, when card is drawn it is removed */
-	std::vector<shared_ptr<Card>> currentDeck;
-
 	/* all cards that are currently in hand, with each index corresponding with each slot */
 	std::vector<shared_ptr<Card>> currentHand;
+
+	/* this vector is used for saving currentHand when learning card */
+	std::vector<shared_ptr<Card>> currentHandSaved;
 
 	/* one CardUI for each card type */
 	std::vector<shared_ptr<CardUI>> cardDisplays;
@@ -40,16 +38,6 @@ private:
 	shared_ptr<Card> learningCard;
 	shared_ptr<Scene> cardScene;
 	std::vector<shared_ptr<CardSlot>> slots;
-
-	/*
-	 * @brief helper function for shuffling the currentDeck
-	 */
-	void ShuffleDeck();
-
-	/*
-	 * @brief helper function for sorting currentHand by cardType
-	 */
-	void SortHand();
 
 	/*
 	 * @brief checks if currentHand is empty
@@ -80,47 +68,11 @@ public:
 
 
 	/*
-	 * @brief Getter for all Cards currently in deck.
-	 * USE THIS FOR CHECKPOINT UI.	
-	 * @return vector<shared_ptr<Card>> : vector of all cards in deck
-	 */
-	std::vector<shared_ptr<Card>> GetAllDeckCards();
-
-	/*
-	* @brief Getter for all cards currently in the Deck
-	* @return vector<shared_ptr<Card>> : vector of all cards that are currently in the deck
-	*/
-	std::vector<shared_ptr<Card>> GetCurrentDeck();
-
-	/*
 	* @brief Getter for all cards currently in the Deck
 	* @return vector<shared_ptr<Card>> : vector of all cards that are currently in the deck
 	*/
 	std::vector<shared_ptr<Card>> GetCurrentHand();
 
-	/*
-	 * @brief Setter for DrawOnHandEmpty.
-	 * If true card is drawn only after the hand is empty;
-	 */
-	void SetDrawOnHandEmpty(bool value);
-
-	/*
-	 * @brief Getter for DrawOnHandEmpty
-	 * @return bool : true if all cards are drawn after the hand is empty
-	 */
-	bool GetDrawOnHandEmpty();
-
-	/*
-	 * @brief Sets the max number of cards that can be in the deck
-	 */
-	void SetMaxDeckSize(int value);
-
-	/*
-	 * @brief Returns the max number of cards that can be in the deck
-	 * @returns int : max deck size
-	 */
-	int GetMaxDeckSize();
-	
 	/*
 	 * @brief Sets the max number of cards that can be in hand
 	 */
@@ -144,13 +96,13 @@ public:
 	shared_ptr<Card> CreateCard(CardType type);
 
 	/*
-	 * @brief sets learningCard, when it is not null it draws card only of this type.
+	 * @brief sets learningCard, when it is not null hand contains cards only of this type.
 	 * @param shared_ptr<Card> : card that is going to be "learned"
 	 */
 	void LearnCard(shared_ptr<Card> card);
 	
 	/*
-	 * @brief function that handles all card-related checkpoint operations
+	 * @brief function that should be called when player reaches checkpoint.
 	 */
 	void ReachCheckpoint();
 	
@@ -162,44 +114,17 @@ public:
 	void UnlockCard(shared_ptr<Card> card);
 
 	/*
-	 * @brief adds card tu current and allCards decks
-	 * @param shared_ptr<Card> shared ptr to added card
-	 */
-	bool AddCardToDeck(shared_ptr<Card> card);
-
-	/*
-	 * @brief removes first card of type from allCardsDeck
-	 * @param shared_ptr<Card> : type of card to be removed
-	 */
-	void RemoveCardFromDeck(shared_ptr<Card> card);
-
-	/*
-	 * @brief removes card from allCardsDeck by index
-	 * @param int : index of card to be removed
-	 */
-	void RemoveCardFromDeck(int index);
-
-	/*
-	 * @brief draws card from currentDeck to currentHand
-	 * @param int : index of slot 
-	 */
-	void DrawCardToHand(int slot);
-
-	/*
-	 * @brief draws card to all empty slots
-	 */
-	void DrawCardsToHand();
-
-	/*
 	 * @brief Uses card, and handles all related animations
 	 * @param int : index of slot
 	 */
 	void UseCard(int index);
 
 	/*
-	 * @brief Adds all cards to current deck and shuffles it
+	 * @brief adds card to currentHand in specified slot, and handles all related animations
+	 * @param int : index of slot
+	 * @param shared_ptr<Card> : card to be added to hand
 	 */
-	void RefreshCurrentDeck();
+	void AddToHand(int slot, shared_ptr<Card> card);
 
 	/*
 	 * @brief Assigns player to all cards in deck, so they can use player-related functions
