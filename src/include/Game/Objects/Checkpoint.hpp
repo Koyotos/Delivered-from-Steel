@@ -1,7 +1,12 @@
-#pragma once
+#ifndef FE_CHECKPOINT
+#define FE_CHECKPOINT
+
 #include "include/Core/Object3D.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Game/Objects/Player.hpp"
+#include "include/Globals/Globals.hpp"
+#include "include/Core/Scene.hpp"
+#include "GLFW/glfw3.h"
 
 class Checkpoint : public Object3D, public ISerializable {
 private:
@@ -31,3 +36,5 @@ public:
     nlohmann::json Serialize() const override;
     void Deserialize(const nlohmann::json& data) override;
 };
+
+#endif

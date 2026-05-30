@@ -213,6 +213,14 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, co
             lightCullRadius = fv;
             break;
         }
+        case RCMD_SATURATION_CONTROL: {
+            postProcessingShader->SetBool("saturationControl", iv);
+            break;
+        }
+        case RCMD_SATURATION_VALUE: {
+            postProcessingShader->SetFloat("saturationValue", fv);
+            break;
+        }
     }
 }
 
@@ -309,6 +317,7 @@ void Renderer::DepthPass() {
         }
     }
     for(uint8_t i = 0; i < lightsPosPoint.size() && i < MAX_LIGHTS_POINT; i++) {
+        
         shared_ptr<Light> light = lightsPosPoint[i].first;
         mat4 projection, view;
         vec3 pos = light->data1;
@@ -324,6 +333,10 @@ void Renderer::DepthPass() {
             depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
         }
         depthShaderLayered->SetInt("lightIndex", i);
+        depthShaderLayered->Use();
+        depthShaderLayered->SetVec3("lightPos", pos);
+        depthShaderLayered->SetFloat("farPlane", 10.0f);
+        farPlanes[i] = 10.0f;
         glClear(GL_DEPTH_BUFFER_BIT);
         for(auto& data : potentialCasters){
             PROFILER_ADD_OBJECT();
@@ -483,7 +496,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
             }
         }
         
-    } else if(node->Type() == "Light") {
+    } else if(node->Type() == "Light" && node->TestDraw()) {
         PrepareDrawLight(static_pointer_cast<Light>(node));
     }
     for(auto& k : node->GetChildren()) {
@@ -491,17 +504,6 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         PrepareDraw(k, t);
     }
 } 
-
-void Renderer::DrawDebug() {
-    /*for(auto& node : drawVector) {
-        auto physicsNode = static_pointer_cast<PhysicsNode>(node);
-        if (physicsNode) {
-            physicsNode->drawDebug();
-        } else {
-            node->Draw();
-        }
-    }*/
-}
 
 void Renderer::ResolveZ() {
     sort(drawVectorUI.begin(), drawVectorUI.end(),[](const shared_ptr<VisualNode>& a, 
@@ -582,6 +584,7 @@ void Renderer::ConfigureShader(shared_ptr<Shader> shader, const NodeRenderType& 
     uint8_t count = std::min((int)lightsPos.size(),MAX_LIGHTS_DIR_AND_SPOT);
     uint8_t countPoint = std::min((int)lightsPosPoint.size(),MAX_LIGHTS_POINT);
     shader->SetInt("lightsNum", count+countPoint);
+    shader->SetInt("dirSpotCount", count);
     for(uint8_t i = 0; i < count; i++) {
         shader->SetMat4("lightSpaceMatrices[" + to_string(i) + "]", lightSpaceMatrices[i]);
         SetLight(lightsPos[i].first, shader, i);
