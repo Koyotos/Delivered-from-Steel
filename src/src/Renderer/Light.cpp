@@ -20,6 +20,7 @@ Light::Light(unordered_map<string,std::any> data) : Node(data) {
 
     type = LightType(fromMap(int64_t,"type",data));
     data4 = fromMap(float,"data4",data);
+    flags[3] = fromMap(bool,"draw", data); 
 
     vector<std::any> dataVec = fromMap(vector<std::any>,"colorAmbient",data);
     colorAmbient.x = any_cast<float>(dataVec[0]);

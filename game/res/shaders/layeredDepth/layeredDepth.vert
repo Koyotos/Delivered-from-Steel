@@ -3,8 +3,6 @@
 layout(location = 0) in vec3 position;
 layout(location = 4) in mat4 instanceMatrix;
 
-uniform mat4 M;
-
 out vec3 WorldPos;
 
 void main() {

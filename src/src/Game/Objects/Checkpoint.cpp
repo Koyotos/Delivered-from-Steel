@@ -11,6 +11,7 @@ Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : 
 
     pointLight = std::make_shared<Light>();
     pointLight->type = LIGHT_POINT;
+    pointLight->SetDraw(false);
 
     pointLight->colorAmbient = glm::vec3(0.0f);
     pointLight->colorSpecular = glm::vec3(0.0f);
@@ -119,7 +120,7 @@ void Checkpoint::Physics(const float& deltaTime) {
 void Checkpoint::MenuToggle() {
     auto cardManager = Globals::GetGlobals().cardManager;
     if (cardManager) {
-		//cardManager->ToggleMenu(); ////////////////////////////// <------------------ odkomentowaæ, gdy menu bêdzie gotowe
+		//cardManager->ToggleMenu(); ////////////////////////////// <------------------ odkomentowaï¿½, gdy menu bï¿½dzie gotowe
     }
 }
 
