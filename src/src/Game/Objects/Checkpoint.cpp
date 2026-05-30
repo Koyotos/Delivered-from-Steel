@@ -1,9 +1,5 @@
 #include "include/Game/Objects/Checkpoint.hpp"
-#include "include/Globals/Globals.hpp"
-#include "include/Core/Scene.hpp"
 #include "include/Game/Objects/CardManager.hpp"
-#include <glm/geometric.hpp>
-#include "GLFW/glfw3.h"
 
 Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : Object3D(data) {
 
@@ -11,7 +7,7 @@ Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : 
 
     pointLight = std::make_shared<Light>();
     pointLight->type = LIGHT_POINT;
-    pointLight->SetDraw(false);
+    pointLight->SetDraw(true);
 
     pointLight->colorAmbient = glm::vec3(0.0f);
     pointLight->colorSpecular = glm::vec3(0.0f);

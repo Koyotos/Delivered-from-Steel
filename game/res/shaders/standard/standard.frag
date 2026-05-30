@@ -21,8 +21,8 @@ struct Light {
     vec3 colorSpecular;
     vec3 colorAmbient;
     vec3 data1;          // dir: direction; point/spot: position
-    vec3 data2;          // spot: direction; point: unused
-    vec3 data3;          // attenuation (point/spot)
+    vec3 data2;          // spot: direction; point: attenuation
+    vec3 data3;          // attenuation spot
     float data4;         // spot inner angle (radians)
 };
 
@@ -165,7 +165,7 @@ vec3 PointLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
     float dist = length(light.data1 - FragPos);
-    float attenuation = 1.0 / (light.data3.x + light.data3.y * dist + light.data3.z * dist * dist);
+    float attenuation = 1.0 / (light.data2.x + light.data2.y * dist + light.data2.z * dist * dist);
 
     vec3 ambient  = light.colorAmbient  * matDiffuse;
     vec3 diffuse  = light.colorDiffuse  * diff * matDiffuse;
@@ -228,6 +228,7 @@ vec3 ApplyLight(int i, Light l, vec3 normal, vec3 viewDir) {
 }
 
 void main() {
+    
     // Normal mapping
     vec3 nMap = texture(material_normal, UV).rgb;
     nMap = nMap * 2.0 - 1.0;

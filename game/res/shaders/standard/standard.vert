@@ -14,6 +14,7 @@ layout(location = 3) out mat3 TBN;
 uniform mat4 VP;
 
 void main() {
+    
     // World-space position
     vec4 worldPos = instanceMatrix * vec4(vertexPosition, 1.0);
     FragPos = worldPos.xyz;

@@ -317,6 +317,7 @@ void Renderer::DepthPass() {
         }
     }
     for(uint8_t i = 0; i < lightsPosPoint.size() && i < MAX_LIGHTS_POINT; i++) {
+        
         shared_ptr<Light> light = lightsPosPoint[i].first;
         mat4 projection, view;
         vec3 pos = light->data1;
@@ -332,6 +333,10 @@ void Renderer::DepthPass() {
             depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
         }
         depthShaderLayered->SetInt("lightIndex", i);
+        depthShaderLayered->Use();
+        depthShaderLayered->SetVec3("lightPos", pos);
+        depthShaderLayered->SetFloat("farPlane", 10.0f);
+        farPlanes[i] = 10.0f;
         glClear(GL_DEPTH_BUFFER_BIT);
         for(auto& data : potentialCasters){
             PROFILER_ADD_OBJECT();
