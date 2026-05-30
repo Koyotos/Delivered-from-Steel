@@ -293,16 +293,19 @@ bool Player::HandleMovement(float deltaTime) {
 		float minBounceSpeed = 0.5f;
 		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
 			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
+			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
 		}
 		else if (isWalledLeft && lastSpeedForBounceX < -minBounceSpeed) {
 			currentVelocity.x = std::max(stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
 		}
 		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
 			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
 		}
@@ -604,7 +607,8 @@ void Player::ExecuteDoubleJump() {
 	glm::vec2 vel = GetVelocity();
 	vel.y = stats.jumpForce;
 	SetVelocity(vel);
-	canCutJump = true;
+	lastVelocity = GetVelocity();
+	canCutJump = false;
 }
 
 void Player::ExecuteWallJump() {
@@ -620,10 +624,12 @@ void Player::ExecuteWallJump() {
 		vel.x = jumpDir * stats.wallJumpForceX;
 		facingDirection = jumpDir;
 		SetVelocity(vel);
+		lastVelocity = GetVelocity();
 
 		coyoteTimeCounter = 0.0f;
 		jumpBufferCounter = 0.0f;
 	}
+	canCutJump = false;
 }
 
 bool Player::CheckWallSnap() {
@@ -652,6 +658,8 @@ bool Player::CheckWallSnap() {
 
 void Player::ExecuteWallSnap() {
 	beforeCardVelocityX = GetVelocity().x;
+
+	lastVelocity = glm::vec2(0.0f);
 	isWallSnaping = true;
 	isDashing = false;
 }
