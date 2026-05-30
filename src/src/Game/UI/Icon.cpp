@@ -13,3 +13,7 @@ Icon::Icon(const std::unordered_map<std::string, std::any>& data) : UIElement(da
 string Icon::GetName() const {
 	return name;
 }
+
+string Icon::Type() {
+	return "Icon";
+}

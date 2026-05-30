@@ -21,6 +21,7 @@ class Icon : public UIElement {
 	Icon(const std::unordered_map<std::string, std::any>& data);
 
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
+	string Type() override;
 
 	string GetName() const;
 

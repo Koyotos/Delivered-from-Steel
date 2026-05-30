@@ -105,7 +105,8 @@ bool MenuManager::Input(InputEvent& event)
 void MenuManager::FindNodes(shared_ptr<Node> node) {
 	if (!node) return;
 
-	if (auto cast = dynamic_pointer_cast<Icon>(node)) {
+	if (node->Type() == "Icon") {
+		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "logo") {
 			logo = cast;
 		}
@@ -117,7 +118,8 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 			buttonIcons.push_back(cast);
 		}
 	}
-	if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
+	if (node->Type() == "TextUI") {
+		shared_ptr<TextUI> cast = static_pointer_cast<TextUI>(node);
 		buttonText.push_back(cast);
 		baseButtonColor = buttonText[0]->GetTint();
 		std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
