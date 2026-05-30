@@ -13,10 +13,18 @@ enum class EaseType {
 
 
 struct Tween {
-    enum class Type { Move, Fade, Tint } type;
+    enum class Type {
+        Move,
+        Fade,
+        Tint,
+        Rotate,
+        Scale,
+        Shake
+    } type;
 
     float duration;
     float elapsed;
+    float delay = 0.0f;
     EaseType ease;
 
     // Move
@@ -30,6 +38,13 @@ struct Tween {
     // Tint
     glm::vec3 startTint;
     glm::vec3 targetTint;
+
+    float startAngle;
+    float targetAngle;
+    glm::vec2 startScale;
+    glm::vec2 targetScale;
+    float intensity;
+    glm::vec2 shakeOrigin;
 
     bool finished = false;
 };

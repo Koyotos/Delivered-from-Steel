@@ -4,13 +4,26 @@
 void Game::Init() {
     engine.Init();
     gameScene = engine.LoadScene("res/scenes/base.json");
-    engine.SetActiveScene(gameScene);
 
-    engine.LinkSceneObjects();
+    engine.TransitionToMenu();
 
-    //engine.LoadLevel("141_obiektow");
-    engine.LoadLevel("testLevel");
+
+    engine.GetMenuManager()->SetOnStartGame([this]() {
+        engine.SetActiveScene(gameScene);
+        engine.LinkSceneObjects();
+        engine.LoadLevel("testLevel");
+        });
+
+    /* Jesli chcesz bez menu do odkomentuj to i zakomentuj to u g�ry
+     * 
+     * engine.SetActiveScene(gameScene); 
+     * engine.LinkSceneObjects();  
+     * engine.LoadLevel("testLevel");
+     */
+     
+
 }
+
 
 void Game::Start() {
     engine.Run();

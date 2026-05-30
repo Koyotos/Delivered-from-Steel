@@ -11,6 +11,7 @@
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/SaveManager/SaveManager.hpp"
 #include "include/SaveManager/WorldStateManager.hpp"
+#include "include/Game/UI/MenuManager.hpp"
 
 /*
 @brief Main engine class that acts as a facade for modules. It hides low-level mechanisms of modules
@@ -34,6 +35,8 @@ class EngineController {
     shared_ptr<Scene> activeLevelScene = nullptr;
     shared_ptr<Node> activeLevelNode = nullptr;
     std::string activeLevelName = "";
+    shared_ptr<MenuManager> mm;
+    shared_ptr<Scene> menuScene;
 
     double currentTime;
     double deltaTime; 
@@ -89,6 +92,10 @@ class EngineController {
     @return void
     */
     void SetActiveScene(const uint16_t&);
+
+    void TransitionToMenu();
+
+    shared_ptr<MenuManager> GetMenuManager() const;
 
     // Deletes of copy constructors
     EngineController(const EngineController&) = delete;

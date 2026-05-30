@@ -5,7 +5,7 @@
 GLuint Shader::currentlyBoundShader = 0;
 
 void Shader::Use() {
-    if (Shader::currentlyBoundShader == this->id) {
+     if (Shader::currentlyBoundShader == this->id) {
         return;
     }
 

@@ -248,7 +248,7 @@ shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
         LinkScene(nodes, currentlyLoading);
         scenes.push_back(currentlyLoading);
         return currentlyLoading;
-    } catch(const exception& except) {
+      } catch(const exception& except) {
         Globals::GetGlobals().Log(string("Can't load scene : ") + except.what());
         return nullptr;
     }
