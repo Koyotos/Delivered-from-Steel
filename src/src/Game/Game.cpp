@@ -14,7 +14,7 @@ void Game::Init() {
         engine.LoadLevel("testLevel");
         });
 
-    /* Je�li chcesz bez menu do odkomentuj to i zakomentuj to u g�ry
+    /* Jesli chcesz bez menu do odkomentuj to i zakomentuj to u g�ry
      * 
      * engine.SetActiveScene(gameScene); 
      * engine.LinkSceneObjects();  
