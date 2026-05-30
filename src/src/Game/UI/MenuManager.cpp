@@ -20,8 +20,12 @@ void MenuManager::Init(shared_ptr<ResourceManager> rsm)
 
 	if (logo)
 	{
- 		logo->MoveTo(vec2(logo->GetTransform().GetGlobal()[3].x, logo->GetTransform().GetGlobal()[3].y - 105.0f), 2.0f, EaseType::OutQuad, 0.25f);
-		logo->FadeIn(2.0f, EaseType::Linear, 0.25f);
+ 		logo->MoveTo(vec2(logo->GetTransform().GetGlobal()[3].x, logo->GetTransform().GetGlobal()[3].y - 105.0f), 1.5f, EaseType::OutQuad, 0.25f);
+		logo->FadeIn(1.5f, EaseType::Linear, 0.25f);
+	}
+	if (moon)
+	{
+		moon->MoveTo(vec2(0.0f, 0.0f), 3.0f, EaseType::OutQuad, 0.25f);
 	}
 
 	init = true;
@@ -59,7 +63,7 @@ bool MenuManager::Input(InputEvent& event)
 				{
 					logo->FinishAllTweens();
 				}
-			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() /* || !buttonIcons[0]->GetActiveTweens().empty()*/  || !buttonText[0]->GetActiveTweens().empty())) {
+			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty() || !moon->GetActiveTweens().empty())) {
 
 				logo->FinishAllTweens();
 				platform->FinishAllTweens();
@@ -69,6 +73,7 @@ bool MenuManager::Input(InputEvent& event)
 				for (auto& text : buttonText) {
 					text->FinishAllTweens();
 				}
+				moon->FinishAllTweens();
 
 			} else if (toMainMenu) {
 				bool up = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_UP) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_UP);
@@ -117,6 +122,9 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		else if (cast->GetName() == "buttonIcon") {
 			buttonIcons.push_back(cast);
 		}
+		else if (cast->GetName() == "moon") {
+			moon = cast;
+		}
 	}
 	if (node->Type() == "TextUI") {
 		shared_ptr<TextUI> cast = static_pointer_cast<TextUI>(node);
@@ -150,6 +158,9 @@ void MenuManager::ToMainMenu()
 		for (auto&  text : buttonText) {
 			text->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 		}
+	}
+	if (moon) {
+		moon->MoveTo(vec2(0.0f, 475.0f), 1.75f, EaseType::InQuad, 0.25f);
 	}
 	toMainMenu = true;
 }

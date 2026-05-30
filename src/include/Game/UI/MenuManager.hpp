@@ -30,6 +30,8 @@ private:
 
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
+    shared_ptr<Icon> moon;
+
     vector<shared_ptr<Icon>> buttonIcons;
 	vector<shared_ptr<TextUI>> buttonText;
 
