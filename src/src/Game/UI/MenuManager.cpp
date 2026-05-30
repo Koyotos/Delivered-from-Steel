@@ -54,7 +54,7 @@ bool MenuManager::Input(InputEvent& event)
 		if ((event.type == InputType::KEYBOARD || event.type == InputType::GAMEPAD_BUTTON) && event.action == GLFW_PRESS) {
 			event.handled = true;
 			if (init) {
-				if (logo->GetActiveTweens().empty())
+				if (logo->GetActiveTweens().empty() && moon->GetActiveTweens().empty())
 				{
 					ToMainMenu();
 					init = false;
@@ -62,6 +62,7 @@ bool MenuManager::Input(InputEvent& event)
 				else
 				{
 					logo->FinishAllTweens();
+					moon->FinishAllTweens();
 				}
 			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty() || !moon->GetActiveTweens().empty())) {
 
@@ -174,10 +175,10 @@ void MenuManager::UpdateText() {
 				float left = buttonText[i]->GetLeftBound();
 				float right = buttonText[i]->GetRightBound();
 				float y = buttonText[i]->GetTransform().GetGlobal()[3].y;
-				float iconOffset = 39.0f;  
+				float iconOffset = 56.0f;  
 
-				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y-3.0f), 0.2f, EaseType::InOutSine);
-				buttonIcons[1]->MoveTo(vec2(right, y-3.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y-4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[1]->MoveTo(vec2(right, y-4.0f), 0.2f, EaseType::InOutSine);
 			}
 			else {
 				buttonText[i]->Tint(baseButtonColor, 0.2f, EaseType::InOutSine);
