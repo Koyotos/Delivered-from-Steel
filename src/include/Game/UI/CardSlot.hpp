@@ -25,7 +25,7 @@ class CardSlot : public UIElement {
 	string Type() override;
 
 	/*
-	* @brief Removes the current card from the slot with an animation. It moves the card up and fades it out before setting the pointer to null.
+	* @brief Removes the current card from the slot.
 	*/
 	void RemoveCard();
 

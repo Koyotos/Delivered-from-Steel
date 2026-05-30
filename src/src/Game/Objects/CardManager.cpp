@@ -45,6 +45,7 @@ void CardManager::AddToHand(int slot, shared_ptr<Card> card)
 {
 	if (slot < 0 || slot >= currentHand.size()) return;
 	currentHand[slot] = card;
+	currentHandSaved[slot] = card;
 	slots[slot]->SetCard(card->GetDisplay());
 }
 
@@ -78,6 +79,7 @@ bool CardManager::IsEmpty()
 CardManager::CardManager()
 {
 	currentHand.resize(maxHandSize, nullptr);
+	currentHandSaved.resize(maxHandSize, nullptr);
 
 }
 
@@ -130,6 +132,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 
 	AddToHand(0, CreateCard(CardType::WallJump));
 	AddToHand(1, CreateCard(CardType::Dash));
+
+	ReachCheckpoint();
 
 }
 
