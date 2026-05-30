@@ -350,7 +350,10 @@
         "zIndex" : 3,
         "ResolveCollision": false,
         "animated" : false,
-        "name": "buttonIcon"
+        "name": "buttonIcon",
+        "playAnimation": "Idle",
+        "animSpeed": 0.32, 
+        "animLoop": true
     },
     "11": {
         "parent": 1,
@@ -383,6 +386,9 @@
         "zIndex" : 3,
         "ResolveCollision": false,
         "animated" : false,
-        "name": "buttonIcon"
+        "name": "buttonIcon",
+        "playAnimation": "Idle",
+        "animSpeed": 0.32, 
+        "animLoop": true
     }
 }
