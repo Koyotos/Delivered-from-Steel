@@ -37730,7 +37730,7 @@
   "1184": {
     "parent": 1,
     "transform": [ 3.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.012, 0.012, 1.0 ],
-    "sprite": "Player",
+    "sprite": "player",
     "class": "CardFind",
     "shader": "player",
     "process": false,

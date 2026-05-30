@@ -1,0 +1,132 @@
+[gd_scene load_steps=3 format=3 uid="uid://duk151e13v5mv"]
+
+[ext_resource type="Script" path="res://CustomPlatform.gd" id="1_altsh"]
+[ext_resource type="Texture2D" uid="uid://beyrdyy0chbyq" path="res://house/TurretBase.png" id="2_37fd8"]
+
+[node name="TurretEnemy" type="Node3D"]
+transform = Transform3D(0.012, 0, 0, 0, 0.012, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_altsh")
+class_type = "TurretEnemy"
+cull = 0.0
+z_index = 2
+shader = "player"
+collider_type = true
+height = 0.0
+metadata/class = "TurretEnemy"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = true
+metadata/addCollider = true
+metadata/ResolveCollision = true
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = 0.0
+metadata/colliderType = true
+metadata/cull = 0.0
+metadata/zIndex = 2
+metadata/shader = "player"
+metadata/sprite = "TurretBase"
+metadata/reqPerspective = true
+metadata/height = 0.0
+metadata/radius = 0.2
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(83.3, 0, 0, 0, -83.3, 0, 0, 0, 1, 0, 0, 0)
+texture = ExtResource("2_37fd8")
+
+[node name="Object2D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0)
+script = ExtResource("1_altsh")
+class_type = "Object2D"
+enable_draw = false
+ignore_parent = false
+cull = 0.0
+add_collider = false
+resolve_collision = false
+width = 0.0
+height = 0.0
+metadata/class = "Object2D"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = false
+metadata/ignoreParent = false
+metadata/static = true
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = 0.0
+metadata/colliderType = false
+metadata/cull = 0.0
+metadata/zIndex = 0
+metadata/shader = "player"
+metadata/sprite = "TurretBarrel"
+metadata/reqPerspective = true
+metadata/height = 0.0
+metadata/width = 0.0
+
+[node name="Object2D" type="Node3D" parent="Object2D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15, 0)
+script = ExtResource("1_altsh")
+class_type = "Object2D"
+ignore_parent = false
+cull = 0.0
+z_index = 1
+shader = "player"
+add_collider = false
+resolve_collision = false
+width = 0.0
+height = 0.0
+metadata/class = "Object2D"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = false
+metadata/static = true
+metadata/addCollider = false
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = 0.0
+metadata/colliderType = false
+metadata/cull = 0.0
+metadata/zIndex = 1
+metadata/shader = "player"
+metadata/sprite = "TurretBarrel"
+metadata/reqPerspective = true
+metadata/height = 0.0
+metadata/width = 0.0
+
+[node name="Bullet" type="Node3D" parent="."]
+transform = Transform3D(0.012, 0, 0, 0, 0.012, 0, 0, 0, 1, 0, 0, -5)
+script = ExtResource("1_altsh")
+class_type = "Bullet"
+is_static = false
+cull = 0.0
+shader = "player"
+resolve_collision = false
+collider_type = true
+collider_pos_y = -0.2
+height = 0.2
+radius = 0.1
+metadata/class = "Bullet"
+metadata/process = true
+metadata/input = true
+metadata/physics = true
+metadata/draw = true
+metadata/ignoreParent = true
+metadata/static = false
+metadata/addCollider = true
+metadata/ResolveCollision = false
+metadata/colliderPosX = 0.0
+metadata/colliderPosY = -0.2
+metadata/colliderType = true
+metadata/cull = 0.0
+metadata/zIndex = 0
+metadata/shader = "player"
+metadata/sprite = "player"
+metadata/reqPerspective = true
+metadata/height = 0.2
+metadata/radius = 0.1
