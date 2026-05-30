@@ -24,6 +24,7 @@ void EngineController::Init() {
 		rsm = make_shared<ResourceManager>();
 		renderer = make_shared<Renderer>();
 		crm = make_shared<CardManager>();
+		Globals::GetGlobals().cardManager = crm;
 		svm = make_shared<SaveManager>();
 		Globals::GetGlobals().sceneManager = scm;
 		wsm = make_shared<WorldStateManager>();
@@ -40,7 +41,7 @@ void EngineController::Init() {
 		renderer->Init(*rsm);
 		iom->Init(renderer->GetWindow());
 		crm->Init(rsm);
-		globals->SetGameFont(Font("res/fonts/verve/Verve.ttf",{0,50}));
+		globals->SetGameFont(Font("res/fonts/8bit_wonder/8-BIT-WONDER.ttf",{32,32}));
 
 		svm->Register(std::static_pointer_cast<ISerializable>(wsm));
 		svm->Register(std::static_pointer_cast<ISerializable>(crm));
@@ -210,6 +211,24 @@ void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
 	scm->SetActive(scn);
 }
 
+shared_ptr<MenuManager> EngineController::GetMenuManager() const {
+	return mm;
+}	
+
+
+void EngineController::TransitionToMenu() {
+	if (!mm) {
+		mm = make_shared<MenuManager>();
+		mm->Init(rsm);
+		menuScene = mm->GetMenuScene();
+		menuScene->GetRoot()->AddChild(mm);
+		scm->AddScene(menuScene);
+	}
+
+	menuScene->GetRoot()->InitRecursive(menuScene);
+	scm->SetActive(menuScene);   // raw swap, no crm/cards injected
+}
+
 void EngineController::SetActiveScene(const uint16_t& idx) {
 	scm->SetActive(idx);
 }
@@ -330,3 +349,5 @@ void EngineController::LoadGame(const string& filepath) {
 		disableDestroyed(activeLevelNode);
 	}
 }
+
+

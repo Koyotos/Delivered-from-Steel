@@ -289,6 +289,8 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 {
 	if (auto cast = dynamic_pointer_cast<CardSlot>(node)) {
 		slots.push_back(cast);
+		std::sort(slots.begin(), slots.end(), [](const std::shared_ptr<CardSlot>& a, const std::shared_ptr<CardSlot>& b) {return a->GetTransform().GetGlobal()[3].x < b->GetTransform().GetGlobal()[3].x;});
+
 	}
 	else if (auto cast = dynamic_pointer_cast<CardUI>(node)) {
 		cardDisplays.push_back(cast);

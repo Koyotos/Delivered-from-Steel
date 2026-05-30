@@ -13,9 +13,11 @@ uniform mat4 invView;
 uniform vec3 lightDir;
 uniform vec3 lightColor;
 uniform mat4 sunMatrix;
+uniform float saturationValue;
 
 uniform bool godRays;
 uniform bool sunExists;
+uniform bool saturationControl;
 
 vec3 reconstructWorldPos(vec2 uv, float depth) {
     float z = depth * 2.0 - 1.0;
@@ -63,19 +65,29 @@ vec3 computeVolumetric(vec2 uv) {
     return result / 64.0;
 }
 
+vec4 AdjustSaturation(vec3 color) {
+    float L = dot(color, vec3(0.299, 0.587, 0.114));
+    return vec4(mix(vec3(L), color, saturationValue),1.0);
+}
+
 void main() {
     if(!godRays || !sunExists) {
         FragColor = vec4(texture(hdrBuffer, TexCoords).rgb, 1.0);
-        return;
+    } else {
+        vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+
+        vec3 volumetric = computeVolumetric(TexCoords);
+
+        hdrColor += volumetric;
+
+        vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
+        mapped = pow(mapped, vec3(1.0 / 2.2));
+
+        FragColor = vec4(mapped, 1.0);
     }
-    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
 
-    vec3 volumetric = computeVolumetric(TexCoords);
-
-    hdrColor += volumetric;
-
-    vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
-    mapped = pow(mapped, vec3(1.0 / 2.2));
-
-    FragColor = vec4(mapped, 1.0);
+    if(saturationControl) {
+        FragColor = AdjustSaturation(FragColor.rgb);
+    }
+    
 }

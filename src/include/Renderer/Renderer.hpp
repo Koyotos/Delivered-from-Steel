@@ -57,7 +57,9 @@ enum RendererCommand {
     RCMD_POINT_CULL_DIST = 6,
     RCMD_SPOT_CULL_DIST = 7,
     RCMD_DIR_DISTANCE = 8,
-    RCMD_LIGHT_CULL_RADIUS = 9
+    RCMD_LIGHT_CULL_RADIUS = 9,
+    RCMD_SATURATION_CONTROL = 10, 
+    RCMD_SATURATION_VALUE = 11
 };
 
 struct RenderData { 
@@ -165,7 +167,6 @@ class Renderer {
 
     // Draws
     inline void Draw();
-    inline void DrawDebug();
 
     inline void DestroyBuffers();
 

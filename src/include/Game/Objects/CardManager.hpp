@@ -20,7 +20,7 @@ class CardManager : public Node, public ISerializable
 private:
 	int maxDeckSize = 9;
 	int maxHandSize = 3;
-	bool drawOnHandEmpty = true;
+	bool drawOnHandEmpty = false;
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
@@ -61,11 +61,6 @@ private:
 	 * @brief helper functions for getting slot and cardUI nodes from scene
 	 */
 	void FindNodes(shared_ptr<Node> node);
-
-	/*
-	 * @brief "factory" function for creating a card of certain type
-	 */
-	shared_ptr<Card> CreateCard(CardType type);
 
 
 public:
@@ -142,6 +137,11 @@ public:
 	 * @return shared_ptr<Scene> : shared pointer to card scene
 	 */
 	std::shared_ptr<Scene> GetCardScene();
+
+	/*
+	 * @brief "factory" function for creating a card of certain type
+	 */
+	shared_ptr<Card> CreateCard(CardType type);
 
 	/*
 	 * @brief sets learningCard, when it is not null it draws card only of this type.

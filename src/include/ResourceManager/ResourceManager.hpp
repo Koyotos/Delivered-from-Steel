@@ -20,6 +20,8 @@
 #include "include/Game/Objects/SpikePlatform.hpp"
 #include "include/Game/Objects/MovingPlatform.hpp"
 #include "include/Game/Objects/Drone.hpp"
+#include "include/Game/Objects/CardFind.hpp"
+#include "include/Game/Objects/Checkpoint.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
@@ -31,11 +33,13 @@
 #include "include/Renderer/ParticleSystemNode.hpp"
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
 #include "include/AudioManager/AudioManager.hpp"
+#include "include/Game/UI/TextUI.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
 #include <filesystem>
 #include <fstream>
+
 
 class AudioManager;
 
@@ -66,6 +70,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Trap>("Trap"),
     RegisterObjectType<Enemy>("Enemy"),
     RegisterObjectType<Drone>("Drone"),
+	RegisterObjectType<CardFind>("CardFind"),
+	RegisterObjectType<Checkpoint>("Checkpoint"),
     RegisterObjectType<ShieldTankEnemy>("ShieldTankEnemy"),
     RegisterObjectType<ChargingEnemy>("ChargingEnemy"),
     RegisterObjectType<TurretEnemy>("TurretEnemy"),
@@ -80,7 +86,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<TextNode>("TextNode"),
     RegisterObjectType<ProfilerNode>("ProfilerNode"),
     RegisterObjectType<ParticleSystemNode>("ParticleSystemNode"),
-    RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode")
+    RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode"),
+    RegisterObjectType<TextUI>("TextUI")
 };
 
 struct RefCountModel {
