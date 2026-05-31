@@ -21,6 +21,7 @@ void EngineController::Init() {
 	try {
 		scm = make_shared<SceneManager>();
 		iom = make_shared<IOManager>();
+		Globals::GetGlobals().ioManager = iom;
 		rsm = make_shared<ResourceManager>();
 		renderer = make_shared<Renderer>();
 		crm = make_shared<CardManager>();
@@ -95,6 +96,8 @@ void EngineController::Run() {
 		accumulator += deltaTime;
 
 		Globals::GetGlobals().SetDeltaTime(static_cast<float>(deltaTime));
+
+		iom->UpdateVibration(static_cast<float>(deltaTime));
 
 		shared_ptr<Scene> active = scm->GetActive();
 
