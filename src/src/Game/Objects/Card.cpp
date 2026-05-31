@@ -8,6 +8,27 @@ Card::Card(const unordered_map<string, std::any>& data) : Object2D(data) {
 Card::Card(CardType type)
 {
 	this->type = type;
+	switch (type)
+	{
+		case CardType::Dash:
+			cardCost = 2;
+			break;
+		case CardType::Bounce:
+			cardCost = 3;
+			break;
+		case CardType::FeatherFalling:
+			cardCost = 1;
+			break;
+		case CardType::DoubleJump:
+			cardCost = 4;
+			break;
+		case CardType::WallJump:
+			cardCost = 3;
+			break;
+		case CardType::WallSnap:
+			cardCost = 3;
+			break;
+	}
 }
 
 void Card::Deactivate()
@@ -17,6 +38,7 @@ void Card::Deactivate()
 
 bool Card::CheckUse()
 {
+
 	switch (type)
 	{
 	case CardType::Dash:
@@ -98,4 +120,9 @@ CardType Card::GetCardType()
 void Card::AssignPlayer(shared_ptr<Player> player)
 {
 	this->player = player;
+}
+
+int Card::GetCardCost() const
+{
+	return cardCost;
 }

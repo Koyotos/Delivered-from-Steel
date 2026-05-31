@@ -9,6 +9,7 @@ enum class EaseType {
     InQuad,
     OutQuad,
     InOutQuad,
+    OutElastic
 };
 
 
