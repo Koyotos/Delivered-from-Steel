@@ -1,6 +1,7 @@
 #include "include/Game/Objects/Player.hpp"
 #include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Globals/Globals.hpp"
+#include "include/IOManager/IOManager.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -542,7 +543,7 @@ void Player::Physics(const float& deltaTime) {
 		HandleAnimations();
 	}
 
-	
+
 }
 
 bool Player::Input(InputEvent& event) {
@@ -569,6 +570,11 @@ void Player::takeDamage(float damage) {
 	if (health.GetHP() <= 0.0f) {
 		Shatter();
 	}
+	else {
+		if (Globals::GetGlobals().ioManager) {
+			Globals::GetGlobals().ioManager->Vibrate(0.3f, 0.3f, 0.3f);
+		}
+	}
 }
 
 void Player::Shatter() {
@@ -576,13 +582,16 @@ void Player::Shatter() {
 	SetPhysics(false);
 	SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");
+	if (Globals::GetGlobals().ioManager) {
+		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.3f);
+	}
 }
 
 bool Player::IsHanging() {
 	return isHanging;
 }
 
-void Player::ExecuteDash() {	
+void Player::ExecuteDash() {
 	if (!isDashing)
 		beforeCardVelocityX = GetVelocity().x;
 	isDashing = true;

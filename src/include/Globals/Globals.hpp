@@ -11,6 +11,7 @@ class AudioManager;
 class WorldStateManager;
 class SceneManager;
 class CardManager;
+class IOManager;
 
 using namespace std;
 using namespace filesystem;
@@ -47,6 +48,7 @@ class Globals {
     std::shared_ptr<WorldStateManager> worldStateManager;
     std::shared_ptr<SceneManager> sceneManager;
     std::shared_ptr<CardManager> cardManager;
+    std::shared_ptr<IOManager> ioManager;
 
     bool wantsToSave = false;
     bool wantsToLoad = false;
