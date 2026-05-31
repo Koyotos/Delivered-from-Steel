@@ -104,6 +104,9 @@ void Player::Init(std::shared_ptr<Scene> scene) {
 				pixelEmitter = emitter;
 			}
 		}
+		if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
+			pointVisualizer = std::static_pointer_cast<OrbitalParticleSystem>(child);
+		}
 	}
 }
 
@@ -210,6 +213,7 @@ void Player::Process() {
 			pixelEmitter->isEmitting = false;
 		}
 	}
+	pointVisualizer->UpdatePlayerState(currentPoints);
 
 	wasDead = health.IsDead();
 
@@ -542,7 +546,10 @@ void Player::Physics(const float& deltaTime) {
 		HandleAnimations();
 	}
 
-	
+	if (pointVisualizer) {
+		glm::vec3 playerPos = GetTransform().GetTranslation();
+		pointVisualizer->UpdateOrbit(deltaTime, playerPos);
+	}
 }
 
 bool Player::Input(InputEvent& event) {
