@@ -42,6 +42,9 @@ target_link_libraries(${PROJECT_NAME} glm::glm)
 target_link_libraries(${PROJECT_NAME} OpenAL::OpenAL)
 target_link_libraries(${PROJECT_NAME} nlohmann_json)
 target_link_libraries(${PROJECT_NAME} Freetype::Freetype)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} xinput)
+endif()
 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
@@ -49,6 +52,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 				   ${CMAKE_SOURCE_DIR}/res 
 				   ${CMAKE_CURRENT_BINARY_DIR}/res)
 
-if(MSVC)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
