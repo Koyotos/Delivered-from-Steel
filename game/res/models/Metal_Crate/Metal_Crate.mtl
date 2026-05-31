@@ -1,4 +1,4 @@
-# Blender 5.0.1 MTL File: 'hl2_box.blend'
+# Blender 5.0.1 MTL File: 'grey-outs.blend'
 # www.blender.org
 
 newmtl Material
@@ -9,4 +9,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
-map_Kd hf2_cube_diff.png
+map_Kd Metal_Crate_diff.png
+map_Ks Metal_Crate_spec.png
+
