@@ -37712,7 +37712,7 @@
             -0.012,
             1.0
         ],
-        "class": "Drone",
+        "class": "drone",
         "process": true,
         "input": true,
         "physics": true,
@@ -37913,7 +37913,7 @@
         "process": true,
         "input": true,
         "physics": true,
-		"draw": true,
+        "draw": true,
         "type": 0,
         "colorAmbient": [
             0.2,
@@ -38009,7 +38009,7 @@
         "lightAngle": 20.0
     },
     "1188": {
-        "parent": 1190,
+        "parent": 1187,
         "class": "Object3D",
         "process": true,
         "input": true,

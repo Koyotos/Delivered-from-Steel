@@ -241,6 +241,7 @@ func _update_metadata():
 	elif class_type == "Light":
 		set_meta("input", true)
 		set_meta("physics", true)
+		set_meta("draw", enable_draw)
 		set_meta("type", light_type_int)
 		
 		var out_data1 = data1
