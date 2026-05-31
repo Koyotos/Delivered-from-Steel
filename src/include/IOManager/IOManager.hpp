@@ -16,16 +16,29 @@ private:
 	GLFWgamepadstate lastGamepadState;
 	bool isGamepadConnected = false;
 
+	float vibrationTimer = 0.0f;
+	bool isVibrating = false;
+
+#ifdef __linux__
+	int ff_fd = -1;
+	int ff_effect_id = -1;
+#endif
+
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 
 public:
+	~IOManager();
 	void Init(GLFWwindow* window);
 	void ProcessEvent(const InputEvent& event);
 	void ProcessInput(shared_ptr<Node> root);
 
 	void PollGamepad();
+
+	void SetMotorSpeed(float leftMotor, float rightMotor);
+	void Vibrate(float leftMotor, float rightMotor, float duration);
+	void UpdateVibration(float deltaTime);
 
 	void ClearQueue();
 };

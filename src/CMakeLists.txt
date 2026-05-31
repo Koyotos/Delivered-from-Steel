@@ -42,6 +42,9 @@ target_link_libraries(${PROJECT_NAME} glm::glm)
 target_link_libraries(${PROJECT_NAME} OpenAL::OpenAL)
 target_link_libraries(${PROJECT_NAME} nlohmann_json)
 target_link_libraries(${PROJECT_NAME} Freetype::Freetype)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} xinput)
+endif()
 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
