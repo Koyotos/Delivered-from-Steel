@@ -37,7 +37,7 @@ void CardManager::UseCard(int index)
 	if (currentManaPoints < currentHand[index]->GetCardCost()) return;
 
 	currentHand[index]->Use();
-	// slots[index]->PlayUseAnimation();
+	slots[index]->PlayUseAnimation();
 	if (learningCard == nullptr) currentManaPoints -= currentHand[index]->GetCardCost();
 }
 

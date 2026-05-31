@@ -16,8 +16,8 @@
       0.0,
       0.0,
       0.0,
-      7.5,
-      7.5,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "wallJump",
@@ -42,7 +42,7 @@
     "addCollider": false,
     "cardType": "WallJump",
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 10,
     "ResolveCollision": false
   },
   "3": {
@@ -54,8 +54,8 @@
       0.0,
       0.0,
       0.0,
-      2.0,
-      2.0,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "slot",
@@ -78,7 +78,7 @@
     "alpha": 1.0,
     "addCollider": true,
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 9,
     "ResolveCollision": false
   },
   "4": {
@@ -90,8 +90,8 @@
       0.0,
       0.0,
       0.0,
-      2.0,
-      2.0,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "slot",
@@ -114,7 +114,7 @@
     "alpha": 1.0,
     "addCollider": true,
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 9,
     "ResolveCollision": false
   },
   "5": {
@@ -126,8 +126,8 @@
       0.0,
       0.0,
       0.0,
-      2.0,
-      2.0,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "slot",
@@ -162,8 +162,8 @@
       0.0,
       0.0,
       0.0,
-      7.5,
-      7.5,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "dash",
@@ -200,8 +200,8 @@
       0.0,
       0.0,
       0.0,
-      7.5,
-      7.5,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "additionalJump",
@@ -226,7 +226,7 @@
     "addCollider": false,
     "cardType": "DoubleJump",
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 10,
     "ResolveCollision": false
   },
   "9": {
@@ -238,8 +238,8 @@
       0.0,
       0.0,
       0.0,
-      7.5,
-      7.5,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "featherFalling",
@@ -264,7 +264,7 @@
     "addCollider": false,
     "cardType": "FeatherFalling",
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 10,
     "ResolveCollision": false
   },
   "10": {
@@ -276,8 +276,8 @@
       0.0,
       0.0,
       0.0,
-      7.5,
-      7.5,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "bounce",
@@ -302,7 +302,7 @@
     "addCollider": false,
     "cardType": "Bounce",
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 10,
     "ResolveCollision": false
   },
   "11": {
@@ -314,8 +314,8 @@
       0.0,
       0.0,
       0.0,
-      7.5,
-      7.5,
+      2.5,
+      2.5,
       1.0
     ],
     "sprite": "wallSnap",
@@ -340,7 +340,7 @@
     "addCollider": false,
     "cardType": "WallSnap",
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 10,
     "ResolveCollision": false
   }
 

@@ -29,6 +29,8 @@ class CardSlot : public UIElement {
 	*/
 	void RemoveCard();
 
+	void PlayUseAnimation();
+
 	/*
 	* @brief Sets a new card in the slot. If there is already a card, it will be removed first. 
 	* The new card will be positioned at the slot's transform and will fade in.

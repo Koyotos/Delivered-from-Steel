@@ -25,6 +25,12 @@ void CardSlot::Draw(shared_ptr<Shader> sh) {
 void CardSlot::RemoveCard() {
 	if (!card) return;
 	card = nullptr;
+} 
+
+void CardSlot::PlayUseAnimation() {
+	if (!card) return;
+	// dodac bouncy balatro animacje
+
 }
 
 
