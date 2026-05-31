@@ -6,6 +6,7 @@
 #include "include/Game/UI/CardSlot.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Core/ISerializable.hpp"
+#include "include/Game/UI/Counter.hpp"
 
 
 
@@ -20,8 +21,8 @@ class CardManager : public Node, public ISerializable
 private:
 	int maxHandSize = 3;
 
-	int maxManaPoints = 12;
-	int currentManaPoints = 12;
+	int maxManaPoints = 15;
+	int currentManaPoints = 15;
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
@@ -39,6 +40,8 @@ private:
 	shared_ptr<Scene> cardScene;
 	std::vector<shared_ptr<CardSlot>> slots;
 
+	shared_ptr<Counter> manaCounter;
+
 	/*
 	 * @brief checks if currentHand is empty
 	 * @returns bool: false if the card has at least one card
@@ -49,6 +52,9 @@ private:
 	 * @brief helper functions for getting slot and cardUI nodes from scene
 	 */
 	void FindNodes(shared_ptr<Node> node);
+
+	void UpdateManaUI();
+
 
 
 public:

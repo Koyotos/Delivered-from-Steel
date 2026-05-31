@@ -36,6 +36,9 @@ class CardSlot : public UIElement {
 	* The new card will be positioned at the slot's transform and will fade in.
 	*/
 	void SetCard(std::shared_ptr<CardUI> newCard);
+
+	void SetCardTint(vec3 color);
+
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
 	void Process() override;

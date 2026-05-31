@@ -39,6 +39,8 @@ void CardManager::UseCard(int index)
 	currentHand[index]->Use();
 	slots[index]->PlayUseAnimation();
 	if (learningCard == nullptr) currentManaPoints -= currentHand[index]->GetCardCost();
+	UpdateManaUI();
+
 }
 
 void CardManager::AddToHand(int slot, shared_ptr<Card> card)
@@ -55,6 +57,7 @@ void CardManager::ReachCheckpoint()
 	learningCard = nullptr;
 	currentHand = currentHandSaved;
 	currentManaPoints = maxManaPoints;
+	UpdateManaUI();
 }
 
 void CardManager::LearnCard(shared_ptr<Card> card)
@@ -80,6 +83,7 @@ CardManager::CardManager()
 {
 	currentHand.resize(maxHandSize, nullptr);
 	currentHandSaved.resize(maxHandSize, nullptr);
+	manaCounter = make_shared<Counter>(nullptr, nullptr, maxManaPoints);
 
 }
 
@@ -139,14 +143,24 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 
 void CardManager::FindNodes(shared_ptr<Node> node)
 {
+	// POPRAWIC TA FUNKCJE POZNIEJ
+
+
 	if (auto cast = dynamic_pointer_cast<CardSlot>(node)) {
 		slots.push_back(cast);
 		std::sort(slots.begin(), slots.end(), [](const std::shared_ptr<CardSlot>& a, const std::shared_ptr<CardSlot>& b) {return a->GetTransform().GetGlobal()[3].x < b->GetTransform().GetGlobal()[3].x;});
 
 	}
+	else if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
+		manaCounter->SetText(cast);
+	}
 	else if (auto cast = dynamic_pointer_cast<CardUI>(node)) {
 		cardDisplays.push_back(cast);
 	}
+	else if (auto cast = dynamic_pointer_cast<Icon>(node)) {
+		manaCounter->SetIcon(cast);
+	}
+
 
 	for (auto& k : node->GetChildren()) {
 		FindNodes(k);
@@ -230,4 +244,21 @@ void CardManager::Deserialize(const nlohmann::json& data) {
 			}
 		}
 	}
+}
+
+void CardManager::UpdateManaUI()
+{
+	for (int i = 0; i < slots.size(); i++) {
+		if (currentHand[i] != nullptr) {
+			if (currentManaPoints < currentHand[i]->GetCardCost()) {
+				slots[i]->SetCardTint(vec3(0.3f, 0.3f, 0.3f)); 
+			}
+			else {
+				slots[i]->SetCardTint(vec3(1.0f, 1.0f, 1.0f)); 
+			}
+		}
+	}
+	manaCounter->UpdateValue(currentManaPoints);
+
+	// if learning card TBD
 }

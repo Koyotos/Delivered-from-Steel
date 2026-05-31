@@ -77,3 +77,7 @@ void CardSlot::Process() {
 	if (removedCard) removedCard->Process();
 }
 
+void CardSlot::SetCardTint(vec3 color) {
+    if (card) card->Tint(color, 0.2f, EaseType::Linear);
+}
+
