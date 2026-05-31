@@ -30,7 +30,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
     ObjectType objectType = ObjectType::Default;
 
     public:
-	float maxFallSpeed = 50.0f;
+	float maxFallSpeed = 10.0f;
 
     string Type() override;
     uint8_t RenderType() override;

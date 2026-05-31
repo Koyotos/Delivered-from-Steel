@@ -18,6 +18,7 @@ ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enem
 }
 
 void ChargingEnemy::Physics(const float& deltaTime) {
+	TriedToAttackPlayer = false;
 	if (stunned) {
 		if (GetCurrentAnimation() != "ChargerIdle") {
 			Play("ChargerIdle", 0.12f, true);
@@ -40,7 +41,28 @@ void ChargingEnemy::Physics(const float& deltaTime) {
 	}
 }
 
+void ChargingEnemy::TryToAttackPlayer() {
+	if (TriedToAttackPlayer) return;
+	auto playerHit = Raycast(
+		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
+		glm::vec2(0.0f, -1.0f),
+		wallCheckDistance,
+		static_cast<uint32_t>(ObjectType::Player)
+	);
+
+	if (playerHit.has_value()) {
+		player->takeDamage(damage);
+	}
+	TriedToAttackPlayer = true;
+}
+
 void ChargingEnemy::Chase(float dt) {
+
+	chargeCooldownTimer += dt;
+	if (chargeCooldownTimer < chargeCooldown) {
+			SetVelocity(glm::vec2(- 0.5f * speed * direction, GetVelocity().y));
+			return;
+	}
 
 	auto wallHit = Raycast(
 		glm::vec2(chargeRaycastOffsetX * direction, raycastOffsetY),
@@ -74,8 +96,17 @@ void ChargingEnemy::ChangeState(shared_ptr<Player> player) {
 	case EnemyState::Patrol: {
 		if (seePlayer) {
 			state = EnemyState::Chase;
+			chargeCooldownTimer = 0;
 		}
 		break;
 	}
+	}
+}
+
+void ChargingEnemy::OnCollisionStay(shared_ptr<Collider> other) {
+	Enemy::OnCollisionStay(other);
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (owner->GetObjectType() == ObjectType::Player) {
+		TryToAttackPlayer();
 	}
 }
