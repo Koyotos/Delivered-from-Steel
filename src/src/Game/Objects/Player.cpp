@@ -543,7 +543,7 @@ void Player::Physics(const float& deltaTime) {
 		HandleAnimations();
 	}
 
-	
+
 }
 
 bool Player::Input(InputEvent& event) {
@@ -570,8 +570,10 @@ void Player::takeDamage(float damage) {
 	if (health.GetHP() <= 0.0f) {
 		Shatter();
 	}
-	if (Globals::GetGlobals().ioManager) {
-		Globals::GetGlobals().ioManager->Vibrate(0.3f, 0.3f, 0.3f);
+	else {
+		if (Globals::GetGlobals().ioManager) {
+			Globals::GetGlobals().ioManager->Vibrate(0.3f, 0.3f, 0.3f);
+		}
 	}
 }
 
@@ -581,7 +583,7 @@ void Player::Shatter() {
 	SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");
 	if (Globals::GetGlobals().ioManager) {
-		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.5f);
+		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.3f);
 	}
 }
 
@@ -589,7 +591,7 @@ bool Player::IsHanging() {
 	return isHanging;
 }
 
-void Player::ExecuteDash() {	
+void Player::ExecuteDash() {
 	if (!isDashing)
 		beforeCardVelocityX = GetVelocity().x;
 	isDashing = true;

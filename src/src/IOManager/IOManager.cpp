@@ -1,8 +1,6 @@
 #include "include/IOManager/IOManager.hpp"
 #include <algorithm>
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 #include <windows.h>
 #include <Xinput.h>
 #elif defined(__linux__)
@@ -191,6 +189,9 @@ void IOManager::SetMotorSpeed(float leftMotor, float rightMotor) {
 void IOManager::Vibrate(float leftMotor, float rightMotor, float duration) {
 	if (!isGamepadConnected) return;
 
+	if (isVibrating && duration <= vibrationTimer) {
+		return;
+	}
 	SetMotorSpeed(leftMotor, rightMotor);
 	vibrationTimer = duration;
 	isVibrating = true;

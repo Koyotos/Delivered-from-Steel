@@ -52,6 +52,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 				   ${CMAKE_SOURCE_DIR}/res 
 				   ${CMAKE_CURRENT_BINARY_DIR}/res)
 
-if(MSVC)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
