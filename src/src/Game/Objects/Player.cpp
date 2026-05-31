@@ -243,6 +243,7 @@ bool Player::HandleMovement(float deltaTime) {
 	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
 
 	isGrounded = CheckGrounded();
+	bool isCeiling = CheckCeiling();
 	bool isWalledLeft = CheckLeftWalled();
 	bool isWalledRight = CheckRightWalled();
 	isWalled = isWalledRight || isWalledLeft;
@@ -253,7 +254,7 @@ bool Player::HandleMovement(float deltaTime) {
 
 	if (isGrounded) {
 		coyoteTimeCounter = stats.coyoteTime;
-		if (CheckCeiling()) {
+		if (isCeiling) {
 			Shatter();
 		}
 	}
@@ -290,7 +291,7 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isBounceActive) {
-		float minBounceSpeed = 0.5f;
+		float minBounceSpeed = 1.0f;
 		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
 			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
 			lastVelocity = currentVelocity;
@@ -305,6 +306,12 @@ bool Player::HandleMovement(float deltaTime) {
 		}
 		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
 			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
+			lastVelocity = currentVelocity;
+			isBounceActive = false;
+			isDashing = false;
+		}
+		else if (isCeiling && lastSpeedForBounceY > minBounceSpeed) {
+			currentVelocity.y = std::min(-stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
 			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
@@ -366,10 +373,12 @@ bool Player::HandleMovement(float deltaTime) {
 		featherFallingTimer -= deltaTime;
 		if (featherFallingTimer <= 0.0f) {
 			isFeatherFalling = false;
-			currentVelocity.y = 0.0f;
 		}
 		else {
-			currentVelocity.y = std::max(currentVelocity.y, -stats.maxFeatherFallingSpeed);
+			if (currentVelocity.y < -stats.maxFeatherFallingSpeed) {
+				currentVelocity.y = lerp(currentVelocity.y, -stats.maxFeatherFallingSpeed, 0.5f);
+			}
+			lastVelocity = currentVelocity;
 			SetVelocity(currentVelocity);
 		}
 	}
@@ -474,7 +483,13 @@ bool Player::HandleMovement(float deltaTime) {
 		if (GetCurrentAnimation() != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
 		}
-		currentVelocity.y = std::max(currentVelocity.y, -stats.wallSlideSpeed);
+		float target = -stats.wallSlideSpeed;
+		if (currentVelocity.y < target)
+		{
+			currentVelocity.y += (10.0f * stats.fallGravityMultiplier + 25.0f) * deltaTime;
+
+			currentVelocity.y = std::min(currentVelocity.y, target);
+		}
 	}
 	else {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
@@ -573,6 +588,10 @@ void Player::takeDamage(float damage) {
 
 void Player::Shatter() {
 	health.Shatter();
+	isBounceActive = false;
+	isDashing = false;
+	isWallSnaping = false;
+	isFeatherFalling = false;
 	SetPhysics(false);
 	SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");

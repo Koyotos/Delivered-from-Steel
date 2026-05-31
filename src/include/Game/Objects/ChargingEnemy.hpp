@@ -10,9 +10,16 @@ private:
 	float stunDuration;
 	float stunTimer = 0.0f;
 
+	float chargeCooldown = 0.5f;
+	float chargeCooldownTimer = 0.0f;
+
     float chargingSpeed;
 
     float chargeRaycastOffsetX;
+
+	bool TriedToAttackPlayer = false;
+
+	void TryToAttackPlayer();
 public:
     void Chase(float) override;
 
@@ -23,6 +30,8 @@ public:
     void ChangeState(shared_ptr<Player> player) override;
 
     void Attack(shared_ptr<Player> player) override {};
+
+	void OnCollisionStay(shared_ptr<Collider> other) override;
 };
 
 #endif // FE_CHARGINGENEMY

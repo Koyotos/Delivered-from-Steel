@@ -27,8 +27,8 @@ void TurretEnemy::AttackState(float dt) {
 			if (GetCurrentAnimation() != "TurretBaseAttack" || !IsPlaying()) {
 				Play("TurretBaseAttack", 0.04f, false);
 			}
-			if (barrel->GetCurrentAnimation() != "TurretBarrelAttack" || !barrel->IsPlaying()) {
-				barrel->Play("TurretBarrelAttack", 0.04f, false);
+			if (barrelReal->GetCurrentAnimation() != "TurretBarrelAttack" || !barrelReal->IsPlaying()) {
+				barrelReal->Play("TurretBarrelAttack", 0.04f, false);
 			}
 			Transform bulletTransform = bullet->GetTransform();
 
