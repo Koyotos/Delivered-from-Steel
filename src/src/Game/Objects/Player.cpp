@@ -2,6 +2,7 @@
 #include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/IOManager/IOManager.hpp"
+#include "include/Game/Objects/CardManager.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -91,6 +92,10 @@ void Player::SetCamera(std::shared_ptr<Camera> cam) {
 
 void Player::TriggerCameraShake(float duration, float intensity) {
 	cameraController.TriggerCameraShake(duration, intensity);
+}
+
+void Player::SetCardManager(std::shared_ptr<CardManager> mgr) {
+	cardManager = mgr;
 }
 
 void Player::Init(std::shared_ptr<Scene> scene) {
@@ -214,6 +219,7 @@ void Player::Process() {
 			pixelEmitter->isEmitting = false;
 		}
 	}
+	int currentPoints = cardManager->getCurrentManaPoints();
 	pointVisualizer->UpdatePlayerState(currentPoints);
 
 	wasDead = health.IsDead();
