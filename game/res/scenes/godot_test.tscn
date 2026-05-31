@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dviaqkphmjo1r"]
+[gd_scene load_steps=20 format=3 uid="uid://dviaqkphmjo1r"]
 
 [ext_resource type="ArrayMesh" uid="uid://cofw7o8a8elqo" path="res://house/house.obj" id="1_0ryik"]
 [ext_resource type="Script" path="res://CustomPlatform.gd" id="3_dm4bk"]
@@ -15,6 +15,9 @@
 [ext_resource type="PackedScene" uid="uid://bde8ir1y0quy" path="res://wires.tscn" id="13_5hjno"]
 [ext_resource type="PackedScene" uid="uid://dps4ux161rntj" path="res://charging_enemy.tscn" id="14_3lod4"]
 [ext_resource type="PackedScene" uid="uid://c1su8rf8fsx6b" path="res://metal_pipe_90d.tscn" id="15_pf044"]
+[ext_resource type="PackedScene" uid="uid://cym6o0ufc5see" path="res://drone.tscn" id="16_ugf6o"]
+[ext_resource type="PackedScene" uid="uid://bjluemq71nhkb" path="res://shield_tank_enemy.tscn" id="17_wy6ky"]
+[ext_resource type="PackedScene" uid="uid://duk151e13v5mv" path="res://turret_enemy.tscn" id="18_5i4vv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u3h6s"]
 shading_mode = 0
@@ -78,144 +81,6 @@ metadata/shader = "standard"
 metadata/model = "house"
 metadata/height = 0.2
 metadata/radius = 0.1
-
-[node name="Dron1" type="Node3D" parent="."]
-transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 8.756, -7.398, -5)
-script = ExtResource("3_dm4bk")
-class_type = "Drone"
-sprite_name = "player"
-is_static = false
-cull = 0.2
-z_index = 1
-shader = "player"
-collider_type = true
-collider_pos_y = -0.2
-width = 0.2
-height = 0.0
-radius = 0.1
-data1 = Vector3(1, -1, 0)
-metadata/class = "Drone"
-metadata/process = true
-metadata/input = true
-metadata/physics = true
-metadata/draw = true
-metadata/ignoreParent = true
-metadata/static = false
-metadata/addCollider = true
-metadata/ResolveCollision = true
-metadata/colliderPosX = 0.0
-metadata/colliderPosY = -0.2
-metadata/colliderType = true
-metadata/cull = 0.2
-metadata/zIndex = 1
-metadata/shader = "player"
-metadata/sprite = "player"
-metadata/reqPerspective = true
-metadata/height = 0.0
-metadata/radius = 0.1
-metadata/direction = -1
-metadata/patrolSpeed = 1.0
-metadata/patrolDistance = 6.0
-metadata/diveSpeed = 2.0
-metadata/visionRange = 4.0
-metadata/visionAngle = 60.0
-metadata/explosionRadius = 1.0
-metadata/explosionDamage = 100.0
-metadata/turnSpeed = 4.5
-
-[node name="Dron2" type="Node3D" parent="."]
-transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 19.0859, 30.1689, -5)
-script = ExtResource("3_dm4bk")
-class_type = "Drone"
-sprite_name = "player"
-is_static = false
-cull = 0.2
-z_index = 1
-shader = "player"
-collider_type = true
-collider_pos_y = -0.2
-width = 0.2
-height = 0.0
-radius = 0.1
-direction = 1
-patrol_distance = 4.0
-dive_speed = 4.0
-data1 = Vector3(1, -1, 0)
-metadata/class = "Drone"
-metadata/process = true
-metadata/input = true
-metadata/physics = true
-metadata/draw = true
-metadata/ignoreParent = true
-metadata/static = false
-metadata/addCollider = true
-metadata/ResolveCollision = true
-metadata/colliderPosX = 0.0
-metadata/colliderPosY = -0.2
-metadata/colliderType = true
-metadata/cull = 0.2
-metadata/zIndex = 1
-metadata/shader = "player"
-metadata/sprite = "player"
-metadata/reqPerspective = true
-metadata/height = 0.0
-metadata/radius = 0.1
-metadata/direction = 1
-metadata/patrolSpeed = 1.0
-metadata/patrolDistance = 4.0
-metadata/diveSpeed = 4.0
-metadata/visionRange = 4.0
-metadata/visionAngle = 60.0
-metadata/explosionRadius = 1.0
-metadata/explosionDamage = 100.0
-metadata/turnSpeed = 4.5
-
-[node name="Dron3" type="Node3D" parent="."]
-transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 24.1566, 30.1689, -5)
-script = ExtResource("3_dm4bk")
-class_type = "Drone"
-sprite_name = "player"
-is_static = false
-cull = 0.2
-z_index = 1
-shader = "player"
-collider_type = true
-collider_pos_y = -0.2
-width = 0.2
-height = 0.0
-radius = 0.1
-direction = 1
-patrol_distance = 4.0
-dive_speed = 4.0
-data1 = Vector3(1, -1, 0)
-metadata/class = "Drone"
-metadata/process = true
-metadata/input = true
-metadata/physics = true
-metadata/draw = true
-metadata/ignoreParent = true
-metadata/static = false
-metadata/addCollider = true
-metadata/ResolveCollision = true
-metadata/colliderPosX = 0.0
-metadata/colliderPosY = -0.2
-metadata/colliderType = true
-metadata/cull = 0.2
-metadata/zIndex = 1
-metadata/shader = "player"
-metadata/sprite = "player"
-metadata/reqPerspective = true
-metadata/height = 0.0
-metadata/radius = 0.1
-metadata/direction = 1
-metadata/patrolSpeed = 1.0
-metadata/patrolDistance = 4.0
-metadata/diveSpeed = 4.0
-metadata/visionRange = 4.0
-metadata/visionAngle = 60.0
-metadata/explosionRadius = 1.0
-metadata/explosionDamage = 100.0
-metadata/turnSpeed = 4.5
 
 [node name="Concrete_Block" parent="." instance=ExtResource("3_i4blv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.3867, -8.89636, -5)
@@ -6379,6 +6244,7 @@ metadata/ResolveCollision = false
 
 [node name="Concrete_Block311" parent="." instance=ExtResource("3_i4blv")]
 transform = Transform3D(150, 0, 0, 0, 150, 0, 0, 0, 1, 14.751, 19.944, -5.9739)
+visible = false
 enable_physics = false
 cull = 150.0
 add_collider = false
@@ -6712,123 +6578,103 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 12.5925, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block252" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 13.7232, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 13.5931, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block253" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 13.7232, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 13.5931, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block926" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 13.7232, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 13.5931, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block254" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.6701, 14.7522, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.6701, 14.3194, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block255" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6883, 14.7522, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.6883, 14.3194, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block927" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.1857, 14.7522, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.1857, 14.3194, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block259" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.3674, 15.6809, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.0552, 15.3829, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block270" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.3856, 15.6809, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block928" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.883, 15.6809, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block271" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.0024, 17.3149, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block272" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.0206, 17.3149, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block930" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.518, 17.3149, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block303" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.7339, 16.4075, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block304" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.7521, 16.4075, -5)
-data1 = Vector3(1, -1, 0)
-
-[node name="Concrete_Block973" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.2496, 16.4075, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.0734, 15.3829, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block273" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.5777, 19.7352, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5803, 15.3829, -5)
 data1 = Vector3(1, -1, 0)
 
-[node name="Concrete_Block274" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5959, 19.7352, -5)
+[node name="Concrete_Block928" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.5708, 15.3829, -5)
 data1 = Vector3(1, -1, 0)
 
-[node name="Concrete_Block935" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.0933, 19.7352, -5)
+[node name="Concrete_Block271" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.8042, 17.2784, -5)
 data1 = Vector3(1, -1, 0)
 
-[node name="Concrete_Block275" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.1503, 20.7515, -5)
+[node name="Concrete_Block272" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.8224, 17.2784, -5)
 data1 = Vector3(1, -1, 0)
 
-[node name="Concrete_Block276" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.1685, 20.7515, -5)
+[node name="Concrete_Block930" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.3198, 17.2784, -5)
 data1 = Vector3(1, -1, 0)
 
-[node name="Concrete_Block966" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.6659, 20.7515, -5)
+[node name="Concrete_Block303" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.6488, 16.2656, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Concrete_Block304" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.667, 16.2656, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Concrete_Block973" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.1645, 16.2656, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block256" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 14.689, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 14.5589, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block257" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 14.2028, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 14.0727, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block258" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 15.6698, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 15.5397, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block260" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 15.6698, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 15.5397, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block261" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 15.1836, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 15.0535, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block929" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 15.6698, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 15.5397, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block262" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 16.1298, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 15.9997, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block263" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 16.1298, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 15.9997, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block931" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 16.1298, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 15.9997, -5)
 enable_physics = false
 add_collider = false
 resolve_collision = false
@@ -6838,23 +6684,23 @@ metadata/addCollider = false
 metadata/ResolveCollision = false
 
 [node name="Concrete_Block264" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 17.1106, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 16.9805, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block265" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 16.6244, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 16.4943, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block266" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 17.1106, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 16.9805, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block267" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 16.6244, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 16.4943, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block932" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 17.1106, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 16.9805, -5)
 enable_physics = false
 add_collider = false
 resolve_collision = false
@@ -6864,7 +6710,7 @@ metadata/addCollider = false
 metadata/ResolveCollision = false
 
 [node name="Concrete_Block933" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 16.6244, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 16.4943, -5)
 enable_physics = false
 add_collider = false
 resolve_collision = false
@@ -6874,15 +6720,33 @@ metadata/addCollider = false
 metadata/ResolveCollision = false
 
 [node name="Concrete_Block268" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 17.5959, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 17.4658, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block269" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 17.5959, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 17.4658, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block934" parent="." instance=ExtResource("3_i4blv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 17.5959, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 17.4658, -5)
+enable_physics = false
+add_collider = false
+resolve_collision = false
+data1 = Vector3(1, -1, 0)
+metadata/physics = false
+metadata/addCollider = false
+metadata/ResolveCollision = false
+
+[node name="Concrete_Block312" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.7512, 17.9646, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Concrete_Block313" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7694, 17.9646, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Concrete_Block974" parent="." instance=ExtResource("3_i4blv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.2668, 17.9646, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Concrete_Block959" parent="." instance=ExtResource("3_i4blv")]
@@ -7205,11 +7069,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.84851, 3.99048, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate17" parent="." instance=ExtResource("9_ftih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.09856, 6.23397, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.83175, 6.23397, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate18" parent="." instance=ExtResource("9_ftih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.48233, 6.23397, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.32642, 6.23397, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate45" parent="." instance=ExtResource("9_ftih7")]
@@ -7222,6 +7086,46 @@ data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate47" parent="." instance=ExtResource("9_ftih7")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.4726, 22.2298, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate53" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.7127, 19.2348, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate54" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.2088, 19.2348, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate55" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.7017, 19.2348, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate56" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.5358, 20.2247, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate57" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.0319, 20.2247, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate59" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.9643, 19.2992, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate72" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.4604, 19.2992, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate73" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.9643, 21.078, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate74" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.4604, 21.078, -5)
+data1 = Vector3(1, -1, 0)
+
+[node name="Metal_Plate58" parent="." instance=ExtResource("9_ftih7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.5248, 20.2247, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate48" parent="." instance=ExtResource("9_ftih7")]
@@ -7517,7 +7421,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.24914, 3.53757, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate5" parent="." instance=ExtResource("9_ftih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.31486, 5.52614, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.26463, 5.52614, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate6" parent="." instance=ExtResource("9_ftih7")]
@@ -7525,7 +7429,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.68767, 5.52614, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate7" parent="." instance=ExtResource("9_ftih7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.07144, 5.52614, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.10341, 5.52614, -5)
 data1 = Vector3(1, -1, 0)
 
 [node name="Metal_Plate36" parent="." instance=ExtResource("9_ftih7")]
@@ -7995,11 +7899,30 @@ transform = Transform3D(-1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 0, 0, 1, 8.7120
 enable_physics = false
 metadata/physics = false
 
-[node name="ChargingEnemy" parent="." instance=ExtResource("14_3lod4")]
-transform = Transform3D(-0.012, 0, 1.50996e-07, 0, -0.012, 0, -1.81195e-09, 0, -1, -9.356, -8.072, -5)
-
 [node name="ChargingEnemy2" parent="." instance=ExtResource("14_3lod4")]
-transform = Transform3D(-0.012, 0, 1.50996e-07, 0, -0.012, 0, -1.81195e-09, 0, -1, 9.49108, 1.04198, -5)
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 9.49108, 1.04198, -5)
 
 [node name="Metal_Pipe_90d" parent="." instance=ExtResource("15_pf044")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -11.5861, -8.80828, -5)
+
+[node name="Drone" parent="." instance=ExtResource("16_ugf6o")]
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 19.086, 30.169, -5)
+direction = 1
+save_ID = "drone1"
+metadata/sprite = "Drone"
+metadata/direction = 1
+metadata/saveID = "drone1"
+
+[node name="Drone2" parent="." instance=ExtResource("16_ugf6o")]
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 24.157, 30.169, -5)
+direction = 1
+save_ID = "drone2"
+metadata/sprite = "Drone"
+metadata/direction = 1
+metadata/saveID = "drone2"
+
+[node name="ShieldTankEnemy" parent="." instance=ExtResource("17_wy6ky")]
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 22.404, 18.745, -5)
+
+[node name="TurretEnemy" parent="." instance=ExtResource("18_5i4vv")]
+transform = Transform3D(0.012, 0, 0, 0, -0.012, 0, 0, 0, 1, 15.915, 21.859, -5)
