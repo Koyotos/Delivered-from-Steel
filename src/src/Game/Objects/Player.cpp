@@ -219,8 +219,13 @@ void Player::Process() {
 			pixelEmitter->isEmitting = false;
 		}
 	}
-	int currentPoints = cardManager->getCurrentManaPoints();
-	pointVisualizer->UpdatePlayerState(currentPoints);
+	if (health.IsDead()) {
+		pointVisualizer->Reset();
+	}
+	else {
+		int currentPoints = cardManager->getCurrentManaPoints();
+		pointVisualizer->UpdatePlayerState(currentPoints);
+	}
 
 	wasDead = health.IsDead();
 

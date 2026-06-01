@@ -10,7 +10,7 @@ public:
 	std::string Type() override;
 	void Process() override;
 	void UpdateOrbit(float deltaTime, const glm::vec3& playerPos);
-
+	void Reset() { activeParticleCount = 0; points = 0; }
 	void UpdatePlayerState(int currentPoints);
 
 	int showThreshold = 15;
