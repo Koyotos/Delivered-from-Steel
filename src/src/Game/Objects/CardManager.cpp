@@ -143,21 +143,24 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 
 void CardManager::FindNodes(shared_ptr<Node> node)
 {
-	// POPRAWIC TA FUNKCJE POZNIEJ
+	if (!node) return;
 
-
-	if (auto cast = dynamic_pointer_cast<CardSlot>(node)) {
+	if (node->Type() == "CardSlot") {
+		shared_ptr<CardSlot> cast = static_pointer_cast<CardSlot>(node);
 		slots.push_back(cast);
 		std::sort(slots.begin(), slots.end(), [](const std::shared_ptr<CardSlot>& a, const std::shared_ptr<CardSlot>& b) {return a->GetTransform().GetGlobal()[3].x < b->GetTransform().GetGlobal()[3].x;});
 
 	}
-	else if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
+	else if (node->Type() == "TextUI") {
+		shared_ptr<TextUI> cast = static_pointer_cast<TextUI>(node);
 		manaCounter->SetText(cast);
 	}
-	else if (auto cast = dynamic_pointer_cast<CardUI>(node)) {
+	else if (node->Type() == "CardUI") {
+		shared_ptr<CardUI> cast = static_pointer_cast<CardUI>(node);
 		cardDisplays.push_back(cast);
 	}
-	else if (auto cast = dynamic_pointer_cast<Icon>(node)) {
+	else if (node->Type() == "Icon") {
+		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
 		else if (cast->GetName() == "checkpoint_bg") checkpointIcon = cast;
 	}
