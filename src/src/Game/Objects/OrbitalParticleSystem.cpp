@@ -38,10 +38,10 @@ void OrbitalParticleSystem::UpdatePlayerState(int currentPoints) {
 	if (targetOrbitCount < points) {
 		for (size_t i = targetOrbitCount; i < points; ++i) {
 			float vx = ((rand() % 100) / 50.0f) - 1.0f;
-			float vy = ((rand() % 100) / 50.0f) + 0.5f;
+			float vy = ((rand() % 100) / 50.0f) + 1.0f;
 			float vz = ((rand() % 100) / 50.0f) - 1.0f;
 
-			velocities[i] = glm::vec3(vx, vy, vz) * 3.0f;
+			velocities[i] = glm::vec3(vx, vy, vz) * 2.0f;
 			lives[i] = 1.0f;
 		}
 	}
