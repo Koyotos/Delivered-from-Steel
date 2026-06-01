@@ -14,6 +14,7 @@ private:
 	PlayerMovementStats stats;
 	PlayerInputState inputState;
 	HealthComponent health;
+	PlayerRaycastConfig raycastConfig;
 	PlayerCameraController cameraController;
 	std::shared_ptr<ParticleEmitterNode> deathEmitter;
 	std::shared_ptr<ParticleEmitterNode> pixelEmitter;
@@ -59,7 +60,6 @@ public:
 	optional<RaycastHit> CheckRightWalledHit();
 	optional<RaycastHit> CheckLeftWalledHit();
 	bool CheckCeiling();
-	bool CheckLedge();
 
 	Player();
 	Player(const std::unordered_map<std::string, std::any>& data);
