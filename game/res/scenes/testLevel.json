@@ -38011,7 +38011,7 @@
     },
     "1188": {
         "parent": 1187,
-        "class": "Object3D",
+        "class": "Platform",
         "process": true,
         "input": true,
         "physics": true,
@@ -38039,6 +38039,7 @@
             1.5,
             1.5,
             1.5
-        ]
+        ],
+        "saveID": "cloth1"
     }
 }
