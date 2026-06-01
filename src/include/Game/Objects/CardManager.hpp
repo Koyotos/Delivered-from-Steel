@@ -24,6 +24,7 @@ private:
 	int maxManaPoints = 15;
 	int currentManaPoints = 15;
 
+
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
 
@@ -41,6 +42,10 @@ private:
 	std::vector<shared_ptr<CardSlot>> slots;
 
 	shared_ptr<Counter> manaCounter;
+
+	shared_ptr<Icon> checkpointIcon;
+
+	bool menuOpen = false;
 
 	/*
 	 * @brief checks if currentHand is empty
@@ -137,6 +142,8 @@ public:
 	 * @param shared_ptr<Player> : player to be assigned
 	 */
 	void AssignPlayer(shared_ptr<Player> player);
+
+	void ToggleMenu();
 
 	void Process() override;
 	bool Input(InputEvent& event) override;

@@ -158,7 +158,8 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 		cardDisplays.push_back(cast);
 	}
 	else if (auto cast = dynamic_pointer_cast<Icon>(node)) {
-		manaCounter->SetIcon(cast);
+		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
+		else if (cast->GetName() == "checkpoint_bg") checkpointIcon = cast;
 	}
 
 
@@ -261,4 +262,18 @@ void CardManager::UpdateManaUI()
 	manaCounter->UpdateValue(currentManaPoints);
 
 	// if learning card TBD
+}
+
+void CardManager::ToggleMenu()
+{
+	menuOpen = !menuOpen;
+	if (menuOpen) {
+		checkpointIcon->FinishAllTweens();
+		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y + 750), 0.5f, EaseType::OutQuad);
+	}
+	else
+	{
+		checkpointIcon->FinishAllTweens();
+		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y - 750), 0.5f, EaseType::InQuad);
+	}
 }
