@@ -114,7 +114,7 @@ class UIElement : public Object2D {
 	vector<shared_ptr<Tween>> GetActiveTweens() const;
 
 	void RotateTo(float targetAngle, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
-	void ScaleTo(glm::vec2 targetScale, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+	void ScaleTo(glm::vec2 targetScale, float time, EaseType ease = EaseType::Linear, float delay = 0.0f, glm::vec2 overrideStart = glm::vec2(-1.f, -1.f));
 	void Shake(float intensity, float duration, float delay = 0.0f);
 
 	void Draw(shared_ptr<Shader> sh = nullptr) override;

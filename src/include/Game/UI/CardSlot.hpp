@@ -25,15 +25,20 @@ class CardSlot : public UIElement {
 	string Type() override;
 
 	/*
-	* @brief Removes the current card from the slot with an animation. It moves the card up and fades it out before setting the pointer to null.
+	* @brief Removes the current card from the slot.
 	*/
 	void RemoveCard();
+
+	void PlayUseAnimation();
 
 	/*
 	* @brief Sets a new card in the slot. If there is already a card, it will be removed first. 
 	* The new card will be positioned at the slot's transform and will fade in.
 	*/
 	void SetCard(std::shared_ptr<CardUI> newCard);
+
+	void SetCardTint(vec3 color);
+
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
 	void Process() override;

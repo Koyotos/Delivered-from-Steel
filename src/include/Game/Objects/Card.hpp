@@ -16,6 +16,7 @@ class Card :
 private:
     CardType type;
     int maxEquippedDeck;
+    int cardCost;
     bool used = false;
 
     bool DestroyAfterUsed = false;
@@ -61,6 +62,8 @@ public:
      * CALL FUNCTIONS LIKE DASH, BOUNCE ETC IN THIS FUNCTION
      */
     void Use();
+
+    int GetCardCost() const;
 
 	void AssignPlayer(shared_ptr<Player> player);
 };

@@ -1,14 +1,8 @@
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/Globals/Globals.hpp"
 #include <random>
-#include <iostream>
 
 #include "GLFW/glfw3.h"
-
-std::vector<shared_ptr<Card>> CardManager::GetCurrentDeck()
-{
-	return currentDeck;
-}
 
 std::vector<shared_ptr<Card>> CardManager::GetCurrentHand()
 {
@@ -18,31 +12,6 @@ std::vector<shared_ptr<Card>> CardManager::GetCurrentHand()
 std::vector<shared_ptr<Card>> CardManager::GetUnlockedCards()
 {
 	return unlockedCards;
-}
-
-std::vector<shared_ptr<Card>> CardManager::GetAllDeckCards()
-{
-	return allDeckCards;
-}
-
-void CardManager::SetDrawOnHandEmpty(bool value)
-{
-	drawOnHandEmpty = value;
-}
-
-bool CardManager::GetDrawOnHandEmpty()
-{
-	return drawOnHandEmpty;
-}
-
-void CardManager::SetMaxDeckSize(int value)
-{
-	maxDeckSize = value;
-}
-
-int CardManager::GetMaxDeckSize()
-{
-	return maxDeckSize;
 }
 
 void CardManager::SetMaxHandSize(int value)
@@ -60,106 +29,46 @@ void CardManager::UnlockCard(std::shared_ptr<Card> card)
 	unlockedCards.push_back(card);
 }
 
-bool CardManager::AddCardToDeck(std::shared_ptr<Card> card)
-{
-	if (allDeckCards.size() < maxDeckSize)
-	{
-		allDeckCards.push_back(card);
-		currentDeck.push_back(card);
-		return true;
-	}
-	return false;
-}
-
-void CardManager::RemoveCardFromDeck(std::shared_ptr<Card> card)
-{
-	for (int i = 0; i < allDeckCards.size(); i++)
-	{
-		if (allDeckCards[i]->GetCardType() == card->GetCardType()) currentDeck.erase(currentDeck.begin() + i);
-	}
-}
-
-void CardManager::RemoveCardFromDeck(int index)
-{
-	if (index > allDeckCards.size()) return;
-
-	allDeckCards.erase(allDeckCards.begin() + index);
-	allDeckCards.shrink_to_fit();
-
-}
-
-void CardManager::DrawCardToHand(int slot)
-{
-	if (currentDeck.empty()) return;
-	if (learningCard != nullptr)
-	{
-		currentHand[slot] = learningCard;
-		slots[slot]->SetCard(learningCard->GetDisplay());
-		return;
-	}
-
-	ShuffleDeck();
-
-	std::shared_ptr<Card> newCard = currentDeck.back();
-	currentHand[slot] = newCard;
-	slots[slot]->SetCard(newCard->GetDisplay());
-	currentDeck.pop_back();
-
-}
-
-void CardManager::DrawCardsToHand()
-{
-	for (int i = 0; i < slots.size(); i++)
-	{
-		DrawCardToHand(i);
-	}
-}
-
 void CardManager::UseCard(int index)
 {
 	if (index < 0 || index >= currentHand.size()) return;
 	if (currentHand[index] == nullptr) return;
 	if (!currentHand[index]->CheckUse()) return;
+	if (currentManaPoints < currentHand[index]->GetCardCost()) return;
 
 	currentHand[index]->Use();
-	currentHand[index] = nullptr;
-	slots[index]->RemoveCard();
+	slots[index]->PlayUseAnimation();
+	if (learningCard == nullptr) currentManaPoints -= currentHand[index]->GetCardCost();
+	UpdateManaUI();
 
-	if (!drawOnHandEmpty)
-	{
-		DrawCardToHand(index);
-	}
-	else if (IsEmpty())
-	{
-		DrawCardsToHand();
-	}
+}
+
+void CardManager::AddToHand(int slot, shared_ptr<Card> card)
+{
+	if (slot < 0 || slot >= currentHand.size()) return;
+	currentHand[slot] = card;
+	currentHandSaved[slot] = card;
+	slots[slot]->SetCard(card->GetDisplay());
 }
 
 
 void CardManager::ReachCheckpoint()
 {
 	learningCard = nullptr;
-	RefreshCurrentDeck();
+	currentHand = currentHandSaved;
+	currentManaPoints = maxManaPoints;
+	UpdateManaUI();
 }
 
 void CardManager::LearnCard(shared_ptr<Card> card)
 {
 	learningCard = card;
-	DrawCardsToHand();
-}
+	unlockedCards.push_back(card);
+	currentHandSaved = currentHand;
+	for (int i = 0; i < maxHandSize; i++) {
+		currentHand[i] = learningCard;
+	}
 
-void CardManager::RefreshCurrentDeck()
-{
-	currentDeck = allDeckCards;
-	ShuffleDeck();
-	DrawCardsToHand();
-}
-
-void CardManager::ShuffleDeck()
-{
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(currentDeck.begin(), currentDeck.end(), g);
 }
 
 bool CardManager::IsEmpty()
@@ -173,6 +82,8 @@ bool CardManager::IsEmpty()
 CardManager::CardManager()
 {
 	currentHand.resize(maxHandSize, nullptr);
+	currentHandSaved.resize(maxHandSize, nullptr);
+	manaCounter = make_shared<Counter>(nullptr, nullptr, maxManaPoints);
 
 }
 
@@ -222,79 +133,34 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::WallSnap));
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
-	UnlockCard(CreateCard(CardType::Bounce));
-	auto c1 = CreateCard(CardType::FeatherFalling);
-	auto c2 = CreateCard(CardType::WallSnap);
-	auto c3 = CreateCard(CardType::Dash);
-	auto c4 = CreateCard(CardType::Bounce);
-	auto c5 = CreateCard(CardType::WallJump);
-	auto c6 = CreateCard(CardType::WallJump);
-	auto c7 = CreateCard(CardType::WallJump);
-	auto c8 = CreateCard(CardType::WallJump);
-	auto c9 = CreateCard(CardType::Bounce);
-	auto c10 = CreateCard(CardType::Bounce);
-	auto c11 = CreateCard(CardType::Bounce);
-	auto c12 = CreateCard(CardType::Bounce);
-	auto c13 = CreateCard(CardType::Bounce);
-	auto c14 = CreateCard(CardType::DoubleJump);
-	auto c15 = CreateCard(CardType::DoubleJump);
-	auto c16 = CreateCard(CardType::WallJump);
-	auto c17 = CreateCard(CardType::WallJump);
-	auto c18 = CreateCard(CardType::WallJump);
-	auto c19 = CreateCard(CardType::WallJump);
-	auto c20 = CreateCard(CardType::WallJump);
-	auto c21 = CreateCard(CardType::WallJump);
-	auto c22 = CreateCard(CardType::WallJump);
-	auto c23 = CreateCard(CardType::WallJump);
-	auto c24 = CreateCard(CardType::WallJump);
-	auto c25 = CreateCard(CardType::WallJump);
 
-	allDeckCards.push_back(c1);
-	allDeckCards.push_back(c2);
-	allDeckCards.push_back(c3);
-	allDeckCards.push_back(c4);
-	allDeckCards.push_back(c5);
-	allDeckCards.push_back(c6);
-	allDeckCards.push_back(c7);
-	allDeckCards.push_back(c8);
-	allDeckCards.push_back(c9);
-	allDeckCards.push_back(c10);
-	allDeckCards.push_back(c11);
-	allDeckCards.push_back(c12);
-	allDeckCards.push_back(c13);
-	allDeckCards.push_back(c14);
-	allDeckCards.push_back(c15);
-	allDeckCards.push_back(c16);
-	allDeckCards.push_back(c17);
-	allDeckCards.push_back(c18);
-	allDeckCards.push_back(c19);
-	allDeckCards.push_back(c20);
-	allDeckCards.push_back(c21);
-	allDeckCards.push_back(c22);
-	allDeckCards.push_back(c23);
-	allDeckCards.push_back(c24);
-	allDeckCards.push_back(c25);
+	AddToHand(0, CreateCard(CardType::WallJump));
+	AddToHand(1, CreateCard(CardType::Dash));
 
-
-	currentDeck = allDeckCards;
-
-	ShuffleDeck();
-
-	DrawCardsToHand();
-
+	ReachCheckpoint();
 
 }
 
 void CardManager::FindNodes(shared_ptr<Node> node)
 {
+	// POPRAWIC TA FUNKCJE POZNIEJ
+
+
 	if (auto cast = dynamic_pointer_cast<CardSlot>(node)) {
 		slots.push_back(cast);
 		std::sort(slots.begin(), slots.end(), [](const std::shared_ptr<CardSlot>& a, const std::shared_ptr<CardSlot>& b) {return a->GetTransform().GetGlobal()[3].x < b->GetTransform().GetGlobal()[3].x;});
 
 	}
+	else if (auto cast = dynamic_pointer_cast<TextUI>(node)) {
+		manaCounter->SetText(cast);
+	}
 	else if (auto cast = dynamic_pointer_cast<CardUI>(node)) {
 		cardDisplays.push_back(cast);
 	}
+	else if (auto cast = dynamic_pointer_cast<Icon>(node)) {
+		manaCounter->SetIcon(cast);
+	}
+
 
 	for (auto& k : node->GetChildren()) {
 		FindNodes(k);
@@ -321,8 +187,6 @@ shared_ptr<Card> CardManager::CreateCard(CardType type)
 void CardManager::AssignPlayer(shared_ptr<Player> player)
 {
 	for (auto& card : unlockedCards) if (card) card->AssignPlayer(player);
-	for (auto& card : allDeckCards) if (card) card->AssignPlayer(player);
-	for (auto& card : currentDeck) if (card) card->AssignPlayer(player);
 	for (auto& card : currentHand) if (card) card->AssignPlayer(player);
 }
 
@@ -339,18 +203,6 @@ nlohmann::json CardManager::Serialize() const {
 		unlocked.push_back(static_cast<int>(card->GetCardType()));
 	}
 	j["unlockedCards"] = unlocked;
-
-	std::vector<int> allDeck;
-	for (const auto& card : allDeckCards) {
-		allDeck.push_back(static_cast<int>(card->GetCardType()));
-	}
-	j["allDeckCards"] = allDeck;
-
-	std::vector<int> currDeck;
-	for (const auto& card : currentDeck) {
-		currDeck.push_back(static_cast<int>(card->GetCardType()));
-	}
-	j["currentDeck"] = currDeck;
 
 	std::vector<int> hand;
 	for (const auto& card : currentHand) {
@@ -375,22 +227,6 @@ void CardManager::Deserialize(const nlohmann::json& data) {
 		}
 	}
 
-	if (data.contains("allDeckCards")) {
-		auto loadedAll = data["allDeckCards"].get<std::vector<int>>();
-		allDeckCards.clear();
-		for (int typeVal : loadedAll) {
-			allDeckCards.push_back(CreateCard(static_cast<CardType>(typeVal)));
-		}
-	}
-
-	if (data.contains("currentDeck")) {
-		auto loadedCurr = data["currentDeck"].get<std::vector<int>>();
-		currentDeck.clear();
-		for (int typeVal : loadedCurr) {
-			currentDeck.push_back(CreateCard(static_cast<CardType>(typeVal)));
-		}
-	}
-
 	if (data.contains("currentHand")) {
 		auto loadedHand = data["currentHand"].get<std::vector<int>>();
 		currentHand.clear();
@@ -408,4 +244,21 @@ void CardManager::Deserialize(const nlohmann::json& data) {
 			}
 		}
 	}
+}
+
+void CardManager::UpdateManaUI()
+{
+	for (int i = 0; i < slots.size(); i++) {
+		if (currentHand[i] != nullptr) {
+			if (currentManaPoints < currentHand[i]->GetCardCost()) {
+				slots[i]->SetCardTint(vec3(0.3f, 0.3f, 0.3f)); 
+			}
+			else {
+				slots[i]->SetCardTint(vec3(1.0f, 1.0f, 1.0f)); 
+			}
+		}
+	}
+	manaCounter->UpdateValue(currentManaPoints);
+
+	// if learning card TBD
 }

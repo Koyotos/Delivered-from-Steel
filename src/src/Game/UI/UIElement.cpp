@@ -164,6 +164,12 @@ float UIElement::Ease(EaseType ease, float t)
 		return t * (2.0f - t);
 	case EaseType::InOutQuad:
 		return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
+	case EaseType::OutElastic: {
+		float c4 = (2.0f * 3.14159f) / 3.0f;
+		if (t == 0.f) return 0.f;
+		if (t == 1.f) return 1.f;
+		return powf(2.f, -10.f * t) * sinf((t * 10.f - 0.75f) * c4) + 1.f;
+	}
 	default:
 		return t;
 	}
@@ -247,7 +253,7 @@ void UIElement::RotateTo(float targetAngle, float time, EaseType ease, float del
 	tweens.push_back(t);
 }
 
-void UIElement::ScaleTo(glm::vec2 targetScale, float time, EaseType ease, float delay)
+void UIElement::ScaleTo(glm::vec2 targetScale, float time, EaseType ease, float delay, glm::vec2 overrideStart)
 {
 	Tween t;
 	t.type = Tween::Type::Scale;
@@ -255,7 +261,9 @@ void UIElement::ScaleTo(glm::vec2 targetScale, float time, EaseType ease, float 
 	t.elapsed = 0.0f;
 	t.ease = ease;
 	t.delay = delay;
-	t.startScale = glm::vec2(GetTransform().GetScale());
+	t.startScale = (overrideStart.x < 0.f)
+		? glm::vec2(GetTransform().GetScale())
+		: overrideStart;
 	t.targetScale = targetScale;
 	tweens.push_back(t);
 }
