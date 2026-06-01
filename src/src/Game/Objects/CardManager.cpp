@@ -133,9 +133,10 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::WallSnap));
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
+	UnlockCard(CreateCard(CardType::Bounce));
 
 	AddToHand(0, CreateCard(CardType::WallJump));
-	AddToHand(1, CreateCard(CardType::Dash));
+	AddToHand(1, CreateCard(CardType::Bounce));
 
 	ReachCheckpoint();
 

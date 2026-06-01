@@ -125,16 +125,16 @@ bool Player::CheckCeiling() {
 	return hitCenter.has_value();
 }
 
-bool Player::CheckLeftWalled() {
+optional<RaycastHit> Player::CheckLeftWalledHit() {
 	auto hitLeft = Raycast(glm::vec2(-raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
 
-	return hitLeft.has_value();
+	return hitLeft;
 }
 
-bool Player::CheckRightWalled() {
+optional<RaycastHit> Player::CheckRightWalledHit() {
 	auto hitRight = Raycast(glm::vec2(raycastConfig.wallOffsetX, raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
 
-	return hitRight.has_value();
+	return hitRight;
 }
 
 bool Player::CheckLedge() {
@@ -147,7 +147,6 @@ bool Player::CheckLedge() {
 }
 
 void Player::GatherInput(float deltaTime) {
-	if (isDashing) return;
 	bool currentJumpRaw = Globals::GetGlobals().GetKeyState(GLFW_KEY_SPACE) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A);
 
 	if (currentJumpRaw && !inputState.lastJumpInput) {
@@ -245,11 +244,13 @@ bool Player::HandleMovement(float deltaTime) {
 
 	isGrounded = CheckGrounded();
 	bool isCeiling = CheckCeiling();
-	bool isWalledLeft = CheckLeftWalled();
-	bool isWalledRight = CheckRightWalled();
+	optional<RaycastHit> WalledLeftHit = CheckLeftWalledHit();
+	optional<RaycastHit> WalledRightHit = CheckRightWalledHit();
+	bool isWalledLeft = WalledLeftHit.has_value();
+	bool isWalledRight = WalledRightHit.has_value();
 	isWalled = isWalledRight || isWalledLeft;
 
-	if (isWalledRight && isWalledLeft) {
+	if (isWalledRight && isWalledLeft && (WalledLeftHit.value().collider != WalledRightHit.value().collider)) {
 		Shatter();
 	}
 
@@ -323,6 +324,12 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isDashing) {
+		if (!wasDashing) {
+			if (std::abs(inputState.moveInput) > 0.01f) {
+				facingDirection = std::copysign(1.0f, inputState.moveInput);
+			}
+			beforeCardVelocityX = facingDirection * abs(beforeCardVelocityX);
+		}
 		wasDashing = true;
 		dashTimer -= deltaTime;
 		if (dashTimer <= 0.0f) {
@@ -616,7 +623,7 @@ void Player::ExecuteDash() {
 	isDashing = true;
 	isWallSnaping = false;
 	dashTimer = stats.dashDuration;
-	SetVelocity(glm::vec2(facingDirection * stats.dashSpeed, 0.0f));
+	wasDashing = false;
 }
 
 void Player::ExecuteBounce() {
@@ -644,8 +651,8 @@ void Player::ExecuteWallJump() {
 	glm::vec2 vel = GetVelocity();
 
 	float jumpDir = 0.0f;
-	if (CheckLeftWalled()) jumpDir = 1.0f;
-	else if (CheckRightWalled()) jumpDir = -1.0f;
+	if (CheckLeftWalledHit().has_value()) jumpDir = 1.0f;
+	else if (CheckRightWalledHit().has_value()) jumpDir = -1.0f;
 
 	if (jumpDir != 0.0f) {
 		vel.y = stats.wallJumpForceY;

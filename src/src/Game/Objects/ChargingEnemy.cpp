@@ -60,7 +60,7 @@ void ChargingEnemy::Chase(float dt) {
 
 	chargeCooldownTimer += dt;
 	if (chargeCooldownTimer < chargeCooldown) {
-			SetVelocity(glm::vec2(- 0.5f * speed * direction, GetVelocity().y));
+			SetVelocity(glm::vec2(0.0f, GetVelocity().y));
 			return;
 	}
 

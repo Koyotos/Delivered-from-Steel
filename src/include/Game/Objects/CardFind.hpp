@@ -5,7 +5,7 @@
 #include "include/Game/CardType.hpp"
 #include "include/Game/Objects/Player.hpp"
 
-class CardFind : public Object2D, public ISerializable {
+class CardFind : public Object2D {
 private:
 	shared_ptr<Player> player;       
     CardType cardTypeToUnlock = CardType::WallJump;
@@ -19,9 +19,5 @@ public:
     void Init(shared_ptr<Scene> scene) override;
 
     void OnCollisionEnter(std::shared_ptr<Collider> other) override;
-
-    std::string GetSerializeKey() const override;
-    nlohmann::json Serialize() const override;
-    void Deserialize(const nlohmann::json& data) override;
 };
 #endif // FE_CARD_FIND

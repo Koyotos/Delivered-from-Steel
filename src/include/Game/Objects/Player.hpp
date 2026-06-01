@@ -56,8 +56,8 @@ private:
 
 public:
 	bool CheckGrounded();
-	bool CheckRightWalled();
-	bool CheckLeftWalled();
+	optional<RaycastHit> CheckRightWalledHit();
+	optional<RaycastHit> CheckLeftWalledHit();
 	bool CheckCeiling();
 	bool CheckLedge();
 
