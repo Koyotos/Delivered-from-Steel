@@ -1,6 +1,7 @@
 #include "include/Game/Objects/CardFind.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/Game/Objects/CardManager.hpp"
+#include "include/SaveManager/WorldStateManager.hpp"
 
 CardFind::CardFind() : Object2D(), isCollected(false) {}
 
@@ -10,27 +11,6 @@ CardFind::CardFind(const unordered_map<string, std::any>& data) : Object2D(data)
 }
 
 CardFind::~CardFind() {}
-
-std::string CardFind::GetSerializeKey() const {
-    glm::vec3 pos = GetTransform().GetTranslation();
-    return "cardfind_" + std::to_string((int)pos.x) + "_" + std::to_string((int)pos.y);
-}
-
-nlohmann::json CardFind::Serialize() const {
-    nlohmann::json j;
-    j["isCollected"] = isCollected;
-    return j;
-}
-
-void CardFind::Deserialize(const nlohmann::json& data) {
-    if (data.contains("isCollected")) {
-        isCollected = data["isCollected"];
-
-        if (isCollected) {
-            this->Disable();
-        }
-    }
-}
 
 void CardFind::OnCollisionEnter(std::shared_ptr<Collider> other) {
     if (isCollected) return;
@@ -46,6 +26,14 @@ void CardFind::OnCollisionEnter(std::shared_ptr<Collider> other) {
             newCard->AssignPlayer(player);
             cardManager->UnlockCard(newCard);
             cardManager->LearnCard(newCard);
+        }
+        std::string id = this->GetSaveID();
+        if (!id.empty()) {
+            auto& globals = Globals::GetGlobals();
+            if (globals.worldStateManager) {
+                std::string currentLevel = globals.activeLevelName;
+                globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
+            }
         }
 
 		this->Disable();

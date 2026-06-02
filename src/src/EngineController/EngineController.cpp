@@ -352,6 +352,8 @@ void EngineController::LoadGame(const string& filepath) {
 	if (activeLevelNode) {
 		disableDestroyed(activeLevelNode);
 	}
+
+	active->GetRoot()->InitRecursive(active);
 }
 
 

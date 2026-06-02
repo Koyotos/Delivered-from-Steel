@@ -1,5 +1,7 @@
 #include "include/Game/Objects/Checkpoint.hpp"
 #include "include/Game/Objects/CardManager.hpp"
+#include "include/Globals/Globals.hpp"
+#include "include/SaveManager/WorldStateManager.hpp"
 
 Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : Object3D(data) {
 
@@ -32,30 +34,10 @@ void Checkpoint::Init(std::shared_ptr<Scene> scene) {
         if (child->Type() == "Object3D") {
             auto castedCloth = std::static_pointer_cast<Object3D>(child);
             clothObject = castedCloth;
-            break;
-        }
-    }
-}
-
-std::string Checkpoint::GetSerializeKey() const {
-    glm::vec3 pos = GetTransform().GetTranslation();
-    return "checkpoint_" + std::to_string((int)pos.x) + "_" + std::to_string((int)pos.y);
-}
-
-nlohmann::json Checkpoint::Serialize() const {
-    nlohmann::json j;
-    j["isActivated"] = isActivated;
-    return j;
-}
-
-void Checkpoint::Deserialize(const nlohmann::json& data) {
-    if (data.contains("isActivated")) {
-        isActivated = data["isActivated"];
-
-        if (isActivated) {
-            if (clothObject) {
-                clothObject->Disable();
+            if (!clothObject->TestDraw()) {
+                Activate();
             }
+            break;
         }
     }
 }
@@ -141,7 +123,15 @@ bool Checkpoint::Input(InputEvent& event) {
 void Checkpoint::Activate() {
     isActivated = true;
 
-    if (clothObject) {
+    if (clothObject && clothObject->TestDraw()) {
+        std::string id = clothObject->GetSaveID();
+        if (!id.empty()) {
+            auto& globals = Globals::GetGlobals();
+            if (globals.worldStateManager) {
+                std::string currentLevel = globals.activeLevelName;
+                globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
+            }
+        }
         clothObject->Disable();
     }
 }

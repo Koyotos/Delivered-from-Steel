@@ -8,7 +8,7 @@
 #include "include/Core/Scene.hpp"
 #include "GLFW/glfw3.h"
 
-class Checkpoint : public Object3D, public ISerializable {
+class Checkpoint : public Object3D {
 private:
     std::shared_ptr<Player> player = nullptr;
     std::shared_ptr<Object3D> clothObject = nullptr;
@@ -31,10 +31,6 @@ public:
     void Init(std::shared_ptr<Scene> scene) override;
     void Physics(const float& deltaTime) override;
     bool Input(InputEvent& event) override;
-
-    std::string GetSerializeKey() const override;
-    nlohmann::json Serialize() const override;
-    void Deserialize(const nlohmann::json& data) override;
 };
 
 #endif
