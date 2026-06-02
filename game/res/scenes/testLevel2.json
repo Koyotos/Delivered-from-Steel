@@ -10,7 +10,7 @@
     "2": {
         "parent": 1,
         "transform": [
-            45.5426,
+            45.4336,
             27.4045,
             -5.0,
             0.0,
@@ -42,7 +42,7 @@
     "3": {
         "parent": 1,
         "transform": [
-            46.0344,
+            45.0515,
             27.4045,
             -5.0,
             0.0,
@@ -74,7 +74,7 @@
     "4": {
         "parent": 1,
         "transform": [
-            46.5327,
+            45.9254,
             27.4045,
             -5.0,
             0.0,
@@ -106,7 +106,7 @@
     "5": {
         "parent": 1,
         "transform": [
-            47.0245,
+            46.4237,
             27.4045,
             -5.0,
             0.0,
@@ -138,7 +138,7 @@
     "6": {
         "parent": 1,
         "transform": [
-            47.4798,
+            46.9155,
             27.4045,
             -5.0,
             0.0,
@@ -170,7 +170,7 @@
     "7": {
         "parent": 1,
         "transform": [
-            47.9477,
+            47.3708,
             27.4045,
             -5.0,
             0.0,
@@ -202,7 +202,7 @@
     "8": {
         "parent": 1,
         "transform": [
-            48.4315,
+            47.8387,
             27.4045,
             -5.0,
             0.0,
@@ -234,7 +234,7 @@
     "9": {
         "parent": 1,
         "transform": [
-            48.9233,
+            48.3225,
             27.4045,
             -5.0,
             0.0,
@@ -266,7 +266,7 @@
     "10": {
         "parent": 1,
         "transform": [
-            49.4067,
+            48.8143,
             27.4045,
             -5.0,
             0.0,
@@ -298,7 +298,7 @@
     "11": {
         "parent": 1,
         "transform": [
-            49.8985,
+            49.2977,
             27.4045,
             -5.0,
             0.0,
@@ -330,7 +330,7 @@
     "12": {
         "parent": 1,
         "transform": [
-            50.3968,
+            49.7895,
             27.4045,
             -5.0,
             0.0,
@@ -362,7 +362,7 @@
     "13": {
         "parent": 1,
         "transform": [
-            50.8886,
+            50.2878,
             27.4045,
             -5.0,
             0.0,
@@ -394,7 +394,7 @@
     "14": {
         "parent": 1,
         "transform": [
-            51.3579,
+            50.7796,
             27.4045,
             -5.0,
             0.0,
@@ -426,7 +426,7 @@
     "15": {
         "parent": 1,
         "transform": [
-            51.8497,
+            51.2489,
             27.4045,
             -5.0,
             0.0,
@@ -458,7 +458,7 @@
     "16": {
         "parent": 1,
         "transform": [
-            52.3335,
+            51.7407,
             27.4045,
             -5.0,
             0.0,
@@ -490,7 +490,7 @@
     "17": {
         "parent": 1,
         "transform": [
-            52.8253,
+            52.2245,
             27.4045,
             -5.0,
             0.0,
@@ -522,7 +522,7 @@
     "18": {
         "parent": 1,
         "transform": [
-            53.3087,
+            52.7163,
             27.4045,
             -5.0,
             0.0,
@@ -554,7 +554,7 @@
     "19": {
         "parent": 1,
         "transform": [
-            53.8005,
+            53.1997,
             27.4045,
             -5.0,
             0.0,
@@ -586,7 +586,7 @@
     "20": {
         "parent": 1,
         "transform": [
-            54.2988,
+            53.6915,
             27.4045,
             -5.0,
             0.0,
@@ -618,7 +618,7 @@
     "21": {
         "parent": 1,
         "transform": [
-            54.7906,
+            54.1898,
             27.4045,
             -5.0,
             0.0,
@@ -650,6 +650,38 @@
     "22": {
         "parent": 1,
         "transform": [
+            54.6816,
+            27.4045,
+            -5.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "class": "Platform",
+        "process": true,
+        "input": true,
+        "physics": true,
+        "draw": true,
+        "ignoreParent": true,
+        "static": true,
+        "addCollider": true,
+        "ResolveCollision": true,
+        "colliderPosX": 0.0,
+        "colliderPosY": -0.25,
+        "colliderType": false,
+        "cull": 0.5,
+        "zIndex": 0,
+        "shader": "standard",
+        "model": "Concrete_Block",
+        "height": 0.5,
+        "width": 0.5
+    },
+    "23": {
+        "parent": 1,
+        "transform": [
             14.751,
             19.944,
             -5.9739,
@@ -679,7 +711,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "23": {
+    "24": {
         "parent": 1,
         "transform": [
             60.3121,
@@ -711,7 +743,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "24": {
+    "25": {
         "parent": 1,
         "transform": [
             59.3303,
@@ -743,7 +775,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "25": {
+    "26": {
         "parent": 1,
         "transform": [
             59.8277,
@@ -775,7 +807,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "26": {
+    "27": {
         "parent": 1,
         "transform": [
             58.1567,
@@ -807,7 +839,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "27": {
+    "28": {
         "parent": 1,
         "transform": [
             57.1749,
@@ -839,7 +871,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "28": {
+    "29": {
         "parent": 1,
         "transform": [
             57.6724,
@@ -871,7 +903,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "29": {
+    "30": {
         "parent": 1,
         "transform": [
             55.4767,
@@ -903,7 +935,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "30": {
+    "31": {
         "parent": 1,
         "transform": [
             55.9741,
@@ -935,7 +967,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "31": {
+    "32": {
         "parent": 1,
         "transform": [
             56.4688,
@@ -967,7 +999,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "32": {
+    "33": {
         "parent": 1,
         "transform": [
             56.9663,
@@ -999,7 +1031,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "33": {
+    "34": {
         "parent": 1,
         "transform": [
             57.4443,
@@ -1031,7 +1063,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "34": {
+    "35": {
         "parent": 1,
         "transform": [
             57.9417,
@@ -1063,7 +1095,7 @@
         "height": 0.5,
         "width": 0.5
     },
-    "35": {
+    "36": {
         "parent": 1,
         "transform": [
             59.2206,
@@ -1095,7 +1127,7 @@
         "height": 0.1,
         "width": 0.5
     },
-    "36": {
+    "37": {
         "parent": 1,
         "transform": [
             59.7167,
@@ -1127,7 +1159,7 @@
         "height": 0.1,
         "width": 0.5
     },
-    "37": {
+    "38": {
         "parent": 1,
         "transform": [
             60.2096,
@@ -1159,7 +1191,7 @@
         "height": 0.1,
         "width": 0.5
     },
-    "38": {
+    "39": {
         "parent": 1,
         "transform": [
             57.0437,
@@ -1191,7 +1223,7 @@
         "height": 0.1,
         "width": 0.5
     },
-    "39": {
+    "40": {
         "parent": 1,
         "transform": [
             57.5398,
@@ -1223,42 +1255,10 @@
         "height": 0.1,
         "width": 0.5
     },
-    "40": {
-        "parent": 1,
-        "transform": [
-            55.4722,
-            25.0891,
-            -5.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            1.0,
-            1.0
-        ],
-        "class": "Platform",
-        "process": true,
-        "input": true,
-        "physics": true,
-        "draw": true,
-        "ignoreParent": true,
-        "static": true,
-        "addCollider": true,
-        "ResolveCollision": true,
-        "colliderPosX": 0.0,
-        "colliderPosY": -0.25,
-        "colliderType": false,
-        "cull": 0.5,
-        "zIndex": 0,
-        "shader": "standard",
-        "model": "Metal_Plate",
-        "height": 0.1,
-        "width": 0.5
-    },
     "41": {
         "parent": 1,
         "transform": [
-            55.9683,
+            55.4722,
             25.0891,
             -5.0,
             0.0,
@@ -1290,8 +1290,8 @@
     "42": {
         "parent": 1,
         "transform": [
-            55.4722,
-            26.8679,
+            55.9683,
+            25.0891,
             -5.0,
             0.0,
             0.0,
@@ -1322,7 +1322,7 @@
     "43": {
         "parent": 1,
         "transform": [
-            55.9683,
+            55.4722,
             26.8679,
             -5.0,
             0.0,
@@ -1354,6 +1354,38 @@
     "44": {
         "parent": 1,
         "transform": [
+            55.9683,
+            26.8679,
+            -5.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "class": "Platform",
+        "process": true,
+        "input": true,
+        "physics": true,
+        "draw": true,
+        "ignoreParent": true,
+        "static": true,
+        "addCollider": true,
+        "ResolveCollision": true,
+        "colliderPosX": 0.0,
+        "colliderPosY": -0.25,
+        "colliderType": false,
+        "cull": 0.5,
+        "zIndex": 0,
+        "shader": "standard",
+        "model": "Metal_Plate",
+        "height": 0.1,
+        "width": 0.5
+    },
+    "45": {
+        "parent": 1,
+        "transform": [
             58.0327,
             26.0146,
             -5.0,
@@ -1383,7 +1415,7 @@
         "height": 0.1,
         "width": 0.5
     },
-    "45": {
+    "46": {
         "parent": 1,
         "transform": [
             56.9119,
@@ -1416,43 +1448,11 @@
         "height": 0.64,
         "width": 0.42
     },
-    "46": {
-        "parent": 1,
-        "transform": [
-            46.6399,
-            29.2772,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            1.0,
-            1.0
-        ],
-        "class": "LevelGateway",
-        "process": true,
-        "input": false,
-        "physics": true,
-        "draw": false,
-        "ignoreParent": true,
-        "static": true,
-        "addCollider": true,
-        "ResolveCollision": false,
-        "colliderPosX": 0.0,
-        "colliderPosY": 0.0,
-        "colliderType": false,
-        "cull": 0.0,
-        "zIndex": 0,
-        "height": 5.0,
-        "width": 2.0,
-        "targetLevel": "testLevel",
-		"isLoad": true
-    },
     "47": {
         "parent": 1,
         "transform": [
-            52.0435,
-            29.1201,
+            45.2423,
+            31.9883,
             0.0,
             0.0,
             0.0,
@@ -1475,9 +1475,10 @@
         "colliderType": false,
         "cull": 0.0,
         "zIndex": 0,
-        "height": 5.0,
-        "width": 2.0,
-        "targetLevel": "testLevel",
-		"isLoad": false
+        "height": 10.0,
+        "width": 15.0,
+        "levelNegative": "testLevel",
+        "levelPositive": "testLevel2",
+        "isVerticalAxis": false
     }
 }

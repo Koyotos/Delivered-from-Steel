@@ -5,11 +5,14 @@
 LevelGateway::LevelGateway() = default;
 
 LevelGateway::LevelGateway(const unordered_map<string, std::any>& data) : PhysicsNode(data) {
-	if (data.find("targetLevel") != data.end()) {
-		targetLevel = fromMap(std::string, "targetLevel", data);
+	if (data.find("levelNegative") != data.end()) {
+		levelNegative = fromMap(std::string, "levelNegative", data);
 	}
-	if (data.find("isLoad") != data.end()) {
-		isLoadTrigger = fromMap(bool, "isLoad", data);
+	if (data.find("levelPositive") != data.end()) {
+		levelPositive = fromMap(std::string, "levelPositive", data);
+	}
+	if (data.find("isVerticalAxis") != data.end()) {
+		isVerticalAxis = fromMap(bool, "isVerticalAxis", data);
 	}
 }
 
@@ -29,29 +32,14 @@ void LevelGateway::OnCollisionEnter(shared_ptr<Collider> other) {
 
 	hasTriggered = true;
 
-	string target = targetLevel;
 	string active = engine->GetActiveLevelName();
 	string prev = engine->GetPreviousLevelName();
 
-	if (isLoadTrigger) {
-		if (target == active) {
-			return;
-		}
-		else if (target == prev) {
-			engine->QueueSwapActiveAndPrevious();
-		}
-		else {
-			engine->QueueStreamNextLevel(target);
-		}
+	if (active != levelNegative && prev != levelNegative) {
+		engine->QueueStreamNextLevel(levelNegative);
 	}
-	else {
-		if (target == prev) {
-			engine->QueueUnloadPreviousLevel();
-		}
-		else if (target == active) {
-			engine->QueueSwapActiveAndPrevious();
-			engine->QueueUnloadPreviousLevel();
-		}
+	else if (active != levelPositive && prev != levelPositive) {
+		engine->QueueStreamNextLevel(levelPositive);
 	}
 }
 
@@ -59,5 +47,35 @@ void LevelGateway::OnCollisionExit(shared_ptr<Collider> other) {
 	auto owner = other ? other->GetOwner() : nullptr;
 	if (!owner || owner->GetObjectType() != ObjectType::Player) return;
 
+	auto& globals = Globals::GetGlobals();
+	auto engine = globals.engineController;
+	if (!engine) return;
+
+	float playerPos = 0.0f;
+	float volumePos = 0.0f;
+
+	if (isVerticalAxis == true) {
+		playerPos = owner->GetTransform().GetTranslation().y;
+		volumePos = this->GetTransform().GetTranslation().y;
+	}
+	else {
+		playerPos = owner->GetTransform().GetTranslation().x;
+		volumePos = this->GetTransform().GetTranslation().x;
+	}
+
+	string targetActive = "";
+	if (playerPos > volumePos) {
+		targetActive = levelPositive;
+	}
+	else {
+		targetActive = levelNegative;
+	}
+
+	string active = engine->GetActiveLevelName();
+
+	if (active != targetActive) {
+		engine->QueueSwapActiveAndPrevious();
+	}
+	engine->QueueUnloadPreviousLevel();
 	hasTriggered = false;
 }

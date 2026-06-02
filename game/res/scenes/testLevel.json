@@ -37910,8 +37910,8 @@
 	"1185": {
         "parent": 1,
         "transform": [
-            43.6399,
-            29.2772,
+            45.2423,
+            31.9883,
             0.0,
             0.0,
             0.0,
@@ -37934,41 +37934,10 @@
         "colliderType": false,
         "cull": 0.0,
         "zIndex": 0,
-        "height": 5.0,
-        "width": 2.0,
-        "targetLevel": "testLevel2",
-		"isLoad": true
-    },
-    "1186": {
-        "parent": 1,
-        "transform": [
-            37.0435,
-            29.1201,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            1.0,
-            1.0,
-            1.0
-        ],
-        "class": "LevelGateway",
-        "process": true,
-        "input": false,
-        "physics": true,
-        "draw": false,
-        "ignoreParent": true,
-        "static": true,
-        "addCollider": true,
-        "ResolveCollision": false,
-        "colliderPosX": 0.0,
-        "colliderPosY": 0.0,
-        "colliderType": false,
-        "cull": 0.0,
-        "zIndex": 0,
-        "height": 5.0,
-        "width": 2.0,
-        "targetLevel": "testLevel2",
-		"isLoad": false
+        "height": 10.0,
+        "width": 15.0,
+        "levelNegative": "testLevel",
+        "levelPositive": "testLevel2",
+        "isVerticalAxis": false
     }
 }

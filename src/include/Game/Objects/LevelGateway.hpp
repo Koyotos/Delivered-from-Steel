@@ -7,10 +7,11 @@
 class LevelGateway final : public PhysicsNode {
 private:
 	bool hasTriggered = false;
-	bool isLoadTrigger = true;
+	bool isVerticalAxis = false; // false for x, true for y
 
 public:
-	std::string targetLevel = "";
+	std::string levelNegative = "";
+	std::string levelPositive = "";
 
 	LevelGateway();
 	LevelGateway(const unordered_map<string, std::any>& data);
