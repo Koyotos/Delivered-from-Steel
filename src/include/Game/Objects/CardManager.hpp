@@ -27,6 +27,8 @@ private:
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
+	std::vector<shared_ptr<CardUI>> unlockedCardDisplays;
+	std::vector<shared_ptr<CardUI>> menuCardDisplays;
 
 	/* all cards that are currently in hand, with each index corresponding with each slot */
 	std::vector<shared_ptr<Card>> currentHand;
@@ -60,6 +62,12 @@ private:
 
 	void UpdateManaUI();
 
+	void MoveUnlockedCards();
+
+	void AddCardUI(shared_ptr<CardUI> cardUI);
+
+	int CardsInHand();
+	bool IsTypeInHand(CardType type);
 
 
 public:

@@ -27,6 +27,17 @@ int CardManager::GetMaxHandSize()
 void CardManager::UnlockCard(std::shared_ptr<Card> card)
 {
 	unlockedCards.push_back(card);
+	for (auto& display : menuCardDisplays)
+	{
+		if (display->GetCardType() == card->GetCardType())
+		{
+			shared_ptr<CardUI> cardUI = display;
+			cardUI->MoveTo(vec2(-300.0f, 800.0f), 0.01f);
+			cardUI->SetVisible(true);
+			unlockedCardDisplays.push_back(cardUI);
+			return;
+		}
+	}
 }
 
 void CardManager::UseCard(int index)
@@ -89,7 +100,7 @@ CardManager::CardManager()
 
 void CardManager::Process()
 {
-	return;
+	
 }
 
 bool CardManager::Input(InputEvent& event)
@@ -157,7 +168,7 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 	}
 	else if (node->Type() == "CardUI") {
 		shared_ptr<CardUI> cast = static_pointer_cast<CardUI>(node);
-		cardDisplays.push_back(cast);
+		AddCardUI(cast);
 	}
 	else if (node->Type() == "Icon") {
 		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
@@ -273,10 +284,52 @@ void CardManager::ToggleMenu()
 	if (menuOpen) {
 		checkpointIcon->FinishAllTweens();
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y + 750), 0.5f, EaseType::OutQuad);
+		MoveUnlockedCards();
 	}
 	else
 	{
 		checkpointIcon->FinishAllTweens();
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y - 750), 0.5f, EaseType::InQuad);
+		MoveUnlockedCards();
 	}
+}
+
+void CardManager::MoveUnlockedCards()
+{
+
+	if (menuOpen) {
+		int count = unlockedCardDisplays.size();
+
+		for (int i = 0; i < count; i++) {
+			float targetX = 100.0f + (i + 1) * (1720.0f / (count + 1));
+			unlockedCardDisplays[i]->FinishAllTweens();
+			unlockedCardDisplays[i]->MoveTo(vec2(targetX, 462.5f), 0.5f, EaseType::OutQuad);
+		}
+	}
+	else {
+		for (auto& display : unlockedCardDisplays) {
+			display->FinishAllTweens();
+			display->MoveTo(vec2(-300.0f, 800.0f), 0.5f, EaseType::InOutSine);
+		}
+	}
+}
+
+void CardManager::AddCardUI(shared_ptr<CardUI> cardUI)
+{
+	if (cardUI->GetTransform().GetTranslation().x == -300.0f) {
+		menuCardDisplays.push_back(cardUI);
+	}
+	else {
+		cardDisplays.push_back(cardUI);
+	}
+}
+
+bool CardManager::IsTypeInHand(CardType type)
+{
+	for (auto& card : currentHand) {
+		if (card != nullptr && card->GetCardType() == type) {
+			return true;
+		}
+	}
+	return false;
 }
