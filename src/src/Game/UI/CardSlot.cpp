@@ -92,3 +92,52 @@ void CardSlot::FinishAllTweens() {
     if (icon) icon->FinishAllTweens();
     if (card) card->FinishAllTweens();
 }
+
+void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float delay) {
+    if (card)
+    {
+        card->FinishAllTweens();
+
+        vec2 origScale = {
+			2.7f, 2.7f
+        };
+        if (origPos == vec2(0.0f, 0.0f)) origPos = {
+            card->GetTransform().GetTranslation().x,
+            card->GetTransform().GetTranslation().y
+        };
+
+        const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
+
+        auto CompensatedPos = [&](vec2 newScale) -> vec2 {
+            return origPos - (newScale - origScale) * halfSize;
+            };
+
+        vec2 s1 = { origScale.x * target.x, origScale.y * target.y };
+
+        card->ScaleTo(s1, time, ease, delay);
+        card->MoveTo(CompensatedPos(s1), time, ease, delay);
+    }
+    else
+    {
+        FinishAllTweens();
+
+        vec2 origScale = {
+            2.7f, 2.7f
+        };
+        if (origPos == vec2(0.0f, 0.0f)) origPos = {
+            GetTransform().GetTranslation().x,
+            GetTransform().GetTranslation().y
+        };
+
+        const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
+
+        auto CompensatedPos = [&](vec2 newScale) -> vec2 {
+            return origPos - (newScale - origScale) * halfSize;
+            };
+
+        vec2 s1 = { origScale.x * target.x, origScale.y * target.y };
+
+        ScaleTo(s1, time, ease, delay);
+        MoveTo(CompensatedPos(s1), time, ease, delay);
+    }
+}

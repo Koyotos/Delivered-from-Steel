@@ -25,6 +25,8 @@ private:
 	int currentManaPoints = 15;
 
 	int selectedCard = -1;
+	int selectedCardUp = 0;
+	bool rowDown = true;
 
 
 	/* it stores one copy of each type of a card that is currently unlocked */
@@ -71,6 +73,9 @@ private:
 	void MoveSlots();
 
 	void UpdateCardSelection();
+
+	void AddCardToHand(int slot, shared_ptr<Card> card);
+	void AddCardToHand(shared_ptr<Card> card);
 
 
 public:

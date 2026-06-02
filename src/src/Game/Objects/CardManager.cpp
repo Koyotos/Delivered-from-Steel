@@ -115,12 +115,24 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_GAMEPAD_BUTTON_Y: UseCard(1); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT: if (menuOpen) {
-				selectedCard = (selectedCard + 1) % (int)unlockedCardDisplays.size();
+				selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_LEFT: if (menuOpen) {
-				selectedCard = (selectedCard - 1 + (int)unlockedCardDisplays.size()) % (int)unlockedCardDisplays.size();
+				selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			case GLFW_GAMEPAD_BUTTON_DPAD_UP: if (menuOpen) {
+				rowDown = !rowDown;
+				selectedCard = 0;
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			case GLFW_GAMEPAD_BUTTON_DPAD_DOWN: if (menuOpen) {
+				rowDown = !rowDown;
+				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
@@ -131,12 +143,29 @@ bool CardManager::Input(InputEvent& event)
 			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_X)
 			{
 				if (event.valueX > 0.5f) {
-					selectedCard = (selectedCard + 1) % (int)unlockedCardDisplays.size();
+					selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 					UpdateCardSelection();
 				}
 				else if (event.valueX < -0.5f) {
-					selectedCard = (selectedCard - 1 + (int)unlockedCardDisplays.size()) % (int)unlockedCardDisplays.size();
+					selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 					UpdateCardSelection();
+				}
+				else if (event.valueX > -0.5f && event.valueX < 0.5f) {
+				}
+			}
+			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_Y)
+			{
+				if (event.valueY > 0.5f) {
+					rowDown = !rowDown;
+					selectedCard = 0;
+					UpdateCardSelection();
+				}
+				else if (event.valueY < -0.5f) {
+					rowDown = !rowDown;
+					selectedCard = 0;
+					UpdateCardSelection();
+				}
+				else if (event.valueY > -0.5f && event.valueY < 0.5f) {
 				}
 			}
 		}
@@ -148,12 +177,24 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_KEY_K: UseCard(1); event.handled = true; break;
 			case GLFW_KEY_L: UseCard(2); event.handled = true; break;
 			case GLFW_KEY_D: if (menuOpen) {
-				selectedCard = (selectedCard + 1) % (int)unlockedCardDisplays.size();
+				selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_KEY_A: if (menuOpen) {
-				selectedCard = (selectedCard - 1 + (int)unlockedCardDisplays.size()) % (int)unlockedCardDisplays.size();
+				selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			case GLFW_KEY_W: if (menuOpen) {
+				rowDown = !rowDown;
+				selectedCard = 0;
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			case GLFW_KEY_S: if (menuOpen) {
+				rowDown = !rowDown;
+				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
@@ -341,12 +382,14 @@ void CardManager::MoveUnlockedCards()
 			float targetX = 100.0f + (i + 1) * (1720.0f / (count + 1));
 			unlockedCardDisplays[i]->FinishAllTweens();
 			unlockedCardDisplays[i]->MoveTo(vec2(targetX - 75.0f, 420.0f), 0.5f, EaseType::OutQuad);
+			unlockedCardDisplays[i]->Tint(vec3(0.75f, 0.75f, 0.75f), 0.01f, EaseType::OutQuad);
 		}
 	}
 	else {
 		for (auto& display : unlockedCardDisplays) {
 			display->FinishAllTweens();
 			display->MoveTo(vec2(-300.0f, 800.0f), 0.5f, EaseType::InOutSine);
+			display->Tint(vec3(1.0f, 1.0f, 1.0f), 0.5f, EaseType::InOutSine);
 		}
 	}
 }
@@ -367,6 +410,7 @@ void CardManager::MoveSlots()
 		float targetY = (menuOpen ? -1.0f : 1.0f) * 666.0f;
 		slots[i]->FinishAllTweens();
 		slots[i]->MoveTo(vec2(slots[i]->GetTransform().GetTranslation().x, slots[i]->GetTransform().GetTranslation().y + targetY), 0.5f, EaseType::OutQuad);
+		slots[i]->SetCardTint(menuOpen ? vec3(0.75f, 0.75f, 0.75f) : vec3(1.0f, 1.0f, 1.0f));
 	}
 	if (menuOpen)
 	{
@@ -382,6 +426,7 @@ void CardManager::MoveSlots()
 
 void CardManager::UpdateCardSelection()
 {
+
 	for (int i = 0; i < unlockedCardDisplays.size(); i++) {
 		vec2 baseScale = vec2(2.7f, 2.7f);
 		float cardW = 75.0f * baseScale.x;
@@ -389,13 +434,27 @@ void CardManager::UpdateCardSelection()
 		float baseX = 100.0f + (i + 1) * (1720.0f / (unlockedCardDisplays.size() + 1));
 		float baseY = 420.0f;
 
-		if (i == selectedCard) {
-			unlockedCardDisplays[i]->ScaleTo(baseScale * 1.1f, 0.2f, EaseType::InOutSine);
+		if (i == selectedCard && rowDown) {
+			unlockedCardDisplays[i]->ScaleTo(baseScale * 1.2f, 0.2f, EaseType::InOutSine);
 			unlockedCardDisplays[i]->MoveTo(vec2(baseX - 75.0f - cardW * 0.05f, baseY - cardH * 0.05f), 0.2f, EaseType::InOutSine);
+			unlockedCardDisplays[i]->Tint(vec3(1.0f, 1.0f, 1.0f), 0.2f, EaseType::InOutSine);
 		}
 		else {
 			unlockedCardDisplays[i]->ScaleTo(baseScale, 0.2f, EaseType::InOutSine);
 			unlockedCardDisplays[i]->MoveTo(vec2(baseX-75.0f, baseY), 0.2f, EaseType::InOutSine);
+			unlockedCardDisplays[i]->Tint(vec3(0.75f, 0.75f, 0.75f), 0.2f, EaseType::InOutSine);
+		}
+	}
+	for (int i = 0; i < slots.size(); i++) {
+		if (i == selectedCard && !rowDown) {
+			slots[i]->SetCardTint(vec3(1.0f, 1.0f, 1.0f));
+			slots[i]->ScaleCardTo(vec2(1.2f, 1.2f), 0.2f, EaseType::InOutSine);
+		}
+		else {
+			slots[i]->SetCardTint(vec3(0.75f, 0.75f, 0.75f));
+			slots[i]->ScaleCardTo(vec2(1.0f, 1.0f), 0.2f, EaseType::InOutSine);
 		}
 	}
 }
+
+

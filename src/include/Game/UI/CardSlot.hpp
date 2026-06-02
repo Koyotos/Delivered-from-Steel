@@ -17,7 +17,9 @@ class CardSlot : public UIElement {
 	std::shared_ptr<CardUI> removedCard;
 	std::shared_ptr<Icon> icon;
 
-	public:
+	vec2 origPos = vec2(0.0f, 0.0f);
+
+	 public:
 
 	CardSlot();
 	CardSlot(const std::unordered_map<std::string, std::any>& data);
@@ -44,6 +46,8 @@ class CardSlot : public UIElement {
 	void Process() override;
 
 	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+
+	void ScaleCardTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 
 	void FinishAllTweens();
 
