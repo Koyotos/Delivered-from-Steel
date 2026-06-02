@@ -1,6 +1,7 @@
 #ifndef FE_ENGINE_CONTROLLER
 #define FE_ENGINE_CONTROLLER
 
+#include <unordered_set>
 #include "include/Globals/Globals.hpp"
 #include "include/Renderer/Renderer.hpp"
 #include "include/IOManager/IOManager.hpp"
@@ -34,9 +35,11 @@ class EngineController {
 
     shared_ptr<Scene> activeLevelScene = nullptr;
     shared_ptr<Node> activeLevelNode = nullptr;
+    shared_ptr<Node> previousLevelNode = nullptr;
     std::string activeLevelName = "";
     shared_ptr<MenuManager> mm;
     shared_ptr<Scene> menuScene;
+    std::unordered_set<const Node*> registeredSerializableRoots;
 
     double currentTime;
     double deltaTime; 
@@ -45,6 +48,8 @@ class EngineController {
     inline void EndFrame();
     inline void ProcessNode(shared_ptr<Node>);
     void RegisterSceneSerializables(shared_ptr<Scene> scene);
+    void RegisterSceneSerializables(shared_ptr<Node> root);
+    void ApplyWorldStateToNode(shared_ptr<Node> root, const string& levelName);
 
     public:
     // Engine API
@@ -113,6 +118,8 @@ class EngineController {
     ~EngineController();
 
     void LoadLevel(const string& levelName);
+    void StreamNextLevel(const string& levelName);
+    void UnloadPreviousLevel();
 
     void SaveGame(const string& filepath);
     void LoadGame(const string& filepath);

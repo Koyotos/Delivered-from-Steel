@@ -162,6 +162,16 @@ shared_ptr<Scene> EngineController::LoadScene(const string& name) {
 void EngineController::RegisterSceneSerializables(shared_ptr<Scene> scene) {
 	if (!scene || !scene->GetRoot()) return;
 
+	RegisterSceneSerializables(scene->GetRoot());
+}
+
+void EngineController::RegisterSceneSerializables(shared_ptr<Node> root) {
+	if (!root) return;
+
+	if (!registeredSerializableRoots.insert(root.get()).second) {
+		return;
+	}
+
 	std::function<void(shared_ptr<Node>)> registerSerializable = [&](shared_ptr<Node> node) {
 		if (!node) return;
 
@@ -175,7 +185,26 @@ void EngineController::RegisterSceneSerializables(shared_ptr<Scene> scene) {
 		}
 		};
 
-	registerSerializable(scene->GetRoot());
+	registerSerializable(root);
+}
+
+void EngineController::ApplyWorldStateToNode(shared_ptr<Node> root, const string& levelName) {
+	if (!root || !wsm) return;
+
+	std::function<void(shared_ptr<Node>)> disableDestroyed = [&](shared_ptr<Node> node) {
+		if (!node) return;
+
+		string id = node->GetSaveID();
+		if (!id.empty() && wsm->IsDestroyed(levelName, id)) {
+			node->Disable();
+		}
+
+		for (auto& child : node->GetChildren()) {
+			disableDestroyed(child);
+		}
+		};
+
+	disableDestroyed(root);
 }
 
 void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
@@ -257,6 +286,7 @@ void EngineController::LoadLevel(const string& levelName) {
 	std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (levelName + ".json");
 
 	if (activeLevelNode) {
+		registeredSerializableRoots.erase(activeLevelNode.get());
 		scm->GetActive()->GetRoot()->RemoveChild(activeLevelNode);
 
 		activeLevelNode.reset();
@@ -270,6 +300,59 @@ void EngineController::LoadLevel(const string& levelName) {
 	activeLevelNode = loadedLevel->GetRoot();
 	activeLevelNode->InitRecursive(scm->GetActive());
 	scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
+}
+
+void EngineController::StreamNextLevel(const string& levelName) {
+	auto levelPath = std::filesystem::path(levelName);
+	if (levelPath.is_absolute() || levelPath.has_parent_path()) {
+		Globals::GetGlobals().Log("Invalid level name.");
+		return;
+	}
+
+	if (previousLevelNode) {
+		UnloadPreviousLevel();
+	}
+
+	previousLevelNode = activeLevelNode;
+	activeLevelName = levelName;
+	Globals::GetGlobals().activeLevelName = levelName;
+
+	std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (levelName + ".json");
+
+	shared_ptr<Scene> loadedLevel = rsm->LoadScene(fullPath);
+	if (!loadedLevel) {
+		Globals::GetGlobals().Log("Failed to stream level.");
+		previousLevelNode.reset();
+		return;
+	}
+
+	activeLevelNode = loadedLevel->GetRoot();
+	activeLevelNode->InitRecursive(scm->GetActive());
+	scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
+
+	if (psm) {
+		psm->RegisterNode(activeLevelNode);
+	}
+
+	ApplyWorldStateToNode(activeLevelNode, levelName);
+	RegisterSceneSerializables(activeLevelNode);
+}
+
+void EngineController::UnloadPreviousLevel() {
+	if (!previousLevelNode) return;
+
+	registeredSerializableRoots.erase(previousLevelNode.get());
+
+	if (psm) {
+		psm->UnregisterNode(previousLevelNode);
+	}
+
+	auto activeScene = scm->GetActive();
+	if (activeScene && activeScene->GetRoot()) {
+		activeScene->GetRoot()->RemoveChild(previousLevelNode);
+	}
+
+	previousLevelNode.reset();
 }
 
 
@@ -335,21 +418,8 @@ void EngineController::LoadGame(const string& filepath) {
 		crm->AssignPlayer(scm->GetActive()->GetPlayer());
 	}
 
-	std::function<void(shared_ptr<Node>)> disableDestroyed = [&](shared_ptr<Node> node) {
-		if (!node) return;
-
-		string id = node->GetSaveID();
-		if (!id.empty() && wsm->IsDestroyed(levelToLoad, id)) {
-			node->Disable();
-		}
-
-		for (auto& child : node->GetChildren()) {
-			disableDestroyed(child);
-		}
-		};
-
 	if (activeLevelNode) {
-		disableDestroyed(activeLevelNode);
+		ApplyWorldStateToNode(activeLevelNode, levelToLoad);
 	}
 }
 

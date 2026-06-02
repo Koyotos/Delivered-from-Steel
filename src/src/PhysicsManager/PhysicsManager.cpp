@@ -1,20 +1,13 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 #include "include/Core/Scene.hpp"
+#include <algorithm>
 
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     if (currentScene != scene) {
         currentScene = scene;
         currentNodes.clear();
         UpdateNode(scene->root);
-        WorldBounds.min = vec2(FLT_MAX);
-        WorldBounds.max = vec2(-FLT_MAX);
-        for (auto& node : currentNodes) {
-            auto col = node->GetCollider();
-            if (!col) continue;
-            auto b = col->GetBounds();
-            WorldBounds.min = glm::min(WorldBounds.min, b.min);
-            WorldBounds.max = glm::max(WorldBounds.max, b.max);
-        }
+        RecalculateWorldBounds();
     }
 
     // Update physics
@@ -118,6 +111,43 @@ void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	}	
 }
 
+void PhysicsManager::CollectPhysicsNodes(shared_ptr<Node> node, vector<shared_ptr<PhysicsNode>>& outNodes) {
+	if (!node) return;
+
+	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
+	if (physicsNode) {
+		outNodes.push_back(physicsNode);
+	}
+
+	for (const auto& child : node->GetChildren()) {
+		CollectPhysicsNodes(child, outNodes);
+	}
+}
+
+void PhysicsManager::RemoveColliderReferences(const shared_ptr<Collider>& collider) {
+	if (!collider) return;
+
+	for (auto& node : currentNodes) {
+		auto otherCollider = node->GetCollider();
+		if (!otherCollider) continue;
+
+		otherCollider->GetCurrentCollisions().erase(collider);
+		otherCollider->GetPreviousCollisions().erase(collider);
+	}
+}
+
+void PhysicsManager::RecalculateWorldBounds() {
+	WorldBounds.min = vec2(FLT_MAX);
+	WorldBounds.max = vec2(-FLT_MAX);
+	for (auto& node : currentNodes) {
+		auto col = node->GetCollider();
+		if (!col) continue;
+		auto b = col->GetBounds();
+		WorldBounds.min = glm::min(WorldBounds.min, b.min);
+		WorldBounds.max = glm::max(WorldBounds.max, b.max);
+	}
+}
+
 PhysicsManager& PhysicsManager::GetPhysicsManager() {
 	static PhysicsManager instance;
 	return instance;
@@ -126,6 +156,34 @@ PhysicsManager& PhysicsManager::GetPhysicsManager() {
 void PhysicsManager::Reset() {
     currentScene = nullptr;
     currentNodes.clear();
+}
+
+void PhysicsManager::RegisterNode(shared_ptr<Node> node) {
+	if (!node) return;
+
+	UpdateNode(node);
+	RecalculateWorldBounds();
+}
+
+void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
+	if (!node) return;
+
+	vector<shared_ptr<PhysicsNode>> nodesToRemove;
+	CollectPhysicsNodes(node, nodesToRemove);
+
+	for (auto& removeNode : nodesToRemove) {
+		auto col = removeNode->GetCollider();
+		if (col) {
+			RemoveColliderReferences(col);
+		}
+
+		auto it = std::remove(currentNodes.begin(), currentNodes.end(), removeNode);
+		if (it != currentNodes.end()) {
+			currentNodes.erase(it, currentNodes.end());
+		}
+	}
+
+	RecalculateWorldBounds();
 }
 
 optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& direction, float maxDistance,
