@@ -134,9 +134,51 @@ void EngineController::Run() {
 			UnloadPreviousLevel();
 			pendingUnload = false;
 		}
-		if (!pendingStreamLevel.empty()) {
-			StreamNextLevel(pendingStreamLevel);
+		if (!pendingStreamLevel.empty() && !isAsyncLoading) {
+			std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (pendingStreamLevel + ".json");
+			rsm->LoadSceneAsync(fullPath.string());
+			isAsyncLoading = true;
+			asyncLoadingName = pendingStreamLevel;
 			pendingStreamLevel = "";
+		}
+
+		if (isAsyncLoading) {
+			auto loadedScene = rsm->GetLoadedAsync(asyncLoadingName);
+
+			if (loadedScene != nullptr) {
+
+				previousLevelNode = activeLevelNode;
+				previousLevelName = activeLevelName;
+				activeLevelName = asyncLoadingName;
+				Globals::GetGlobals().activeLevelName = activeLevelName;
+				activeLevelNode = loadedScene->GetRoot();
+
+				rsm->AddLoadedScene(loadedScene);
+
+				if (activeLevelNode) {
+					activeLevelNode->InitRecursive(scm->GetActive());
+					scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
+
+					if (psm) {
+						psm->RegisterNode(activeLevelNode);
+					}
+
+					ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+					RegisterSceneSerializables(activeLevelNode);
+				}
+				else {
+					globals->Log("Loaded scene has no root node.");
+				}
+
+				isAsyncLoading = false;
+				asyncLoadingName = "";
+				Globals::GetGlobals().Log("Loaded scene: " + activeLevelName);
+			}
+			else if (rsm->IsAsyncQueueEmpty()) {
+				Globals::GetGlobals().Log("ERROR: Loading " + asyncLoadingName + " interrupted! Resetting flag.");
+				isAsyncLoading = false;
+				asyncLoadingName = "";
+			}
 		}
 
 		if (aum) {

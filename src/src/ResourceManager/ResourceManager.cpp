@@ -246,12 +246,27 @@ shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
         sceneData.erase(sceneData.find("name"));
         auto nodes = ParseNodes(sceneData);
         LinkScene(nodes, currentlyLoading);
-        scenes.push_back(currentlyLoading);
         return currentlyLoading;
       } catch(const exception& except) {
         Globals::GetGlobals().Log(string("Can't load scene : ") + except.what());
         return nullptr;
     }
+}
+
+void ResourceManager::LoadSceneAsync(const path& path) noexcept {
+    sceneAsyncQueue.push_back(async(launch::async, &ResourceManager::LoadScene, this, path.string()));
+}
+
+shared_ptr<Scene> ResourceManager::GetLoadedAsync(const string& name) noexcept {
+    if (sceneAsyncQueue.empty()) {
+        return nullptr;
+    }
+    if(sceneAsyncQueue.front().wait_for(seconds(0)) == future_status::ready) {
+        shared_ptr<Scene> ret =  sceneAsyncQueue.front().get();
+        sceneAsyncQueue.erase(sceneAsyncQueue.begin());
+        return ret;
+    }
+    return nullptr;
 }
 
 void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {

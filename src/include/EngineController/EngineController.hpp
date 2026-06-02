@@ -46,6 +46,9 @@ class EngineController {
     bool pendingUnload = false;
     bool pendingSwap = false;
 
+    bool isAsyncLoading = false;
+    std::string asyncLoadingName = "";
+
     double currentTime;
     double deltaTime; 
     double lastTime;

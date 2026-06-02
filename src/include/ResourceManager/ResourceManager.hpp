@@ -150,6 +150,15 @@ class ResourceManager {
     void UnloadScene(shared_ptr<Scene>);
     void ConfigurePaths();
 
+    bool IsAsyncQueueEmpty() const {
+        return sceneAsyncQueue.empty();
+    }
+    void AddLoadedScene(std::shared_ptr<Scene> scene) {
+        if (scene) {
+            scenes.push_back(scene);
+        }
+    }
+
     void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
     shared_ptr<Shader> LoadShader(const string&);
 
