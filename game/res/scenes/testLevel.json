@@ -37904,11 +37904,97 @@
         "shader": "player",
         "sprite": "cannonBall",
         "reqPerspective": true,
-        "height": 0.2,
-        "radius": 0.1
+        "height": 0.0,
+        "radius": 0.08
     },
 	"1185": {
         "parent": 1,
+        "class": "Light",
+        "process": true,
+        "input": true,
+        "physics": true,
+        "draw": true,
+        "type": 0,
+        "colorAmbient": [
+            0.2,
+            0.25,
+            0.3
+        ],
+        "colorDiffuse": [
+            0.9,
+            0.9,
+            0.8
+        ],
+        "colorSpecular": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "data1": [
+            -0.58,
+            -0.58,
+            -0.58
+        ],
+        "data2": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "data3": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "data4": 0.0
+    },
+	"1186": {
+    "parent": 1,
+    "transform": [ 3.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.012, 0.012, 1.0 ],
+    "sprite": "player",
+    "class": "CardFind",
+    "shader": "player",
+    "process": false,
+    "input": false,
+    "physics": true,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": true,
+    "static": true,
+    "addCollider": true,
+    "colliderPosX": 0.0,
+    "colliderPosY": -0.2,
+    "colliderType": true,
+    "height": 0.2,
+    "radius": 0.1,
+    "cull": 0.0,
+    "zIndex": 0,
+    "ResolveCollision": false,
+    "cardType": 0,
+    "saveID": "cardfind1"
+  },
+    "1187": {
+        "parent": 1,
+        "class": "Checkpoint",
+        "process": true,
+        "input": true,
+        "physics": true,
+        "draw": true,
+        "ignoreParent": true,
+        "static": true,
+        "addCollider": false,
+        "ResolveCollision": false,
+        "colliderPosX": 0.0,
+        "colliderPosY": -0.25,
+        "colliderType": false,
+        "cull": 0.5,
+        "zIndex": 0,
+        "shader": "standard",
+        "model": "Concrete_Block",
+        "height": 0.5,
+        "width": 0.5,
+        "lightOffsetX": 0.0,
+        "lightOffsetY": 0.6,
+        "lightOffsetZ": 0.0,
         "transform": [
             45.2423,
             31.9883,
@@ -37920,7 +38006,12 @@
             1.0,
             1.0
         ],
-        "class": "LevelGateway",
+        "activationRadius": 2.0,
+        "lightAngle": 20.0
+    },
+    "1188": {
+        "parent": 1187,
+        "class": "Platform",
         "process": true,
         "input": false,
         "physics": true,
@@ -37934,10 +38025,21 @@
         "colliderType": false,
         "cull": 0.0,
         "zIndex": 0,
-        "height": 10.0,
-        "width": 15.0,
-        "levelNegative": "testLevel",
-        "levelPositive": "testLevel2",
-        "isVerticalAxis": false
+        "shader": "standard",
+        "model": "Concrete_Block",
+        "height": 0.5,
+        "width": 0.5,
+        "transform": [
+            6.0,
+            0.0,
+            -5.0,
+            0.0,
+            -0.0,
+            0.0,
+            1.5,
+            1.5,
+            1.5
+        ],
+        "saveID": "cloth1"
     }
 }

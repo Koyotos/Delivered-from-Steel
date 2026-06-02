@@ -73,22 +73,42 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
+		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+
 		Attack(player);
 		glm::vec2 pos = GetTransform().GetTranslation();
 		auto trans = player->GetTransform();
 		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
+		std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
 
+		float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
+		float platformTop = box->GetMax().y;
 
-		lastPosition = pos;
-		player->SetTransform(trans);
+		if (playerBottom >= platformTop) {
+			lastPosition = pos;
+			player->SetTransform(trans);
+		}
 	}
 }
 
 void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (owner->GetObjectType() == ObjectType::Player) {
+		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
+		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
 
-		player->addPlatformVelocity(realVelocity);
+		Attack(player);
+		glm::vec2 pos = GetTransform().GetTranslation();
+		auto trans = player->GetTransform();
+		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
+		std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
+
+		float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
+		float platformTop = box->GetMax().y;
+
+		if (playerBottom >= platformTop) {
+			player->addPlatformVelocity(realVelocity);
+		}
 	}
 }
 
