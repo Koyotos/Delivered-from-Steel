@@ -37614,14 +37614,14 @@
         "addCollider": true,
         "ResolveCollision": true,
         "colliderPosX": 0.0,
-        "colliderPosY": -0.29,
+        "colliderPosY": -0.334,
         "colliderType": false,
         "cull": 0.5,
         "zIndex": 0,
         "shader": "player",
         "sprite": "Charger",
         "reqPerspective": true,
-        "height": 0.59,
+        "height": 0.61,
         "width": 0.65
     },
     "1177": {
@@ -37765,14 +37765,14 @@
         "addCollider": true,
         "ResolveCollision": true,
         "colliderPosX": 0.0,
-        "colliderPosY": -0.26,
+        "colliderPosY": -0.29,
         "colliderType": false,
         "cull": 0.5,
         "zIndex": 0,
         "shader": "player",
         "sprite": "Boiler",
         "reqPerspective": true,
-        "height": 0.64,
+        "height": 0.68,
         "width": 0.42
     },
     "1181": {

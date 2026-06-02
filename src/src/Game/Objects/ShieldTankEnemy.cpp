@@ -7,21 +7,26 @@ ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : 
 	speed = 0.3f;
 	damage = 0.0f;
 
-	raycastOffsetX = 0.211f;
+	float colY = fromMap(float, "colliderPosY", data);
+	float width = fromMap(float, "width", data);
+	float height = fromMap(float, "height", data);
+
+	float skinWidth = 0.001f;
+
+	raycastOffsetX = (width / 2.0f) + skinWidth;
 	raycastOffsetY = 0.0f;
 
-	groundCheckDistance = 0.581f;
-	wallCheckDistance = 0.57f;
+	groundCheckDistance = std::abs(colY) + (height / 2.0f) + 0.001f;
+	wallCheckDistance = std::abs(colY) + (height / 2.0f) - 0.01f;
 
 	shieldRaycastOffsetX = raycastOffsetX + 0.02f;
+	raycastGroundCheckOffsetX = raycastOffsetX + 0.2f;
 
 	visiblityAngle = 1 / tan(radians(90.0f));
 	visiblityDistance = 2.0f;
 
 	shieldCooldown = 0.12f;
 	attackDelay = 0.12f;
-
-	raycastGroundCheckOffsetX = raycastOffsetX + 0.2f;
 
 	chaseTime = 2.0f;
 }
