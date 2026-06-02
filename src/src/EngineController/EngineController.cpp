@@ -125,13 +125,13 @@ void EngineController::Run() {
 
 		PROFILER_END_LOGIC();
 
-		if (pendingUnload) {
-			UnloadPreviousLevel();
-			pendingUnload = false;
-		}
 		if (pendingSwap) {
 			SwapActiveAndPrevious();
 			pendingSwap = false;
+		}
+		if (pendingUnload) {
+			UnloadPreviousLevel();
+			pendingUnload = false;
 		}
 		if (!pendingStreamLevel.empty()) {
 			StreamNextLevel(pendingStreamLevel);

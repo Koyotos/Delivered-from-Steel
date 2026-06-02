@@ -8,6 +8,9 @@ LevelGateway::LevelGateway(const unordered_map<string, std::any>& data) : Physic
 	if (data.find("targetLevel") != data.end()) {
 		targetLevel = fromMap(std::string, "targetLevel", data);
 	}
+	if (data.find("isLoad") != data.end()) {
+		isLoadTrigger = fromMap(bool, "isLoad", data);
+	}
 }
 
 string LevelGateway::Type() {
@@ -27,14 +30,28 @@ void LevelGateway::OnCollisionEnter(shared_ptr<Collider> other) {
 	hasTriggered = true;
 
 	string target = targetLevel;
-	if (target == engine->GetActiveLevelName()) {
-		engine->QueueUnloadPreviousLevel();
-	}
-	else if (target == engine->GetPreviousLevelName()) {
-		engine->QueueSwapActiveAndPrevious();
+	string active = engine->GetActiveLevelName();
+	string prev = engine->GetPreviousLevelName();
+
+	if (isLoadTrigger) {
+		if (target == active) {
+			return;
+		}
+		else if (target == prev) {
+			engine->QueueSwapActiveAndPrevious();
+		}
+		else {
+			engine->QueueStreamNextLevel(target);
+		}
 	}
 	else {
-		engine->QueueStreamNextLevel(target);
+		if (target == prev) {
+			engine->QueueUnloadPreviousLevel();
+		}
+		else if (target == active) {
+			engine->QueueSwapActiveAndPrevious();
+			engine->QueueUnloadPreviousLevel();
+		}
 	}
 }
 

@@ -7,6 +7,7 @@
 class LevelGateway final : public PhysicsNode {
 private:
 	bool hasTriggered = false;
+	bool isLoadTrigger = true;
 
 public:
 	std::string targetLevel = "";
