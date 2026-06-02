@@ -19,3 +19,18 @@ void Counter::SetText(shared_ptr<TextUI> newText) {
 void Counter::SetIcon(shared_ptr<Icon> newIcon) {
     icon = newIcon;
 }
+
+void Counter::FinishAllTweens() {
+    text->FinishAllTweens();
+    icon->FinishAllTweens();
+}
+
+void Counter::FadeOut(float time, EaseType ease, float delay) {
+    text->FadeOut(time, ease, delay);
+    icon->FadeOut(time, ease, delay);
+}
+
+void Counter::FadeIn(float time, EaseType ease, float delay) {
+    text->FadeIn(time, ease, delay);
+    icon->FadeIn(time, ease, delay);
+}

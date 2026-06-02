@@ -150,7 +150,7 @@
     "alpha": 1.0,
     "addCollider": true,
     "cull": 0.0,
-    "zIndex": 0,
+    "zIndex": 9,
     "ResolveCollision": false
   },
   "7": {
@@ -439,7 +439,7 @@
 		    "alpha" : 1.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 9,
+        "zIndex" : 7,
         "ResolveCollision": false,
         "animated" : false,
         "name": "checkpoint_bg"

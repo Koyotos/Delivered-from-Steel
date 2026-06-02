@@ -285,12 +285,14 @@ void CardManager::ToggleMenu()
 		checkpointIcon->FinishAllTweens();
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y + 750), 0.5f, EaseType::OutQuad);
 		MoveUnlockedCards();
+		MoveSlots();
 	}
 	else
 	{
 		checkpointIcon->FinishAllTweens();
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y - 750), 0.5f, EaseType::InQuad);
 		MoveUnlockedCards();
+		MoveSlots();
 	}
 }
 
@@ -303,7 +305,7 @@ void CardManager::MoveUnlockedCards()
 		for (int i = 0; i < count; i++) {
 			float targetX = 100.0f + (i + 1) * (1720.0f / (count + 1));
 			unlockedCardDisplays[i]->FinishAllTweens();
-			unlockedCardDisplays[i]->MoveTo(vec2(targetX, 462.5f), 0.5f, EaseType::OutQuad);
+			unlockedCardDisplays[i]->MoveTo(vec2(targetX - 75.0f, 420.0f), 0.5f, EaseType::OutQuad);
 		}
 	}
 	else {
@@ -324,12 +326,21 @@ void CardManager::AddCardUI(shared_ptr<CardUI> cardUI)
 	}
 }
 
-bool CardManager::IsTypeInHand(CardType type)
+void CardManager::MoveSlots()
 {
-	for (auto& card : currentHand) {
-		if (card != nullptr && card->GetCardType() == type) {
-			return true;
-		}
+	for (int i = 0; i < slots.size(); i++) {
+		float targetY = (menuOpen ? -1.0f : 1.0f) * 666.0f;
+		slots[i]->FinishAllTweens();
+		slots[i]->MoveTo(vec2(slots[i]->GetTransform().GetTranslation().x, slots[i]->GetTransform().GetTranslation().y + targetY), 0.5f, EaseType::OutQuad);
 	}
-	return false;
+	if (menuOpen)
+	{
+		manaCounter->FinishAllTweens();
+		manaCounter->FadeOut(0.2f);
+	}
+	else
+	{
+		manaCounter->FinishAllTweens();
+		manaCounter->FadeIn(0.2f, EaseType::Linear, 0.3f);
+	}
 }

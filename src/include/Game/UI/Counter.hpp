@@ -20,6 +20,10 @@ class Counter : public UIElement {
 	void SetText(shared_ptr<TextUI> newText);
 	void SetIcon(shared_ptr<Icon> newIcon);
 	void UpdateValue(int newVal);
+
+	void FinishAllTweens();
+	void FadeOut(float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+	void FadeIn(float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 };
 
 #endif

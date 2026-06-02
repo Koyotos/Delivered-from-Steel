@@ -66,8 +66,7 @@ private:
 
 	void AddCardUI(shared_ptr<CardUI> cardUI);
 
-	int CardsInHand();
-	bool IsTypeInHand(CardType type);
+	void MoveSlots();
 
 
 public:

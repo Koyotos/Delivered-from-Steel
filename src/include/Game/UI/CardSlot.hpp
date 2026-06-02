@@ -43,6 +43,13 @@ class CardSlot : public UIElement {
 
 	void Process() override;
 
+	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+
+	void FinishAllTweens();
+
+
+	
+
 
 };
 

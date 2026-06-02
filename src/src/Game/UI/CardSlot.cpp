@@ -81,3 +81,14 @@ void CardSlot::SetCardTint(vec3 color) {
     if (card) card->Tint(color, 0.2f, EaseType::Linear);
 }
 
+void CardSlot::MoveTo(glm::vec2 target, float time, EaseType ease, float delay) {
+    UIElement::MoveTo(target, time, ease, delay);
+    if (icon) icon->MoveTo(target, time, ease, delay);
+    if (card) card->MoveTo(target, time, ease, delay);
+}
+
+void CardSlot::FinishAllTweens() {
+    UIElement::FinishAllTweens();
+    if (icon) icon->FinishAllTweens();
+    if (card) card->FinishAllTweens();
+}
