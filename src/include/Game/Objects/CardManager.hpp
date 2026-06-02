@@ -138,6 +138,8 @@ public:
 	 */
 	void AssignPlayer(shared_ptr<Player> player);
 
+	int getCurrentManaPoints() const { return currentManaPoints; }
+
 	void Process() override;
 	bool Input(InputEvent& event) override;
 
