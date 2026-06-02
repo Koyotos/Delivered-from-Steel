@@ -40,6 +40,7 @@
 #include <memory>
 #include <filesystem>
 #include <fstream>
+#include <future>
 
 
 class AudioManager;
@@ -116,6 +117,8 @@ class ResourceManager {
 
     fstream resourceStream;
 
+    vector<future<shared_ptr<Scene>>> sceneAsyncQueue; 
+
     vector<RefCountModel> models;
     vector<RefCountSprite> sprites;
     vector<RefCountShader> shaders;
@@ -150,6 +153,10 @@ class ResourceManager {
 
     void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
     shared_ptr<Shader> LoadShader(const string&);
+
+    // Asynchronous loading
+    void LoadSceneAsync(const path&) noexcept;
+    shared_ptr<Scene> GetLoadedAsync(const string&) noexcept;
 
     ResourceManager();
     ~ResourceManager();
