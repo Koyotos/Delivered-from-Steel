@@ -105,7 +105,7 @@ void CardManager::Process()
 
 bool CardManager::Input(InputEvent& event)
 {
-	if(!event.handled)
+	if (!event.handled)
 	{
 		if (event.type == InputType::GAMEPAD_BUTTON && event.action == GLFW_PRESS)
 		{
@@ -114,6 +114,30 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_GAMEPAD_BUTTON_X: UseCard(0); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_Y: UseCard(1); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); event.handled = true; break;
+			case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT: if (menuOpen) {
+				selectedCard = (selectedCard + 1) % (int)unlockedCardDisplays.size();
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			case GLFW_GAMEPAD_BUTTON_DPAD_LEFT: if (menuOpen) {
+				selectedCard = (selectedCard - 1 + (int)unlockedCardDisplays.size()) % (int)unlockedCardDisplays.size();
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			}
+		}
+		if (event.type == InputType::GAMEPAD_AXIS)
+		{
+			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_X)
+			{
+				if (event.valueX > 0.5f) {
+					selectedCard = (selectedCard + 1) % (int)unlockedCardDisplays.size();
+					UpdateCardSelection();
+				}
+				else if (event.valueX < -0.5f) {
+					selectedCard = (selectedCard - 1 + (int)unlockedCardDisplays.size()) % (int)unlockedCardDisplays.size();
+					UpdateCardSelection();
+				}
 			}
 		}
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS)
@@ -123,6 +147,16 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_KEY_J: UseCard(0); event.handled = true; break;
 			case GLFW_KEY_K: UseCard(1); event.handled = true; break;
 			case GLFW_KEY_L: UseCard(2); event.handled = true; break;
+			case GLFW_KEY_D: if (menuOpen) {
+				selectedCard = (selectedCard + 1) % (int)unlockedCardDisplays.size();
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
+			case GLFW_KEY_A: if (menuOpen) {
+				selectedCard = (selectedCard - 1 + (int)unlockedCardDisplays.size()) % (int)unlockedCardDisplays.size();
+				UpdateCardSelection();
+				event.handled = true;
+			} break;
 			}
 		}
 	}
@@ -293,6 +327,7 @@ void CardManager::ToggleMenu()
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y - 750), 0.5f, EaseType::InQuad);
 		MoveUnlockedCards();
 		MoveSlots();
+		selectedCard = -1;
 	}
 }
 
@@ -342,5 +377,25 @@ void CardManager::MoveSlots()
 	{
 		manaCounter->FinishAllTweens();
 		manaCounter->FadeIn(0.2f, EaseType::Linear, 0.3f);
+	}
+}
+
+void CardManager::UpdateCardSelection()
+{
+	for (int i = 0; i < unlockedCardDisplays.size(); i++) {
+		vec2 baseScale = vec2(2.7f, 2.7f);
+		float cardW = 75.0f * baseScale.x;
+		float cardH = 100.0f * baseScale.y;
+		float baseX = 100.0f + (i + 1) * (1720.0f / (unlockedCardDisplays.size() + 1));
+		float baseY = 420.0f;
+
+		if (i == selectedCard) {
+			unlockedCardDisplays[i]->ScaleTo(baseScale * 1.1f, 0.2f, EaseType::InOutSine);
+			unlockedCardDisplays[i]->MoveTo(vec2(baseX - 75.0f - cardW * 0.05f, baseY - cardH * 0.05f), 0.2f, EaseType::InOutSine);
+		}
+		else {
+			unlockedCardDisplays[i]->ScaleTo(baseScale, 0.2f, EaseType::InOutSine);
+			unlockedCardDisplays[i]->MoveTo(vec2(baseX-75.0f, baseY), 0.2f, EaseType::InOutSine);
+		}
 	}
 }

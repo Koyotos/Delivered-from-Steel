@@ -24,6 +24,8 @@ private:
 	int maxManaPoints = 15;
 	int currentManaPoints = 15;
 
+	int selectedCard = -1;
+
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
@@ -67,6 +69,8 @@ private:
 	void AddCardUI(shared_ptr<CardUI> cardUI);
 
 	void MoveSlots();
+
+	void UpdateCardSelection();
 
 
 public:
