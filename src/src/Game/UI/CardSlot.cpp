@@ -22,9 +22,11 @@ void CardSlot::Draw(shared_ptr<Shader> sh) {
 
 }
 
-void CardSlot::RemoveCard() {
-	if (!card) return;
+shared_ptr<CardUI> CardSlot::RemoveCard() {
+    if (!card) return nullptr;
+	shared_ptr<CardUI> removedCard = card;
 	card = nullptr;
+	return removedCard;
 } 
 
 void CardSlot::PlayUseAnimation() {

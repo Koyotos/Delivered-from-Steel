@@ -76,6 +76,9 @@ private:
 
 	void AddCardToHand(int slot, shared_ptr<Card> card);
 	void AddCardToHand(shared_ptr<Card> card);
+	void RemoveCardFromHand(int slot);
+
+	void Select(int slot=-1);
 
 
 public:

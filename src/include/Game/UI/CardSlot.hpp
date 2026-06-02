@@ -29,7 +29,7 @@ class CardSlot : public UIElement {
 	/*
 	* @brief Removes the current card from the slot.
 	*/
-	void RemoveCard();
+	shared_ptr<CardUI> RemoveCard();
 
 	void PlayUseAnimation();
 

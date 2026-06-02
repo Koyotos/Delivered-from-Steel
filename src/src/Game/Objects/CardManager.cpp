@@ -176,6 +176,7 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_KEY_J: UseCard(0); event.handled = true; break;
 			case GLFW_KEY_K: UseCard(1); event.handled = true; break;
 			case GLFW_KEY_L: UseCard(2); event.handled = true; break;
+			case GLFW_KEY_SPACE: if (menuOpen) Select(); event.handled = true; break;
 			case GLFW_KEY_D: if (menuOpen) {
 				selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 				UpdateCardSelection();
@@ -219,9 +220,6 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::WallSnap));
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
-
-	AddToHand(0, CreateCard(CardType::WallJump));
-	AddToHand(1, CreateCard(CardType::Dash));
 
 	ReachCheckpoint();
 
@@ -455,6 +453,90 @@ void CardManager::UpdateCardSelection()
 			slots[i]->ScaleCardTo(vec2(1.0f, 1.0f), 0.2f, EaseType::InOutSine);
 		}
 	}
+}
+
+void CardManager::Select(int slot)
+{
+	if (!menuOpen) return;
+	if (rowDown && selectedCard >= 0)
+	{
+		shared_ptr<Card> found = nullptr;
+		for (auto& card : unlockedCards) {
+			if (card->GetCardType() == unlockedCardDisplays[selectedCard]->GetCardType()) {
+				found = card;
+				break;
+			}
+		}
+		switch (slot)
+		{
+		case 0: AddCardToHand(0, found); break;
+		case 1: AddCardToHand(1, found); break;
+		case 2: AddCardToHand(2, found); break;
+		default: AddCardToHand(found); break;
+
+		}
+	}
+	else if (!rowDown && selectedCard >= 0)
+	{
+		RemoveCardFromHand(selectedCard);
+		
+	}
+
+}
+void CardManager::AddCardToHand(shared_ptr<Card> card)
+{
+	for (int i = 0; i < currentHand.size(); i++) {
+		if (currentHand[i] == nullptr) {
+			AddCardToHand(i, card);
+			return;
+		}
+	}
+}
+
+void CardManager::AddCardToHand(int slot, shared_ptr<Card> card)
+{
+	if (slot < 0 || slot >= (int)currentHand.size()) return;
+
+	if (currentHand[slot] != nullptr && currentHand[slot]->GetDisplay() != nullptr) {
+		RemoveCardFromHand(slot);
+	}
+
+	currentHand[slot] = card;
+	currentHandSaved[slot] = card;
+
+	auto& disp = unlockedCardDisplays[selectedCard];
+	slots[slot]->SetCard(disp);
+	unlockedCardDisplays.erase(unlockedCardDisplays.begin() + selectedCard);
+
+	for (int i = 0; i < (int)menuCardDisplays.size(); i++) {
+		if (menuCardDisplays[i]->GetCardType() == card->GetCardType()) {
+			menuCardDisplays.erase(menuCardDisplays.begin() + i);
+			break;
+		}
+	}
+
+	selectedCard = std::min(selectedCard, (int)unlockedCardDisplays.size() - 1);
+	UpdateCardSelection();
+}
+
+void CardManager::RemoveCardFromHand(int slot)
+{
+	if (slot < 0 || slot >= (int)currentHand.size()) return;
+	if (currentHand[slot] == nullptr) return;
+
+	// zwróæ display z powrotem do menu
+	shared_ptr<CardUI> returning = slots[slot]->RemoveCard();
+	if (returning) {
+		unlockedCardDisplays.push_back(returning);
+		menuCardDisplays.push_back(returning);
+		returning->RotateTo(0.0f, 0.1f, EaseType::InOutSine);
+	}
+
+	currentHand[slot] = nullptr;
+	currentHandSaved[slot] = nullptr;
+
+	UpdateCardSelection();
+	MoveUnlockedCards(); 
 }
 
 
