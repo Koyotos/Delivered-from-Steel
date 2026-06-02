@@ -2,6 +2,7 @@
 #include "include/Game/Objects/BreakableWall.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/IOManager/IOManager.hpp"
+#include "include/Game/Objects/CardManager.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -93,6 +94,10 @@ void Player::TriggerCameraShake(float duration, float intensity) {
 	cameraController.TriggerCameraShake(duration, intensity);
 }
 
+void Player::SetCardManager(std::shared_ptr<CardManager> mgr) {
+	cardManager = mgr;
+}
+
 void Player::Init(std::shared_ptr<Scene> scene) {
 	for (auto& child : GetChildren()) {
 		if (child->Type() == "ParticleEmitterNode") {
@@ -104,6 +109,9 @@ void Player::Init(std::shared_ptr<Scene> scene) {
 			else if (child->GetName() == "PixelEmitter") {
 				pixelEmitter = emitter;
 			}
+		}
+		if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
+			pointVisualizer = std::static_pointer_cast<OrbitalParticleSystem>(child);
 		}
 	}
 }
@@ -210,6 +218,13 @@ void Player::Process() {
 		else if (!health.IsDead()) {
 			pixelEmitter->isEmitting = false;
 		}
+	}
+	if (health.IsDead()) {
+		pointVisualizer->Reset();
+	}
+	else {
+		int currentPoints = cardManager->getCurrentManaPoints();
+		pointVisualizer->UpdatePlayerState(currentPoints);
 	}
 
 	wasDead = health.IsDead();
@@ -558,6 +573,10 @@ void Player::Physics(const float& deltaTime) {
 		HandleAnimations();
 	}
 
+	if (pointVisualizer) {
+		glm::vec3 playerPos = GetTransform().GetTranslation();
+		pointVisualizer->UpdateOrbit(deltaTime, playerPos);
+	}
 
 }
 

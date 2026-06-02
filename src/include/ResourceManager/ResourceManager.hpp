@@ -32,6 +32,7 @@
 #include "include/Profiler/ProfilerNode.hpp"
 #include "include/Renderer/ParticleSystemNode.hpp"
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
+#include "include/Game/Objects/OrbitalParticleSystem.hpp"
 #include "include/AudioManager/AudioManager.hpp"
 #include "include/Game/UI/TextUI.hpp"
 #include <nlohmann/json.hpp>
@@ -87,6 +88,7 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<ProfilerNode>("ProfilerNode"),
     RegisterObjectType<ParticleSystemNode>("ParticleSystemNode"),
     RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode"),
+    RegisterObjectType<OrbitalParticleSystem>("OrbitalParticleSystem"),
     RegisterObjectType<TextUI>("TextUI")
 };
 

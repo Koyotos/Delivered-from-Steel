@@ -8,6 +8,9 @@
 #include "include/Game/Objects/PlayerCameraController.hpp"
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
 #include "include/Core/ISerializable.hpp"
+#include "include/Game/Objects/OrbitalParticleSystem.hpp"
+
+class CardManager;
 
 class Player final : public Object2D, public ISerializable {
 private:
@@ -17,6 +20,8 @@ private:
 	PlayerCameraController cameraController;
 	std::shared_ptr<ParticleEmitterNode> deathEmitter;
 	std::shared_ptr<ParticleEmitterNode> pixelEmitter;
+	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
+	std::shared_ptr<CardManager> cardManager;
 
 	bool isGrounded = false;
 	bool isWalled = false;
@@ -68,6 +73,7 @@ public:
 	void Physics(const float& deltaTime) override;
 	void Process() override;
 	bool Input(InputEvent& event) override;
+	void SetCardManager(std::shared_ptr<CardManager> mgr);
 
 	void SetCamera(std::shared_ptr<Camera> cam);
 	void TriggerCameraShake(float duration, float intensity);
