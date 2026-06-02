@@ -1,6 +1,7 @@
 #include "include/EngineController/EngineController.hpp"
 #include <functional>
 #include <filesystem>
+#include <utility>
 
 void EngineController::Init() {
 
@@ -16,6 +17,7 @@ void EngineController::Init() {
 		exit(1);
 	}
 
+	globals->engineController = this;
 	globals->Log("Globals OK");
 
 	try {
@@ -123,6 +125,19 @@ void EngineController::Run() {
 
 		PROFILER_END_LOGIC();
 
+		if (pendingUnload) {
+			UnloadPreviousLevel();
+			pendingUnload = false;
+		}
+		if (pendingSwap) {
+			SwapActiveAndPrevious();
+			pendingSwap = false;
+		}
+		if (!pendingStreamLevel.empty()) {
+			StreamNextLevel(pendingStreamLevel);
+			pendingStreamLevel = "";
+		}
+
 		if (aum) {
 			aum->Update();
 		}
@@ -134,6 +149,25 @@ void EngineController::Run() {
 		PROFILER_END_RENDER();
 
 		EndFrame();
+
+		//test przeladowywania scen
+		static bool f6Pressed = false;
+		if (Globals::GetGlobals().GetKeyState(295)) {
+			if (!f6Pressed) {
+				StreamNextLevel("testLevel2");
+				Globals::GetGlobals().Log("TEST: Streamed next level");
+				f6Pressed = true;
+			}
+		}
+		else {
+			f6Pressed = false;
+		}
+
+		if (Globals::GetGlobals().GetKeyState(296)) {
+			UnloadPreviousLevel();
+			Globals::GetGlobals().Log("TEST: Unloaded previous level");
+		}
+
 		//test save/load
 		if (Globals::GetGlobals().wantsToSave) {
 			SaveGame("save_0.json");
@@ -314,6 +348,7 @@ void EngineController::StreamNextLevel(const string& levelName) {
 	}
 
 	previousLevelNode = activeLevelNode;
+	previousLevelName = activeLevelName;
 	activeLevelName = levelName;
 	Globals::GetGlobals().activeLevelName = levelName;
 
@@ -353,8 +388,25 @@ void EngineController::UnloadPreviousLevel() {
 	}
 
 	previousLevelNode.reset();
+	previousLevelName = "";
 }
 
+void EngineController::SwapActiveAndPrevious() {
+	if (!previousLevelNode) return;
+
+	std::swap(activeLevelNode, previousLevelNode);
+	std::swap(activeLevelName, previousLevelName);
+
+	Globals::GetGlobals().activeLevelName = activeLevelName;
+}
+
+std::string EngineController::GetActiveLevelName() const {
+	return activeLevelName;
+}
+
+std::string EngineController::GetPreviousLevelName() const {
+	return previousLevelName;
+}
 
 void EngineController::SaveGame(const string& filepath) {
 	auto saveDir = Globals::GetGlobals().GetExecDir() / "saves";
@@ -422,5 +474,3 @@ void EngineController::LoadGame(const string& filepath) {
 		ApplyWorldStateToNode(activeLevelNode, levelToLoad);
 	}
 }
-
-

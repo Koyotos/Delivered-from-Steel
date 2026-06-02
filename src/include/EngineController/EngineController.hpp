@@ -37,9 +37,14 @@ class EngineController {
     shared_ptr<Node> activeLevelNode = nullptr;
     shared_ptr<Node> previousLevelNode = nullptr;
     std::string activeLevelName = "";
+    std::string previousLevelName = "";
     shared_ptr<MenuManager> mm;
     shared_ptr<Scene> menuScene;
     std::unordered_set<const Node*> registeredSerializableRoots;
+
+    std::string pendingStreamLevel = "";
+    bool pendingUnload = false;
+    bool pendingSwap = false;
 
     double currentTime;
     double deltaTime; 
@@ -120,6 +125,13 @@ class EngineController {
     void LoadLevel(const string& levelName);
     void StreamNextLevel(const string& levelName);
     void UnloadPreviousLevel();
+    void SwapActiveAndPrevious();
+    void QueueStreamNextLevel(const std::string& levelName) { pendingStreamLevel = levelName; }
+    void QueueUnloadPreviousLevel() { pendingUnload = true; }
+    void QueueSwapActiveAndPrevious() { pendingSwap = true; }
+
+    std::string GetActiveLevelName() const;
+    std::string GetPreviousLevelName() const;
 
     void SaveGame(const string& filepath);
     void LoadGame(const string& filepath);
