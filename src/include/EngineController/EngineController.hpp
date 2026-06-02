@@ -134,6 +134,7 @@ class EngineController {
     void QueueSwapActiveAndPrevious() { pendingSwap = true; }
     bool IsAsyncLoading() const;
     std::string GetSavedSceneToLoad() const;
+    bool HasPendingStreamLevel() const { return !pendingStreamLevel.empty(); }
 
     std::string GetActiveLevelName() const;
     std::string GetPreviousLevelName() const;

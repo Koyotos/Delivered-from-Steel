@@ -253,9 +253,11 @@ void Player::Process() {
 			if (engineCtrl && !targetRespawnLevel.empty() && engineCtrl->GetActiveLevelName() != targetRespawnLevel) {
 				engineCtrl->QueueStreamNextLevel(targetRespawnLevel);
 				pendingRespawn = true;
+				return;
 			}
 			else if (engineCtrl && engineCtrl->IsAsyncLoading()) {
 				pendingRespawn = true;
+				return;
 			}
 			else {
 				Transform t = GetTransform();
@@ -263,15 +265,17 @@ void Player::Process() {
 				SetTransform(t);
 				Enable();
 				pendingRespawn = false;
+				return;
 			}
 		}
 		auto engineCtrlCheck = Globals::GetGlobals().engineController;
-		if (pendingRespawn && (!engineCtrlCheck || !engineCtrlCheck->IsAsyncLoading())) {
+		if (pendingRespawn && engineCtrlCheck && !engineCtrlCheck->IsAsyncLoading() && !engineCtrlCheck->HasPendingStreamLevel()) {
 			Transform t = GetTransform();
 			t.SetTranslation(respawnPoint);
 			SetTransform(t);
 			Enable();
 			pendingRespawn = false;
+			engineCtrlCheck->UnloadPreviousLevel();
 		}
 		return;
 	}
