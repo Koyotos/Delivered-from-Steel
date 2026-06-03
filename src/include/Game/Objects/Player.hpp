@@ -35,7 +35,6 @@ private:
 	bool isBounceActive = false;
 	bool isFeatherFalling = false;
 	bool isWallSnaping = false;
-	bool pendingRespawn = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;

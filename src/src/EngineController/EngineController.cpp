@@ -2,7 +2,6 @@
 #include <functional>
 #include <filesystem>
 #include <utility>
-#include <thread>
 
 void EngineController::Init() {
 
@@ -417,17 +416,6 @@ void EngineController::StreamNextLevel(const string& levelName) {
 	RegisterSceneSerializables(activeLevelNode);
 }
 
-bool EngineController::IsAsyncLoading() const {
-	return isAsyncLoading;
-}
-
-std::string EngineController::GetSavedSceneToLoad() const {
-	if (svm) {
-		return svm->GetCurrentSceneToLoad();
-	}
-	return std::string();
-}
-
 void EngineController::UnloadPreviousLevel() {
 	if (!previousLevelNode) return;
 
@@ -442,11 +430,7 @@ void EngineController::UnloadPreviousLevel() {
 		activeScene->GetRoot()->RemoveChild(previousLevelNode);
 	}
 
-	auto trash = std::move(previousLevelNode);
-	std::thread([backgroundTrash = std::move(trash)]() {
-		}).detach();
-
-	//previousLevelNode.reset();
+	previousLevelNode.reset();
 	previousLevelName = "";
 }
 
@@ -510,29 +494,6 @@ void EngineController::LoadGame(const string& filepath) {
 	if (levelToLoad.empty()) {
 		Globals::GetGlobals().Log("Save file missing active_scene.");
 		return;
-	}
-
-	isAsyncLoading = false;
-	pendingStreamLevel = "";
-	asyncLoadingName = "";
-
-	if (previousLevelNode) {
-		UnloadPreviousLevel();
-	}
-
-	if (activeLevelNode) {
-		registeredSerializableRoots.erase(activeLevelNode.get());
-		if (psm) psm->UnregisterNode(activeLevelNode);
-
-		auto activeScene = scm->GetActive();
-		if (activeScene && activeScene->GetRoot()) {
-			activeScene->GetRoot()->RemoveChild(activeLevelNode);
-		}
-
-		auto trash = std::move(activeLevelNode);
-		std::thread([backgroundTrash = std::move(trash)]() {}).detach();
-
-		activeLevelName = "";
 	}
 
 	LoadLevel(levelToLoad);

@@ -3,7 +3,6 @@
 #include "include/Globals/Globals.hpp"
 #include "include/IOManager/IOManager.hpp"
 #include "include/Game/Objects/CardManager.hpp"
-#include "include/EngineController/EngineController.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -245,33 +244,10 @@ void Player::Process() {
 		if (health.CheckAndResetRespawn(deltaTime)) {
 			SetVelocity(glm::vec2(0.0f));
 			lastVelocity = glm::vec2(0.0f);
-			auto engineCtrl = Globals::GetGlobals().engineController;
-			std::string targetRespawnLevel;
-			if (engineCtrl) {
-				targetRespawnLevel = engineCtrl->GetSavedSceneToLoad();
-			}
-			if (engineCtrl && !targetRespawnLevel.empty() && engineCtrl->GetActiveLevelName() != targetRespawnLevel) {
-				engineCtrl->QueueStreamNextLevel(targetRespawnLevel);
-				pendingRespawn = true;
-			}
-			else if (engineCtrl && engineCtrl->IsAsyncLoading()) {
-				pendingRespawn = true;
-			}
-			else {
-				Transform t = GetTransform();
-				t.SetTranslation(respawnPoint);
-				SetTransform(t);
-				Enable();
-				pendingRespawn = false;
-			}
-		}
-		auto engineCtrlCheck = Globals::GetGlobals().engineController;
-		if (pendingRespawn && (!engineCtrlCheck || !engineCtrlCheck->IsAsyncLoading())) {
 			Transform t = GetTransform();
 			t.SetTranslation(respawnPoint);
 			SetTransform(t);
 			Enable();
-			pendingRespawn = false;
 		}
 		return;
 	}
