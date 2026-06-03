@@ -24,6 +24,7 @@ void EngineController::Init() {
 		Globals::GetGlobals().ioManager = iom;
 		rsm = make_shared<ResourceManager>();
 		renderer = make_shared<Renderer>();
+		Globals::GetGlobals().renderer = renderer;
 		crm = make_shared<CardManager>();
 		Globals::GetGlobals().cardManager = crm;
 		svm = make_shared<SaveManager>();
