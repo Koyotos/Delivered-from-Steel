@@ -151,34 +151,42 @@ bool CardManager::Input(InputEvent& event)
 		{
 			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_X)
 			{
-				if (event.valueX > 0.0f) {
+				if (event.valueX > 0.5f && !axisHeld) {
 					selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 					UpdateCardSelection();
+					axisHeld = true;
 					event.handled = true;
 				}
-				else if (event.valueX < 0.0f) {
+				else if (event.valueX < -0.5f && !axisHeld) {
 					selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 					UpdateCardSelection();
+					axisHeld = true;
 					event.handled = true;
 				}
-				else if (event.valueX > -0.5f && event.valueX < 0.5f) {
+				else if (event.valueX > -0.5f && event.valueX < 0.5f && axisHeld) {
+					axisHeld = false;
+					event.handled = true;
 				}
 			}
 			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_Y)
 			{
-				if (event.valueY > 0.5f) {
+				if (event.valueX > 0.5f && !axisHeldY) {
 					rowDown = !rowDown;
 					selectedCard = 0;
 					UpdateCardSelection();
+					axisHeldY = true;
 					event.handled = true;
 				}
-				else if (event.valueY < -0.5f) {
+				else if (event.valueX < -0.5f && !axisHeldY) {
 					rowDown = !rowDown;
 					selectedCard = 0;
 					UpdateCardSelection();
+					axisHeldY = true;
 					event.handled = true;
 				}
-				else if (event.valueY > -0.5f && event.valueY < 0.5f) {
+				else if (event.valueX > -0.5f && event.valueX < 0.5f && axisHeldY) {
+					axisHeldY = false;
+					event.handled = true;
 				}
 			}
 		}
@@ -385,6 +393,7 @@ void CardManager::ToggleMenu()
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y + 750), 0.5f, EaseType::OutQuad);
 		MoveUnlockedCards();
 		MoveSlots();
+		player->SetPhysics(false);
 	}
 	else
 	{
@@ -392,6 +401,7 @@ void CardManager::ToggleMenu()
 		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y - 750), 0.5f, EaseType::InQuad);
 		MoveUnlockedCards();
 		MoveSlots();
+		player->SetPhysics(true);
 		selectedCard = -1;
 	}
 }

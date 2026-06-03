@@ -28,6 +28,9 @@ private:
 	int selectedCardUp = 0;
 	bool rowDown = true;
 
+	bool axisHeld = false;
+	bool axisHeldY = false;
+
 	shared_ptr<Player> player;
 
 	std::vector<float> slotsY;
