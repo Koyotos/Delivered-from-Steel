@@ -254,6 +254,19 @@ shared_ptr<Scene> ResourceManager::LoadScene(const path& scenePath) noexcept {
     }
 }
 
+void ResourceManager::LoadSceneAsync(const path& path) noexcept {
+    sceneAsyncQueue.push_back(async(launch::async, &ResourceManager::LoadScene, this, path));
+}
+
+shared_ptr<Scene> ResourceManager::GetLoadedAsync(const string& name) noexcept {
+    if(sceneAsyncQueue[0].wait_for(seconds(0)) == future_status::ready) {
+        shared_ptr<Scene> ret =  sceneAsyncQueue[0].get();
+        sceneAsyncQueue.erase(sceneAsyncQueue.begin());
+        return ret;
+    }
+    return nullptr;
+}
+
 void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
     for(auto& model : scene->sceneModels) {
         for(uint16_t i = 0; i < models.size(); i++) {
