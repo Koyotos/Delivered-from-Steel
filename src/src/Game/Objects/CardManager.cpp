@@ -266,6 +266,7 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
 	UnlockCard(CreateCard(CardType::Bounce));
+	UnlockCard(CreateCard(CardType::Dash));
 
 	ReachCheckpoint();
 
