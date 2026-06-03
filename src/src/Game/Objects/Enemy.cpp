@@ -133,7 +133,7 @@ void Enemy::Physics(const float& deltaTime) {
 }
 
 void Enemy::DetectPlayer() {
-	if (player) {
+	if (player && player->TestDraw()) {
 
 		glm::vec3 enemyPos3 = transform.GetTranslation();
 		enemyPos3.y -= groundCheckDistance/2;
@@ -165,6 +165,9 @@ void Enemy::DetectPlayer() {
 		else {
 			seePlayer = false;
 		}
+	}
+	else {
+		seePlayer = false;
 	}
 }
 
