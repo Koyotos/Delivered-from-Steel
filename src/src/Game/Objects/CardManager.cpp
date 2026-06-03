@@ -225,6 +225,7 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::WallSnap));
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
+	UnlockCard(CreateCard(CardType::Bounce));
 
 	ReachCheckpoint();
 
@@ -528,7 +529,7 @@ void CardManager::RemoveCardFromHand(int slot)
 	if (slot < 0 || slot >= (int)currentHand.size()) return;
 	if (currentHand[slot] == nullptr) return;
 
-	// zwróæ display z powrotem do menu
+	// zwrï¿½ï¿½ display z powrotem do menu
 	shared_ptr<CardUI> returning = slots[slot]->RemoveCard();
 	if (returning) {
 		unlockedCardDisplays.push_back(returning);

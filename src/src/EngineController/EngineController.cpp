@@ -60,6 +60,7 @@ void EngineController::LinkSceneObjects() {
 	active->GetRoot()->InitRecursive(active);
 
 	crm->AssignPlayer(active->GetPlayer());
+	active->GetPlayer()->SetCardManager(crm);
 
 	if (active->GetPlayer()) {
 		svm->Register(std::static_pointer_cast<ISerializable>(active->GetPlayer()));
@@ -351,6 +352,8 @@ void EngineController::LoadGame(const string& filepath) {
 	if (activeLevelNode) {
 		disableDestroyed(activeLevelNode);
 	}
+
+	active->GetRoot()->InitRecursive(active);
 }
 
 

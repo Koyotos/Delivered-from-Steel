@@ -50,7 +50,7 @@ bool Card::CheckUse()
 	case CardType::DoubleJump:
 		return !player->isDead() && !player->CheckGrounded();
 	case CardType::WallJump:
-		return !player->isDead() && (player->CheckLeftWalled() || player->CheckRightWalled()) && !player->CheckGrounded() ;
+		return !player->isDead() && (player->CheckLeftWalledHit().has_value() || player->CheckRightWalledHit().has_value()) && !player->CheckGrounded();
 	case CardType::WallSnap:
 		return !player->isDead() && player->CheckWallSnap();
 	default:

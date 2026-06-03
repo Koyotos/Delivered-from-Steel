@@ -163,6 +163,7 @@ public:
 	void AssignPlayer(shared_ptr<Player> player);
 
 	void ToggleMenu();
+	int getCurrentManaPoints() const { return currentManaPoints; }
 
 	void Process() override;
 	bool Input(InputEvent& event) override;

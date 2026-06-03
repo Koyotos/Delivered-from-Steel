@@ -46,11 +46,6 @@ struct PlayerRaycastConfig {
 	glm::vec2 wallRayDir;
 	float wallOffsetX;
 	float wallOffsetY;
-
-	float ledgeRayLength;
-	float ledgeOffsetX;
-	float ledgeLowerY;
-	float ledgeUpperY;
 };
 
 struct PlayerInputState {

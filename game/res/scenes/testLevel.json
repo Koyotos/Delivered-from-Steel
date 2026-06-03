@@ -37902,10 +37902,10 @@
         "cull": 0.0,
         "zIndex": 0,
         "shader": "player",
-        "sprite": "player",
+        "sprite": "cannonBall",
         "reqPerspective": true,
-        "height": 0.2,
-        "radius": 0.1
+        "height": 0.0,
+        "radius": 0.08
     },
     "1185": {
         "parent": 1,
@@ -37969,7 +37969,8 @@
     "cull": 0.0,
     "zIndex": 0,
     "ResolveCollision": false,
-    "cardType": 0
+    "cardType": 0,
+    "saveID": "cardfind1"
   },
     "1187": {
         "parent": 1,
@@ -38010,7 +38011,7 @@
     },
     "1188": {
         "parent": 1187,
-        "class": "Object3D",
+        "class": "Platform",
         "process": true,
         "input": true,
         "physics": true,
@@ -38038,6 +38039,7 @@
             1.5,
             1.5,
             1.5
-        ]
+        ],
+        "saveID": "cloth1"
     }
 }

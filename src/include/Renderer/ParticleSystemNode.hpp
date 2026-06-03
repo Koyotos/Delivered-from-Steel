@@ -17,7 +17,7 @@ public:
 	void Draw(std::shared_ptr<Shader> sh = nullptr) override;
 	void Emit(const glm::vec3& position, const glm::vec3& velocity, const glm::vec4& color, float lifeTime, float rotation = 0.0f);
 
-private:
+protected:
 	size_t maxParticles;
 	size_t activeParticleCount;
 
