@@ -71,19 +71,36 @@ void CardManager::AddToHand(int slot, shared_ptr<Card> card)
 
 void CardManager::ReachCheckpoint()
 {
-	learningCard = nullptr;
-	currentHand = currentHandSaved;
+	if (learningCard)
+	{
+		learningCard = nullptr;
+		for (int i = 0; i < currentHand.size(); i++)
+		{
+			slots[i]->RemoveCard();
+			currentHand[i] = nullptr;
+		}
+	}
+
+
 	currentManaPoints = maxManaPoints;
 	UpdateManaUI();
+
 }
 
 void CardManager::LearnCard(shared_ptr<Card> card)
 {
 	learningCard = card;
-	unlockedCards.push_back(card);
-	currentHandSaved = currentHand;
+	UnlockCard(learningCard);
 	for (int i = 0; i < maxHandSize; i++) {
-		currentHand[i] = learningCard;
+		currentHand[i] = CreateCard(learningCard->GetCardType());
+		shared_ptr<CardUI> removed = slots[i]->RemoveCard();
+		if (removed)
+		{
+			removed->MoveTo(vec2(-300.0f, 800.0f), 0.01f);
+			removed->RotateTo(0.0f, 0.01f);
+			unlockedCardDisplays.push_back(removed);
+		}
+		slots[i]->SetCard(currentHand[i]->GetDisplay());
 	}
 
 }
@@ -245,7 +262,6 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	slotsY[2] = slots[2]->GetTransform().GetTranslation().y;
 
 	UnlockCard(CreateCard(CardType::WallJump));
-	UnlockCard(CreateCard(CardType::Dash));
 	UnlockCard(CreateCard(CardType::WallSnap));
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
@@ -302,6 +318,7 @@ shared_ptr<Card> CardManager::CreateCard(CardType type)
 			break;
 		}
 	}
+	if (player) newCard->AssignPlayer(player);
 	return newCard;
 }
 

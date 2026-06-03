@@ -11,6 +11,7 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 	card->SetVisible(true);
     card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y), 0.2f, EaseType::InOutSine);    
     card->RotateTo(this->GetTransform().GetRotation().z, 0.2f, EaseType::InOutSine);
+    card->ScaleTo(vec2(GetTransform().GetScale().x, GetTransform().GetScale().y), 0.2f);
 }
 
 
@@ -74,7 +75,7 @@ string CardSlot::Type()
 void CardSlot::Process() {
 	UIElement::Process();
 	if (icon) icon->Process();
-	// if (card) card->Process();
+	if (card) card->Process();
 }
 
 void CardSlot::SetCardTint(vec3 color) {
