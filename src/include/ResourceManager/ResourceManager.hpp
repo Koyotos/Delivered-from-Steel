@@ -161,9 +161,6 @@ class ResourceManager {
             scenes.push_back(scene);
         }
     }
-    void ClearAsyncQueue() {
-        sceneAsyncQueue.clear();
-    }
 
     void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
     shared_ptr<Shader> LoadShader(const string&);

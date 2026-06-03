@@ -442,7 +442,11 @@ void EngineController::UnloadPreviousLevel() {
 		activeScene->GetRoot()->RemoveChild(previousLevelNode);
 	}
 
-	previousLevelNode.reset();
+	auto trash = std::move(previousLevelNode);
+	std::thread([backgroundTrash = std::move(trash)]() {
+		}).detach();
+
+	//previousLevelNode.reset();
 	previousLevelName = "";
 }
 
@@ -512,10 +516,6 @@ void EngineController::LoadGame(const string& filepath) {
 	pendingStreamLevel = "";
 	asyncLoadingName = "";
 
-	if (rsm) {
-		rsm->ClearAsyncQueue();
-	}
-
 	if (previousLevelNode) {
 		UnloadPreviousLevel();
 	}
@@ -529,7 +529,9 @@ void EngineController::LoadGame(const string& filepath) {
 			activeScene->GetRoot()->RemoveChild(activeLevelNode);
 		}
 
-		activeLevelNode.reset();
+		auto trash = std::move(activeLevelNode);
+		std::thread([backgroundTrash = std::move(trash)]() {}).detach();
+
 		activeLevelName = "";
 	}
 
