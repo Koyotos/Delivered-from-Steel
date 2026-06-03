@@ -61,6 +61,7 @@ void CardManager::UseCard(int index)
 
 void CardManager::AddToHand(int slot, shared_ptr<Card> card)
 {
+
 	if (slot < 0 || slot >= currentHand.size()) return;
 	currentHand[slot] = card;
 	currentHandSaved[slot] = card;
@@ -99,6 +100,8 @@ CardManager::CardManager()
 {
 	currentHand.resize(maxHandSize, nullptr);
 	currentHandSaved.resize(maxHandSize, nullptr);
+	slotIcons.resize(3);
+	slotsY.resize(3);
 	manaCounter = make_shared<Counter>(nullptr, nullptr, maxManaPoints);
 
 }
@@ -119,6 +122,7 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_GAMEPAD_BUTTON_X: UseCard(0); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_Y: UseCard(1); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); event.handled = true; break;
+			case GLFW_GAMEPAD_BUTTON_A: if (menuOpen) Select(); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT: if (menuOpen) {
 				selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 				UpdateCardSelection();
@@ -147,13 +151,15 @@ bool CardManager::Input(InputEvent& event)
 		{
 			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_X)
 			{
-				if (event.valueX > 0.5f) {
+				if (event.valueX > 0.0f) {
 					selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 					UpdateCardSelection();
+					event.handled = true;
 				}
-				else if (event.valueX < -0.5f) {
+				else if (event.valueX < 0.0f) {
 					selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
 					UpdateCardSelection();
+					event.handled = true;
 				}
 				else if (event.valueX > -0.5f && event.valueX < 0.5f) {
 				}
@@ -164,11 +170,13 @@ bool CardManager::Input(InputEvent& event)
 					rowDown = !rowDown;
 					selectedCard = 0;
 					UpdateCardSelection();
+					event.handled = true;
 				}
 				else if (event.valueY < -0.5f) {
 					rowDown = !rowDown;
 					selectedCard = 0;
 					UpdateCardSelection();
+					event.handled = true;
 				}
 				else if (event.valueY > -0.5f && event.valueY < 0.5f) {
 				}
@@ -220,6 +228,14 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	shared_ptr<Node> root = cardScene->GetRoot();
 	FindNodes(root);
 
+	slots[0]->SetIcon(slotIcons[0]);
+	slots[1]->SetIcon(slotIcons[1]);
+	slots[2]->SetIcon(slotIcons[2]);
+
+	slotsY[0] = slots[0]->GetTransform().GetTranslation().y;
+	slotsY[1] = slots[1]->GetTransform().GetTranslation().y;
+	slotsY[2] = slots[2]->GetTransform().GetTranslation().y;
+
 	UnlockCard(CreateCard(CardType::WallJump));
 	UnlockCard(CreateCard(CardType::Dash));
 	UnlockCard(CreateCard(CardType::WallSnap));
@@ -253,6 +269,9 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
 		else if (cast->GetName() == "checkpoint_bg") checkpointIcon = cast;
+		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
+		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
+		else if (cast->GetName() == "button_b") slotIcons[2] = cast;
 	}
 
 
@@ -282,6 +301,7 @@ void CardManager::AssignPlayer(shared_ptr<Player> player)
 {
 	for (auto& card : unlockedCards) if (card) card->AssignPlayer(player);
 	for (auto& card : currentHand) if (card) card->AssignPlayer(player);
+	this->player = player;
 }
 
 
@@ -392,6 +412,7 @@ void CardManager::MoveUnlockedCards()
 		for (auto& display : unlockedCardDisplays) {
 			display->FinishAllTweens();
 			display->MoveTo(vec2(-300.0f, 800.0f), 0.5f, EaseType::InOutSine);
+			display->ScaleTo(vec2(2.7f, 2.7f), 0.5f, EaseType::Linear);
 			display->Tint(vec3(1.0f, 1.0f, 1.0f), 0.5f, EaseType::InOutSine);
 		}
 	}
@@ -410,9 +431,10 @@ void CardManager::AddCardUI(shared_ptr<CardUI> cardUI)
 void CardManager::MoveSlots()
 {
 	for (int i = 0; i < slots.size(); i++) {
-		float targetY = (menuOpen ? -1.0f : 1.0f) * 666.0f;
+		float targetY = (menuOpen ? 666.0f : 0.0f);
 		slots[i]->FinishAllTweens();
-		slots[i]->MoveTo(vec2(slots[i]->GetTransform().GetTranslation().x, slots[i]->GetTransform().GetTranslation().y + targetY), 0.5f, EaseType::OutQuad);
+		if (!menuOpen) slots[i]->ScaleCardTo(vec2(1.0f, 1.0f), 0.5f, EaseType::OutQuad);
+		slots[i]->MoveTo(vec2(slots[i]->GetTransform().GetTranslation().x, slotsY[i] - targetY), 0.5f, EaseType::OutQuad);
 		slots[i]->SetCardTint(menuOpen ? vec3(0.75f, 0.75f, 0.75f) : vec3(1.0f, 1.0f, 1.0f));
 	}
 	if (menuOpen)

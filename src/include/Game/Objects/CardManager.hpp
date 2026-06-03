@@ -28,6 +28,9 @@ private:
 	int selectedCardUp = 0;
 	bool rowDown = true;
 
+	shared_ptr<Player> player;
+
+	std::vector<float> slotsY;
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
@@ -50,6 +53,7 @@ private:
 	shared_ptr<Counter> manaCounter;
 
 	shared_ptr<Icon> checkpointIcon;
+	std::vector<shared_ptr<Icon>> slotIcons;
 
 	bool menuOpen = false;
 

@@ -24,6 +24,8 @@ class CardSlot : public UIElement {
 	CardSlot();
 	CardSlot(const std::unordered_map<std::string, std::any>& data);
 
+	vec2 iconOffset;
+
 	string Type() override;
 
 	/*
@@ -38,6 +40,7 @@ class CardSlot : public UIElement {
 	* The new card will be positioned at the slot's transform and will fade in.
 	*/
 	void SetCard(std::shared_ptr<CardUI> newCard);
+	void SetIcon(std::shared_ptr<Icon> newIcon);
 
 	void SetCardTint(vec3 color);
 

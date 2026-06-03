@@ -74,8 +74,7 @@ string CardSlot::Type()
 void CardSlot::Process() {
 	UIElement::Process();
 	if (icon) icon->Process();
-	if (card) card->Process();
-	if (removedCard) removedCard->Process();
+	// if (card) card->Process();
 }
 
 void CardSlot::SetCardTint(vec3 color) {
@@ -84,8 +83,9 @@ void CardSlot::SetCardTint(vec3 color) {
 
 void CardSlot::MoveTo(glm::vec2 target, float time, EaseType ease, float delay) {
     UIElement::MoveTo(target, time, ease, delay);
-    if (icon) icon->MoveTo(target, time, ease, delay);
     if (card) card->MoveTo(target, time, ease, delay);
+    if (icon) icon->MoveTo(target+iconOffset, time, ease, delay);
+
 }
 
 void CardSlot::FinishAllTweens() {
@@ -138,4 +138,12 @@ void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float de
         ScaleTo(s1, time, ease, delay);
         MoveTo(CompensatedPos(s1), time, ease, delay);
     }
+}
+
+void CardSlot::SetIcon(std::shared_ptr<Icon> newIcon) {
+    icon = newIcon;
+    iconOffset = glm::vec2(icon->GetTransform().GetTranslation().x,
+        icon->GetTransform().GetTranslation().y)
+        - glm::vec2(GetTransform().GetTranslation().x,
+            GetTransform().GetTranslation().y);
 }
