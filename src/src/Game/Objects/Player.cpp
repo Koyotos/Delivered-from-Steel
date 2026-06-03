@@ -316,27 +316,9 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isBounceActive) {
-		float minBounceSpeed = 1.0f;
+		float minBounceSpeed = 2.5f;
 		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
 			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isWalledLeft && lastSpeedForBounceX < -minBounceSpeed) {
-			currentVelocity.x = std::max(stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
-			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isCeiling && lastSpeedForBounceY > minBounceSpeed) {
-			currentVelocity.y = std::min(-stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
 			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
