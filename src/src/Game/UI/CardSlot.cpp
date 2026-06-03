@@ -9,9 +9,8 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 	// pozniej zamienic to na moveTo i RotateTo z animacja, a nie od razu ustawiac nowy transform
 	card = newCard;
 	card->SetVisible(true);
-	Transform t = this->GetTransform();
-	card->SetTransform(t);
-
+    card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y), 0.2f, EaseType::InOutSine);    
+    card->RotateTo(this->GetTransform().GetRotation().z, 0.2f, EaseType::InOutSine);
 }
 
 
@@ -98,8 +97,6 @@ void CardSlot::FinishAllTweens() {
 void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float delay) {
     if (card)
     {
-        card->FinishAllTweens();
-
         vec2 origScale = {
 			2.7f, 2.7f
         };
@@ -121,7 +118,6 @@ void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float de
     }
     else
     {
-        FinishAllTweens();
 
         vec2 origScale = {
             2.7f, 2.7f

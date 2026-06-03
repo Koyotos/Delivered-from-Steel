@@ -42,6 +42,11 @@ void CardManager::UnlockCard(std::shared_ptr<Card> card)
 
 void CardManager::UseCard(int index)
 {
+	if (menuOpen)
+	{
+		Select(index);
+		return;
+	}
 	if (index < 0 || index >= currentHand.size()) return;
 	if (currentHand[index] == nullptr) return;
 	if (!currentHand[index]->CheckUse()) return;
@@ -378,7 +383,6 @@ void CardManager::MoveUnlockedCards()
 
 		for (int i = 0; i < count; i++) {
 			float targetX = 100.0f + (i + 1) * (1720.0f / (count + 1));
-			unlockedCardDisplays[i]->FinishAllTweens();
 			unlockedCardDisplays[i]->MoveTo(vec2(targetX - 75.0f, 420.0f), 0.5f, EaseType::OutQuad);
 			unlockedCardDisplays[i]->Tint(vec3(0.75f, 0.75f, 0.75f), 0.01f, EaseType::OutQuad);
 		}
@@ -536,7 +540,6 @@ void CardManager::RemoveCardFromHand(int slot)
 	currentHandSaved[slot] = nullptr;
 
 	UpdateCardSelection();
-	MoveUnlockedCards(); 
 }
 
 
