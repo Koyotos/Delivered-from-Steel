@@ -24,7 +24,7 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	spotLight->data4 = glm::radians(visionAngle);
 	spotLight->data2 = vec3(0.001f, -1.0f, 0.0f);
 	spotLight->colorDiffuse = vec3(1.0f, 0.9f, 0.1f);
-	spotLight->data3 = vec3(1.0f, -0.5f, 0.15f);
+	spotLight->data3 = vec3(1.0f, -1.3f, 0.8f);
 
 	AddChild(spotLight);
 }
@@ -92,8 +92,32 @@ void Drone::DetectPlayer() {
 	if (angleToPlayer <= visionAngle / 2.0f) {
 		auto hitWall = Raycast(dirToPlayer, dist, obstacleMask);
 		if (!hitWall.has_value()) {
-			seePlayer = true;
-			diveTarget = vec3(playerPos.x, playerPos.y, GetTransform().GetTranslation().z);
+			auto hitFloorBelow = Raycast(vec2(0.0f, -1.0f), dist, obstacleMask);
+			if (!hitFloorBelow.has_value()) {
+				seePlayer = true;
+				diveTarget = vec3(playerPos.x, playerPos.y, GetTransform().GetTranslation().z);
+				return;
+			}
+			vec2 perpendicular(-dirToPlayer.y, dirToPlayer.x);
+			float droneWingWidth = 0.70f;
+
+			vec2 leftFlightPath = playerPos + perpendicular * droneWingWidth;
+			vec2 dirLeft = leftFlightPath - dronePos;
+			float distLeft = glm::length(dirLeft);
+			auto hitLeft = Raycast(dirLeft / distLeft, distLeft, obstacleMask);
+
+			vec2 rightFlightPath = playerPos - perpendicular * droneWingWidth;
+			vec2 dirRight = rightFlightPath - dronePos;
+			float distRight = glm::length(dirRight);
+			auto hitRight = Raycast(dirRight / distRight, distRight, obstacleMask);
+
+			if (!hitLeft.has_value() && !hitRight.has_value()) {
+				seePlayer = true;
+				diveTarget = vec3(playerPos.x, playerPos.y, GetTransform().GetTranslation().z);
+			}
+			else {
+				seePlayer = false;
+			}
 		}
 		else {
 			seePlayer = false;
@@ -145,7 +169,7 @@ void Drone::Chase(float dt) {
 	t.SetTranslation(currentPos + moveStep);
 	direction = (currentDiveVelocity.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
-	scale.x = std::abs(scale.x) * direction;
+	scale.x = std::abs(scale.x) * -direction;
 	t.SetScale(scale);
 	SetTransform(t);
 }
@@ -185,7 +209,7 @@ void Drone::Patrol(float dt) {
 
 	direction = (dir.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
-	scale.x = std::abs(scale.x) * direction;
+	scale.x = std::abs(scale.x) * -direction;
 	t.SetScale(scale);
 	SetTransform(t);
 }
