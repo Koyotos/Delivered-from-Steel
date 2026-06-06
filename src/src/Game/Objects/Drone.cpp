@@ -21,11 +21,10 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	spotLight->colorAmbient = vec3(0.0f, 0.0f, 0.0f);
 	spotLight->colorSpecular = vec3(0.0f, 0.0f, 0.0f);
 	spotLight->data1 = GetTransform().GetTranslation();
-	//spotLight->data4 = glm::radians(visionAngle);
-	spotLight->data4 = glm::cos(glm::radians(visionAngle) / 2.0f); 
+	spotLight->data4 = glm::radians(visionAngle);
 	spotLight->data2 = vec3(0.001f, -1.0f, 0.0f);
-	spotLight->colorDiffuse = vec3(1.0f, 0.6f, 0.8f);
-	spotLight->data3 = vec3(1.0f, 0.09f, 0.032f);
+	spotLight->colorDiffuse = vec3(1.0f, 0.9f, 0.1f);
+	spotLight->data3 = vec3(1.0f, -0.5f, 0.15f);
 
 	AddChild(spotLight);
 }
@@ -131,11 +130,12 @@ void Drone::Chase(float dt) {
 	}
 	vec2 desiredVelocity = desiredDir * diveSpeed;
 
-	currentDiveVelocity = glm::mix(currentDiveVelocity, desiredVelocity, turnSpeed * dt);
+	float interpolationFactor = glm::clamp(turnSpeed * dt, 0.0f, 1.0f);
+	currentDiveVelocity = glm::mix(currentDiveVelocity, desiredVelocity, interpolationFactor);
 	vec2 diveDir = glm::normalize(currentDiveVelocity);
 	currentDiveVelocity = diveDir * diveSpeed;
 
-	if (distToPlayer < explosionRadius * 0.4f) {
+	if (distToPlayer < explosionRadius * 0.5f) {
 		Explode();
 		return;
 	}
