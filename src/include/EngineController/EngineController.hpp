@@ -45,6 +45,10 @@ class EngineController {
     std::string pendingStreamLevel = "";
     bool pendingUnload = false;
     bool pendingSwap = false;
+    bool pendingF9 = false;
+    std::string pendingF9Path = "";
+    bool pendingRespawn = false;
+    bool discardAsyncResult = false;
 
     bool isAsyncLoading = false;
     std::string asyncLoadingName = "";
@@ -132,6 +136,8 @@ class EngineController {
     void QueueStreamNextLevel(const std::string& levelName) { pendingStreamLevel = levelName; }
     void QueueUnloadPreviousLevel() { pendingUnload = true; }
     void QueueSwapActiveAndPrevious() { pendingSwap = true; }
+    void TriggerRespawn();
+    void CancelAsyncLoad();
 
     std::string GetActiveLevelName() const;
     std::string GetPreviousLevelName() const;

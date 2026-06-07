@@ -146,38 +146,59 @@ void EngineController::Run() {
 			auto loadedScene = rsm->GetLoadedAsync(asyncLoadingName);
 
 			if (loadedScene != nullptr) {
-
-				previousLevelNode = activeLevelNode;
-				previousLevelName = activeLevelName;
-				activeLevelName = asyncLoadingName;
-				Globals::GetGlobals().activeLevelName = activeLevelName;
-				activeLevelNode = loadedScene->GetRoot();
-
-				rsm->AddLoadedScene(loadedScene);
-
-				if (activeLevelNode) {
-					activeLevelNode->InitRecursive(scm->GetActive());
-					scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
-
-					if (psm) {
-						psm->RegisterNode(activeLevelNode);
-					}
-
-					ApplyWorldStateToNode(activeLevelNode, activeLevelName);
-					RegisterSceneSerializables(activeLevelNode);
+				if (pendingF9 || pendingRespawn || discardAsyncResult) {
+					discardAsyncResult = false;
+					isAsyncLoading = false;
+					asyncLoadingName = "";
 				}
 				else {
-					globals->Log("Loaded scene has no root node.");
-				}
+					if (previousLevelNode) {
+						UnloadPreviousLevel();
+					}
+					previousLevelNode = activeLevelNode;
+					previousLevelName = activeLevelName;
+					activeLevelName = asyncLoadingName;
+					Globals::GetGlobals().activeLevelName = activeLevelName;
+					activeLevelNode = loadedScene->GetRoot();
 
-				isAsyncLoading = false;
-				asyncLoadingName = "";
-				Globals::GetGlobals().Log("Loaded scene: " + activeLevelName);
+					rsm->AddLoadedScene(loadedScene);
+
+					if (activeLevelNode) {
+						activeLevelNode->InitRecursive(scm->GetActive());
+						scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
+
+						if (psm) {
+							psm->RegisterNode(activeLevelNode);
+							psm->Update(scm->GetActive(), 0.0f);
+						}
+
+						RegisterSceneSerializables(activeLevelNode);
+						ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+					}
+					else {
+						globals->Log("Loaded scene has no root node.");
+					}
+
+					isAsyncLoading = false;
+					asyncLoadingName = "";
+					Globals::GetGlobals().Log("Loaded scene: " + activeLevelName);
+				}
 			}
 			else if (rsm->IsAsyncQueueEmpty()) {
 				Globals::GetGlobals().Log("ERROR: Loading " + asyncLoadingName + " interrupted! Resetting flag.");
 				isAsyncLoading = false;
 				asyncLoadingName = "";
+			}
+		}
+
+		if (!isAsyncLoading) {
+			if (pendingF9) {
+				pendingF9 = false;
+				LoadGame(pendingF9Path);
+			}
+			else if (pendingRespawn) {
+				pendingRespawn = false;
+				TriggerRespawn();
 			}
 		}
 
@@ -322,7 +343,7 @@ void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
 
 shared_ptr<MenuManager> EngineController::GetMenuManager() const {
 	return mm;
-}	
+}
 
 
 void EngineController::TransitionToMenu() {
@@ -357,6 +378,9 @@ void EngineController::LoadLevel(const string& levelName) {
 		return;
 	}
 
+	if (previousLevelNode) {
+		UnloadPreviousLevel();
+	}
 	activeLevelName = levelName;
 	Globals::GetGlobals().activeLevelName = levelName;
 
@@ -377,6 +401,13 @@ void EngineController::LoadLevel(const string& levelName) {
 	activeLevelNode = loadedLevel->GetRoot();
 	activeLevelNode->InitRecursive(scm->GetActive());
 	scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
+
+	if (psm) {
+		psm->RegisterNode(activeLevelNode);
+		//psm->Update(scm->GetActive(), 0.0f);
+	}
+
+	RegisterSceneSerializables(activeLevelNode);
 }
 
 void EngineController::StreamNextLevel(const string& levelName) {
@@ -443,6 +474,13 @@ void EngineController::SwapActiveAndPrevious() {
 	Globals::GetGlobals().activeLevelName = activeLevelName;
 }
 
+void EngineController::CancelAsyncLoad() {
+	if (isAsyncLoading) {
+		discardAsyncResult = true;
+	}
+	pendingStreamLevel = "";
+}
+
 std::string EngineController::GetActiveLevelName() const {
 	return activeLevelName;
 }
@@ -496,26 +534,77 @@ void EngineController::LoadGame(const string& filepath) {
 		return;
 	}
 
-	LoadLevel(levelToLoad);
+	if (isAsyncLoading) {
+		pendingF9 = true;
+		pendingF9Path = filepath;
+		return;
+	}
+	pendingStreamLevel = "";
 
 	auto active = scm->GetActive();
-	RegisterSceneSerializables(active);
-
-	if (scm->GetActive() && scm->GetActive()->GetPlayer()) {
-		svm->Register(std::static_pointer_cast<ISerializable>(scm->GetActive()->GetPlayer()));
+	if (active && active->GetPlayer()) {
+		active->GetPlayer()->SuspendForLoading();
 	}
-	svm->Register(std::static_pointer_cast<ISerializable>(wsm));
-	svm->Register(std::static_pointer_cast<ISerializable>(crm));
+
+	LoadLevel(levelToLoad);
+
+	active = scm->GetActive();
+	if (active && active->GetPlayer()) {
+		svm->Register(std::static_pointer_cast<ISerializable>(active->GetPlayer()));
+	}
 
 	svm->ApplyLoaded();
+	ApplyWorldStateToNode(activeLevelNode, activeLevelName);
 
-	if (scm->GetActive() && scm->GetActive()->GetPlayer()) {
-		crm->AssignPlayer(scm->GetActive()->GetPlayer());
+	if (psm) {
+		psm->Update(active, 0.0f);
 	}
 
-	if (activeLevelNode) {
-		ApplyWorldStateToNode(activeLevelNode, levelToLoad);
+	if (active && active->GetPlayer()) {
+		crm->AssignPlayer(active->GetPlayer());
+		active->GetPlayer()->Enable();
+		active->GetPlayer()->Unsuspend();
 	}
+}
 
-	active->GetRoot()->InitRecursive(active);
+void EngineController::TriggerRespawn() {
+	auto active = scm->GetActive();
+	if (!active || !active->GetPlayer()) return;
+
+	auto player = active->GetPlayer();
+	string respawnLevel = player->GetRespawnLevelName();
+
+	if (activeLevelName != respawnLevel && !respawnLevel.empty()) {
+
+		if (isAsyncLoading) {
+			pendingRespawn = true;
+			return;
+		}
+		pendingStreamLevel = "";
+
+		player->SuspendForLoading();
+		LoadLevel(respawnLevel);
+		ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+		active = scm->GetActive();
+
+		if (active && active->GetPlayer()) {
+			player = active->GetPlayer();
+			Transform t = player->GetTransform();
+			t.SetTranslation(player->GetRespawnPoint());
+			player->SetTransform(t);
+
+			if (psm) {
+				psm->Update(active, 0.0f);
+			}
+
+			player->Enable();
+			player->Unsuspend();
+		}
+	}
+	else {
+		Transform t = player->GetTransform();
+		t.SetTranslation(player->GetRespawnPoint());
+		player->SetTransform(t);
+		player->Enable();
+	}
 }

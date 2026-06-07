@@ -3,6 +3,7 @@
 #include "include/Globals/Globals.hpp"
 #include "include/IOManager/IOManager.hpp"
 #include "include/Game/Objects/CardManager.hpp"
+#include "include/EngineController/EngineController.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -209,6 +210,7 @@ void Player::GatherInput(float deltaTime) {
 }
 
 void Player::Process() {
+	if (isSuspended) return;
 	Object2D::Process();
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
@@ -244,10 +246,7 @@ void Player::Process() {
 		if (health.CheckAndResetRespawn(deltaTime)) {
 			SetVelocity(glm::vec2(0.0f));
 			lastVelocity = glm::vec2(0.0f);
-			Transform t = GetTransform();
-			t.SetTranslation(respawnPoint);
-			SetTransform(t);
-			Enable();
+			Globals::GetGlobals().engineController->TriggerRespawn();
 		}
 		return;
 	}
@@ -574,6 +573,7 @@ void Player::HandleAnimations() {
 }
 
 void Player::Physics(const float& deltaTime) {
+	if (isSuspended) return;
 	bool skipAnimations = HandleMovement(deltaTime);
 
 	if (!skipAnimations) {
@@ -588,6 +588,7 @@ void Player::Physics(const float& deltaTime) {
 }
 
 bool Player::Input(InputEvent& event) {
+	if (isSuspended) return false;
 	if (!event.handled) {
 		//test save/load
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
@@ -732,6 +733,11 @@ nlohmann::json Player::Serialize() const {
 	j["posY"] = pos.y;
 	j["posZ"] = pos.z;
 
+	j["respawnPosX"] = this->respawnPoint.x;
+	j["respawnPosY"] = this->respawnPoint.y;
+	j["respawnPosZ"] = this->respawnPoint.z;
+	j["respawnLevel"] = this->respawnLevelName;
+
 	return j;
 }
 
@@ -744,5 +750,11 @@ void Player::Deserialize(const nlohmann::json& data) {
 		Transform t = this->GetTransform();
 		t.SetTranslation(loadedPos);
 		this->SetTransform(t);
+	}
+	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
+		this->respawnPoint = glm::vec3(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
+	}
+	if (data.contains("respawnLevel")) {
+		this->respawnLevelName = data["respawnLevel"];
 	}
 }

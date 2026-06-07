@@ -76,6 +76,9 @@ void LevelGateway::OnCollisionExit(shared_ptr<Collider> other) {
 	if (active != targetActive) {
 		engine->QueueSwapActiveAndPrevious();
 	}
+	else {
+		engine->CancelAsyncLoad();
+	}
 	engine->QueueUnloadPreviousLevel();
 	hasTriggered = false;
 }
