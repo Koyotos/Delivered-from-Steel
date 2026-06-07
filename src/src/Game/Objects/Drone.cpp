@@ -169,7 +169,7 @@ void Drone::Chase(float dt) {
 	t.SetTranslation(currentPos + moveStep);
 	direction = (currentDiveVelocity.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
-	scale.x = std::abs(scale.x) * -direction;
+	scale.x = std::abs(scale.x) * direction;
 	t.SetScale(scale);
 	SetTransform(t);
 }
@@ -209,7 +209,7 @@ void Drone::Patrol(float dt) {
 
 	direction = (dir.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
-	scale.x = std::abs(scale.x) * -direction;
+	scale.x = std::abs(scale.x) * direction;
 	t.SetScale(scale);
 	SetTransform(t);
 }
