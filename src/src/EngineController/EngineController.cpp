@@ -341,7 +341,15 @@ void EngineController::LoadGame(const string& filepath) {
 
 		string id = node->GetSaveID();
 		if (!id.empty() && wsm->IsDestroyed(levelToLoad, id)) {
-			node->Disable();
+			std::function<void(shared_ptr<Node>)> disableAll = [&](shared_ptr<Node> n) {
+				if (!n) return;
+				n->Disable();
+				for (auto& ch : n->GetChildren()) {
+					disableAll(ch);
+				}
+			};
+			disableAll(node);
+			return;
 		}
 
 		for (auto& child : node->GetChildren()) {
