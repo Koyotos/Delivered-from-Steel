@@ -657,20 +657,14 @@ void Player::ExecuteWallJump() {
 	isDashing = false;
 	glm::vec2 vel = GetVelocity();
 
-	float jumpDir = 0.0f;
-	if (CheckLeftWalledHit().has_value()) jumpDir = 1.0f;
-	else if (CheckRightWalledHit().has_value()) jumpDir = -1.0f;
+	vel.y = stats.wallJumpForceY;
+	vel.x = wallJumpFacedDirection * stats.wallJumpForceX;
+	SetVelocity(vel);
+	lastVelocity = GetVelocity();
 
-	if (jumpDir != 0.0f) {
-		vel.y = stats.wallJumpForceY;
-		vel.x = jumpDir * stats.wallJumpForceX;
-		facingDirection = jumpDir;
-		SetVelocity(vel);
-		lastVelocity = GetVelocity();
+	coyoteTimeCounter = 0.0f;
+	jumpBufferCounter = 0.0f;
 
-		coyoteTimeCounter = 0.0f;
-		jumpBufferCounter = 0.0f;
-	}
 	canCutJump = false;
 }
 
@@ -733,4 +727,15 @@ void Player::Deserialize(const nlohmann::json& data) {
 		t.SetTranslation(loadedPos);
 		this->SetTransform(t);
 	}
+}
+
+bool Player::CheckWallJump() {
+	float additionalOffsetXProcent = 1.5f;
+	auto hitLeft = Raycast(glm::vec2(-(raycastConfig.wallOffsetX * additionalOffsetXProcent), raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
+	auto hitRight = Raycast(glm::vec2((raycastConfig.wallOffsetX * additionalOffsetXProcent), raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
+
+	bool isWalledLeft = hitLeft.has_value();
+	bool isWalledRight = hitRight.has_value();
+	wallJumpFacedDirection = isWalledLeft ? 1.0f : (isWalledRight ? -1.0f : 0.0f);
+	return (isWalledLeft || isWalledRight);
 }

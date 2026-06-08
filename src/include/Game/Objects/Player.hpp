@@ -35,6 +35,7 @@ private:
 	bool isBounceActive = false;
 	bool isFeatherFalling = false;
 	bool isWallSnaping = false;
+	int wallJumpFacedDirection = 1.0f;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -90,6 +91,7 @@ public:
 	void ExecuteWallJump();
 	void ExecuteWallSnap();
 	bool CheckWallSnap();
+	bool CheckWallJump();
 	bool isDead() const { return health.IsDead(); }
 
 	std::string GetSerializeKey() const override;
