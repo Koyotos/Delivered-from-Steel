@@ -303,7 +303,15 @@ void EngineController::ApplyWorldStateToNode(shared_ptr<Node> root, const string
 
 		string id = node->GetSaveID();
 		if (!id.empty() && wsm->IsDestroyed(levelName, id)) {
-			node->Disable();
+			std::function<void(shared_ptr<Node>)> disableAll = [&](shared_ptr<Node> n) {
+				if (!n) return;
+				n->Disable();
+				for (auto& ch : n->GetChildren()) {
+					disableAll(ch);
+				}
+			};
+			disableAll(node);
+			return;
 		}
 
 		for (auto& child : node->GetChildren()) {

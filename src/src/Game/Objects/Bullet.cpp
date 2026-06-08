@@ -6,7 +6,7 @@ Bullet::Bullet(const std::unordered_map<std::string, std::any>& data)
 {
 	objectType = ObjectType::Bullet;
 	speed = 3.0f;
-	damage = 40.0f;
+	damage = 100.0f;
 	direction = vec2(0.0f, 0.0f);
 	lifeTime = 2.f;
 	SetVisible(false);
@@ -80,5 +80,4 @@ void Bullet::OnCollisionEnter(std::shared_ptr<Collider> other)
 void Bullet::Attack(std::shared_ptr<Player> player)
 {
 	player->takeDamage(damage);
-	SetVisible(false);
 }

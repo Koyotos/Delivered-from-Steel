@@ -315,27 +315,9 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isBounceActive) {
-		float minBounceSpeed = 1.0f;
+		float minBounceSpeed = 2.5f;
 		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
 			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isWalledLeft && lastSpeedForBounceX < -minBounceSpeed) {
-			currentVelocity.x = std::max(stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
-			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isCeiling && lastSpeedForBounceY > minBounceSpeed) {
-			currentVelocity.y = std::min(-stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
 			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
@@ -495,7 +477,13 @@ bool Player::HandleMovement(float deltaTime) {
 	currentVelocity.x = PlayerMoveTowards(currentVelocity.x, targetSpeed, acceleration * deltaTime);
 
 	if (currentVelocity.y < 0) {
-		currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
+		if (isFeatherFalling) {
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime /3;
+		}
+		else {
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
+		}
+
 	}
 	else {
 		currentVelocity.y -= 10.0f * deltaTime;
