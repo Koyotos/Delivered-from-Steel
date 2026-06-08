@@ -478,7 +478,13 @@ bool Player::HandleMovement(float deltaTime) {
 	currentVelocity.x = PlayerMoveTowards(currentVelocity.x, targetSpeed, acceleration * deltaTime);
 
 	if (currentVelocity.y < 0) {
-		currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
+		if (isFeatherFalling) {
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime /3;
+		}
+		else {
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
+		}
+
 	}
 	else {
 		currentVelocity.y -= 10.0f * deltaTime;
