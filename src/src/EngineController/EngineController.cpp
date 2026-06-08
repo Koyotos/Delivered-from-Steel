@@ -148,6 +148,7 @@ void EngineController::Run() {
 			if (loadedScene != nullptr) {
 				if (pendingF9 || pendingRespawn || discardAsyncResult) {
 					discardAsyncResult = false;
+					FlattenForUnload(loadedScene->GetRoot());
 					isAsyncLoading = false;
 					asyncLoadingName = "";
 				}
@@ -211,6 +212,14 @@ void EngineController::Run() {
 		renderer->DrawScene(active);
 
 		PROFILER_END_RENDER();
+
+		if (!isAsyncLoading && !nodesToUnload.empty()) {
+			int nodesToDestroyThisFrame = 30;
+			while (!nodesToUnload.empty() && nodesToDestroyThisFrame > 0) {
+				nodesToUnload.pop_back();
+				nodesToDestroyThisFrame--;
+			}
+		}
 
 		EndFrame();
 
@@ -389,7 +398,7 @@ void EngineController::LoadLevel(const string& levelName) {
 	if (activeLevelNode) {
 		registeredSerializableRoots.erase(activeLevelNode.get());
 		scm->GetActive()->GetRoot()->RemoveChild(activeLevelNode);
-
+		FlattenForUnload(activeLevelNode);
 		activeLevelNode.reset();
 	}
 
@@ -404,7 +413,6 @@ void EngineController::LoadLevel(const string& levelName) {
 
 	if (psm) {
 		psm->RegisterNode(activeLevelNode);
-		//psm->Update(scm->GetActive(), 0.0f);
 	}
 
 	RegisterSceneSerializables(activeLevelNode);
@@ -460,7 +468,7 @@ void EngineController::UnloadPreviousLevel() {
 	if (activeScene && activeScene->GetRoot()) {
 		activeScene->GetRoot()->RemoveChild(previousLevelNode);
 	}
-
+	FlattenForUnload(previousLevelNode);
 	previousLevelNode.reset();
 	previousLevelName = "";
 }
@@ -479,6 +487,15 @@ void EngineController::CancelAsyncLoad() {
 		discardAsyncResult = true;
 	}
 	pendingStreamLevel = "";
+}
+
+void EngineController::FlattenForUnload(shared_ptr<Node> node) {
+	if (!node) return;
+	for (auto& child : node->GetChildren()) {
+		FlattenForUnload(child);
+	}
+	node->GetChildren().clear();
+	nodesToUnload.push_back(node);
 }
 
 std::string EngineController::GetActiveLevelName() const {

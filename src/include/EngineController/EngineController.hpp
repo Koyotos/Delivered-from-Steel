@@ -49,6 +49,8 @@ class EngineController {
     std::string pendingF9Path = "";
     bool pendingRespawn = false;
     bool discardAsyncResult = false;
+    std::vector<shared_ptr<Node>> nodesToUnload;
+	void FlattenForUnload(shared_ptr<Node> node);
 
     bool isAsyncLoading = false;
     std::string asyncLoadingName = "";

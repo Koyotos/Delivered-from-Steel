@@ -1,6 +1,7 @@
 #include "include/PhysicsManager/PhysicsManager.hpp"
 #include "include/Core/Scene.hpp"
 #include <algorithm>
+#include <unordered_set>
 
 void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     if (currentScene != scene) {
@@ -171,17 +172,30 @@ void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
 	vector<shared_ptr<PhysicsNode>> nodesToRemove;
 	CollectPhysicsNodes(node, nodesToRemove);
 
+	std::unordered_set<shared_ptr<PhysicsNode>> nodesToRemoveSet(nodesToRemove.begin(), nodesToRemove.end());
+	std::vector<shared_ptr<Collider>> collidersToRemove;
 	for (auto& removeNode : nodesToRemove) {
-		auto col = removeNode->GetCollider();
-		if (col) {
-			RemoveColliderReferences(col);
-		}
-
-		auto it = std::remove(currentNodes.begin(), currentNodes.end(), removeNode);
-		if (it != currentNodes.end()) {
-			currentNodes.erase(it, currentNodes.end());
+		if (auto col = removeNode->GetCollider()) {
+			collidersToRemove.push_back(col);
 		}
 	}
+
+	for (auto& currNode : currentNodes) {
+        if (nodesToRemoveSet.find(currNode) != nodesToRemoveSet.end()) continue;
+
+		auto otherCol = currNode->GetCollider();
+		if (!otherCol) continue;
+
+        for (auto& colToRemove : collidersToRemove) {
+            otherCol->GetCurrentCollisions().erase(colToRemove);
+            otherCol->GetPreviousCollisions().erase(colToRemove);
+		}
+	}
+
+    currentNodes.erase(std::remove_if(currentNodes.begin(), currentNodes.end(),
+        [&nodesToRemoveSet](const shared_ptr<PhysicsNode>& node) {
+            return nodesToRemoveSet.find(node) != nodesToRemoveSet.end();
+		}), currentNodes.end());
 
 	RecalculateWorldBounds();
 }
