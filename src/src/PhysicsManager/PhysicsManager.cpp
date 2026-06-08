@@ -125,18 +125,6 @@ void PhysicsManager::CollectPhysicsNodes(shared_ptr<Node> node, vector<shared_pt
 	}
 }
 
-void PhysicsManager::RemoveColliderReferences(const shared_ptr<Collider>& collider) {
-	if (!collider) return;
-
-	for (auto& node : currentNodes) {
-		auto otherCollider = node->GetCollider();
-		if (!otherCollider) continue;
-
-		otherCollider->GetCurrentCollisions().erase(collider);
-		otherCollider->GetPreviousCollisions().erase(collider);
-	}
-}
-
 void PhysicsManager::RecalculateWorldBounds() {
 	WorldBounds.min = vec2(FLT_MAX);
 	WorldBounds.max = vec2(-FLT_MAX);
@@ -173,24 +161,21 @@ void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
 	CollectPhysicsNodes(node, nodesToRemove);
 
 	std::unordered_set<shared_ptr<PhysicsNode>> nodesToRemoveSet(nodesToRemove.begin(), nodesToRemove.end());
-	std::vector<shared_ptr<Collider>> collidersToRemove;
-	for (auto& removeNode : nodesToRemove) {
-		if (auto col = removeNode->GetCollider()) {
-			collidersToRemove.push_back(col);
-		}
-	}
 
-	for (auto& currNode : currentNodes) {
-        if (nodesToRemoveSet.find(currNode) != nodesToRemoveSet.end()) continue;
+    for (auto& removeNode : nodesToRemove) {
+        auto colToRemove = removeNode->GetCollider();
+        if (!colToRemove) continue;
 
-		auto otherCol = currNode->GetCollider();
-		if (!otherCol) continue;
+        for (auto& other : colToRemove->GetCurrentCollisions()) {
+            if (other) other->GetCurrentCollisions().erase(colToRemove);
+        }
 
-        for (auto& colToRemove : collidersToRemove) {
-            otherCol->GetCurrentCollisions().erase(colToRemove);
-            otherCol->GetPreviousCollisions().erase(colToRemove);
-		}
-	}
+        for (auto& other : colToRemove->GetPreviousCollisions()) {
+            if (other) other->GetPreviousCollisions().erase(colToRemove);
+        }
+        colToRemove->GetCurrentCollisions().clear();
+        colToRemove->GetPreviousCollisions().clear();
+    }
 
     currentNodes.erase(std::remove_if(currentNodes.begin(), currentNodes.end(),
         [&nodesToRemoveSet](const shared_ptr<PhysicsNode>& node) {

@@ -12,7 +12,6 @@ class PhysicsManager {
 	vector<shared_ptr<PhysicsNode>> currentNodes;
 	void UpdateNode(shared_ptr<Node> node);
 	void CollectPhysicsNodes(shared_ptr<Node> node, vector<shared_ptr<PhysicsNode>>& outNodes);
-	void RemoveColliderReferences(const shared_ptr<Collider>& collider);
 	void RecalculateWorldBounds();
 	AABB WorldBounds;
 	QuadTree quadTree;
