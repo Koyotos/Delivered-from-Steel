@@ -27,7 +27,7 @@ int CardManager::GetMaxHandSize()
 void CardManager::UnlockCard(std::shared_ptr<Card> card)
 {
 	unlockedCards.push_back(card);
-	for (auto& display : menuCardDisplays)
+	for (auto& display : cardDisplays)
 	{
 		if (display->GetCardType() == card->GetCardType())
 		{
@@ -118,7 +118,6 @@ CardManager::CardManager()
 	currentHand.resize(maxHandSize, nullptr);
 	currentHandSaved.resize(maxHandSize, nullptr);
 	slotIcons.resize(3);
-	slotsY.resize(3);
 	manaCounter = make_shared<Counter>(nullptr, nullptr, maxManaPoints);
 
 }
@@ -253,13 +252,12 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	shared_ptr<Node> root = cardScene->GetRoot();
 	FindNodes(root);
 
-	slots[0]->SetIcon(slotIcons[0]);
-	slots[1]->SetIcon(slotIcons[1]);
-	slots[2]->SetIcon(slotIcons[2]);
+	for (int i = 0; i < slots.size(); i++)
+	{
+		slots[i]->SetIcon(slotIcons[i]);
+		slots[i]->Init();
+	}
 
-	slotsY[0] = slots[0]->GetTransform().GetTranslation().y;
-	slotsY[1] = slots[1]->GetTransform().GetTranslation().y;
-	slotsY[2] = slots[2]->GetTransform().GetTranslation().y;
 
 	UnlockCard(CreateCard(CardType::WallJump));
 	UnlockCard(CreateCard(CardType::WallSnap));
@@ -267,8 +265,6 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::FeatherFalling));
 	UnlockCard(CreateCard(CardType::Bounce));
 	UnlockCard(CreateCard(CardType::Dash));
-
-	ReachCheckpoint();
 
 }
 
@@ -288,12 +284,12 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 	}
 	else if (node->Type() == "CardUI") {
 		shared_ptr<CardUI> cast = static_pointer_cast<CardUI>(node);
-		AddCardUI(cast);
+		cardDisplays.push_back(cast);
 	}
 	else if (node->Type() == "Icon") {
 		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
-		else if (cast->GetName() == "checkpoint_bg") checkpointIcon = cast;
+		else if (cast->GetName() == "checkpoint_bg") checkpointBackground = cast;
 		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
 		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
 		else if (cast->GetName() == "button_b") slotIcons[2] = cast;
@@ -398,6 +394,7 @@ void CardManager::UpdateManaUI()
 			}
 		}
 	}
+
 	manaCounter->UpdateValue(currentManaPoints);
 
 	// if learning card TBD
@@ -407,20 +404,22 @@ void CardManager::ToggleMenu()
 {
 	menuOpen = !menuOpen;
 	if (menuOpen) {
-		checkpointIcon->FinishAllTweens();
-		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y + 750), 0.5f, EaseType::OutQuad);
+		selectedCard = 0;
+		rowDown = true;
+		player->SetPhysics(false);
+		UpdateCardSelection();	
+		checkpointBackground->ClearAllTweens();
+		checkpointBackground->MoveTo(vec2(0.0f, 0.0f), 0.5f, EaseType::OutQuad);
 		MoveUnlockedCards();
 		MoveSlots();
-		player->SetPhysics(false);
 	}
 	else
 	{
-		checkpointIcon->FinishAllTweens();
-		checkpointIcon->MoveTo(vec2(checkpointIcon->GetTransform().GetTranslation().x, checkpointIcon->GetTransform().GetTranslation().y - 750), 0.5f, EaseType::InQuad);
+		checkpointBackground->FinishAllTweens();
+		checkpointBackground->MoveTo(vec2(0.0f, -1080.0f), 0.5f, EaseType::InQuad);
 		MoveUnlockedCards();
 		MoveSlots();
 		player->SetPhysics(true);
-		selectedCard = -1;
 	}
 }
 
@@ -446,34 +445,19 @@ void CardManager::MoveUnlockedCards()
 	}
 }
 
-void CardManager::AddCardUI(shared_ptr<CardUI> cardUI)
-{
-	if (cardUI->GetTransform().GetTranslation().x == -300.0f) {
-		menuCardDisplays.push_back(cardUI);
-	}
-	else {
-		cardDisplays.push_back(cardUI);
-	}
-}
+
 
 void CardManager::MoveSlots()
 {
-	for (int i = 0; i < slots.size(); i++) {
-		float targetY = (menuOpen ? 666.0f : 0.0f);
-		slots[i]->FinishAllTweens();
-		if (!menuOpen) slots[i]->ScaleCardTo(vec2(1.0f, 1.0f), 0.5f, EaseType::OutQuad);
-		slots[i]->MoveTo(vec2(slots[i]->GetTransform().GetTranslation().x, slotsY[i] - targetY), 0.5f, EaseType::OutQuad);
-		slots[i]->SetCardTint(menuOpen ? vec3(0.75f, 0.75f, 0.75f) : vec3(1.0f, 1.0f, 1.0f));
-	}
 	if (menuOpen)
-	{
-		manaCounter->FinishAllTweens();
-		manaCounter->FadeOut(0.2f);
-	}
+		for (int i = 0; i < slots.size(); i++) {
+			slots[i]->ShowSlot(0.5f);
+		}
 	else
 	{
-		manaCounter->FinishAllTweens();
-		manaCounter->FadeIn(0.2f, EaseType::Linear, 0.3f);
+		for (int i = 0; i < slots.size(); i++) {
+			slots[i]->HideSlot(0.5f);
+		}
 	}
 }
 
@@ -563,9 +547,9 @@ void CardManager::AddCardToHand(int slot, shared_ptr<Card> card)
 	slots[slot]->SetCard(disp);
 	unlockedCardDisplays.erase(unlockedCardDisplays.begin() + selectedCard);
 
-	for (int i = 0; i < (int)menuCardDisplays.size(); i++) {
-		if (menuCardDisplays[i]->GetCardType() == card->GetCardType()) {
-			menuCardDisplays.erase(menuCardDisplays.begin() + i);
+	for (int i = 0; i < unlockedCardDisplays.size(); i++) {
+		if (unlockedCardDisplays[i]->GetCardType() == card->GetCardType()) {
+			unlockedCardDisplays.erase(unlockedCardDisplays.begin() + i);
 			break;
 		}
 	}
@@ -583,7 +567,6 @@ void CardManager::RemoveCardFromHand(int slot)
 	shared_ptr<CardUI> returning = slots[slot]->RemoveCard();
 	if (returning) {
 		unlockedCardDisplays.push_back(returning);
-		menuCardDisplays.push_back(returning);
 		returning->RotateTo(0.0f, 0.1f, EaseType::InOutSine);
 	}
 

@@ -96,7 +96,7 @@ class UIElement : public Object2D {
 	* @param time - Duration of the move effect.
 	* @param ease - Easing function to use for the tween (Linear by default).
 	*/
-	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f, vec2 overrideStartPos = vec2(0.0f, 0.0f));
 
 	/*
 	* @brief Tweens the element's tint color to a target color over specified time.
@@ -110,6 +110,7 @@ class UIElement : public Object2D {
 	 * @brief Instantly finishes all active tweens, setting the element's properties to their target values.
 	 */
 	void FinishAllTweens();
+	void ClearAllTweens();
 
 	vector<shared_ptr<Tween>> GetActiveTweens() const;
 

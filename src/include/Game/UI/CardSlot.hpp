@@ -17,9 +17,11 @@ class CardSlot : public UIElement {
 	std::shared_ptr<CardUI> removedCard;
 	std::shared_ptr<Icon> icon;
 
-	vec2 origPos = vec2(0.0f, 0.0f);
+	vec2 origPos;
 
-	 public:
+	bool isLearning = false;
+
+	public:
 
 	CardSlot();
 	CardSlot(const std::unordered_map<std::string, std::any>& data);
@@ -34,6 +36,8 @@ class CardSlot : public UIElement {
 	shared_ptr<CardUI> RemoveCard();
 
 	void PlayUseAnimation();
+
+	void Init();
 
 	/*
 	* @brief Sets a new card in the slot. If there is already a card, it will be removed first. 
@@ -53,6 +57,10 @@ class CardSlot : public UIElement {
 	void ScaleCardTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 
 	void FinishAllTweens();
+	void ClearAllTweens();
+
+	void ShowSlot(float time);
+	void HideSlot(float time);
 
 
 	

@@ -4,9 +4,6 @@
 
 
 void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
-	// if (card) zwrocic, pozniej bedzie handlowana animacja w cardmanagerze
-
-	// pozniej zamienic to na moveTo i RotateTo z animacja, a nie od razu ustawiac nowy transform
 	card = newCard;
 	card->SetVisible(true);
     card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y), 0.2f, EaseType::InOutSine);    
@@ -17,9 +14,16 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 
 void CardSlot::Draw(shared_ptr<Shader> sh) {	
 	UIElement::Draw();
-	if (icon) icon->Draw(sh);
-	if (card) card->Draw(GetShader()); 
+	if (isLearning && card) card->Draw(GetShader()); 
 
+}
+
+void CardSlot::Init()
+{
+	origPos = {
+        this->GetTransform().GetTranslation().x,
+        this->GetTransform().GetTranslation().y
+    };
 }
 
 shared_ptr<CardUI> CardSlot::RemoveCard() {
@@ -32,15 +36,12 @@ shared_ptr<CardUI> CardSlot::RemoveCard() {
 void CardSlot::PlayUseAnimation() {
     if (!card) return;
 
-    card->FinishAllTweens();
+    card->ClearAllTweens();
 
+    /*
     vec2 origScale = {
-        card->GetTransform().GetScale().x,
-        card->GetTransform().GetScale().y
-    };
-    vec2 origPos = {
-        card->GetTransform().GetTranslation().x,
-        card->GetTransform().GetTranslation().y
+    card->GetTransform().GetScale().x,
+    card->GetTransform().GetScale().y
     };
 
     const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
@@ -60,6 +61,10 @@ void CardSlot::PlayUseAnimation() {
 
     card->ScaleTo(origScale, 0.16f, EaseType::OutElastic, 0.26f);
     card->MoveTo(origPos, 0.16f, EaseType::OutElastic, 0.26f);
+	*/
+    vec2 targetPos = vec2(origPos.x, origPos.y - 110.0f);
+    card->MoveTo(targetPos, 0.25f, EaseType::InSine);
+    card->MoveTo(vec2(origPos.x, origPos.y), 0.25f, EaseType::OutSine, 0.25f, targetPos);
 }
 
 
@@ -74,8 +79,7 @@ string CardSlot::Type()
 
 void CardSlot::Process() {
 	UIElement::Process();
-	if (icon) icon->Process();
-	if (card) card->Process();
+	if (isLearning && card) card->Process();
 }
 
 void CardSlot::SetCardTint(vec3 color) {
@@ -85,7 +89,6 @@ void CardSlot::SetCardTint(vec3 color) {
 void CardSlot::MoveTo(glm::vec2 target, float time, EaseType ease, float delay) {
     UIElement::MoveTo(target, time, ease, delay);
     if (card) card->MoveTo(target, time, ease, delay);
-    if (icon) icon->MoveTo(target+iconOffset, time, ease, delay);
 
 }
 
@@ -95,21 +98,29 @@ void CardSlot::FinishAllTweens() {
     if (card) card->FinishAllTweens();
 }
 
+void CardSlot::ClearAllTweens()
+{
+    UIElement::ClearAllTweens();
+    if (icon) icon->ClearAllTweens();
+    if (card) card->ClearAllTweens();
+}
+
 void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float delay) {
+
+    vec2 origScale = {
+    2.7f, 2.7f
+    };
+    vec2 showPos = {
+        origPos.x,
+        origPos.y - 250.0f
+    };
+
+    const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
+
     if (card)
     {
-        vec2 origScale = {
-			2.7f, 2.7f
-        };
-        if (origPos == vec2(0.0f, 0.0f)) origPos = {
-            card->GetTransform().GetTranslation().x,
-            card->GetTransform().GetTranslation().y
-        };
-
-        const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
-
         auto CompensatedPos = [&](vec2 newScale) -> vec2 {
-            return origPos - (newScale - origScale) * halfSize;
+            return showPos - (newScale - origScale) * halfSize;
             };
 
         vec2 s1 = { origScale.x * target.x, origScale.y * target.y };
@@ -120,18 +131,8 @@ void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float de
     else
     {
 
-        vec2 origScale = {
-            2.7f, 2.7f
-        };
-        if (origPos == vec2(0.0f, 0.0f)) origPos = {
-            GetTransform().GetTranslation().x,
-            GetTransform().GetTranslation().y
-        };
-
-        const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
-
         auto CompensatedPos = [&](vec2 newScale) -> vec2 {
-            return origPos - (newScale - origScale) * halfSize;
+            return showPos - (newScale - origScale) * halfSize;
             };
 
         vec2 s1 = { origScale.x * target.x, origScale.y * target.y };
@@ -147,4 +148,20 @@ void CardSlot::SetIcon(std::shared_ptr<Icon> newIcon) {
         icon->GetTransform().GetTranslation().y)
         - glm::vec2(GetTransform().GetTranslation().x,
             GetTransform().GetTranslation().y);
+}
+
+void CardSlot::ShowSlot(float time)
+{
+    this->ClearAllTweens();
+    this->FadeIn(time, EaseType::InOutSine);
+    this->MoveTo(vec2(origPos.x, origPos.y - 250.0f), time, EaseType::InOutSine);
+    if (card) card->MoveTo(vec2(origPos.x, origPos.y - 250.0f), time, EaseType::InOutSine);
+}
+
+void CardSlot::HideSlot(float time)
+{
+    this->ClearAllTweens();
+    this->FadeOut(time, EaseType::InOutSine);
+    this->MoveTo(vec2(origPos.x, origPos.y), time, EaseType::InOutSine);
+    if (card) card->MoveTo(vec2(origPos.x, origPos.y), time, EaseType::InOutSine);
 }

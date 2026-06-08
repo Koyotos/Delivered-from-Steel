@@ -33,12 +33,9 @@ private:
 
 	shared_ptr<Player> player;
 
-	std::vector<float> slotsY;
-
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
 	std::vector<shared_ptr<CardUI>> unlockedCardDisplays;
-	std::vector<shared_ptr<CardUI>> menuCardDisplays;
 
 	/* all cards that are currently in hand, with each index corresponding with each slot */
 	std::vector<shared_ptr<Card>> currentHand;
@@ -55,7 +52,7 @@ private:
 
 	shared_ptr<Counter> manaCounter;
 
-	shared_ptr<Icon> checkpointIcon;
+	shared_ptr<Icon> checkpointBackground;
 	std::vector<shared_ptr<Icon>> slotIcons;
 
 	bool menuOpen = false;
