@@ -195,10 +195,12 @@ void EngineController::Run() {
 		if (!isAsyncLoading) {
 			if (pendingF9) {
 				pendingF9 = false;
+				pendingRespawn = false;
 				LoadGame(pendingF9Path);
 			}
 			else if (pendingRespawn) {
 				pendingRespawn = false;
+				pendingF9 = false;
 				TriggerRespawn();
 			}
 		}
@@ -405,12 +407,13 @@ void EngineController::LoadLevel(const string& levelName) {
 
 	if (activeLevelNode) {
 		registeredSerializableRoots.erase(activeLevelNode.get());
+		if (psm) {
+			psm->UnregisterNode(activeLevelNode);
+		}
 		scm->GetActive()->GetRoot()->RemoveChild(activeLevelNode);
 		FlattenForUnload(activeLevelNode);
 		activeLevelNode.reset();
 	}
-
-	psm->Reset();
 
 	shared_ptr<Scene> loadedLevel = rsm->LoadScene(fullPath);
 	if (!loadedLevel) return;
