@@ -64,8 +64,8 @@ void Checkpoint::Physics(const float& deltaTime) {
                 globals.cardManager->ReachCheckpoint();
             }
             if (!isActivated) Activate();
-            player->SetRespawnPoint(vec3(checkpointPos,-5));
 			playerInsideAndVisible = true;
+            player->SetRespawnPoint(vec3(checkpointPos,-5), globals.activeLevelName);
         }
     }
     else {
