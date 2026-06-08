@@ -36610,7 +36610,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -36642,7 +36642,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -36674,7 +36674,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -36706,7 +36706,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -36898,7 +36898,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -37666,7 +37666,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -37698,7 +37698,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -37730,7 +37730,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -37762,7 +37762,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Metal_Frame",
+        "model": "Wires",
         "height": 1.0,
         "width": 1.0,
         "transform": [
@@ -40277,5 +40277,38 @@
         "model": "Metal_Plate",
         "height": 0.1,
         "width": 0.5
+    },
+    "1258": {
+        "parent": 1,
+        "transform": [
+            45.2423,
+            31.9883,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "class": "LevelGateway",
+        "process": true,
+        "input": false,
+        "physics": true,
+        "draw": false,
+        "ignoreParent": true,
+        "static": true,
+        "addCollider": true,
+        "ResolveCollision": false,
+        "colliderPosX": 0.0,
+        "colliderPosY": 0.0,
+        "colliderType": false,
+        "cull": 0.0,
+        "zIndex": 0,
+        "height": 10.0,
+        "width": 15.0,
+        "levelNegative": "testLevel",
+        "levelPositive": "testLevel2",
+        "isVerticalAxis": false
     }
 }

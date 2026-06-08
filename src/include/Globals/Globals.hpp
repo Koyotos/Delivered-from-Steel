@@ -12,6 +12,7 @@ class WorldStateManager;
 class SceneManager;
 class CardManager;
 class IOManager;
+class EngineController;
 
 using namespace std;
 using namespace filesystem;
@@ -49,6 +50,7 @@ class Globals {
     std::shared_ptr<SceneManager> sceneManager;
     std::shared_ptr<CardManager> cardManager;
     std::shared_ptr<IOManager> ioManager;
+    EngineController* engineController = nullptr;
 
     bool wantsToSave = false;
     bool wantsToLoad = false;

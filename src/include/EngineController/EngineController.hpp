@@ -1,6 +1,7 @@
 #ifndef FE_ENGINE_CONTROLLER
 #define FE_ENGINE_CONTROLLER
 
+#include <unordered_set>
 #include "include/Globals/Globals.hpp"
 #include "include/Renderer/Renderer.hpp"
 #include "include/IOManager/IOManager.hpp"
@@ -34,9 +35,25 @@ class EngineController {
 
     shared_ptr<Scene> activeLevelScene = nullptr;
     shared_ptr<Node> activeLevelNode = nullptr;
+    shared_ptr<Node> previousLevelNode = nullptr;
     std::string activeLevelName = "";
+    std::string previousLevelName = "";
     shared_ptr<MenuManager> mm;
     shared_ptr<Scene> menuScene;
+    std::unordered_set<const Node*> registeredSerializableRoots;
+
+    std::string pendingStreamLevel = "";
+    bool pendingUnload = false;
+    bool pendingSwap = false;
+    bool pendingF9 = false;
+    std::string pendingF9Path = "";
+    bool pendingRespawn = false;
+    bool discardAsyncResult = false;
+    std::vector<shared_ptr<Node>> nodesToUnload;
+	void FlattenForUnload(shared_ptr<Node> node);
+
+    bool isAsyncLoading = false;
+    std::string asyncLoadingName = "";
 
     double currentTime;
     double deltaTime; 
@@ -45,6 +62,8 @@ class EngineController {
     inline void EndFrame();
     inline void ProcessNode(shared_ptr<Node>);
     void RegisterSceneSerializables(shared_ptr<Scene> scene);
+    void RegisterSceneSerializables(shared_ptr<Node> root);
+    void ApplyWorldStateToNode(shared_ptr<Node> root, const string& levelName);
 
     public:
     // Engine API
@@ -113,6 +132,17 @@ class EngineController {
     ~EngineController();
 
     void LoadLevel(const string& levelName);
+    void StreamNextLevel(const string& levelName);
+    void UnloadPreviousLevel();
+    void SwapActiveAndPrevious();
+    void QueueStreamNextLevel(const std::string& levelName) { pendingStreamLevel = levelName; }
+    void QueueUnloadPreviousLevel() { pendingUnload = true; }
+    void QueueSwapActiveAndPrevious() { pendingSwap = true; }
+    void TriggerRespawn();
+    void CancelAsyncLoad();
+
+    std::string GetActiveLevelName() const;
+    std::string GetPreviousLevelName() const;
 
     void SaveGame(const string& filepath);
     void LoadGame(const string& filepath);

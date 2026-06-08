@@ -24,6 +24,8 @@ private:
 	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
 	std::shared_ptr<CardManager> cardManager;
 
+	std::string respawnLevelName = "testLevel";
+
 	bool isGrounded = false;
 	bool isWalled = false;
 	bool isWallSliding = false;
@@ -35,6 +37,7 @@ private:
 	bool isBounceActive = false;
 	bool isFeatherFalling = false;
 	bool isWallSnaping = false;
+	bool isSuspended = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -81,7 +84,19 @@ public:
 	void Shatter();
 	bool IsHanging();
 	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity = velocity; }
-	void SetRespawnPoint(glm::vec3 point) { respawnPoint = point; }
+	void SetRespawnPoint(glm::vec3 point, const std::string& levelName) {
+		respawnPoint = point;
+		respawnLevelName = levelName;
+	}
+	glm::vec3 GetRespawnPoint() const { return respawnPoint; }
+	std::string GetRespawnLevelName() const { return respawnLevelName; }
+	void SuspendForLoading() {
+		isSuspended = true;
+		SetVelocity(glm::vec2(0.0f));
+	}
+	void Unsuspend() {
+		isSuspended = false;
+	}
 
 	void ExecuteDash();
 	void ExecuteBounce();
