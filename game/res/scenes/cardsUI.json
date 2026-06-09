@@ -542,6 +542,39 @@
     "ResolveCollision": false,
     "animated": false,
     "name": "button_b"
+},
+  "24": {
+    "parent": 1,
+    "transform": [
+        620.0,
+        1025.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "sprite": "manaIcon",
+    "class": "Icon",
+    "shader": "ui",
+    "active": "manaIcon",
+    "process": true,
+    "input": false,
+    "physics": false,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": false,
+    "static": true,
+    "visible": true,
+    "alpha": 1.0,
+    "addCollider": false,
+    "cull": 0.0,
+    "zIndex": 22,
+    "ResolveCollision": false,
+    "animated": false,
+    "name": "mana_icon"
 }
 
 }

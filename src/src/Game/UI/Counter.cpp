@@ -20,6 +20,10 @@ void Counter::SetIcon(shared_ptr<Icon> newIcon) {
     icon = newIcon;
 }
 
+void Counter::SetManaIcon(shared_ptr<Icon> newIcon) {
+    manaIcon = newIcon;
+}
+
 void Counter::FinishAllTweens() {
     text->FinishAllTweens();
     icon->FinishAllTweens();
