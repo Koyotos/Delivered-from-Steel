@@ -431,7 +431,7 @@ void CardManager::MoveUnlockedCards()
 
 		for (int i = 0; i < count; i++) {
 			float targetX = 100.0f + (i + 1) * (1720.0f / (count + 1));
-			unlockedCardDisplays[i]->MoveTo(vec2(targetX - 75.0f, 420.0f), 0.5f, EaseType::OutQuad);
+			unlockedCardDisplays[i]->MoveTo(vec2(targetX - 75.0f, 220.0f), 0.5f, EaseType::OutQuad);
 			unlockedCardDisplays[i]->Tint(vec3(0.75f, 0.75f, 0.75f), 0.01f, EaseType::OutQuad);
 		}
 	}
@@ -469,7 +469,7 @@ void CardManager::UpdateCardSelection()
 		float cardW = 75.0f * baseScale.x;
 		float cardH = 100.0f * baseScale.y;
 		float baseX = 100.0f + (i + 1) * (1720.0f / (unlockedCardDisplays.size() + 1));
-		float baseY = 420.0f;
+		float baseY = 220.0;
 
 		if (i == selectedCard && rowDown) {
 			unlockedCardDisplays[i]->ScaleTo(baseScale * 1.2f, 0.2f, EaseType::InOutSine);
