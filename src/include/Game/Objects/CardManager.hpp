@@ -169,6 +169,8 @@ public:
 	void ToggleMenu();
 	int getCurrentManaPoints() const { return currentManaPoints; }
 
+	void ChangeSelection(bool left);
+
 	void Process() override;
 	bool Input(InputEvent& event) override;
 

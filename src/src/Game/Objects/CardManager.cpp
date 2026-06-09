@@ -140,12 +140,12 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_GAMEPAD_BUTTON_B: UseCard(2); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_A: if (menuOpen) Select(); event.handled = true; break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_RIGHT: if (menuOpen) {
-				selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+				ChangeSelection(false);
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_LEFT: if (menuOpen) {
-				selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+				ChangeSelection(true);
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
@@ -168,13 +168,13 @@ bool CardManager::Input(InputEvent& event)
 			if (menuOpen && event.key == GLFW_GAMEPAD_AXIS_LEFT_X)
 			{
 				if (event.valueX > 0.5f && !axisHeld) {
-					selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+					ChangeSelection(false);
 					UpdateCardSelection();
 					axisHeld = true;
 					event.handled = true;
 				}
 				else if (event.valueX < -0.5f && !axisHeld) {
-					selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+					ChangeSelection(true);
 					UpdateCardSelection();
 					axisHeld = true;
 					event.handled = true;
@@ -215,12 +215,12 @@ bool CardManager::Input(InputEvent& event)
 			case GLFW_KEY_L: UseCard(2); event.handled = true; break;
 			case GLFW_KEY_SPACE: if (menuOpen) Select(); event.handled = true; break;
 			case GLFW_KEY_D: if (menuOpen) {
-				selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+				ChangeSelection(false);
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_KEY_A: if (menuOpen) {
-				selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+				ChangeSelection(true);
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
@@ -574,6 +574,19 @@ void CardManager::RemoveCardFromHand(int slot)
 	currentHandSaved[slot] = nullptr;
 
 	UpdateCardSelection();
+}
+
+void CardManager::ChangeSelection(bool left)
+{
+	if (!left)
+	{
+		selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+	}
+	else
+	{
+		if (selectedCard == 0) selectedCard = (rowDown ? unlockedCardDisplays.size() : slots.size()) - 1;
+		else selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+	}
 }
 
 
