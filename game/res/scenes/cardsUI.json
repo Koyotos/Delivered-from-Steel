@@ -11,7 +11,7 @@
     "parent": 1,
     "transform": [
       610.0,
-      950.0,
+      930.0,
       0.0,
       0.0,
       0.0,
@@ -47,7 +47,7 @@
     "parent": 1,
      "transform": [
       850.0,
-      950.0,
+      930.0,
       0.0,
       0.0,
       0.0,
@@ -83,7 +83,7 @@
     "parent": 1,
      "transform": [
       1095.0,
-      950.0,
+      930.0,
       0.0,
       0.0,
       0.0,
@@ -118,20 +118,20 @@
   "12": {
         "parent": 1,
         "transform": [
-            900.0,
-            970.0,
+            510.0,
+            990.0,
             0.0,
             0.0,
             0.0,
             0.0,
-            3.0,
-            3.0,
+            1.0,
+            0.75,
             1.0
         ],
-        "sprite": "manaWheel",
+        "sprite": "manaBar",
         "class": "Icon",
         "shader": "ui",
-        "active" : "manaWheel",
+        "active" : "manaBar",
         "process": true,
         "input": true,
         "physics": false,
@@ -143,7 +143,7 @@
 		    "alpha" : 1.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 10,
+        "zIndex" : 20,
         "ResolveCollision": false,
         "animated" : false,
         "name": "mana_wheel"
@@ -151,8 +151,8 @@
     "13": {
     "parent": 1,
     "transform": [
-        900.0,
-        970.0,
+        524.5,
+        1000.0,
         0.0,
         0.0,
         0.0,
@@ -172,9 +172,9 @@
     "static": true,
     "visible": true,
     "alpha": 1.0,
-    "zIndex": 11,
+    "zIndex": 21,
     "color": [1.0, 1.0, 1.0],
-    "textPos": [928, 1005],
+    "textPos": [540, 1032],
     "textSize": [32, 32],
     "textScale": 1.0,
     "ResolveCollision": false,
@@ -447,8 +447,8 @@
   "21": {
     "parent": 3,
     "transform": [
-        727.0,
-        1010.0,
+        685.0,
+        965.0,
         0.0,
         0.0,
         0.0,
@@ -480,8 +480,8 @@
 "22": {
     "parent": 4,
     "transform": [
-        927.0,
-        940.0,
+        925.0,
+        965.0,
         0.0,
         0.0,
         0.0,
@@ -513,8 +513,8 @@
 "23": {
     "parent": 5,
     "transform": [
-        1127.0,
-        1010.0,
+        1170.0,
+        965.0,
         0.0,
         0.0,
         0.0,

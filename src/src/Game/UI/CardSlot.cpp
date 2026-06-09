@@ -161,6 +161,7 @@ void CardSlot::ShowSlot(float time)
 void CardSlot::HideSlot(float time)
 {
     this->ClearAllTweens();
+    this->ScaleCardTo(vec2(1.0f, 1.0f), time);
     this->FadeOut(time, EaseType::InOutSine);
     this->MoveTo(vec2(origPos.x, origPos.y), time, EaseType::InOutSine);
     if (card) card->MoveTo(vec2(origPos.x, origPos.y), time, EaseType::InOutSine);
