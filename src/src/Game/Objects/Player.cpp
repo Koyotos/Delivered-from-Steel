@@ -3,6 +3,7 @@
 #include "include/Globals/Globals.hpp"
 #include "include/IOManager/IOManager.hpp"
 #include "include/Game/Objects/CardManager.hpp"
+#include "include/EngineController/EngineController.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -209,6 +210,7 @@ void Player::GatherInput(float deltaTime) {
 }
 
 void Player::Process() {
+	if (isSuspended) return;
 	Object2D::Process();
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
@@ -244,10 +246,7 @@ void Player::Process() {
 		if (health.CheckAndResetRespawn(deltaTime)) {
 			SetVelocity(glm::vec2(0.0f));
 			lastVelocity = glm::vec2(0.0f);
-			Transform t = GetTransform();
-			t.SetTranslation(respawnPoint);
-			SetTransform(t);
-			Enable();
+			Globals::GetGlobals().engineController->TriggerRespawn();
 		}
 		return;
 	}
@@ -333,27 +332,9 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isBounceActive) {
-		float minBounceSpeed = 1.0f;
+		float minBounceSpeed = 2.5f;
 		if (isGrounded && lastSpeedForBounceY < -minBounceSpeed) {
 			currentVelocity.y = std::max(stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isWalledLeft && lastSpeedForBounceX < -minBounceSpeed) {
-			currentVelocity.x = std::max(stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isWalledRight && lastSpeedForBounceX > minBounceSpeed) {
-			currentVelocity.x = std::min(-stats.bounceForce, -lastSpeedForBounceX - stats.bounceForce / lastSpeedForBounceX);
-			lastVelocity = currentVelocity;
-			isBounceActive = false;
-			isDashing = false;
-		}
-		else if (isCeiling && lastSpeedForBounceY > minBounceSpeed) {
-			currentVelocity.y = std::min(-stats.bounceForce, -lastSpeedForBounceY - stats.bounceForce / lastSpeedForBounceY);
 			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
@@ -513,7 +494,13 @@ bool Player::HandleMovement(float deltaTime) {
 	currentVelocity.x = PlayerMoveTowards(currentVelocity.x, targetSpeed, acceleration * deltaTime);
 
 	if (currentVelocity.y < 0) {
-		currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
+		if (isFeatherFalling) {
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime /3;
+		}
+		else {
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
+		}
+
 	}
 	else {
 		currentVelocity.y -= 10.0f * deltaTime;
@@ -591,6 +578,7 @@ void Player::HandleAnimations() {
 }
 
 void Player::Physics(const float& deltaTime) {
+	if (isSuspended) return;
 	bool skipAnimations = HandleMovement(deltaTime);
 
 	if (!skipAnimations) {
@@ -605,6 +593,7 @@ void Player::Physics(const float& deltaTime) {
 }
 
 bool Player::Input(InputEvent& event) {
+	if (isSuspended) return false;
 	if (!event.handled) {
 		//test save/load
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
@@ -686,20 +675,14 @@ void Player::ExecuteWallJump() {
 	isDashing = false;
 	glm::vec2 vel = GetVelocity();
 
-	float jumpDir = 0.0f;
-	if (CheckLeftWalledHit().has_value()) jumpDir = 1.0f;
-	else if (CheckRightWalledHit().has_value()) jumpDir = -1.0f;
+	vel.y = stats.wallJumpForceY;
+	vel.x = wallJumpFacedDirection * stats.wallJumpForceX;
+	SetVelocity(vel);
+	lastVelocity = GetVelocity();
 
-	if (jumpDir != 0.0f) {
-		vel.y = stats.wallJumpForceY;
-		vel.x = jumpDir * stats.wallJumpForceX;
-		facingDirection = jumpDir;
-		SetVelocity(vel);
-		lastVelocity = GetVelocity();
+	coyoteTimeCounter = 0.0f;
+	jumpBufferCounter = 0.0f;
 
-		coyoteTimeCounter = 0.0f;
-		jumpBufferCounter = 0.0f;
-	}
 	canCutJump = false;
 }
 
@@ -749,6 +732,11 @@ nlohmann::json Player::Serialize() const {
 	j["posY"] = pos.y;
 	j["posZ"] = pos.z;
 
+	j["respawnPosX"] = this->respawnPoint.x;
+	j["respawnPosY"] = this->respawnPoint.y;
+	j["respawnPosZ"] = this->respawnPoint.z;
+	j["respawnLevel"] = this->respawnLevelName;
+
 	return j;
 }
 
@@ -762,4 +750,21 @@ void Player::Deserialize(const nlohmann::json& data) {
 		t.SetTranslation(loadedPos);
 		this->SetTransform(t);
 	}
+	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
+		this->respawnPoint = glm::vec3(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
+	}
+	if (data.contains("respawnLevel")) {
+		this->respawnLevelName = data["respawnLevel"];
+	}
+}
+
+bool Player::CheckWallJump() {
+	float additionalOffsetXProcent = 1.5f;
+	auto hitLeft = Raycast(glm::vec2(-(raycastConfig.wallOffsetX * additionalOffsetXProcent), raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
+	auto hitRight = Raycast(glm::vec2((raycastConfig.wallOffsetX * additionalOffsetXProcent), raycastConfig.wallOffsetY), raycastConfig.wallRayDir, raycastConfig.wallRayLength, obstacleMask);
+
+	bool isWalledLeft = hitLeft.has_value();
+	bool isWalledRight = hitRight.has_value();
+	wallJumpFacedDirection = isWalledLeft ? 1.0f : (isWalledRight ? -1.0f : 0.0f);
+	return (isWalledLeft || isWalledRight);
 }

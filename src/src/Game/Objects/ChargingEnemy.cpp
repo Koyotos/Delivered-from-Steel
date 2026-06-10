@@ -6,10 +6,19 @@ ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enem
 	speed = 0.8f;
 	chargingSpeed = 3.0f;
 	damage = 100.0f;
-	raycastOffsetX = 0.326f;
+
+
+	float colY = fromMap(float, "colliderPosY", data);
+	float width = fromMap(float, "width", data);
+	float height = fromMap(float, "height", data);
+
+	float skinWidth = 0.001f;
+
+	raycastOffsetX = (width / 2.0f) + skinWidth;
 	raycastOffsetY = 0.0f;
-	groundCheckDistance = 0.61f;
-	wallCheckDistance = 0.58f;
+
+	groundCheckDistance = std::abs(colY) + (height / 2.0f) + 0.025f;
+	wallCheckDistance = std::abs(colY) + (height / 2.0f) - 0.005f;
 
 	raycastGroundCheckOffsetX = raycastOffsetX + 0.3f;
 

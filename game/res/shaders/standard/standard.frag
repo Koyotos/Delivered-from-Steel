@@ -195,7 +195,7 @@ vec3 SpotLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     float dist = length(lightPos - FragPos);
     float attenuation = 1.0 / (light.data3.x + light.data3.y * dist + light.data3.z * dist * dist);
 
-    float innerAngle = light.data4;
+    float innerAngle = light.data4 * 0.5;
     float outerAngle = innerAngle + radians(5.0);
 
     float innerCutoff = cos(innerAngle);

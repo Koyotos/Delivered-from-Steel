@@ -1,4 +1,5 @@
 #include "include/Game/Objects/TurretEnemy.hpp"
+#include <iostream>
 
 TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(data)
 {
@@ -18,6 +19,8 @@ TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(da
 	barrelLocked = false;
 
 	aimTolerance = 0.98f;
+
+	groundCheckDistance = 0.0f;
 }
 
 void TurretEnemy::AttackState(float dt) {
@@ -127,6 +130,14 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 	float targetAngle = sign(GetTransform().GetScale().y) * atan2(direction.y, direction.x) + radians(90.0f);
 
+	float targetAngleClamp = targetAngle;
+
+	if (targetAngleClamp > radians(179.0f))
+		targetAngleClamp = radians(-89.0f);
+	else if (targetAngleClamp > radians(89.0f))
+		targetAngleClamp = radians(89.0f);
+	else if (targetAngleClamp < radians(-89.0f))
+		targetAngleClamp = radians(-89.0f);
 
 	vec3 rotation = barrelTransform.GetRotation();
 
@@ -134,8 +145,8 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 
 	float angleDiff = atan2(
-		sin(targetAngle - currentAngle),
-		cos(targetAngle - currentAngle)
+		sin(targetAngleClamp - currentAngle),
+		cos(targetAngleClamp - currentAngle)
 	);
 
 	float maxStep = rotationSpeed * deltaTime;
@@ -144,11 +155,7 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 	float newAngle = currentAngle + step;
 
-	//float newAngle =
-	//	currentAngle +
-	//	angleDiff * rotationSpeed * deltaTime;
-
-	if (abs(cos(targetAngle - newAngle)) > aimTolerance) {
+	if (abs(cos(targetAngle - newAngle)) > aimTolerance && abs(targetAngle - newAngle) < radians(90.0f)) {
 		playerInSight = true;
 	}
 	else {

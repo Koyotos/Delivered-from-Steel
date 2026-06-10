@@ -1,4 +1,4 @@
-# Blender 5.0.1 MTL File: 'grey-outs.blend'
+# Blender 5.0.1 MTL File: 'None'
 # www.blender.org
 
 newmtl Material
@@ -11,3 +11,4 @@ d 1.000000
 illum 2
 map_Kd Metal_Frame_diff.png
 map_Ks Metal_Frame_spec.png
+map_Bump -bm 1.000000 Metal_Frame_normals.png

@@ -260,7 +260,7 @@ bool Renderer::Cull(const shared_ptr<VisualNode>& node) {
 
 void Renderer::DepthPass() {
     glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
-    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glViewport(0, 0, shadowW, shadowH);
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
 
@@ -491,7 +491,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         PrepareDrawNode(cast, t);
         if(node->RenderType() == NRT_OBJECT3D) {
             float dist = distance(vec2(currentScene->sceneCam->GetPos()),vec2(cast->GetTransform().GetGlobal()[3]));
-            if(dist < lightCullRadius) {
+            if(dist < lightCullRadius && node->TestDraw()) {
                 CreateRenderData(static_pointer_cast<Object3D>(node), potentialCasters);
             }
         }

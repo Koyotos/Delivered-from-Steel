@@ -13,6 +13,7 @@ class SceneManager;
 class CardManager;
 class IOManager;
 class Renderer;
+class EngineController;
 
 using namespace std;
 using namespace filesystem;
@@ -51,6 +52,7 @@ class Globals {
     std::shared_ptr<CardManager> cardManager;
     std::shared_ptr<IOManager> ioManager;
     std::shared_ptr<Renderer> renderer;
+    EngineController* engineController = nullptr;
 
     bool wantsToSave = false;
     bool wantsToLoad = false;

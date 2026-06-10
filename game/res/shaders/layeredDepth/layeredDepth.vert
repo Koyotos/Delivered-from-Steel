@@ -6,5 +6,7 @@ layout(location = 4) in mat4 instanceMatrix;
 out vec3 WorldPos;
 
 void main() {
-    WorldPos = vec3(instanceMatrix * vec4(position, 1.0));
+    vec4 worldPos = instanceMatrix * vec4(position, 1.0);
+    WorldPos = worldPos.xyz;
+    gl_Position = worldPos;
 }

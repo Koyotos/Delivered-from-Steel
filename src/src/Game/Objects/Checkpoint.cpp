@@ -58,16 +58,15 @@ void Checkpoint::Physics(const float& deltaTime) {
 
         auto hitWall = Raycast(rayDir, dist, static_cast<uint32_t>(ObjectType::Wall));
 
-        if (!hitWall.has_value() && !playerInsideAndVisible) {
+        if (!hitWall.has_value() && !playerInsideAndVisible && player->GetVelocity().y > -7.0f) {
             auto& globals = Globals::GetGlobals();
             if (globals.cardManager) {
                 globals.cardManager->ReachCheckpoint();
             }
             if (!isActivated) Activate();
-            player->SetRespawnPoint(vec3(checkpointPos,-5));
+			playerInsideAndVisible = true;
+            player->SetRespawnPoint(vec3(checkpointPos,-5), globals.activeLevelName);
         }
-
-        playerInsideAndVisible = !hitWall.has_value();
     }
     else {
         playerInsideAndVisible = false;
@@ -83,7 +82,7 @@ void Checkpoint::Physics(const float& deltaTime) {
             if (colorTransitionProgress < 0.0f) colorTransitionProgress = 0.0f;
         }
 
-        glm::vec3 normalColor = glm::vec3(0.0f, 0.6f, 1.5f);
+        glm::vec3 normalColor = glm::vec3(0.0f, 0.4f, 1.0f);
 
         glm::vec3 activeColor = glm::vec3(0.0f, 0.8f, 2.0f);
 

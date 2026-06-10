@@ -22,6 +22,7 @@
 #include "include/Game/Objects/Drone.hpp"
 #include "include/Game/Objects/CardFind.hpp"
 #include "include/Game/Objects/Checkpoint.hpp"
+#include "include/Game/Objects/LevelGateway.hpp"
 #include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
 #include "include/Renderer/TextNode.hpp"
@@ -85,6 +86,7 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<BreakableWall>("BreakableWall"),
     RegisterObjectType<SpikePlatform>("SpikePlatform"),
 	RegisterObjectType<MovingPlatform>("MovingPlatform"),
+    RegisterObjectType<LevelGateway>("LevelGateway"),
     RegisterObjectType<TextNode>("TextNode"),
     RegisterObjectType<ProfilerNode>("ProfilerNode"),
     RegisterObjectType<ParticleSystemNode>("ParticleSystemNode"),
@@ -150,6 +152,15 @@ class ResourceManager {
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void UnloadScene(shared_ptr<Scene>);
     void ConfigurePaths();
+
+    bool IsAsyncQueueEmpty() const {
+        return sceneAsyncQueue.empty();
+    }
+    void AddLoadedScene(std::shared_ptr<Scene> scene) {
+        if (scene) {
+            scenes.push_back(scene);
+        }
+    }
 
     void SetAudioManager(shared_ptr<AudioManager> aum) { audioManager = aum; }
     shared_ptr<Shader> LoadShader(const string&);

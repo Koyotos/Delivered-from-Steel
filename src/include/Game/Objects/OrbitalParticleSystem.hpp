@@ -19,7 +19,7 @@ public:
 	float orbitSpeed = 3.0f;
 	float followSpeed = 15.0f;
 	float orbitSpreadY = 0.5f;
-	glm::vec4 particleColor = glm::vec4(0.2f, 0.8f, 1.0f, 1.0f);
+	glm::vec4 particleColor = glm::vec4(0.0f, 1.0f, 0.894f, 1.0f);
 
 private:
 	float elapsedTime = 0.0f;

@@ -1,7 +1,7 @@
 # Blender 5.0.1 MTL File: 'grey-outs.blend'
 # www.blender.org
 
-newmtl Material
+newmtl Material.004
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
@@ -11,3 +11,4 @@ d 1.000000
 illum 2
 map_Kd Metal_Hook_diff.png
 map_Ks Metal_Hook_spec.png
+map_Bump -bm 1.000000 Metal_Hook_normals.png
