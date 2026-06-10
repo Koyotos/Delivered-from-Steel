@@ -5,7 +5,7 @@ void Game::Init() {
     engine.Init();
     gameScene = engine.LoadScene("res/scenes/base.json");
 
-    /*
+    /* 
     engine.TransitionToMenu();
 
 
@@ -19,7 +19,7 @@ void Game::Init() {
      
      engine.SetActiveScene(gameScene); 
      engine.LinkSceneObjects();  
-	 engine.LoadLevel("testLevel");
+	 engine.LoadLevel("jan_background");
      
      
 
