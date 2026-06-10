@@ -6,9 +6,9 @@
 void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 	card = newCard;
 	card->SetVisible(true);
-    card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y), 0.2f, EaseType::InOutSine);    
-    card->RotateTo(this->GetTransform().GetRotation().z, 0.2f, EaseType::InOutSine);
     card->ScaleTo(vec2(GetTransform().GetScale().x, GetTransform().GetScale().y), 0.2f);
+    card->RotateTo(this->GetTransform().GetRotation().z, 0.2f, EaseType::InOutSine);
+    card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y - 30.0f), 0.2f, EaseType::InOutSine);
 }
 
 
@@ -88,7 +88,7 @@ void CardSlot::SetCardTint(vec3 color) {
 
 void CardSlot::MoveTo(glm::vec2 target, float time, EaseType ease, float delay) {
     UIElement::MoveTo(target, time, ease, delay);
-    if (card) card->MoveTo(target, time, ease, delay);
+    if (card) card->MoveTo(vec2(target.x, target.y - 30.0f), time, ease, delay);
 
 }
 
@@ -155,7 +155,6 @@ void CardSlot::ShowSlot(float time)
     this->ClearAllTweens();
     this->FadeIn(time, EaseType::InOutSine);
     this->MoveTo(vec2(origPos.x, origPos.y - 250.0f), time, EaseType::InOutSine);
-    if (card) card->MoveTo(vec2(origPos.x, origPos.y - 250.0f), time, EaseType::InOutSine);
 }
 
 void CardSlot::HideSlot(float time)
