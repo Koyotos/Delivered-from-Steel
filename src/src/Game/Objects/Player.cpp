@@ -253,6 +253,23 @@ void Player::Process() {
 
 	health.Physics(deltaTime);
 	GatherInput(deltaTime);
+
+	// przeniesc to pozniej do dedykowanej klasy
+	UpdateVignette();
+}
+
+void Player::UpdateVignette() {
+	float velY = GetVelocity().y;
+	float speed = std::abs(std::min(velY, 0.0f));
+	float threshold = stats.fallDamageSpeed * 0.3f;
+	float target = std::clamp((speed - threshold) / (stats.fallDamageSpeed - threshold), 0.0f, 1.0f);
+
+	float lerpSpeed = target > smoothedFallIntensity ? 6.0f : 2.5f;
+	smoothedFallIntensity = PlayerMoveTowards(smoothedFallIntensity, target, lerpSpeed * Globals::GetGlobals().GetDeltaTime());
+
+	float saturation = 1.0f - smoothedFallIntensity;
+	Globals::GetGlobals().renderer->Reconfigure(RCMD_SATURATION_CONTROL, 1, 0.0f);
+	Globals::GetGlobals().renderer->Reconfigure(RCMD_SATURATION_VALUE, 0, saturation);
 }
 
 bool Player::HandleMovement(float deltaTime) {

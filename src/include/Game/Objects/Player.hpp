@@ -52,6 +52,8 @@ private:
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
 
+	float smoothedFallIntensity = 0.0f;
+
 	glm::vec2 lastVelocity = glm::vec2(0.0f);
 	glm::vec2 platformVelocity = glm::vec2(0.0f);
 	glm::vec3 respawnPoint = glm::vec3(0.0f);
@@ -59,6 +61,8 @@ private:
 	void GatherInput(float deltaTime);
 	bool HandleMovement(float deltaTime);
 	void HandleAnimations();
+
+	void UpdateVignette();
 
 	uint32_t obstacleMask = static_cast<uint32_t>(ObjectType::Wall) |
 		static_cast<uint32_t>(ObjectType::Enemy) |

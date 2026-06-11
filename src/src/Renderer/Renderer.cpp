@@ -44,6 +44,7 @@ void Renderer::Init(ResourceManager& rsm) {
     drawVectorUI.reserve(UI_NUMBER_PREDICT);
     updatedShaders.reserve(SHADER_NUMBER_PREDICT);
 
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glEnable(GL_CULL_FACE);
@@ -316,28 +317,25 @@ void Renderer::DepthPass() {
             default : break;
         }
     }
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
+    glClear(GL_DEPTH_BUFFER_BIT);
     for(uint8_t i = 0; i < lightsPosPoint.size() && i < MAX_LIGHTS_POINT; i++) {
         
         shared_ptr<Light> light = lightsPosPoint[i].first;
         mat4 projection, view;
         vec3 pos = light->data1;
         projection = perspective(radians(90.f), 1.f, 0.1f, 10.f);
-        depthShaderLayered->Use();
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
         mat4 shadowMatrices[6];
-        for(int face = 0; face < 6; face++) {
-            view = lookAt(pos, pos + dirs[face], ups[face]);
-            shadowMatrices[face] = projection * view;
-        }
         for(int f = 0; f < 6; f++) {
+            view = lookAt(pos, pos + dirs[f], ups[f]);
+            shadowMatrices[f] = projection * view;
             depthShaderLayered->SetMat4("shadowMatrices[" + std::to_string(f) + "]", shadowMatrices[f]);
         }
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeArray, 0);  
         depthShaderLayered->SetInt("lightIndex", i);
-        depthShaderLayered->Use();
         depthShaderLayered->SetVec3("lightPos", pos);
         depthShaderLayered->SetFloat("farPlane", 10.0f);
         farPlanes[i] = 10.0f;
-        glClear(GL_DEPTH_BUFFER_BIT);
         for(auto& data : potentialCasters){
             PROFILER_ADD_OBJECT();
             data.model->DrawInstanced(*depthShaderLayered, data.matrices);
@@ -349,7 +347,6 @@ void Renderer::DepthPass() {
 }
 
 void Renderer::DrawScene(shared_ptr<Scene> scene) {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     lightsPos.clear();
     lightsPosPoint.clear();

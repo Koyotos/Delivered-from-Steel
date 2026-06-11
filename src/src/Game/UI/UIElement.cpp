@@ -92,7 +92,7 @@ void UIElement::UpdateTweens(float dt) {
 	);
 }
 
-void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease, float delay)
+void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease, float delay, vec2 overrideStartPos)
 {
 	Tween t;
 	t.type = Tween::Type::Move;
@@ -101,7 +101,8 @@ void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease, float delay)
 	t.ease = ease;
 	t.delay = delay;
 
-	t.startPos = glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y); // get global position
+	if (overrideStartPos != vec2(0.0f, 0.0f)) t.startPos = overrideStartPos;
+	else t.startPos = glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y); // get global position
 	t.targetPos = target;
 
 	tweens.push_back(t);
@@ -227,6 +228,11 @@ void UIElement::FinishAllTweens() {
 			break;
 		}
 	}
+	tweens.clear();
+}
+
+void UIElement::ClearAllTweens()
+{
 	tweens.clear();
 }
 

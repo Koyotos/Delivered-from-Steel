@@ -17,31 +17,53 @@ class CardSlot : public UIElement {
 	std::shared_ptr<CardUI> removedCard;
 	std::shared_ptr<Icon> icon;
 
+	vec2 origPos;
+
+	bool isLearning = false;
+
 	public:
 
 	CardSlot();
 	CardSlot(const std::unordered_map<std::string, std::any>& data);
+
+	vec2 iconOffset;
 
 	string Type() override;
 
 	/*
 	* @brief Removes the current card from the slot.
 	*/
-	void RemoveCard();
+	shared_ptr<CardUI> RemoveCard();
 
 	void PlayUseAnimation();
+
+	void Init();
 
 	/*
 	* @brief Sets a new card in the slot. If there is already a card, it will be removed first. 
 	* The new card will be positioned at the slot's transform and will fade in.
 	*/
 	void SetCard(std::shared_ptr<CardUI> newCard);
+	void SetIcon(std::shared_ptr<Icon> newIcon);
 
 	void SetCardTint(vec3 color);
 
 	void Draw(shared_ptr<Shader> sh = nullptr) override;
 
 	void Process() override;
+
+	void MoveTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+
+	void ScaleCardTo(glm::vec2 target, float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+
+	void FinishAllTweens();
+	void ClearAllTweens();
+
+	void ShowSlot(float time);
+	void HideSlot(float time);
+
+
+	
 
 
 };
