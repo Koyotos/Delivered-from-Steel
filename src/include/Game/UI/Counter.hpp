@@ -11,6 +11,7 @@ class Counter : public UIElement {
 	std::shared_ptr<TextUI> text;
 	std::shared_ptr<Icon> icon;
 	std::shared_ptr<Icon> manaIcon;
+	float origTextPosX;
 	int maxVal;
 	int currentVal;
 

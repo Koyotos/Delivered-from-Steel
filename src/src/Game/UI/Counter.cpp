@@ -7,13 +7,19 @@ Counter::~Counter() {}
 
 void Counter::UpdateValue(int newVal) {
     currentVal = newVal;
+    if (newVal < 10) {
+        text->SetTextPos(ivec2(origTextPosX + 9.0f, text->GetTransform().GetTranslation().y)); // Adjust position for single-digit numbers
+    } else {
+        text->SetTextPos(ivec2(origTextPosX, text->GetTransform().GetTranslation().y)); // Reset to original position for double-digit numbers
+	}
     text->SetContent(std::to_string(currentVal));
-    // play animation TBD
+    // Add animation TBD
     // update icon
 }
 
 void Counter::SetText(shared_ptr<TextUI> newText) {
     text = newText;
+	origTextPosX = text->GetLeftBound();
 }
 
 void Counter::SetIcon(shared_ptr<Icon> newIcon) {
