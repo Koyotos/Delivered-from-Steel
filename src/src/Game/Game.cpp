@@ -19,7 +19,7 @@ void Game::Init() {
      
      engine.SetActiveScene(gameScene); 
      engine.LinkSceneObjects();  
-	 engine.LoadLevel("jan_background");
+	 engine.LoadLevel("testLevel");
      
      
 
