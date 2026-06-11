@@ -15,11 +15,10 @@ void Game::Init() {
         engine.LoadLevel("testLevel");
         });
     */
-    
      
      engine.SetActiveScene(gameScene); 
      engine.LinkSceneObjects();  
-	 engine.LoadLevel("testLevel");
+	 engine.LoadLevel("jan_scena");
      
      
 
