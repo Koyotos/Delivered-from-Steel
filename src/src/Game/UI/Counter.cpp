@@ -7,14 +7,26 @@ Counter::~Counter() {}
 
 void Counter::UpdateValue(int newVal) {
     currentVal = newVal;
+    if (currentVal == maxVal)
+    {
+        this->UpdateManaIcons();
+    }
+	valueChanged = true;
     if (newVal < 10) {
         text->SetTextPos(ivec2(origTextPosX + 9.0f, text->GetTransform().GetTranslation().y)); // Adjust position for single-digit numbers
     } else {
         text->SetTextPos(ivec2(origTextPosX, text->GetTransform().GetTranslation().y)); // Reset to original position for double-digit numbers
 	}
     text->SetContent(std::to_string(currentVal));
+    this->UpdateManaIconsValue();
     // Add animation TBD
     // update icon
+}
+
+void Counter::UpdateMaxVal(int newVal)
+{
+	maxVal = newVal;
+    this->UpdateManaIcons();
 }
 
 void Counter::SetText(shared_ptr<TextUI> newText) {
@@ -26,8 +38,8 @@ void Counter::SetIcon(shared_ptr<Icon> newIcon) {
     icon = newIcon;
 }
 
-void Counter::SetManaIcon(shared_ptr<Icon> newIcon) {
-    manaIcon = newIcon;
+void Counter::AddManaIcon(shared_ptr<Icon> newIcon) {
+    manaIcons.push_back(newIcon);
 }
 
 void Counter::FinishAllTweens() {
@@ -43,4 +55,45 @@ void Counter::FadeOut(float time, EaseType ease, float delay) {
 void Counter::FadeIn(float time, EaseType ease, float delay) {
     text->FadeIn(time, ease, delay);
     icon->FadeIn(time, ease, delay);
+}
+
+void Counter::UpdateManaIcons() {
+
+    float beginX = 625.0f;
+    float endX = 1250.0f;
+	float iconY = manaIcons[0]->GetTransform().GetTranslation().y;
+
+    for (int i = 0; i < manaIcons.size(); i++) {
+        if (i < maxVal) {
+            manaIcons[i]->SetVisible(true);
+            float t = (float)i / (float)(maxVal - 1);
+            float x = beginX + t * (endX - beginX);
+            manaIcons[i]->MoveTo(vec2(x, iconY), 0.01f);
+            manaIcons[i]->FadeIn(0.01f);
+            manaIcons[i]->Play("unspent");
+        } else {
+            manaIcons[i]->SetVisible(false);
+        }
+	}
+
+}
+
+void Counter::UpdateManaIconsValue()
+{
+    if (valueChanged)
+    {
+        for (int i = 0; i < maxVal; i++) {
+            if (i >= currentVal)
+            {
+                manaIcons[i]->Play("spent", 0.1f, false);
+                manaIcons[i]->FadeOut(0.01f, EaseType::Linear, 0.5f);
+            }
+            else if (i < currentVal)
+            {
+                manaIcons[i]->Play("unspent");
+                manaIcons[i]->FadeIn(0.01f);
+            }
+        }
+        valueChanged = false;
+    }
 }
