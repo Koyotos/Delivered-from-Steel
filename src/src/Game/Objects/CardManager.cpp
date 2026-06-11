@@ -258,6 +258,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 		slots[i]->Init();
 	}
 
+	manaCounter->UpdateMaxVal(maxManaPoints);
+
 
 	UnlockCard(CreateCard(CardType::WallJump));
 	UnlockCard(CreateCard(CardType::WallSnap));
@@ -265,6 +267,7 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::FeatherFalling));
 	UnlockCard(CreateCard(CardType::Bounce));
 	UnlockCard(CreateCard(CardType::Dash));
+
 
 }
 
@@ -289,7 +292,7 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 	else if (node->Type() == "Icon") {
 		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
- 		else if (cast->GetName() == "mana_icon") manaCounter->SetManaIcon(cast);
+ 		else if (cast->GetName() == "mana_icon") manaCounter->AddManaIcon(cast);
 		else if (cast->GetName() == "checkpoint_bg") checkpointBackground = cast;
 		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
 		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
