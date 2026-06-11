@@ -24,8 +24,18 @@ private:
 	int maxManaPoints = 15;
 	int currentManaPoints = 15;
 
+	int selectedCard = -1;
+	int selectedCardUp = 0;
+	bool rowDown = true;
+
+	bool axisHeld = false;
+	bool axisHeldY = false;
+
+	shared_ptr<Player> player;
+
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
+	std::vector<shared_ptr<CardUI>> unlockedCardDisplays;
 
 	/* all cards that are currently in hand, with each index corresponding with each slot */
 	std::vector<shared_ptr<Card>> currentHand;
@@ -42,6 +52,11 @@ private:
 
 	shared_ptr<Counter> manaCounter;
 
+	shared_ptr<Icon> checkpointBackground;
+	std::vector<shared_ptr<Icon>> slotIcons;
+
+	bool menuOpen = false;
+
 	/*
 	 * @brief checks if currentHand is empty
 	 * @returns bool: false if the card has at least one card
@@ -55,6 +70,19 @@ private:
 
 	void UpdateManaUI();
 
+	void MoveUnlockedCards();
+
+	void AddCardUI(shared_ptr<CardUI> cardUI);
+
+	void MoveSlots();
+
+	void UpdateCardSelection();
+
+	void AddCardToHand(int slot, shared_ptr<Card> card);
+	void AddCardToHand(shared_ptr<Card> card);
+	void RemoveCardFromHand(int slot);
+
+	void Select(int slot=-1);
 
 
 public:
@@ -138,7 +166,10 @@ public:
 	 */
 	void AssignPlayer(shared_ptr<Player> player);
 
+	void ToggleMenu();
 	int getCurrentManaPoints() const { return currentManaPoints; }
+
+	void ChangeSelection(bool left);
 
 	void Process() override;
 	bool Input(InputEvent& event) override;

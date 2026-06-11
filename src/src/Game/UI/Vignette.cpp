@@ -6,11 +6,6 @@
 
 
 Vignette::Vignette(const std::unordered_map<std::string, std::any>& data) : UIElement(data) {
-	states = fromMap(float, "states", data);
-
-	currentValue = 0;
-	minValue = 0;
-	maxValue = states;
 }
 
 void Vignette::Draw(shared_ptr<Shader> sh) {

@@ -97,20 +97,20 @@ void Checkpoint::Physics(const float& deltaTime) {
 void Checkpoint::MenuToggle() {
     auto cardManager = Globals::GetGlobals().cardManager;
     if (cardManager) {
-		//cardManager->ToggleMenu(); ////////////////////////////// <------------------ odkomentowa�, gdy menu b�dzie gotowe
+		cardManager->ToggleMenu();
     }
 }
 
 bool Checkpoint::Input(InputEvent& event) {
     if (!event.handled && playerInsideAndVisible) {
 
-        if (event.type == InputType::GAMEPAD_BUTTON && event.action == GLFW_PRESS && event.key == GLFW_GAMEPAD_BUTTON_START) {
+        if (event.type == InputType::GAMEPAD_BUTTON && event.action == GLFW_PRESS && (event.key == GLFW_GAMEPAD_BUTTON_START || event.key == GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER)) {
             MenuToggle();
             event.handled = true;
             return true;
         }
 
-        if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS && event.key == GLFW_KEY_E) {
+        if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS && (event.key == GLFW_KEY_E || event.key == GLFW_KEY_TAB)) {
             MenuToggle();
             event.handled = true;
             return true;

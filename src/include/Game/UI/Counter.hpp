@@ -10,6 +10,8 @@ class Counter : public UIElement {
 	private:
 	std::shared_ptr<TextUI> text;
 	std::shared_ptr<Icon> icon;
+	std::shared_ptr<Icon> manaIcon;
+	float origTextPosX;
 	int maxVal;
 	int currentVal;
 
@@ -19,7 +21,12 @@ class Counter : public UIElement {
 
 	void SetText(shared_ptr<TextUI> newText);
 	void SetIcon(shared_ptr<Icon> newIcon);
+	void SetManaIcon(shared_ptr<Icon> newIcon);
 	void UpdateValue(int newVal);
+
+	void FinishAllTweens();
+	void FadeOut(float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
+	void FadeIn(float time, EaseType ease = EaseType::Linear, float delay = 0.0f);
 };
 
 #endif

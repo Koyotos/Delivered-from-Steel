@@ -24,7 +24,6 @@ void CardFind::OnCollisionEnter(std::shared_ptr<Collider> other) {
         if (cardManager) {
             std::shared_ptr<Card> newCard = cardManager->CreateCard(cardTypeToUnlock);
             newCard->AssignPlayer(player);
-            cardManager->UnlockCard(newCard);
             cardManager->LearnCard(newCard);
         }
         std::string id = this->GetSaveID();
