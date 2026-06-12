@@ -50,6 +50,8 @@ class EngineController {
     bool discardAsyncResult = false;
     std::vector<shared_ptr<Node>> nodesToUnload;
 	void FlattenForUnload(shared_ptr<Node> node);
+	shared_ptr<Scene> nextLevelScene = nullptr;
+	std::string nextLevelName = "";
 
     bool isAsyncLoading = false;
     std::string asyncLoadingName = "";

@@ -154,19 +154,14 @@ void EngineController::Run() {
 					asyncLoadingName = "";
 				}
 				else {
-					if (previousLevelNode) {
-						UnloadPreviousLevel();
-					}
-					previousLevelNode = activeLevelNode;
-					previousLevelName = activeLevelName;
+					nextLevelScene = loadedScene;
+					nextLevelName = asyncLoadingName;
 
-					rsm->AddLoadedScene(loadedScene);
-
-					ActivateLoadedScene(loadedScene, asyncLoadingName);
+					rsm->AddLoadedScene(nextLevelScene);
 
 					isAsyncLoading = false;
 					asyncLoadingName = "";
-					Globals::GetGlobals().Log("Loaded scene: " + activeLevelName);
+					Globals::GetGlobals().Log("Pre-loaded scene: " + nextLevelName);
 				}
 			}
 			else if (rsm->IsAsyncQueueEmpty()) {
@@ -181,6 +176,8 @@ void EngineController::Run() {
 				pendingF9 = false;
 				pendingRespawn = false;
 				LoadGame(pendingF9Path);
+				lastTime = glfwGetTime();
+				accumulator = 0.0;
 			}
 			else if (pendingRespawn) {
 				pendingRespawn = false;
@@ -423,12 +420,18 @@ void EngineController::UnloadPreviousLevel() {
 }
 
 void EngineController::SwapActiveAndPrevious() {
-	if (!previousLevelNode) return;
+	if (!nextLevelScene) return;
 
-	std::swap(activeLevelNode, previousLevelNode);
-	std::swap(activeLevelName, previousLevelName);
+	if (activeLevelNode) {
+		previousLevelNode = activeLevelNode;
+		previousLevelName = activeLevelName;
+	}
+	
+	ActivateLoadedScene(nextLevelScene, nextLevelName);
 
-	Globals::GetGlobals().activeLevelName = activeLevelName;
+	nextLevelScene = nullptr;
+	nextLevelName = "";
+	pendingUnload = true;
 }
 
 void EngineController::CancelAsyncLoad() {
@@ -506,10 +509,21 @@ void EngineController::LoadGame(const string& filepath) {
 		return;
 	}
 	pendingStreamLevel = "";
+	pendingRespawn = false;
 
 	auto active = scm->GetActive();
-	if (active && active->GetPlayer()) {
-		active->GetPlayer()->SuspendForLoading();
+	if (active) {
+		if (auto player = active->GetPlayer()) {
+			player->SuspendForLoading();
+			player->SetVelocity(glm::vec2(0.0f));
+			Transform t = player->GetTransform();
+			t.SetTranslation(player->GetRespawnPoint());
+			player->SetTransform(t);
+		}
+	}
+
+	if (wsm) {
+		wsm->ClearGraveyard();
 	}
 
 	LoadLevel(levelToLoad);
@@ -523,10 +537,12 @@ void EngineController::LoadGame(const string& filepath) {
 		psm->Update(active, 0.0f);
 	}
 
-	if (active && active->GetPlayer()) {
-		crm->AssignPlayer(active->GetPlayer());
-		active->GetPlayer()->Enable();
-		active->GetPlayer()->Unsuspend();
+	if (active) {
+		if (auto player = active->GetPlayer()) {
+			crm->AssignPlayer(player);
+			player->Enable();
+			player->Unsuspend();
+		}
 	}
 }
 
