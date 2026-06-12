@@ -226,24 +226,6 @@ void EngineController::Run() {
 
 		EndFrame();
 
-		//test przeladowywania scen
-		static bool f6Pressed = false;
-		if (Globals::GetGlobals().GetKeyState(295)) {
-			if (!f6Pressed) {
-				StreamNextLevel("testLevel2");
-				Globals::GetGlobals().Log("TEST: Streamed next level");
-				f6Pressed = true;
-			}
-		}
-		else {
-			f6Pressed = false;
-		}
-
-		if (Globals::GetGlobals().GetKeyState(296)) {
-			UnloadPreviousLevel();
-			Globals::GetGlobals().Log("TEST: Unloaded previous level");
-		}
-
 		//test save/load
 		if (Globals::GetGlobals().wantsToSave) {
 			SaveGame("save_0.json");
@@ -427,43 +409,6 @@ void EngineController::LoadLevel(const string& levelName) {
 		psm->RegisterNode(activeLevelNode);
 	}
 
-	RegisterSceneSerializables(activeLevelNode);
-}
-
-void EngineController::StreamNextLevel(const string& levelName) {
-	auto levelPath = std::filesystem::path(levelName);
-	if (levelPath.is_absolute() || levelPath.has_parent_path()) {
-		Globals::GetGlobals().Log("Invalid level name.");
-		return;
-	}
-
-	if (previousLevelNode) {
-		UnloadPreviousLevel();
-	}
-
-	previousLevelNode = activeLevelNode;
-	previousLevelName = activeLevelName;
-	activeLevelName = levelName;
-	Globals::GetGlobals().activeLevelName = levelName;
-
-	std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (levelName + ".json");
-
-	shared_ptr<Scene> loadedLevel = rsm->LoadScene(fullPath);
-	if (!loadedLevel) {
-		Globals::GetGlobals().Log("Failed to stream level.");
-		previousLevelNode.reset();
-		return;
-	}
-
-	activeLevelNode = loadedLevel->GetRoot();
-	activeLevelNode->InitRecursive(scm->GetActive());
-	scm->GetActive()->GetRoot()->AddChild(activeLevelNode);
-
-	if (psm) {
-		psm->RegisterNode(activeLevelNode);
-	}
-
-	ApplyWorldStateToNode(activeLevelNode, levelName);
 	RegisterSceneSerializables(activeLevelNode);
 }
 

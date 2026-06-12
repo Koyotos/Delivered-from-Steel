@@ -132,7 +132,6 @@ class EngineController {
     ~EngineController();
 
     void LoadLevel(const string& levelName);
-    void StreamNextLevel(const string& levelName);
     void UnloadPreviousLevel();
     void SwapActiveAndPrevious();
     void QueueStreamNextLevel(const std::string& levelName) { pendingStreamLevel = levelName; }
