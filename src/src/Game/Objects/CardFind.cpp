@@ -8,13 +8,12 @@ CardFind::CardFind() : PickUpAbstract(){}
 
 CardFind::CardFind(const unordered_map<string, std::any>& data) : PickUpAbstract(data) {
     int cardType = (int)fromMap(int64_t, "cardType", data);
-    vec3 position = GetTransform().GetTranslation();
+    cardTypeToUnlock = static_cast<CardType>(cardType);
+
     color2 = vec3(fromMap(float, "lightR", data)/255, fromMap(float, "lightG", data)/255, fromMap(float, "lightB", data)/255);
 	color1 = color2 * 0.5f;
 	specular1 = color1 * 0.05f;
 	specular2 = color2 * 0.05f;
-    
-    cardTypeToUnlock = static_cast<CardType>(cardType);
 }
 
 CardFind::~CardFind() {}
