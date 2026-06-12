@@ -33,7 +33,6 @@ class EngineController {
     shared_ptr<SaveManager> svm;
     shared_ptr<WorldStateManager> wsm;
 
-    shared_ptr<Scene> activeLevelScene = nullptr;
     shared_ptr<Node> activeLevelNode = nullptr;
     shared_ptr<Node> previousLevelNode = nullptr;
     std::string activeLevelName = "";
@@ -64,6 +63,7 @@ class EngineController {
     void RegisterSceneSerializables(shared_ptr<Scene> scene);
     void RegisterSceneSerializables(shared_ptr<Node> root);
     void ApplyWorldStateToNode(shared_ptr<Node> root, const string& levelName);
+    void ActivateLoadedScene(shared_ptr<Scene> loadedScene, const std::string& levelName);
 
     public:
     // Engine API
