@@ -23,7 +23,9 @@ Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : 
     pointLight->data3 = glm::vec3(0.0f);
     pointLight->data4 = 0.0f;
 
-    pointLight->colorDiffuse = glm::vec3(0.0f, 0.0f, 0.0f);
+    pointLight->colorDiffuse = glm::vec3(0.0f);
+
+    pointLight->Disable();
 
     AddChild(pointLight);
 }
@@ -142,6 +144,7 @@ bool Checkpoint::Input(InputEvent& event) {
 void Checkpoint::Activate() {
     isActivated = true;
 
+    pointLight->Enable();
     if (clothObject && clothObject->TestDraw()) {
         std::string id = clothObject->GetSaveID();
         if (!id.empty()) {
