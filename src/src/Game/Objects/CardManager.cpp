@@ -359,30 +359,47 @@ nlohmann::json CardManager::Serialize() const {
 }
 
 void CardManager::Deserialize(const nlohmann::json& data) {
+	unlockedCards.clear();
+	unlockedCardDisplays.clear();
+	for (int i = 0; i < slots.size(); i++) {
+		slots[i]->RemoveCard();
+		currentHand[i] = nullptr;
+		currentHandSaved[i] = nullptr;
+	}
+
 	if (data.contains("unlockedCards")) {
 		auto loadedUnlocked = data["unlockedCards"].get<std::vector<int>>();
-		unlockedCards.clear();
 		for (int typeVal : loadedUnlocked) {
-			unlockedCards.push_back(CreateCard(static_cast<CardType>(typeVal)));
+			UnlockCard(CreateCard(static_cast<CardType>(typeVal)));
 		}
 	}
 
 	if (data.contains("currentHand")) {
 		auto loadedHand = data["currentHand"].get<std::vector<int>>();
-		currentHand.clear();
-		currentHand.resize(maxHandSize, nullptr);
 
 		for (int i = 0; i < loadedHand.size() && i < slots.size(); i++) {
 			if (loadedHand[i] != -1) {
-				auto newCard = CreateCard(static_cast<CardType>(loadedHand[i]));
+				CardType type = static_cast<CardType>(loadedHand[i]);
+				auto newCard = CreateCard(type);
 				currentHand[i] = newCard;
-				slots[i]->SetCard(newCard->GetDisplay());
-			}
-			else {
-				currentHand[i] = nullptr;
-				slots[i]->RemoveCard();
+				currentHandSaved[i] = newCard;
+				for (auto it = unlockedCardDisplays.begin(); it != unlockedCardDisplays.end(); ++it) {
+					if ((*it)->GetCardType() == type) {
+						slots[i]->SetCard(*it);
+						unlockedCardDisplays.erase(it);
+						break;
+					}
+				}
 			}
 		}
+	}
+	selectedCard = 0;
+	UpdateCardSelection();
+	MoveUnlockedCards();
+	MoveSlots();
+	if (!menuOpen && checkpointBackground) {
+		checkpointBackground->FinishAllTweens();
+		checkpointBackground->MoveTo(vec2(0.0f, -1080.0f), 0.01f, EaseType::Linear);
 	}
 }
 
