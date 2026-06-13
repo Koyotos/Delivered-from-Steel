@@ -23,7 +23,9 @@ Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : 
     pointLight->data3 = glm::vec3(0.0f);
     pointLight->data4 = 0.0f;
 
-    pointLight->colorDiffuse = glm::vec3(0.0f, 0.0f, 0.0f);
+    pointLight->colorDiffuse = glm::vec3(0.0f);
+
+    pointLight->Disable();
 
     AddChild(pointLight);
 }
@@ -34,10 +36,11 @@ void Checkpoint::Init(std::shared_ptr<Scene> scene) {
         if (child->Type() == "Object3D") {
             auto castedCloth = std::static_pointer_cast<Object3D>(child);
             clothObject = castedCloth;
-            if (!clothObject->TestDraw()) {
-                Activate();
-            }
-            break;
+        }
+        if (child->Type() == "Object2D") {
+            auto castedButton = std::static_pointer_cast<Object2D>(child);
+            infoButtonObject = castedButton;
+			buttonNormalScale = castedButton->GetTransform().GetScale();
         }
     }
 }
@@ -51,6 +54,10 @@ void Checkpoint::Physics(const float& deltaTime) {
     glm::vec2 dirToPlayer = playerPos - checkpointPos;
     float dist = glm::length(dirToPlayer);
 
+    if (infoButtonObject && clothObject && !clothObject->TestDraw() && !isActivated) {
+        Activate();
+    }
+
     if (dist <= activationRadius) {
         glm::vec2 normDir = glm::normalize(dirToPlayer);
 
@@ -58,7 +65,7 @@ void Checkpoint::Physics(const float& deltaTime) {
 
         auto hitWall = Raycast(rayDir, dist, static_cast<uint32_t>(ObjectType::Wall));
 
-        if (!hitWall.has_value() && !playerInsideAndVisible && player->GetVelocity().y > -7.0f) {
+        if (!hitWall.has_value() && !playerInsideAndVisible && player->GetVelocity().y > -7.0f && !player->isDead()) {
             auto& globals = Globals::GetGlobals();
             if (globals.cardManager) {
                 globals.cardManager->ReachCheckpoint();
@@ -72,18 +79,21 @@ void Checkpoint::Physics(const float& deltaTime) {
         playerInsideAndVisible = false;
     }
 
-    if (pointLight && isActivated) {
+    if (pointLight && isActivated && infoButtonObject) {
         if (playerInsideAndVisible) {
             colorTransitionProgress += deltaTime * 2.0f;
             if (colorTransitionProgress > 1.0f) colorTransitionProgress = 1.0f;
+			buttonScaleProgress += deltaTime * 7.0f;
+            if (buttonScaleProgress > 1.0f) buttonScaleProgress = 1.0f;
         }
         else {
             colorTransitionProgress -= deltaTime * 1.5f;
             if (colorTransitionProgress < 0.0f) colorTransitionProgress = 0.0f;
+			buttonScaleProgress -= deltaTime * 7.0f;
+			if (buttonScaleProgress < 0.0f) buttonScaleProgress = 0.0f;
         }
 
         glm::vec3 normalColor = glm::vec3(0.0f, 0.4f, 1.0f);
-
         glm::vec3 activeColor = glm::vec3(0.0f, 0.8f, 2.0f);
 
         glm::vec3 normalSpecular = glm::vec3(0.0f, 0.02f, 0.1f);
@@ -91,6 +101,18 @@ void Checkpoint::Physics(const float& deltaTime) {
 
         pointLight->colorDiffuse = glm::mix(normalColor, activeColor, colorTransitionProgress);
         pointLight->colorSpecular = glm::mix(normalSpecular, activeSpecular, colorTransitionProgress);
+
+        if (buttonScaleProgress == 0.0f) {
+			infoButtonObject->SetDraw(false);
+        }
+        else {
+			infoButtonObject->SetDraw(true);
+		    Transform buttonTrans = infoButtonObject->GetTransform();
+		    glm::vec3 targetScale = buttonNormalScale * buttonScaleProgress;
+			buttonTrans.SetScale(targetScale);
+			infoButtonObject->SetTransform(buttonTrans);
+        }
+
     }
 }
 
@@ -122,6 +144,7 @@ bool Checkpoint::Input(InputEvent& event) {
 void Checkpoint::Activate() {
     isActivated = true;
 
+    pointLight->Enable();
     if (clothObject && clothObject->TestDraw()) {
         std::string id = clothObject->GetSaveID();
         if (!id.empty()) {

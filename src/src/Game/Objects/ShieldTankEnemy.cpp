@@ -46,8 +46,6 @@ void ShieldTankEnemy::Chase(float dt) {
 
 		}
 
-		chaseTimer += dt;
-
 		if (playerJumpingOver) {
 			float dist = length(dir);
 			if (dist > 2.0f) {
@@ -91,14 +89,14 @@ void ShieldTankEnemy::Chase(float dt) {
 		static_cast<uint32_t>(ObjectType::Wall)
 	);
 
-	auto enemyHit = Raycast(
+	auto wallHit = Raycast(
 		glm::vec2(raycastOffsetX * direction, 0.0f),
 		glm::vec2(0.0f, -1.0f),
 		wallCheckDistance,
-		static_cast<uint32_t>(ObjectType::Enemy)
+		obstacleMask
 	);
 
-	if (groundHit.has_value() && !enemyHit.has_value()) {
+	if (groundHit.has_value() && !wallHit.has_value()) {
 		SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
 	}
 	else {
