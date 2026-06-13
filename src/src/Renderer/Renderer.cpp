@@ -145,8 +145,8 @@ void Renderer::GenShadowMaps() {
         MAX_LIGHTS_DIR_AND_SPOT
     );
 
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -275,6 +275,7 @@ void Renderer::DepthPass() {
 
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
     for(uint8_t i = 0; i < lightsPos.size() && i < MAX_LIGHTS_DIR_AND_SPOT; i++) {
         shared_ptr<Light> light = lightsPos[i].first;
@@ -350,6 +351,7 @@ void Renderer::DepthPass() {
         }
         farPlanes[i] = 10.0f;
     }
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0,0,windowW, windowH);
 }
@@ -359,7 +361,10 @@ void Renderer::DrawScene(shared_ptr<Scene> scene) {
     lightsPos.clear();
     lightsPosPoint.clear();
     drawVector.clear();
+    drawLookup.clear();
+    casterLookup.clear();
     drawVectorUI.clear();
+    drawVector2D.clear();
     potentialCasters.clear();
     updatedShaders.clear();
     sunExists = false;
@@ -459,6 +464,7 @@ void Renderer::PostProcessingPass() {
     postProcessingShader->SetMat4("sunMatrix", sunMatrix);
     postProcessingShader->SetVec3("lightColor", vec3(1.0f));
     postProcessingShader->SetInt("shadowMaps2D",TEXTURES_SLOT_SHADOWMAPS);
+    postProcessingShader->SetVec3("cameraPos",vec3(currentScene->sceneCam->GetPos(),0));
     glBindVertexArray(screenQuadVAO);
     glDrawElements(
         GL_TRIANGLES,
@@ -528,7 +534,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
         if(node->RenderType() == NRT_OBJECT3D) {
             float dist = distance(vec2(currentScene->sceneCam->GetPos()),vec2(cast->GetTransform().GetGlobal()[3]));
             if(dist < lightCullRadius && node->TestDraw()) {
-                CreateRenderData(static_pointer_cast<Object3D>(node), potentialCasters);
+                CreateRenderData(static_pointer_cast<Object3D>(node), potentialCasters, casterLookup);
             }
         }
         
@@ -560,20 +566,22 @@ void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) 
         } else if(visualCast->RenderType() == NRT_TEXTNODE) {
             drawVectorUI.push_back(visualCast);
         } else {
-            CreateRenderData(static_pointer_cast<Object3D>(visualCast),drawVector);
+            CreateRenderData(static_pointer_cast<Object3D>(visualCast),drawVector, drawLookup);
         }
     }
 }
 
-void Renderer::CreateRenderData(shared_ptr<Object3D> node, vector<RenderData>& dataset) {
-    for(RenderData& entry : dataset) {
-        if(node->GetModel() == entry.model && node->GetShader() == entry.shader) {
-            entry.matrices.push_back(node->GetTransform().GetGlobal());
-            return;
-        }
+void Renderer::CreateRenderData(shared_ptr<Object3D> node, vector<RenderData>& dataset, unordered_map<BatchKey, size_t, BatchKeyHash> batchLookup) {
+    BatchKey key{node->GetModel().get(), node->GetShader().get()};
+    auto it = batchLookup.find(key);
+    if(it != batchLookup.end()) {
+        dataset[it->second].matrices.push_back(node->GetTransform().GetGlobal());
+        return;
     }
-    dataset.push_back(RenderData(node->GetModel(),node->GetShader(),{node->GetTransform().GetGlobal()}));   
-}   
+    size_t index = dataset.size();
+    dataset.emplace_back(node->GetModel(), node->GetShader(),vector<mat4> {node->GetTransform().GetGlobal()});
+    batchLookup[key] = index;
+}
 
 void Renderer::PrepareDrawLight(shared_ptr<Light> light) {
     vec2 campos;
@@ -616,10 +624,8 @@ void Renderer::SetLight(shared_ptr<Light> light, shared_ptr<Shader> shader, cons
 }
 
 void Renderer::ConfigureShader(shared_ptr<Shader> shader, const NodeRenderType& type, const bool info2D) {
-    for(auto& s : updatedShaders) {
-        if(s == shader.get()) {
-            return;
-        }
+    if(updatedShaders.contains(shader.get())) {
+        return;
     }
     shader->SetMat4("VP", frameVP);
     shader->SetVec3("viewPos", vec3(currentScene->sceneCam->GetPos(),0.0f));
@@ -637,15 +643,13 @@ void Renderer::ConfigureShader(shared_ptr<Shader> shader, const NodeRenderType& 
     }
     shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
     shader->SetInt("shadowCubemaps", TEXTURES_SLOT_SHADOWCUBEMAPS);
-    updatedShaders.push_back(shader.get());
+    updatedShaders.insert(shader.get());
 }
 
 void Renderer::ConfigureShader2D(shared_ptr<VisualNode> node) {
     shared_ptr<Shader> shader = node->GetShader();
-    for(auto& s : updatedShaders) {
-        if(s == shader.get()) {
-            return;
-        }
+    if(updatedShaders.contains(shader.get())) {
+        return;
     }
     switch(node->RenderType()) {
         case NRT_OBJECT2D: {
@@ -668,7 +672,7 @@ void Renderer::ConfigureShader2D(shared_ptr<VisualNode> node) {
         }
         default : break;
     }
-    updatedShaders.push_back(shader.get());
+    updatedShaders.insert(shader.get());
 }
 
 void Renderer::EndFrame() {
@@ -677,10 +681,10 @@ void Renderer::EndFrame() {
 }
 
 void Renderer::DestroyBuffers() {
-    glDeleteBuffers(1,&mainColorBuffer);
-    glDeleteBuffers(1,&depthColorBuffer);
-    glDeleteBuffers(1,&brightColorBuffer);
-    glDeleteBuffers(2,blurColorBuffers);
+    glDeleteTextures(1,&mainColorBuffer);
+    glDeleteTextures(1,&depthColorBuffer);
+    glDeleteTextures(1,&brightColorBuffer);
+    glDeleteTextures(2,blurColorBuffers);
     glDeleteFramebuffers(1,&mainFBO);
     glDeleteFramebuffers(1,&depthFBO);
     glDeleteFramebuffers(2,blurFBOs);

@@ -69,6 +69,25 @@ struct RenderData {
     vector<mat4> matrices;
 };
 
+struct BatchKey {
+    Model* model;
+    Shader* shader;
+
+    bool operator==(const BatchKey& other) const {
+        return model == other.model &&
+               shader == other.shader;
+    }
+};
+
+struct BatchKeyHash {
+    size_t operator()(const BatchKey& k) const {
+        size_t h1 = std::hash<Model*>{}(k.model);
+        size_t h2 = std::hash<Shader*>{}(k.shader);
+
+        return h1 ^ (h2 << 1);
+    }
+};
+
 class Renderer {
     private: 
     // Window
@@ -92,8 +111,10 @@ class Renderer {
     mat4 frameO;
     mat4 frameV;
     mat4 frameP;
-    vector<Shader*> updatedShaders;
+    unordered_set<Shader*> updatedShaders;
     float lightCullRadius = 15.0f;
+    unordered_map<BatchKey,size_t,BatchKeyHash> drawLookup;
+    unordered_map<BatchKey,size_t,BatchKeyHash> casterLookup;
  
     // Depth Pass
     int16_t shadowW = SHADOW_WIDTH;
@@ -152,7 +173,7 @@ class Renderer {
     inline void PrepareDraw(shared_ptr<Node>, Transform);
     inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&);
     inline void PrepareDrawLight(shared_ptr<Light>);
-    inline void CreateRenderData(shared_ptr<Object3D>, vector<RenderData>&);
+    inline void CreateRenderData(shared_ptr<Object3D>, vector<RenderData>&, unordered_map<BatchKey, size_t, BatchKeyHash>);
    
     inline void DepthPass();
     inline void PostProcessingPass();

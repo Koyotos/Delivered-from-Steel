@@ -7,6 +7,7 @@ uniform sampler2D hdrBuffer;
 uniform sampler2D bloomBlur;
 uniform bool bloom;
 uniform float exposure;
+uniform vec3 camPos;
 
 uniform sampler2D depthBuffer;
 uniform sampler2DArray shadowMaps2D;
@@ -36,7 +37,6 @@ vec3 computeVolumetric(vec2 uv) {
     float depth = texture(depthBuffer, uv).r;
     vec3 worldPos = reconstructWorldPos(uv, depth);
 
-    vec3 camPos = (invView * vec4(0,0,0,1)).xyz;
     vec3 rayDir = normalize(worldPos - camPos);
 
     float tMax = length(worldPos - camPos);
@@ -45,7 +45,7 @@ vec3 computeVolumetric(vec2 uv) {
     vec3 pos = camPos;
     vec3 result = vec3(0.0);
 
-    for(int i = 0; i < 64; i++) {
+    for(int i = 0; i < 16; i++) {
         pos += rayDir * stepSize;
 
         // transform to light space
