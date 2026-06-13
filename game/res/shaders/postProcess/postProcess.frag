@@ -4,6 +4,8 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D hdrBuffer;
+uniform sampler2D bloomBlur;
+uniform bool bloom;
 uniform float exposure;
 
 uniform sampler2D depthBuffer;
@@ -71,6 +73,11 @@ vec4 AdjustSaturation(vec3 color) {
 }
 
 void main() {
+    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+    if(bloom) {
+        vec3 bloomColor = texture(bloomBlur, TexCoords).rgb;
+        hdrColor += bloomColor;
+    }
     if(!godRays || !sunExists) {
         FragColor = vec4(texture(hdrBuffer, TexCoords).rgb, 1.0);
     } else {

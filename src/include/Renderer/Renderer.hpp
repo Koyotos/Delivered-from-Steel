@@ -113,6 +113,7 @@ class Renderer {
     GLuint screenQuadVAO;
     GLuint screenQuadVBO;
     GLuint screenQuadEBO;
+    GLuint bloomTexture;
     shared_ptr<Shader> postProcessingShader;
     shared_ptr<Shader> blurShader;
     vec3 sunDir;

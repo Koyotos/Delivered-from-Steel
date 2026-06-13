@@ -430,47 +430,71 @@ void Renderer::Draw() {
 }
 
 void Renderer::PostProcessingPass() {
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, windowW, windowH);
     glClear(GL_COLOR_BUFFER_BIT);
-    glActiveTexture(GL_TEXTURE0+TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
-    glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    postProcessingShader->Use();
     glDisable(GL_DEPTH_TEST);
-    postProcessingShader->SetInt("hdrBuffer",TEXTURES_SLOT_RENDERER_COLOR_BUFFER);
-    postProcessingShader->SetFloat("exposure", 0.6);
+
+    // HDR scene
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mainColorBuffer);
+    postProcessingShader->SetInt("hdrBuffer", 0);
+
+    // Depth
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depthColorBuffer);
-    postProcessingShader->SetBool("sunExists", sunExists);
     postProcessingShader->SetInt("depthBuffer", 1);
-    postProcessingShader->SetMat4("invProjection", inverse(frameP));
-    postProcessingShader->SetMat4("invView", inverse(frameV));
+
+    // Bloom
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, bloomTexture);
+    postProcessingShader->SetInt("bloomBlur", 2);
+    postProcessingShader->SetFloat("exposure", 0.6f);
+    postProcessingShader->SetBool("bloom", true);
+    postProcessingShader->SetBool("sunExists", sunExists);
+    postProcessingShader->SetMat4("invProjection",inverse(frameP));
+    postProcessingShader->SetMat4("invView",inverse(frameV));
     postProcessingShader->SetVec3("lightDir", sunDir);
     postProcessingShader->SetMat4("sunMatrix", sunMatrix);
-    postProcessingShader->SetVec3("lightColor", vec3(1.0));
-    postProcessingShader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
+    postProcessingShader->SetVec3("lightColor", vec3(1.0f));
+    postProcessingShader->SetInt("shadowMaps2D",TEXTURES_SLOT_SHADOWMAPS);
     glBindVertexArray(screenQuadVAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindTexture(GL_TEXTURE_2D,0);
+    glDrawElements(
+        GL_TRIANGLES,
+        6,
+        GL_UNSIGNED_INT,
+        nullptr
+    );
     glBindVertexArray(0);
 }
 
 void Renderer::BlurBloomPass() {
+    blurShader->Use();
     bool horizontal = true;
-    bool first_iteration = true;
-    int amount = 5;
-    blurShader->SetInt("image", 0);
+    bool firstIteration = true;
+    const int amount = 10;
+    glViewport(0, 0, windowW, windowH);
     glBindVertexArray(screenQuadVAO);
-    for (int i = 0; i < amount; i++) {
+    blurShader->SetInt("image", 0);
+    for (int i = 0; i < amount; ++i) {
         glBindFramebuffer(GL_FRAMEBUFFER, blurFBOs[horizontal]);
         blurShader->SetBool("horizontal", horizontal);
-        glBindTexture(GL_TEXTURE_2D,
-            first_iteration ? brightColorBuffer : blurColorBuffers[!horizontal]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(
+            GL_TEXTURE_2D,
+            firstIteration
+                ? brightColorBuffer
+                : blurColorBuffers[!horizontal]
+        );
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         horizontal = !horizontal;
-        if (first_iteration)
-            first_iteration = false;
+        if (firstIteration)
+            firstIteration = false;
     }
+    glBindVertexArray(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    bloomTexture = blurColorBuffers[!horizontal];
 }
 
 void Renderer::PrepareLights() {

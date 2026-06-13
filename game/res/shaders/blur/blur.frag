@@ -7,16 +7,8 @@ in vec2 TexCoords;
 uniform sampler2D image;
 uniform bool horizontal;
 
-uniform bool bloom;
-
 void main() {
-    if(!bloom) {
-        FragColor = vec4(texture(image, TexCoords).rgb, 1.0);
-        return;
-    }
-
     vec2 tex_offset = 1.0 / textureSize(image, 0);
-
     float weights[5] = float[](
         0.227027,
         0.1945946,
@@ -24,22 +16,16 @@ void main() {
         0.054054,
         0.016216
     );
-
     vec3 result = texture(image, TexCoords).rgb * weights[0];
-
-    for(int i = 1; i < 5; ++i)
-    {
-        if(horizontal)
-        {
+    for(int i = 1; i < 5; ++i) {
+        if(horizontal) {
             result += texture(image, TexCoords + vec2(tex_offset.x * i, 0.0)).rgb * weights[i];
             result += texture(image, TexCoords - vec2(tex_offset.x * i, 0.0)).rgb * weights[i];
         }
-        else
-        {
+        else {
             result += texture(image, TexCoords + vec2(0.0, tex_offset.y * i)).rgb * weights[i];
             result += texture(image, TexCoords - vec2(0.0, tex_offset.y * i)).rgb * weights[i];
         }
     }
-
     FragColor = vec4(result, 1.0);
 }
