@@ -415,6 +415,10 @@ void Renderer::Draw() {
         data.model->DrawInstanced(*data.shader, data.matrices);
     }
     glDisable(GL_CULL_FACE);
+    for(auto& node : drawVector2D) {
+        PROFILER_ADD_OBJECT();
+        node->Draw();
+    }
     glDisable(GL_DEPTH_TEST);
     for(auto& node : drawVectorUI) {
         PROFILER_ADD_OBJECT();
@@ -484,6 +488,9 @@ void Renderer::PrepareShaders() {
     for(auto& data : drawVector) {
         ConfigureShader(data.shader, NRT_OBJECT3D, false);
     }
+    for(auto& node : drawVector2D) {
+        ConfigureShader2D(node);
+    }
     for(auto& node : drawVectorUI) {
         ConfigureShader2D(node);
     }
@@ -520,7 +527,13 @@ void Renderer::ResolveZ() {
 void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) {
     t = visualCast->GetTransform();
     if(Cull(visualCast) && visualCast->TestDraw()) {
-        if(visualCast->RenderType() == NRT_OBJECT2D || visualCast->RenderType() == NRT_TEXTNODE) {
+        if(visualCast->RenderType() == NRT_OBJECT2D) {
+            if(static_pointer_cast<Object2D>(visualCast)->GetReqPerspective()) {
+                drawVector2D.push_back(visualCast);
+            } else {
+                drawVectorUI.push_back(visualCast);
+            }
+        } else if(visualCast->RenderType() == NRT_TEXTNODE) {
             drawVectorUI.push_back(visualCast);
         } else {
             CreateRenderData(static_pointer_cast<Object3D>(visualCast),drawVector);

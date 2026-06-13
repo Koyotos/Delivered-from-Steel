@@ -136,6 +136,7 @@ class Renderer {
     // Drawing
     shared_ptr<Scene> currentScene;
     vector<RenderData> drawVector;
+    vector<shared_ptr<VisualNode>> drawVector2D;
     vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
     vector<pair<shared_ptr<Light>,float>> lightsPosPoint;
