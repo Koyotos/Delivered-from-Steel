@@ -3,6 +3,7 @@
 
 #include "include/PhysicsManager/PhysicsNode.hpp"
 #include "include/Renderer/Sprite.hpp"
+#include "include/Globals/Globals.hpp"
 
 /*
 @brief Base class for every 2D game object. It combines physics and visuals. This class is on it's own

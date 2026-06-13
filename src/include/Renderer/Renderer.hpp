@@ -1,15 +1,7 @@
 #ifndef FE_RENDERER
 #define FE_RENDERER
 
-#include "include/Core/Scene.hpp"
-#include "include/Core/Transform.hpp"
-#include "include/Core/VisualNode.hpp"
-#include "include/Renderer/Shader.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
-
-#include "GLFW/glfw3.h"
-#include "include/Renderer/Camera.hpp"
-#include "include/Renderer/Light.hpp"
 
 #define GL_VERSION_MAJOR 4
 #define GL_VERSION_MINOR 6
@@ -75,7 +67,7 @@ struct BatchKey {
 
     bool operator==(const BatchKey& other) const {
         return model == other.model &&
-               shader == other.shader;
+        shader == other.shader;
     }
 };
 
@@ -83,7 +75,6 @@ struct BatchKeyHash {
     size_t operator()(const BatchKey& k) const {
         size_t h1 = std::hash<Model*>{}(k.model);
         size_t h2 = std::hash<Shader*>{}(k.shader);
-
         return h1 ^ (h2 << 1);
     }
 };

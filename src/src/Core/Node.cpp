@@ -1,5 +1,4 @@
 #include "include/Core/Node.hpp"
-#include <algorithm>
 
 vector<shared_ptr<Node>> Node::GetChildren() {
     return children;
@@ -10,7 +9,7 @@ void Node::AddChild(shared_ptr<Node> node) {
 }
 
 void Node::RemoveChild(shared_ptr<Node> node) {
-    auto it = std::find(children.begin(), children.end(), node);
+    auto it = find(children.begin(), children.end(), node);
     if (it != children.end()) {
         children.erase(it);
     }

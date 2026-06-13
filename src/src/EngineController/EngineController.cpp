@@ -1,8 +1,4 @@
 #include "include/EngineController/EngineController.hpp"
-#include "include/Renderer/Renderer.hpp"
-#include <functional>
-#include <filesystem>
-#include <utility>
 
 void EngineController::Init() {
 
@@ -22,25 +18,27 @@ void EngineController::Init() {
 	globals->Log("Globals OK");
 
 	try {
+		renderer = make_shared<Renderer>();
 		scm = make_shared<SceneManager>();
 		iom = make_shared<IOManager>();
-		Globals::GetGlobals().ioManager = iom;
 		rsm = make_shared<ResourceManager>();
-		renderer = make_shared<Renderer>();
-		Globals::GetGlobals().renderer = renderer;
 		crm = make_shared<CardManager>();
-		Globals::GetGlobals().cardManager = crm;
 		svm = make_shared<SaveManager>();
-		Globals::GetGlobals().sceneManager = scm;
 		wsm = make_shared<WorldStateManager>();
-		Globals::GetGlobals().worldStateManager = wsm;
 		aum = make_shared<AudioManager>();
-		if (!aum->Init()) {
+
+		globals->ioManager = iom;
+		globals->renderer = renderer;
+		globals->cardManager = crm;
+		globals->sceneManager = scm;
+		globals->worldStateManager = wsm;
+
+		if(!aum->Init()) {
 			globals->Log("Audio failed to initialize. Game will continue without sound.");
 			aum = nullptr;
 		}
 		rsm->SetAudioManager(aum);
-		Globals::GetGlobals().audioManager = aum;
+		globals->audioManager = aum;
 
 		rsm->ConfigurePaths();
 		renderer->Init(*rsm);
@@ -48,8 +46,8 @@ void EngineController::Init() {
 		crm->Init(rsm);
 		globals->SetGameFont(Font("res/fonts/8bit_wonder/8-BIT-WONDER.ttf",{32,32}));
 
-		svm->Register(std::static_pointer_cast<ISerializable>(wsm));
-		svm->Register(std::static_pointer_cast<ISerializable>(crm));
+		svm->Register(static_pointer_cast<ISerializable>(wsm));
+		svm->Register(static_pointer_cast<ISerializable>(crm));
 
 		ReadApplyConf();
 
@@ -69,7 +67,7 @@ void EngineController::LinkSceneObjects() {
 	active->GetPlayer()->SetCardManager(crm);
 
 	if (active->GetPlayer()) {
-		svm->Register(std::static_pointer_cast<ISerializable>(active->GetPlayer()));
+		svm->Register(static_pointer_cast<ISerializable>(active->GetPlayer()));
 	}
 	RegisterSceneSerializables(active);
 }
@@ -142,7 +140,7 @@ void EngineController::Run() {
 		lastTime = currentTime;
 		accumulator += deltaTime;
 
-		Globals::GetGlobals().SetDeltaTime(static_cast<float>(deltaTime));
+		globals->SetDeltaTime(static_cast<float>(deltaTime));
 
 		iom->UpdateVibration(static_cast<float>(deltaTime));
 
@@ -164,7 +162,7 @@ void EngineController::Run() {
 				psm->Update(active, static_cast<float>(fixedDeltaTime));
 				accumulator -= fixedDeltaTime;
 				t += fixedDeltaTime;
-				Globals::GetGlobals().SetPhysicsTime(t);
+				globals->SetPhysicsTime(t);
 			}
 		}
 
@@ -179,7 +177,7 @@ void EngineController::Run() {
 			pendingUnload = false;
 		}
 		if (!pendingStreamLevel.empty() && !isAsyncLoading) {
-			std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (pendingStreamLevel + ".json");
+			std::filesystem::path fullPath = globals->GetExecDir() / "res" / "scenes" / (pendingStreamLevel + ".json");
 			rsm->LoadSceneAsync(fullPath.string());
 			isAsyncLoading = true;
 			asyncLoadingName = pendingStreamLevel;
@@ -204,11 +202,11 @@ void EngineController::Run() {
 
 					isAsyncLoading = false;
 					asyncLoadingName = "";
-					Globals::GetGlobals().Log("Pre-loaded scene: " + nextLevelName);
+					globals->Log("Pre-loaded scene: " + nextLevelName);
 				}
 			}
 			else if (rsm->IsAsyncQueueEmpty()) {
-				Globals::GetGlobals().Log("ERROR: Loading " + asyncLoadingName + " interrupted! Resetting flag.");
+				globals->Log("ERROR: Loading " + asyncLoadingName + " interrupted! Resetting flag.");
 				isAsyncLoading = false;
 				asyncLoadingName = "";
 			}
@@ -250,16 +248,16 @@ void EngineController::Run() {
 		EndFrame();
 
 		//test save/load
-		if (Globals::GetGlobals().wantsToSave) {
+		if (globals->wantsToSave) {
 			SaveGame("save_0.json");
-			Globals::GetGlobals().Log("TEST: Game Saved (F5)");
-			Globals::GetGlobals().wantsToSave = false;
+			globals->Log("TEST: Game Saved (F5)");
+			globals->wantsToSave = false;
 		}
 
-		if (Globals::GetGlobals().wantsToLoad) {
+		if (globals->wantsToLoad) {
 			LoadGame("save_0.json");
-			Globals::GetGlobals().Log("TEST: Game Loaded (F9)");
-			Globals::GetGlobals().wantsToLoad = false;
+			globals->Log("TEST: Game Loaded (F9)");
+			globals->wantsToLoad = false;
 		}
 	}
 }
@@ -281,7 +279,7 @@ void EngineController::ActivateLoadedScene(shared_ptr<Scene> loadedScene, const 
 	}
 
 	activeLevelName = levelName;
-	Globals::GetGlobals().activeLevelName = activeLevelName;
+	globals->activeLevelName = activeLevelName;
 	activeLevelNode = loadedScene->GetRoot();
 
 	activeLevelNode->InitRecursive(scm->GetActive());
@@ -312,7 +310,7 @@ void EngineController::RegisterSceneSerializables(shared_ptr<Node> root) {
 	auto registerSerializable = [&](auto& self, const shared_ptr<Node>& node) -> void {
 		if (!node) return;
 
-		auto serializable = std::dynamic_pointer_cast<ISerializable>(node);
+		auto serializable = dynamic_pointer_cast<ISerializable>(node);
 		if (serializable) {
 			svm->Register(serializable);
 		}
@@ -420,7 +418,7 @@ EngineController::~EngineController() {
 void EngineController::LoadLevel(const string& levelName) {
 	auto levelPath = std::filesystem::path(levelName);
 	if (levelPath.is_absolute() || levelPath.has_parent_path()) {
-		Globals::GetGlobals().Log("Invalid level name.");
+		globals->Log("Invalid level name.");
 		return;
 	}
 
@@ -428,7 +426,7 @@ void EngineController::LoadLevel(const string& levelName) {
 		UnloadPreviousLevel();
 	}
 
-	std::filesystem::path fullPath = Globals::GetGlobals().GetExecDir() / "res" / "scenes" / (levelName + ".json");
+	std::filesystem::path fullPath = globals->GetExecDir() / "res" / "scenes" / (levelName + ".json");
 
 	if (activeLevelNode) {
 		previousLevelNode = activeLevelNode;
@@ -502,12 +500,12 @@ std::string EngineController::GetPreviousLevelName() const {
 }
 
 void EngineController::SaveGame(const string& filepath) {
-	auto saveDir = Globals::GetGlobals().GetExecDir() / "saves";
+	auto saveDir = globals->GetExecDir() / "saves";
 	std::filesystem::create_directories(saveDir);
 
 	std::filesystem::path inputPath(filepath);
 	if (inputPath.is_absolute() || inputPath.has_parent_path()) {
-		Globals::GetGlobals().Log("Invalid save path.");
+		globals->Log("Invalid save path.");
 		return;
 	}
 
@@ -519,30 +517,30 @@ void EngineController::SaveGame(const string& filepath) {
 	}
 
 	if (!svm->SaveGame(finalPath.string(), activeLevelName)) {
-		Globals::GetGlobals().Log("Failed to save game.");
+		globals->Log("Failed to save game.");
 	}
 }
 
 
 void EngineController::LoadGame(const string& filepath) {
-	auto saveDir = Globals::GetGlobals().GetExecDir() / "saves";
+	auto saveDir = globals->GetExecDir() / "saves";
 
 	std::filesystem::path inputPath(filepath);
 	if (inputPath.is_absolute() || inputPath.has_parent_path()) {
-		Globals::GetGlobals().Log("Invalid save path.");
+		globals->Log("Invalid save path.");
 		return;
 	}
 
 	auto finalPath = (saveDir / inputPath).lexically_normal();
 
 	if (!svm->LoadFile(finalPath.string())) {
-		Globals::GetGlobals().Log("Failed to open save file: " + finalPath.string());
+		globals->Log("Failed to open save file: " + finalPath.string());
 		return;
 	}
 
 	string levelToLoad = svm->GetCurrentSceneToLoad();
 	if (levelToLoad.empty()) {
-		Globals::GetGlobals().Log("Save file missing active_scene.");
+		globals->Log("Save file missing active_scene.");
 		return;
 	}
 

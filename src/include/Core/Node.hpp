@@ -1,14 +1,16 @@
 #ifndef FE_NODE
 #define FE_NODE
 
+#include "include/IOManager/InputEvent.hpp"
+#include "include/Renderer/Shader.hpp"
+
 #include <any>
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include "include/IOManager/InputEvent.hpp"
-#include "include/Renderer/Shader.hpp"
+#include <algorithm>
 #include <stdexcept>
 
 #define fromMap(type,key,data) FromMap<type>(data,key)

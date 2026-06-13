@@ -36,26 +36,26 @@ class EngineController {
 
     shared_ptr<Node> activeLevelNode = nullptr;
     shared_ptr<Node> previousLevelNode = nullptr;
-    std::string activeLevelName = "";
-    std::string previousLevelName = "";
+    string activeLevelName = "";
+    string previousLevelName = "";
     shared_ptr<MenuManager> mm;
     shared_ptr<Scene> menuScene;
-    std::unordered_set<const Node*> registeredSerializableRoots;
+    unordered_set<const Node*> registeredSerializableRoots;
 
-    std::string pendingStreamLevel = "";
+    string pendingStreamLevel = "";
     bool pendingUnload = false;
     bool pendingSwap = false;
     bool pendingF9 = false;
-    std::string pendingF9Path = "";
+    string pendingF9Path = "";
     bool pendingRespawn = false;
     bool discardAsyncResult = false;
-    std::vector<shared_ptr<Node>> nodesToUnload;
+    vector<shared_ptr<Node>> nodesToUnload;
 	void FlattenForUnload(shared_ptr<Node> node);
 	shared_ptr<Scene> nextLevelScene = nullptr;
-	std::string nextLevelName = "";
+	string nextLevelName = "";
 
     bool isAsyncLoading = false;
-    std::string asyncLoadingName = "";
+    string asyncLoadingName = "";
 
     double currentTime;
     double deltaTime; 
