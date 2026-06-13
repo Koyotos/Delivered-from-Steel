@@ -24,6 +24,8 @@ T FromMap(const std::unordered_map<std::string, std::any>& data, const std::stri
     return std::any_cast<T>(it->second);
 }
 
+typedef vector<std::any> jsonVector;
+
 using namespace std;
 
 class Scene;

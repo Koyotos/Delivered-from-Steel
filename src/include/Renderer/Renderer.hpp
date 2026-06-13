@@ -59,7 +59,8 @@ enum RendererCommand {
     RCMD_DIR_DISTANCE = 8,
     RCMD_LIGHT_CULL_RADIUS = 9,
     RCMD_SATURATION_CONTROL = 10, 
-    RCMD_SATURATION_VALUE = 11
+    RCMD_SATURATION_VALUE = 11,
+    RCMD_FULLSCREEN = 12
 };
 
 struct RenderData { 
@@ -72,6 +73,7 @@ class Renderer {
     private: 
     // Window
     GLFWwindow* window;
+    GLFWmonitor* monitor;
     uint16_t windowW;
     uint16_t windowH;
 

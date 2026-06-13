@@ -1,4 +1,5 @@
 #include "include/EngineController/EngineController.hpp"
+#include "include/Renderer/Renderer.hpp"
 #include <functional>
 #include <filesystem>
 #include <utility>
@@ -50,6 +51,8 @@ void EngineController::Init() {
 		svm->Register(std::static_pointer_cast<ISerializable>(wsm));
 		svm->Register(std::static_pointer_cast<ISerializable>(crm));
 
+		ReadApplyConf();
+
 	} catch(const exception& except) {
 		globals->Log("Engine initialization error : " + string(except.what()));
 		exit(2);
@@ -81,6 +84,46 @@ void EngineController::ProcessNode(shared_ptr<Node> node) {
 	for (auto& child : node->GetChildren()) {
 		ProcessNode(child);
 	}
+}
+
+
+void EngineController::ReadApplyConf() {
+	string valueS;
+	bool valueB;
+	float valueF;
+	
+	unordered_map<string, std::any> confData = rsm->LoadJSON(confPath);
+
+	// Window
+	jsonVector size = fromMap(jsonVector, "windowSize", confData);
+	renderer->Reconfigure(RCMD_RESIZE_W, any_cast<int64_t>(size[0]));
+	renderer->Reconfigure(RCMD_RESIZE_H, any_cast<int64_t>(size[1]));
+	renderer->Reconfigure(RCMD_REMAKE_WINDOW);
+
+	valueB = fromMap(bool, "fullscreen", confData);
+	renderer->Reconfigure(RCMD_FULLSCREEN);
+
+	valueS = fromMap(string, "shadows", confData);
+	renderer->Reconfigure(RCMD_SHADOW_QUALITY, valueS == "low" ?
+		 RCMDVAL_SHADOWS_LOW : valueS == "medium" ? RCMDVAL_SHADOWS_MEDIUM : RCMDVAL_SHADOWS_HIGH);
+
+	valueB = fromMap(bool, "godRays", confData);
+	renderer->Reconfigure(RCMD_GOD_RAYS, valueB);
+
+	valueB = fromMap(bool, "bloom", confData);
+	renderer->Reconfigure(RCMD_BLOOM, valueB);
+
+	valueF = fromMap(float, "cdpl", confData);
+	renderer->Reconfigure(RCMD_POINT_CULL_DIST,0,valueF);
+
+	valueF = fromMap(float, "cdsl", confData);
+	renderer->Reconfigure(RCMD_SPOT_CULL_DIST,0,valueF);
+
+	valueF = fromMap(float, "ddist", confData);
+	renderer->Reconfigure(RCMD_DIR_DISTANCE,0,valueF);
+
+	valueF = fromMap(float, "lcull", confData);
+	renderer->Reconfigure(RCMD_LIGHT_CULL_RADIUS,0,valueF);
 }
 
 void EngineController::Run() {

@@ -23,7 +23,8 @@ class EngineController {
 
     Globals* globals;
     PhysicsManager* psm;
-
+    const char* confPath = "settings.json";
+    
     shared_ptr<SceneManager> scm;
     shared_ptr<IOManager> iom;
     shared_ptr<Renderer> renderer;
@@ -140,6 +141,7 @@ class EngineController {
     void QueueSwapActiveAndPrevious() { pendingSwap = true; }
     void TriggerRespawn();
     void CancelAsyncLoad();
+    void ReadApplyConf();
 
     std::string GetActiveLevelName() const;
     std::string GetPreviousLevelName() const;

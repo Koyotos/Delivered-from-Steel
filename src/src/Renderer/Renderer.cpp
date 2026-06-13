@@ -222,6 +222,14 @@ void Renderer::Reconfigure(const RendererCommand& command, const int16_t& iv, co
             postProcessingShader->SetFloat("saturationValue", fv);
             break;
         }
+        case RCMD_FULLSCREEN: {
+            if(iv) {
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+                glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            } else {
+                glfwSetWindowMonitor(window,nullptr,0,0,windowW, windowH, GLFW_DONT_CARE);
+            }
+        }
     }
 }
 
