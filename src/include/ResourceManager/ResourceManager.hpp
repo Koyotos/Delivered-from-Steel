@@ -21,6 +21,7 @@
 #include "include/Game/Objects/MovingPlatform.hpp"
 #include "include/Game/Objects/Drone.hpp"
 #include "include/Game/Objects/CardFind.hpp"
+#include "include/Game/Objects/ManaFind.hpp"
 #include "include/Game/Objects/Checkpoint.hpp"
 #include "include/Game/Objects/LevelGateway.hpp"
 #include "include/Renderer/Camera.hpp"
@@ -74,6 +75,7 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<Enemy>("Enemy"),
     RegisterObjectType<Drone>("Drone"),
 	RegisterObjectType<CardFind>("CardFind"),
+	RegisterObjectType<ManaFind>("ManaFind"),
 	RegisterObjectType<Checkpoint>("Checkpoint"),
     RegisterObjectType<ShieldTankEnemy>("ShieldTankEnemy"),
     RegisterObjectType<ChargingEnemy>("ChargingEnemy"),

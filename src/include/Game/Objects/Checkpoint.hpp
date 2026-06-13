@@ -12,10 +12,14 @@ class Checkpoint : public Object3D {
 private:
     std::shared_ptr<Player> player = nullptr;
     std::shared_ptr<Object3D> clothObject = nullptr;
+    std::shared_ptr<Object2D> infoButtonObject = nullptr;
     std::shared_ptr<Light> pointLight = nullptr;
+
+    glm::vec3 buttonNormalScale;
 
     float activationRadius = 3.0f;
 	float colorTransitionProgress = 0.0f;
+	float buttonScaleProgress = 0.0f;
 
     bool isActivated = false;
     bool playerInsideAndVisible = false;

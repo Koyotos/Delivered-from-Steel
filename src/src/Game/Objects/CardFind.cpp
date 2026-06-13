@@ -1,45 +1,29 @@
 #include "include/Game/Objects/CardFind.hpp"
+
 #include "include/Globals/Globals.hpp"
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/SaveManager/WorldStateManager.hpp"
 
-CardFind::CardFind() : Object2D(), isCollected(false) {}
+CardFind::CardFind() : PickUpAbstract(){}
 
-CardFind::CardFind(const unordered_map<string, std::any>& data) : Object2D(data), isCollected(false) {
+CardFind::CardFind(const unordered_map<string, std::any>& data) : PickUpAbstract(data) {
     int cardType = (int)fromMap(int64_t, "cardType", data);
     cardTypeToUnlock = static_cast<CardType>(cardType);
+
+    color2 = vec3(fromMap(float, "lightR", data)/255, fromMap(float, "lightG", data)/255, fromMap(float, "lightB", data)/255);
+	color1 = color2 * 0.5f;
+	specular1 = color1 * 0.05f;
+	specular2 = color2 * 0.05f;
 }
 
 CardFind::~CardFind() {}
 
-void CardFind::OnCollisionEnter(std::shared_ptr<Collider> other) {
-    if (isCollected) return;
+void CardFind::OnPickUp() {
+    auto cardManager = Globals::GetGlobals().cardManager;
 
-    std::shared_ptr<PhysicsNode> owner = other->GetOwner();
-    if (owner && owner->GetObjectType() == ObjectType::Player) {
-        isCollected = true;
-
-        auto cardManager = Globals::GetGlobals().cardManager;
-
-        if (cardManager) {
-            std::shared_ptr<Card> newCard = cardManager->CreateCard(cardTypeToUnlock);
-            newCard->AssignPlayer(player);
-            cardManager->LearnCard(newCard);
-        }
-        std::string id = this->GetSaveID();
-        if (!id.empty()) {
-            auto& globals = Globals::GetGlobals();
-            if (globals.worldStateManager) {
-                std::string currentLevel = globals.activeLevelName;
-                globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
-            }
-        }
-
-		this->Disable();
+    if (cardManager) {
+        std::shared_ptr<Card> newCard = cardManager->CreateCard(cardTypeToUnlock);
+        newCard->AssignPlayer(player);
+        cardManager->LearnCard(newCard);
     }
-}
-
-
-void CardFind::Init(shared_ptr<Scene> scene) {
-    player = scene->GetPlayer();
 }

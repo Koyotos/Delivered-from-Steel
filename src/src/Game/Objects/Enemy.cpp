@@ -190,12 +190,19 @@ bool Enemy::AllRaycast(int direction) {
 }
 
 void Enemy::Patrol(float dt) {
-	if (AllRaycast(direction) && !AllRaycast(-direction)) {
-		direction *= -1.0f;
-		ScaleToDirection();
+	if (AllRaycast(direction)) {
+		if (!AllRaycast(-direction)) {
+			direction *= -1.0f;
+			ScaleToDirection();
+			SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
+		}
+		else {
+			SetVelocity(glm::vec2(0.0f, GetVelocity().y));
+		}
 	}
-
-	SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
+	else {
+		SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
+	}
 }
 
 void Enemy::ScaleToDirection() {
