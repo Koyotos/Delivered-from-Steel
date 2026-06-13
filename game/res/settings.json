@@ -1,0 +1,11 @@
+{
+    "windowSize" : [1920, 1080],
+    "fullscreen" : true,
+    "shadows" : "high",
+    "godRays" : false,
+    "bloom" : true,
+    "cdpl" : 20.0,
+    "cdsl" : 20.0,
+    "ddist" : 50.0,
+    "lcull" : 50.0
+}

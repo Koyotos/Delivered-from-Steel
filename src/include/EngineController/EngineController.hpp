@@ -23,7 +23,7 @@ class EngineController {
 
     Globals* globals;
     PhysicsManager* psm;
-    const char* confPath = "settings.json";
+    const char* confPath = "res/settings.json";
     
     shared_ptr<SceneManager> scm;
     shared_ptr<IOManager> iom;
