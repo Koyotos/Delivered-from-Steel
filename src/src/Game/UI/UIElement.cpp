@@ -115,7 +115,7 @@ void UIElement::FadeIn(float time, EaseType ease, float delay)
 	t.duration = time;
 	t.elapsed = 0.0f;
 	t.ease = ease;
-	t.startAlpha = 0.0f;
+	t.startAlpha = this->GetAlpha();
 	t.targetAlpha = 1.0f;
 	t.delay = delay;
 	tweens.push_back(t);

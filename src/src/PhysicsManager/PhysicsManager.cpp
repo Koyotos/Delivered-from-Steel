@@ -13,17 +13,11 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update physics
     for (auto& node : currentNodes) {
-        if (!node->TestPhysics()) continue;
         node->Physics(dt);
-        if (!node->GetStatic()) {
-            node->ResetGlobal();
-            node->SetTransformChanged(true);
-        }
     }
 
     // Process collisions
     for (auto& node : currentNodes) {
-        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             node->processCollisions();
@@ -35,7 +29,6 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update collider positions
     for (auto& node : currentNodes) {
-        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             col->UpdatePosition(node->GetTransform());
@@ -44,7 +37,6 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     // Build quadtree
     quadTree = QuadTree(0, WorldBounds);
     for (auto& node : currentNodes) {
-        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             quadTree.Insert(node.get());
@@ -59,7 +51,6 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     vector<pair<PhysicsNode*, CollisionInfo>> actualHits;
 
     for (auto& node : currentNodes) {
-        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (!col) continue;
 
@@ -102,7 +93,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
 void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
-	if (physicsNode) {
+	if (physicsNode && physicsNode->TestPhysics()) {
 	    currentNodes.push_back(physicsNode);
 		physicsNode->Init();
 	}

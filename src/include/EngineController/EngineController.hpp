@@ -34,7 +34,6 @@ class EngineController {
     shared_ptr<SaveManager> svm;
     shared_ptr<WorldStateManager> wsm;
 
-    shared_ptr<Scene> activeLevelScene = nullptr;
     shared_ptr<Node> activeLevelNode = nullptr;
     shared_ptr<Node> previousLevelNode = nullptr;
     std::string activeLevelName = "";
@@ -52,6 +51,8 @@ class EngineController {
     bool discardAsyncResult = false;
     std::vector<shared_ptr<Node>> nodesToUnload;
 	void FlattenForUnload(shared_ptr<Node> node);
+	shared_ptr<Scene> nextLevelScene = nullptr;
+	std::string nextLevelName = "";
 
     bool isAsyncLoading = false;
     std::string asyncLoadingName = "";
@@ -65,6 +66,7 @@ class EngineController {
     void RegisterSceneSerializables(shared_ptr<Scene> scene);
     void RegisterSceneSerializables(shared_ptr<Node> root);
     void ApplyWorldStateToNode(shared_ptr<Node> root, const string& levelName);
+    void ActivateLoadedScene(shared_ptr<Scene> loadedScene, const std::string& levelName);
 
     public:
     // Engine API
@@ -133,7 +135,6 @@ class EngineController {
     ~EngineController();
 
     void LoadLevel(const string& levelName);
-    void StreamNextLevel(const string& levelName);
     void UnloadPreviousLevel();
     void SwapActiveAndPrevious();
     void QueueStreamNextLevel(const std::string& levelName) { pendingStreamLevel = levelName; }
