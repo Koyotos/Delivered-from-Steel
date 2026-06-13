@@ -4,7 +4,10 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D hdrBuffer;
+uniform sampler2D bloomBlur;
+uniform bool bloom;
 uniform float exposure;
+uniform vec3 camPos;
 
 uniform sampler2D depthBuffer;
 uniform sampler2DArray shadowMaps2D;
@@ -34,7 +37,6 @@ vec3 computeVolumetric(vec2 uv) {
     float depth = texture(depthBuffer, uv).r;
     vec3 worldPos = reconstructWorldPos(uv, depth);
 
-    vec3 camPos = (invView * vec4(0,0,0,1)).xyz;
     vec3 rayDir = normalize(worldPos - camPos);
 
     float tMax = length(worldPos - camPos);
@@ -43,7 +45,7 @@ vec3 computeVolumetric(vec2 uv) {
     vec3 pos = camPos;
     vec3 result = vec3(0.0);
 
-    for(int i = 0; i < 64; i++) {
+    for(int i = 0; i < 16; i++) {
         pos += rayDir * stepSize;
 
         // transform to light space
@@ -71,6 +73,11 @@ vec4 AdjustSaturation(vec3 color) {
 }
 
 void main() {
+    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+    if(bloom) {
+        vec3 bloomColor = texture(bloomBlur, TexCoords).rgb;
+        hdrColor += bloomColor;
+    }
     if(!godRays || !sunExists) {
         FragColor = vec4(texture(hdrBuffer, TexCoords).rgb, 1.0);
     } else {

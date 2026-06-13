@@ -1,8 +1,4 @@
 #include "include/AudioManager/AudioManager.hpp"
-#include "include/Globals/Globals.hpp"
-#define STB_VORBIS_HEADER_ONLY
-#include <stb_vorbis.c>
-#include <fstream>
 
 AudioManager::AudioManager() : device(nullptr), context(nullptr) {}
 
@@ -132,10 +128,10 @@ void AudioManager::Update() {
 	}
 }
 
-ALuint AudioManager::LoadWav(const std::string& filepath) {
+ALuint AudioManager::LoadWav(const string& filepath) {
 	if (!context) return 0;
 
-	std::ifstream file(filepath, std::ios::binary);
+	ifstream file(filepath, ios::binary);
 	if (!file.is_open()) {
 		Globals::GetGlobals().Log("AUDIO ERROR: Can't find " + filepath);
 		return 0;
@@ -144,12 +140,12 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	char buffer[5] = { 0 };
 
 	file.read(buffer, 4);
-	if (std::string(buffer) != "RIFF") { Globals::GetGlobals().Log("AUDIO ERROR: File is not RIFF"); return 0; }
-	file.seekg(4, std::ios::cur);
+	if (string(buffer) != "RIFF") { Globals::GetGlobals().Log("AUDIO ERROR: File is not RIFF"); return 0; }
+	file.seekg(4, ios::cur);
 	file.read(buffer, 4);
-	if (std::string(buffer) != "WAVE") { Globals::GetGlobals().Log("AUDIO ERROR: File is not WAVE"); return 0; }
+	if (string(buffer) != "WAVE") { Globals::GetGlobals().Log("AUDIO ERROR: File is not WAVE"); return 0; }
 	file.read(buffer, 4);
-	if (std::string(buffer) != "fmt ") { Globals::GetGlobals().Log("AUDIO ERROR: Missing fmt chunk"); return 0; }
+	if (string(buffer) != "fmt ") { Globals::GetGlobals().Log("AUDIO ERROR: Missing fmt chunk"); return 0; }
 
 	uint32_t fmtSize;
 	file.read(reinterpret_cast<char*>(&fmtSize), 4);
@@ -166,18 +162,18 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	file.read(reinterpret_cast<char*>(&blockAlign), 2);
 	file.read(reinterpret_cast<char*>(&bitsPerSample), 2);
 
-	if (fmtSize > 16) file.seekg(fmtSize - 16, std::ios::cur);
+	if (fmtSize > 16) file.seekg(fmtSize - 16, ios::cur);
 
 	uint32_t dataSize = 0;
 	bool foundData = false;
 
 	while (file.read(buffer, 4)) {
 		file.read(reinterpret_cast<char*>(&dataSize), 4);
-		if (std::string(buffer, 4) == "data") {
+		if (string(buffer, 4) == "data") {
 			foundData = true;
 			break;
 		}
-		file.seekg(dataSize, std::ios::cur);
+		file.seekg(dataSize, ios::cur);
 	}
 
 	if (!foundData) { Globals::GetGlobals().Log("AUDIO ERROR: Missing data chunk"); return 0; }
@@ -187,7 +183,7 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 		return 0;
 	}
 
-	std::vector<char> audioData(dataSize);
+	vector<char> audioData(dataSize);
 	file.read(audioData.data(), dataSize);
 
 	ALenum format = 0;
@@ -208,7 +204,7 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	return alBuffer;
 }
 
-void AudioManager::LoadSound(const std::string& name, const std::string& filepath) {
+void AudioManager::LoadSound(const string& name, const string& filepath) {
 	if (!context) return;
 	if (audioBuffers.find(name) != audioBuffers.end()) return;
 
@@ -230,7 +226,7 @@ ALuint AudioManager::GetAvailableSource() {
 	return 0;
 }
 
-void AudioManager::PlaySound2D(const std::string& name, float volume, float pitch, bool loop) {
+void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bool loop) {
 	if (!context) return;
 	auto it = audioBuffers.find(name);
 	if (it == audioBuffers.end()) return;
@@ -248,7 +244,7 @@ void AudioManager::PlaySound2D(const std::string& name, float volume, float pitc
 	alSourcePlay(source);
 }
 
-void AudioManager::PlaySound3D(const std::string& name, glm::vec3 position, float volume, float pitch, bool loop) {
+void AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop) {
 	if (!context) return;
 	auto it = audioBuffers.find(name);
 	if (it == audioBuffers.end()) return;
@@ -271,7 +267,7 @@ void AudioManager::PlaySound3D(const std::string& name, glm::vec3 position, floa
 }
 
 
-void AudioManager::RegisterBGM(const std::string& name, const std::string& filepath) {
+void AudioManager::RegisterBGM(const string& name, const string& filepath) {
 	if (!context) return;
 	if (streams.find(name) != streams.end()) return;
 
@@ -287,7 +283,7 @@ void AudioManager::RegisterBGM(const std::string& name, const std::string& filep
 bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	if (!context || !stream.oggStream) return false;
 
-	thread_local std::vector<short> pcm;
+	thread_local vector<short> pcm;
 	if (pcm.size() != BUFFER_SIZE) {
 		pcm.resize(BUFFER_SIZE);
 	}
@@ -314,7 +310,7 @@ bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	return false;
 }
 
-bool AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
+bool AudioManager::PlayBGM(const string& name, float volume, bool loop) {
 	if (!context) return false;
 	auto it = streams.find(name);
 	if (it == streams.end()) return false;
@@ -361,7 +357,7 @@ bool AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
 }
 
 
-void AudioManager::StopBGM(const std::string& name) {
+void AudioManager::StopBGM(const string& name) {
 	if (!context) return;
 	auto it = streams.find(name);
 	if (it == streams.end()) return;
@@ -390,7 +386,7 @@ void AudioManager::StopAllBGM() {
 	}
 }
 
-void AudioManager::SetListenerPosition(glm::vec3 position) {
+void AudioManager::SetListenerPosition(vec3 position) {
 	if (!context) return;
 	alListener3f(AL_POSITION, position.x, position.y, position.z);
 }
@@ -404,7 +400,7 @@ void AudioManager::StopAll() {
 	isPlaylistActive = false;
 }
 
-void AudioManager::PlayPlaylist(const std::vector<std::string>& trackNames, float volume) {
+void AudioManager::PlayPlaylist(const vector<string>& trackNames, float volume) {
 	if (!context || trackNames.empty()) return;
 
 	currentPlaylist = trackNames;

@@ -134,13 +134,6 @@ class ResourceManager {
     inline shared_ptr<Model> LoadModel(const string&);
     inline shared_ptr<Sprite> LoadSprite(const string&);
 
-    // Helper
-    inline string LoadPlainText(const path&);
-
-    // Json methods
-    inline std::any JSONtoAny(const json&);
-    inline unordered_map<string, std::any> LoadJSON(const path&);
-
     // Node parser helpers
     inline void ApplyAssetsGFX(shared_ptr<Node>, unordered_map<string,std::any>);
     inline void ApplyAssetsSFX(shared_ptr<Node>, unordered_map<string,std::any>);
@@ -151,6 +144,14 @@ class ResourceManager {
     shared_ptr<AudioManager> audioManager;
 
     public:
+
+    // Helper
+    inline string LoadPlainText(const path&);
+
+    // Json methods
+    inline std::any JSONtoAny(const json&);
+    inline unordered_map<string, std::any> LoadJSON(const path&);
+
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void UnloadScene(shared_ptr<Scene>);
     void ConfigurePaths();
