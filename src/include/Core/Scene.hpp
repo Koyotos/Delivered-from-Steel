@@ -54,6 +54,9 @@ class Scene {
     */
     void UpdateTransforms(shared_ptr<Node>, Transform);
 
+    vector<string> scenePlaylist;
+    string sceneAmbient = "";
+
     std::string GetName() const { return name; }
 };
 

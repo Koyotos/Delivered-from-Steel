@@ -5,7 +5,10 @@
         "class": "Node",
         "process": true,
         "input": false,
-        "physics": false
+        "physics": false,
+		"sounds": [],
+		"bgms": ["biom1"],
+		"playlist": ["biom1"]
     },
     "2": {
         "parent": 1,

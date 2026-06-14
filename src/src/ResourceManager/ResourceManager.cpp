@@ -181,11 +181,12 @@ void ResourceManager::ManageAudio(unordered_map<string,std::any> data) {
         }
         if (data.contains("playlist") && audioManager) {
             vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", data);
-            vector<string> playlistNames;
             for (const auto& song : playlistAny) {
-                playlistNames.push_back(std::any_cast<string>(song));
+                currentlyLoading->scenePlaylist.push_back(std::any_cast<string>(song));
             }
-            audioManager->PlayPlaylist(playlistNames, 0.4f);
+        }
+        if (data.contains("ambient") && audioManager) {
+            currentlyLoading->sceneAmbient = fromMap(string, "ambient", data);
         }
 }
 
@@ -199,6 +200,7 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
                 shared_ptr<Node> node = octEntry.second(objVarList);
                 ApplyAssetsGFX(node, objVarList);
                 ApplyAssetsSFX(node, objVarList);
+				ManageAudio(objVarList);
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }
