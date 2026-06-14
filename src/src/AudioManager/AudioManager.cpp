@@ -67,7 +67,7 @@ void AudioManager::CleanUp() {
 	}
 }
 
-void AudioManager::Update() {
+void AudioManager::Update(float deltaTime) {
 	if (!context) return;
 	bool isMusicPlaying = false;
 	bool isAmbientPlaying = false;
@@ -75,6 +75,20 @@ void AudioManager::Update() {
 	for (auto& pair : streams) {
 		AudioStream& stream = pair.second;
 		if (!stream.isPlaying) continue;
+
+		if (stream.fadeState != 0) {
+			stream.currentFadeMultiplier += (stream.fadeState * stream.fadeSpeed * deltaTime);
+			stream.currentFadeMultiplier = std::clamp(stream.currentFadeMultiplier, 0.0f, 1.0f);
+			float currentVolume = stream.isAmbient ? ambientVolume : bgmVolume;
+			alSourcef(stream.source, AL_GAIN, stream.baseVolume * stream.currentFadeMultiplier * currentVolume);
+			if (stream.fadeState == -1 && stream.currentFadeMultiplier <= 0.0f) {
+				StopStream(pair.first);
+				continue;
+			}
+			if (stream.fadeState == 1 && stream.currentFadeMultiplier >= 1.0f) {
+				stream.fadeState = 0;
+			}
+		}
 
 		ALint processed;
 		alGetSourcei(stream.source, AL_BUFFERS_PROCESSED, &processed);
@@ -356,7 +370,7 @@ bool AudioManager::PlayBGM(const string& name, float volume, bool loop) {
 }
 
 
-void AudioManager::StopBGM(const string& name) {
+void AudioManager::StopStream(const string& name) {
 	if (!context) return;
 	auto it = streams.find(name);
 	if (it == streams.end()) return;
@@ -382,7 +396,7 @@ void AudioManager::StopAllBGM() {
 	isPlaylistActive = false;
 	for (auto& pair : streams) {
 		if (!pair.second.isAmbient) {
-			StopBGM(pair.first);
+			StopStream(pair.first);
 		}
 	}
 }
@@ -460,7 +474,7 @@ bool AudioManager::PlayAmbient(const string& name, float volume, bool loop) {
 void AudioManager::StopAllAmbient() {
 	for (auto& pair : streams) {
 		if (pair.second.isAmbient) {
-			StopBGM(pair.first);
+			StopStream(pair.first);
 		}
 	}
 }
@@ -474,10 +488,10 @@ bool AudioManager::StartStream(const string& name, float volume, bool loop) {
 	if (stream.isPlaying) return true;
 
 	if (stream.isAmbient) {
-		StopAllAmbient();
+		FadeOutAllAmbient(1.5f);
 	}
 	else {
-		StopAllBGM();
+		FadeOutAllBGM(1.5f);
 	}
 
 	int error;
@@ -492,6 +506,9 @@ bool AudioManager::StartStream(const string& name, float volume, bool loop) {
 	stream.sampleRate = info.sample_rate;
 	stream.loop = loop;
 	stream.baseVolume = volume;
+	stream.currentFadeMultiplier = 0.0f;
+	stream.fadeState = 1;
+	stream.fadeSpeed = 1.0f / 1.5f;
 
 	ALuint queuedBuffers[4];
 	int filledBufferCount = 0;
@@ -510,10 +527,31 @@ bool AudioManager::StartStream(const string& name, float volume, bool loop) {
 
 	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
 	float currentVolume = stream.isAmbient ? ambientVolume : bgmVolume;
-	alSourcef(stream.source, AL_GAIN, stream.baseVolume * currentVolume);
+	alSourcef(stream.source, AL_GAIN, stream.baseVolume * stream.currentFadeMultiplier * currentVolume);
 	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
 
 	alSourcePlay(stream.source);
 	stream.isPlaying = true;
 	return true;
+}
+
+void AudioManager::FadeOutAllBGM(float duration) {
+	isPlaylistActive = false;
+	float speed = (duration > 0.0f) ? (1.0f / duration) : 1000.0f;
+	for (auto& pair : streams) {
+		if (!pair.second.isAmbient && pair.second.isPlaying) {
+			pair.second.fadeState = -1;
+			pair.second.fadeSpeed = speed;
+		}
+	}
+}
+
+void AudioManager::FadeOutAllAmbient(float duration) {
+	float speed = (duration > 0.0f) ? (1.0f / duration) : 1000.0f;
+	for (auto& pair : streams) {
+		if (pair.second.isAmbient && pair.second.isPlaying) {
+			pair.second.fadeState = -1;
+			pair.second.fadeSpeed = speed;
+		}
+	}
 }

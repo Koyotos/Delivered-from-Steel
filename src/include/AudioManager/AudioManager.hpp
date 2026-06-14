@@ -33,6 +33,9 @@ struct AudioStream {
 	string currentFile = "";
 	bool isAmbient = false;
 	float baseVolume = 1.0f;
+	int fadeState = 0; // 0 = no fade, 1 = fading in, -1 = fading out
+	float currentFadeMultiplier = 1.0f;
+	float fadeSpeed = 1.0f;
 };
 
 /**
@@ -103,9 +106,10 @@ public:
 	void CleanUp();
 	/**
 	 * @brief Updates streaming buffers. Must be called every frame.
+	 * @param1 float - delta time since last update
 	 * @return void
 	 */
-	void Update();
+	void Update(float deltaTime);
 	/**
 	 * @brief Loads a sound effect into memory.
 	 * @param1 const std::string& - unique name for the sound
@@ -149,11 +153,11 @@ public:
 	 */
 	bool PlayBGM(const string& name, float volume = 1.0f, bool loop = true);
 	/**
-	 * @brief Stops a specific BGM stream.
+	 * @brief Stops a specific stream.
 	 * @param1 const std::string& - stream name
 	 * @return void
 	 */
-	void StopBGM(const string& name);
+	void StopStream(const string& name);
 	/**
 	 * @brief Stops all active BGM streams.
 	 * @return void
@@ -185,6 +189,9 @@ public:
 	void RegisterAmbient(const string& name, const string& filepath);
 	bool PlayAmbient(const string& name, float volume = 1.0f, bool loop = true);
 	void StopAllAmbient();
+
+	void FadeOutAllBGM(float duration = 1.5f);
+	void FadeOutAllAmbient(float duration = 1.5f);
 };
 
 #endif

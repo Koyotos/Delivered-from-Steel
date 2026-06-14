@@ -239,7 +239,7 @@ void EngineController::Run() {
 		}
 
 		if (aum) {
-			aum->Update();
+			aum->Update(deltaTime);
 		}
 
 		iom->ClearQueue();
