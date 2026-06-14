@@ -9,7 +9,6 @@ Bullet::Bullet(const std::unordered_map<std::string, std::any>& data)
 	damage = 100.0f;
 	direction = vec2(0.0f, 0.0f);
 	lifeTime = 2.f;
-	SetVisible(false);
 }
 
 void Bullet::Physics(const float& deltaTime)
