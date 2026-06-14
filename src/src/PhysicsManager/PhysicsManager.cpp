@@ -13,11 +13,13 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update physics
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         node->Physics(dt);
     }
 
     // Process collisions
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             node->processCollisions();
@@ -29,6 +31,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update collider positions
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             col->UpdatePosition(node->GetTransform());
@@ -37,6 +40,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     // Build quadtree
     quadTree = QuadTree(0, WorldBounds);
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             quadTree.Insert(node.get());
@@ -51,6 +55,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     vector<pair<PhysicsNode*, CollisionInfo>> actualHits;
 
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (!col) continue;
 
@@ -64,6 +69,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
         for (auto& other : candidates) {
             if (node.get() == other) continue;
+            if (!node->TestPhysics()) continue;
 
             auto otherCol = other->GetCollider();
             if (!otherCol) continue;
@@ -92,11 +98,13 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 }
 
 void PhysicsManager::UpdateNode(shared_ptr<Node> node) {
-	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
-	if (physicsNode && physicsNode->TestPhysics()) {
-	    currentNodes.push_back(physicsNode);
-		physicsNode->Init();
-	}
+    if (node->RenderType() >= 3) {
+	    auto physicsNode = static_pointer_cast<PhysicsNode>(node);
+	    if (physicsNode && physicsNode->TestPhysics()) {
+	        currentNodes.push_back(physicsNode);
+		    physicsNode->Init();
+	    }
+    }
 
 	for (const auto& child : node->GetChildren()) {
 		UpdateNode(child);
@@ -105,11 +113,12 @@ void PhysicsManager::UpdateNode(shared_ptr<Node> node) {
 
 void PhysicsManager::CollectPhysicsNodes(shared_ptr<Node> node, vector<shared_ptr<PhysicsNode>>& outNodes) {
 	if (!node) return;
-
-	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
-	if (physicsNode) {
-		outNodes.push_back(physicsNode);
-	}
+    if (node->RenderType() >= 3) {
+        auto physicsNode = static_pointer_cast<PhysicsNode>(node);
+        if (physicsNode) {
+            outNodes.push_back(physicsNode);
+        }
+    }
 
 	for (const auto& child : node->GetChildren()) {
 		CollectPhysicsNodes(child, outNodes);

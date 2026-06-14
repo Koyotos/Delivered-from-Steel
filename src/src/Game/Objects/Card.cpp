@@ -48,7 +48,7 @@ bool Card::CheckUse()
 	case CardType::FeatherFalling:
 		return !player->isDead();
 	case CardType::DoubleJump:
-		return !player->isDead() && !player->CheckGrounded();
+		return !player->isDead();
 	case CardType::WallJump:
 		return !player->isDead() && player->CheckWallJump();
 	case CardType::WallSnap:
