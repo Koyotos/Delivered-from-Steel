@@ -8,7 +8,8 @@
         "physics": false,
 		"sounds": [],
 		"bgms": ["biom1"],
-		"playlist": ["biom1"]
+		"playlist": ["biom1"],
+		"ambient": "ambient1"
     },
     "2": {
         "parent": 1,

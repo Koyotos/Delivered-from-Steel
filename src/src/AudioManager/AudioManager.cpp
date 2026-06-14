@@ -32,6 +32,7 @@ bool AudioManager::Init() {
 void AudioManager::CleanUp() {
 	StopAll();
 	StopAllBGM();
+	StopAllAmbient();
 
 	if (!audioSources.empty() && context) {
 		alDeleteSources(audioSources.size(), audioSources.data());
@@ -68,7 +69,8 @@ void AudioManager::CleanUp() {
 
 void AudioManager::Update() {
 	if (!context) return;
-	bool isAnyStreamPlaying = false;
+	bool isMusicPlaying = false;
+	bool isAmbientPlaying = false;
 
 	for (auto& pair : streams) {
 		AudioStream& stream = pair.second;
@@ -106,10 +108,15 @@ void AudioManager::Update() {
 			alSourcePlay(stream.source);
 		}
 
-		isAnyStreamPlaying = true;
+		if (stream.isAmbient) {
+			isAmbientPlaying = true;
+		}
+		else {
+			isMusicPlaying = true;
+		}
 	}
 
-	if (isPlaylistActive && !isAnyStreamPlaying) {
+	if (isPlaylistActive && !isMusicPlaying) {
 		if (currentPlaylist.empty()) {
 			isPlaylistActive = false;
 			return;
@@ -309,6 +316,7 @@ void AudioManager::RegisterBGM(const string& name, const string& filepath) {
 	alGenBuffers(4, newStream.buffers);
 	newStream.currentFile = filepath;
 	newStream.isPlaying = false;
+	newStream.isAmbient = false;
 
 	streams[name] = newStream;
 }
@@ -344,49 +352,7 @@ bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 }
 
 bool AudioManager::PlayBGM(const string& name, float volume, bool loop) {
-	if (!context) return false;
-	auto it = streams.find(name);
-	if (it == streams.end()) return false;
-
-	AudioStream& stream = it->second;
-	if (stream.isPlaying) return true;
-
-	StopAllBGM();
-
-	int error;
-	stream.oggStream = stb_vorbis_open_filename(stream.currentFile.c_str(), &error, nullptr);
-	if (!stream.oggStream) {
-		Globals::GetGlobals().Log("AUDIO ERROR: Can't open ogg file: " + stream.currentFile);
-		return false;
-	}
-
-	stb_vorbis_info info = stb_vorbis_get_info(stream.oggStream);
-	stream.format = (info.channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-	stream.sampleRate = info.sample_rate;
-	stream.loop = loop;
-
-	ALuint queuedBuffers[4];
-	int filledBufferCount = 0;
-	for (int i = 0; i < 4; ++i) {
-		if (StreamBufferData(stream.buffers[i], stream)) {
-			queuedBuffers[filledBufferCount++] = stream.buffers[i];
-		}
-	}
-
-	if (filledBufferCount == 0) {
-		stb_vorbis_close(stream.oggStream);
-		stream.oggStream = nullptr;
-		stream.isPlaying = false;
-		return false;
-	}
-
-	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
-	alSourcef(stream.source, AL_GAIN, volume * bgmVolume);
-	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
-
-	alSourcePlay(stream.source);
-	stream.isPlaying = true;
-	return true;
+	return StartStream(name, volume, loop);
 }
 
 
@@ -415,7 +381,9 @@ void AudioManager::StopBGM(const string& name) {
 void AudioManager::StopAllBGM() {
 	isPlaylistActive = false;
 	for (auto& pair : streams) {
-		StopBGM(pair.first);
+		if (!pair.second.isAmbient) {
+			StopBGM(pair.first);
+		}
 	}
 }
 
@@ -457,12 +425,95 @@ void AudioManager::SetSFXVolume(float volume) {
 void AudioManager::SetBGMVolume(float volume) {
 	bgmVolume = std::clamp(volume, 0.0f, 1.0f);
 	for (auto& pair : streams) {
-		if (pair.second.isPlaying) {
-			alSourcef(pair.second.source, AL_GAIN, playlistVolume * bgmVolume);
+		if (pair.second.isPlaying && !pair.second.isAmbient) {
+			alSourcef(pair.second.source, AL_GAIN, pair.second.baseVolume * playlistVolume * bgmVolume);
 		}
 	}
 }
 
 void AudioManager::SetAmbientVolume(float volume) {
 	ambientVolume = std::clamp(volume, 0.0f, 1.0f);
+	for (auto& pair : streams) {
+		if (pair.second.isPlaying && pair.second.isAmbient) {
+			alSourcef(pair.second.source, AL_GAIN, pair.second.baseVolume * ambientVolume);
+		}
+	}
+}
+
+void AudioManager::RegisterAmbient(const string& name, const string& filepath) {
+	if (!context) return;
+	if (streams.find(name) != streams.end()) return;
+
+	AudioStream newStream;
+	alGenSources(1, &newStream.source);
+	alGenBuffers(4, newStream.buffers);
+	newStream.currentFile = filepath;
+	newStream.isPlaying = false;
+	newStream.isAmbient = true;
+	streams[name] = newStream;
+}
+
+bool AudioManager::PlayAmbient(const string& name, float volume, bool loop) {
+	return StartStream(name, volume, loop);
+}
+
+void AudioManager::StopAllAmbient() {
+	for (auto& pair : streams) {
+		if (pair.second.isAmbient) {
+			StopBGM(pair.first);
+		}
+	}
+}
+
+bool AudioManager::StartStream(const string& name, float volume, bool loop) {
+	if (!context) return false;
+	auto it = streams.find(name);
+	if (it == streams.end()) return false;
+
+	AudioStream& stream = it->second;
+	if (stream.isPlaying) return true;
+
+	if (stream.isAmbient) {
+		StopAllAmbient();
+	}
+	else {
+		StopAllBGM();
+	}
+
+	int error;
+	stream.oggStream = stb_vorbis_open_filename(stream.currentFile.c_str(), &error, nullptr);
+	if (!stream.oggStream) {
+		Globals::GetGlobals().Log("AUDIO ERROR: Can't open ogg file: " + stream.currentFile);
+		return false;
+	}
+
+	stb_vorbis_info info = stb_vorbis_get_info(stream.oggStream);
+	stream.format = (info.channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
+	stream.sampleRate = info.sample_rate;
+	stream.loop = loop;
+	stream.baseVolume = volume;
+
+	ALuint queuedBuffers[4];
+	int filledBufferCount = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (StreamBufferData(stream.buffers[i], stream)) {
+			queuedBuffers[filledBufferCount++] = stream.buffers[i];
+		}
+	}
+
+	if (filledBufferCount == 0) {
+		stb_vorbis_close(stream.oggStream);
+		stream.oggStream = nullptr;
+		stream.isPlaying = false;
+		return false;
+	}
+
+	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
+	float currentVolume = stream.isAmbient ? ambientVolume : bgmVolume;
+	alSourcef(stream.source, AL_GAIN, stream.baseVolume * currentVolume);
+	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
+
+	alSourcePlay(stream.source);
+	stream.isPlaying = true;
+	return true;
 }

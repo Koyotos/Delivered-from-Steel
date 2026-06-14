@@ -31,6 +31,8 @@ struct AudioStream {
 	bool isPlaying = false;
 	bool loop = true;
 	string currentFile = "";
+	bool isAmbient = false;
+	float baseVolume = 1.0f;
 };
 
 /**
@@ -83,6 +85,7 @@ private:
 	 * @return bool - true if data was read
 	 */
 	bool StreamBufferData(ALuint buffer, AudioStream& stream);
+	bool StartStream(const string& name, float volume, bool loop);
 
 public:
 	AudioManager();
@@ -178,6 +181,10 @@ public:
 	void SetSFXVolume(float volume);
 	void SetBGMVolume(float volume);
 	void SetAmbientVolume(float volume);
+
+	void RegisterAmbient(const string& name, const string& filepath);
+	bool PlayAmbient(const string& name, float volume = 1.0f, bool loop = true);
+	void StopAllAmbient();
 };
 
 #endif

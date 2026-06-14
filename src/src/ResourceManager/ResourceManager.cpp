@@ -191,7 +191,9 @@ void ResourceManager::ManageAudio(unordered_map<string,std::any> data) {
             }
         }
         if (data.contains("ambient") && audioManager) {
-            currentlyLoading->sceneAmbient = fromMap(string, "ambient", data);
+			string ambientName = fromMap(string, "ambient", data);
+			audioManager->RegisterAmbient(ambientName, (audioPath / (ambientName + ".ogg")).string());
+			currentlyLoading->sceneAmbient = ambientName;
         }
 }
 

@@ -308,9 +308,9 @@ void EngineController::ActivateLoadedScene(shared_ptr<Scene> loadedScene, const 
 		if (!loadedScene->scenePlaylist.empty()) {
 			aum->PlayPlaylist(loadedScene->scenePlaylist);
 		}
-		//if (!loadedScene->sceneAmbient.empty()) {
-		//	aum->PlayAmbient(loadedScene->sceneAmbient);
-		//}
+		if (!loadedScene->sceneAmbient.empty()) {
+			aum->PlayAmbient(loadedScene->sceneAmbient);
+		}
 	}
 }
 
@@ -425,9 +425,9 @@ void EngineController::TransitionToMenu() {
 		if (!menuScene->scenePlaylist.empty()) {
 			aum->PlayPlaylist(menuScene->scenePlaylist);
 		}
-		//if (!menuScene->sceneAmbient.empty()) {
-		//	aum->PlayAmbient(menuScene->sceneAmbient);
-		//}
+		if (!menuScene->sceneAmbient.empty()) {
+			aum->PlayAmbient(menuScene->sceneAmbient);
+		}
 	}
 }
 
