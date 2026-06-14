@@ -665,7 +665,7 @@ void Player::ExecuteFeatherFalling() {
 void Player::ExecuteDoubleJump() {
 	isDashing = false;
 	glm::vec2 vel = GetVelocity();
-	vel.y = stats.jumpForce;
+	vel.y = stats.jumpForce * 1.3f;
 	SetVelocity(vel);
 	lastVelocity = GetVelocity();
 	canCutJump = false;
