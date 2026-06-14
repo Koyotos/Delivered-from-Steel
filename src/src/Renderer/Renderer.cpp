@@ -567,7 +567,7 @@ void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) 
     }
 }
 
-void Renderer::CreateRenderData(shared_ptr<Object3D> node, vector<RenderData>& dataset, unordered_map<BatchKey, size_t, BatchKeyHash> batchLookup) {
+void Renderer::CreateRenderData(shared_ptr<Object3D> node, vector<RenderData>& dataset, unordered_map<BatchKey, size_t, BatchKeyHash>& batchLookup) {
     BatchKey key{node->GetModel().get(), node->GetShader().get()};
     auto it = batchLookup.find(key);
     if(it != batchLookup.end()) {
