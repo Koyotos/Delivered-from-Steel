@@ -78,7 +78,7 @@ void AudioManager::Update(float deltaTime) {
 
 		if (stream.fadeState != 0) {
 			stream.currentFadeMultiplier += (stream.fadeState * stream.fadeSpeed * deltaTime);
-			stream.currentFadeMultiplier = std::clamp(stream.currentFadeMultiplier, 0.0f, 1.0f);
+			stream.currentFadeMultiplier = glm::clamp(stream.currentFadeMultiplier, 0.0f, 1.0f);
 			float currentVolume = stream.isAmbient ? ambientVolume : bgmVolume;
 			alSourcef(stream.source, AL_GAIN, stream.baseVolume * stream.currentFadeMultiplier * currentVolume);
 			if (stream.fadeState == -1 && stream.currentFadeMultiplier <= 0.0f) {
@@ -428,16 +428,16 @@ void AudioManager::PlayPlaylist(const vector<string>& trackNames, float volume) 
 }
 
 void AudioManager::SetMasterVolume(float volume) {
-	masterVolume = std::clamp(volume, 0.0f, 1.0f);
+	masterVolume = glm::clamp(volume, 0.0f, 1.0f);
 	alListenerf(AL_GAIN, masterVolume);
 }
 
 void AudioManager::SetSFXVolume(float volume) {
-	sfxVolume = std::clamp(volume, 0.0f, 1.0f);
+	sfxVolume = glm::clamp(volume, 0.0f, 1.0f);
 }
 
 void AudioManager::SetBGMVolume(float volume) {
-	bgmVolume = std::clamp(volume, 0.0f, 1.0f);
+	bgmVolume = glm::clamp(volume, 0.0f, 1.0f);
 	for (auto& pair : streams) {
 		if (pair.second.isPlaying && !pair.second.isAmbient) {
 			alSourcef(pair.second.source, AL_GAIN, pair.second.baseVolume * playlistVolume * bgmVolume);
@@ -446,7 +446,7 @@ void AudioManager::SetBGMVolume(float volume) {
 }
 
 void AudioManager::SetAmbientVolume(float volume) {
-	ambientVolume = std::clamp(volume, 0.0f, 1.0f);
+	ambientVolume = glm::clamp(volume, 0.0f, 1.0f);
 	for (auto& pair : streams) {
 		if (pair.second.isPlaying && pair.second.isAmbient) {
 			alSourcef(pair.second.source, AL_GAIN, pair.second.baseVolume * ambientVolume);
