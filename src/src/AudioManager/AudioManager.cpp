@@ -236,7 +236,7 @@ void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bo
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
-	alSourcef(source, AL_GAIN, volume);
+	alSourcef(source, AL_GAIN, volume * sfxVolume);
 	alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 	alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
 	alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
@@ -254,7 +254,7 @@ void AudioManager::PlaySound3D(const string& name, vec3 position, float volume, 
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
-	alSourcef(source, AL_GAIN, volume);
+	alSourcef(source, AL_GAIN, volume * sfxVolume);
 	alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 	alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
 	float safeZ = position.z + 3.0f;
@@ -348,7 +348,7 @@ bool AudioManager::PlayBGM(const string& name, float volume, bool loop) {
 	}
 
 	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
-	alSourcef(stream.source, AL_GAIN, volume);
+	alSourcef(stream.source, AL_GAIN, volume * bgmVolume);
 	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
 
 	alSourcePlay(stream.source);
@@ -410,4 +410,26 @@ void AudioManager::PlayPlaylist(const vector<string>& trackNames, float volume) 
 
 	PlayBGM(currentPlaylist[currentPlaylistIndex], volume, false);
 	isPlaylistActive = true;
+}
+
+void AudioManager::SetMasterVolume(float volume) {
+	masterVolume = std::clamp(volume, 0.0f, 1.0f);
+	alListenerf(AL_GAIN, masterVolume);
+}
+
+void AudioManager::SetSFXVolume(float volume) {
+	sfxVolume = std::clamp(volume, 0.0f, 1.0f);
+}
+
+void AudioManager::SetBGMVolume(float volume) {
+	bgmVolume = std::clamp(volume, 0.0f, 1.0f);
+	for (auto& pair : streams) {
+		if (pair.second.isPlaying) {
+			alSourcef(pair.second.source, AL_GAIN, playlistVolume * bgmVolume);
+		}
+	}
+}
+
+void AudioManager::SetAmbientVolume(float volume) {
+	ambientVolume = std::clamp(volume, 0.0f, 1.0f);
 }

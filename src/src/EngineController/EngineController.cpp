@@ -122,6 +122,17 @@ void EngineController::ReadApplyConf() {
 
 	valueF = fromMap(float, "lcull", confData);
 	renderer->Reconfigure(RCMD_LIGHT_CULL_RADIUS,0,valueF);
+
+	if (aum) {
+		valueF = fromMap(float, "masterVolume", confData);
+		aum->SetMasterVolume(valueF);
+		valueF = fromMap(float, "sfxVolume", confData);
+		aum->SetSFXVolume(valueF);
+		valueF = fromMap(float, "bgmVolume", confData);
+		aum->SetBGMVolume(valueF);
+		valueF = fromMap(float, "ambientVolume", confData);
+		aum->SetAmbientVolume(valueF);
+	}
 }
 
 void EngineController::Run() {

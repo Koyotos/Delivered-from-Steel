@@ -54,6 +54,11 @@ private:
 	bool isPlaylistActive = false;
 	float playlistVolume = 1.0f;
 
+	float masterVolume = 1.0f;
+	float sfxVolume = 1.0f;
+	float bgmVolume = 1.0f;
+	float ambientVolume = 1.0f;
+
 	/**
 	 * @brief Loads a .wav file from disk to a buffer.
 	 * @param1 const std::string& - filepath
@@ -162,6 +167,11 @@ public:
 	* @param2 float - volume
 	*/
 	void PlayPlaylist(const vector<string>& trackNames, float volume = 1.0f);
+
+	void SetMasterVolume(float volume);
+	void SetSFXVolume(float volume);
+	void SetBGMVolume(float volume);
+	void SetAmbientVolume(float volume);
 };
 
 #endif
