@@ -251,9 +251,9 @@ void Drone::Explode() {
 			player->takeDamage(explosionDamage);
 		}
 	}
-	//if (Globals::GetGlobals().audioManager) {
-	//	Globals::GetGlobals().audioManager->PlaySound3D("drone_explode", GetTransform().GetTranslation());
-	//}
+	if (Globals::GetGlobals().audioManager) {
+		Globals::GetGlobals().audioManager->PlaySound3D("explosion", GetTransform().GetTranslation());
+	}
 	if (spotLight) spotLight->Disable();
 
 	std::string id = this->GetSaveID();

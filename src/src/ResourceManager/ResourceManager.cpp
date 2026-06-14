@@ -117,17 +117,22 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
 }
 
 void ResourceManager::ApplyAssetsSFX(shared_ptr<Node> node, unordered_map<string,std::any> data) {
+    auto resolveAudioPath = [&](const string& name) -> string {
+		path oggPath = audioPath / (name + ".ogg");
+        if (filesystem::exists(oggPath)) {
+			return oggPath.string();
+        }
+		return (audioPath / (name + ".wav")).string();
+	};
     if(data.contains("sound") && audioManager) {
         string soundName = fromMap(string, "sound", data);
-        string fullPath = (audioPath / (soundName + ".wav")).string();
-        audioManager->LoadSound(soundName, fullPath);
+        audioManager->LoadSound(soundName, resolveAudioPath(soundName));
     }
     if(data.contains("sounds") && audioManager) {
         vector<std::any> soundList = fromMap(vector<std::any>, "sounds", data);
         for (const auto& soundAny : soundList) {
             string soundName = std::any_cast<string>(soundAny);
-            string fullPath = (audioPath / (soundName + ".wav")).string();
-            audioManager->LoadSound(soundName, fullPath);
+            audioManager->LoadSound(soundName, resolveAudioPath(soundName));
         }
     }
 }
@@ -181,11 +186,14 @@ void ResourceManager::ManageAudio(unordered_map<string,std::any> data) {
         }
         if (data.contains("playlist") && audioManager) {
             vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", data);
-            vector<string> playlistNames;
             for (const auto& song : playlistAny) {
-                playlistNames.push_back(std::any_cast<string>(song));
+                currentlyLoading->scenePlaylist.push_back(std::any_cast<string>(song));
             }
-            audioManager->PlayPlaylist(playlistNames, 0.4f);
+        }
+        if (data.contains("ambient") && audioManager) {
+			string ambientName = fromMap(string, "ambient", data);
+			audioManager->RegisterAmbient(ambientName, (audioPath / (ambientName + ".ogg")).string());
+			currentlyLoading->sceneAmbient = ambientName;
         }
 }
 
@@ -199,6 +207,7 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
                 shared_ptr<Node> node = octEntry.second(objVarList);
                 ApplyAssetsGFX(node, objVarList);
                 ApplyAssetsSFX(node, objVarList);
+				ManageAudio(objVarList);
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }

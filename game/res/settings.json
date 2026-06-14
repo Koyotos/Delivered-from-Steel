@@ -7,5 +7,9 @@
     "cdpl" : 20.0,
     "cdsl" : 20.0,
     "ddist" : 50.0,
-    "lcull" : 50.0
+    "lcull" : 50.0,
+	"masterVolume" : 1.0,
+	"sfxVolume" : 1.0,
+	"bgmVolume" : 1.0,
+	"ambientVolume" : 1.0
 }

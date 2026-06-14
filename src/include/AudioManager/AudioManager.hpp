@@ -31,6 +31,11 @@ struct AudioStream {
 	bool isPlaying = false;
 	bool loop = true;
 	string currentFile = "";
+	bool isAmbient = false;
+	float baseVolume = 1.0f;
+	int fadeState = 0; // 0 = no fade, 1 = fading in, -1 = fading out
+	float currentFadeMultiplier = 1.0f;
+	float fadeSpeed = 1.0f;
 };
 
 /**
@@ -54,12 +59,23 @@ private:
 	bool isPlaylistActive = false;
 	float playlistVolume = 1.0f;
 
+	float masterVolume = 1.0f;
+	float sfxVolume = 1.0f;
+	float bgmVolume = 1.0f;
+	float ambientVolume = 1.0f;
+
 	/**
 	 * @brief Loads a .wav file from disk to a buffer.
 	 * @param1 const std::string& - filepath
 	 * @return ALuint - generated buffer ID
 	 */
 	ALuint LoadWav(const string& filepath);
+	/**
+	 * @brief Loads an .ogg file from disk to a buffer.
+	 * @param1 const std::string& - filepath
+	 * @return ALuint - generated buffer ID
+	 */
+	ALuint LoadOgg(const string& filepath);
 	/**
 	 * @brief Finds an idle source from the pool.
 	 * @return ALuint - source ID
@@ -72,6 +88,7 @@ private:
 	 * @return bool - true if data was read
 	 */
 	bool StreamBufferData(ALuint buffer, AudioStream& stream);
+	bool StartStream(const string& name, float volume, bool loop);
 
 public:
 	AudioManager();
@@ -89,9 +106,10 @@ public:
 	void CleanUp();
 	/**
 	 * @brief Updates streaming buffers. Must be called every frame.
+	 * @param1 float - delta time since last update
 	 * @return void
 	 */
-	void Update();
+	void Update(float deltaTime);
 	/**
 	 * @brief Loads a sound effect into memory.
 	 * @param1 const std::string& - unique name for the sound
@@ -135,11 +153,11 @@ public:
 	 */
 	bool PlayBGM(const string& name, float volume = 1.0f, bool loop = true);
 	/**
-	 * @brief Stops a specific BGM stream.
+	 * @brief Stops a specific stream.
 	 * @param1 const std::string& - stream name
 	 * @return void
 	 */
-	void StopBGM(const string& name);
+	void StopStream(const string& name);
 	/**
 	 * @brief Stops all active BGM streams.
 	 * @return void
@@ -162,6 +180,18 @@ public:
 	* @param2 float - volume
 	*/
 	void PlayPlaylist(const vector<string>& trackNames, float volume = 1.0f);
+
+	void SetMasterVolume(float volume);
+	void SetSFXVolume(float volume);
+	void SetBGMVolume(float volume);
+	void SetAmbientVolume(float volume);
+
+	void RegisterAmbient(const string& name, const string& filepath);
+	bool PlayAmbient(const string& name, float volume = 1.0f, bool loop = true);
+	void StopAllAmbient();
+
+	void FadeOutAllBGM(float duration = 1.5f);
+	void FadeOutAllAmbient(float duration = 1.5f);
 };
 
 #endif

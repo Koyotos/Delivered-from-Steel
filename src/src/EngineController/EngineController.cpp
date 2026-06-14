@@ -122,6 +122,17 @@ void EngineController::ReadApplyConf() {
 
 	valueF = fromMap(float, "lcull", confData);
 	renderer->Reconfigure(RCMD_LIGHT_CULL_RADIUS,0,valueF);
+
+	if (aum) {
+		valueF = fromMap(float, "masterVolume", confData);
+		aum->SetMasterVolume(valueF);
+		valueF = fromMap(float, "sfxVolume", confData);
+		aum->SetSFXVolume(valueF);
+		valueF = fromMap(float, "bgmVolume", confData);
+		aum->SetBGMVolume(valueF);
+		valueF = fromMap(float, "ambientVolume", confData);
+		aum->SetAmbientVolume(valueF);
+	}
 }
 
 void EngineController::Run() {
@@ -228,7 +239,7 @@ void EngineController::Run() {
 		}
 
 		if (aum) {
-			aum->Update();
+			aum->Update(deltaTime);
 		}
 
 		iom->ClearQueue();
@@ -292,6 +303,15 @@ void EngineController::ActivateLoadedScene(shared_ptr<Scene> loadedScene, const 
 
 	RegisterSceneSerializables(activeLevelNode);
 	ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+
+	if (aum) {
+		if (!loadedScene->scenePlaylist.empty()) {
+			aum->PlayPlaylist(loadedScene->scenePlaylist);
+		}
+		if (!loadedScene->sceneAmbient.empty()) {
+			aum->PlayAmbient(loadedScene->sceneAmbient);
+		}
+	}
 }
 
 void EngineController::RegisterSceneSerializables(shared_ptr<Scene> scene) {
@@ -401,6 +421,14 @@ void EngineController::TransitionToMenu() {
 
 	menuScene->GetRoot()->InitRecursive(menuScene);
 	scm->SetActive(menuScene);   // raw swap, no crm/cards injected
+	if (aum) {
+		if (!menuScene->scenePlaylist.empty()) {
+			aum->PlayPlaylist(menuScene->scenePlaylist);
+		}
+		if (!menuScene->sceneAmbient.empty()) {
+			aum->PlayAmbient(menuScene->sceneAmbient);
+		}
+	}
 }
 
 void EngineController::SetActiveScene(const uint16_t& idx) {
