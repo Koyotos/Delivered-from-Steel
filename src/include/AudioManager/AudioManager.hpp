@@ -66,6 +66,12 @@ private:
 	 */
 	ALuint LoadWav(const string& filepath);
 	/**
+	 * @brief Loads an .ogg file from disk to a buffer.
+	 * @param1 const std::string& - filepath
+	 * @return ALuint - generated buffer ID
+	 */
+	ALuint LoadOgg(const string& filepath);
+	/**
 	 * @brief Finds an idle source from the pool.
 	 * @return ALuint - source ID
 	 */

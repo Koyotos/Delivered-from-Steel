@@ -117,17 +117,22 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
 }
 
 void ResourceManager::ApplyAssetsSFX(shared_ptr<Node> node, unordered_map<string,std::any> data) {
+    auto resolveAudioPath = [&](const string& name) -> string {
+		path oggPath = audioPath / (name + ".ogg");
+        if (filesystem::exists(oggPath)) {
+			return oggPath.string();
+        }
+		return (audioPath / (name + ".wav")).string();
+	};
     if(data.contains("sound") && audioManager) {
         string soundName = fromMap(string, "sound", data);
-        string fullPath = (audioPath / (soundName + ".wav")).string();
-        audioManager->LoadSound(soundName, fullPath);
+        audioManager->LoadSound(soundName, resolveAudioPath(soundName));
     }
     if(data.contains("sounds") && audioManager) {
         vector<std::any> soundList = fromMap(vector<std::any>, "sounds", data);
         for (const auto& soundAny : soundList) {
             string soundName = std::any_cast<string>(soundAny);
-            string fullPath = (audioPath / (soundName + ".wav")).string();
-            audioManager->LoadSound(soundName, fullPath);
+            audioManager->LoadSound(soundName, resolveAudioPath(soundName));
         }
     }
 }

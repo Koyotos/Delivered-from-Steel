@@ -204,11 +204,44 @@ ALuint AudioManager::LoadWav(const string& filepath) {
 	return alBuffer;
 }
 
+ALuint AudioManager::LoadOgg(const string& filepath) {
+	if (!context) return 0;
+	
+	int channels, sampleRate;
+	short* decodedData;
+
+	int numSamples = stb_vorbis_decode_filename(filepath.c_str(), &channels, &sampleRate, &decodedData);
+	if (numSamples < 0) {
+		Globals::GetGlobals().Log("AUDIO ERROR: Failed to decode OGG file: " + filepath);
+		return 0;
+	}
+
+	ALenum format = (channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
+	int dataSize = numSamples * channels * sizeof(short);
+
+	ALuint alBuffer;
+	alGenBuffers(1, &alBuffer);
+	alBufferData(alBuffer, format, decodedData, dataSize, sampleRate);
+	free(decodedData);
+	return alBuffer;
+}
+
 void AudioManager::LoadSound(const string& name, const string& filepath) {
 	if (!context) return;
 	if (audioBuffers.find(name) != audioBuffers.end()) return;
 
-	ALuint buffer = LoadWav(filepath);
+	ALuint buffer = 0;
+
+	if (filepath.ends_with(".wav")) {
+		buffer = LoadWav(filepath);
+	}
+	else if (filepath.ends_with(".ogg")) {
+		buffer = LoadOgg(filepath);
+	}
+	else {
+		Globals::GetGlobals().Log("AUDIO ERROR: Unsupported audio format for " + filepath);
+		return;
+	}
 	if (buffer != 0) {
 		audioBuffers[name] = buffer;
 	}
