@@ -162,7 +162,7 @@ class Renderer {
 
     // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
-    inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&);
+    inline void PrepareDrawNode(shared_ptr<VisualNode>);
     inline void PrepareDrawLight(shared_ptr<Light>);
     inline void CreateRenderData(shared_ptr<Object3D>, vector<RenderData>&, unordered_map<BatchKey, size_t, BatchKeyHash>&);
    
