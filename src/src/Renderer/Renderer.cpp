@@ -526,7 +526,7 @@ void Renderer::PrepareDraw(shared_ptr<Node> node, Transform t) {
     bool childTransformState = false;
     if(node->RenderType() >= NRT_OBJECT2D) {
         shared_ptr<VisualNode> cast = static_pointer_cast<VisualNode>(node);
-        PrepareDrawNode(cast, t);
+        PrepareDrawNode(cast);
         if(node->RenderType() == NRT_OBJECT3D) {
             float dist = distance(vec2(currentScene->sceneCam->GetPos()),vec2(cast->GetTransform().GetGlobal()[3]));
             if(dist < lightCullRadius && node->TestDraw()) {
@@ -550,9 +550,8 @@ void Renderer::ResolveZ() {
     });
 }
 
-void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast, Transform& t) {
-    t = visualCast->GetTransform();
-    if(Cull(visualCast) && visualCast->TestDraw()) {
+void Renderer::PrepareDrawNode(shared_ptr<VisualNode> visualCast) {
+    if(visualCast->TestDraw() && Cull(visualCast)) {
         if(visualCast->RenderType() == NRT_OBJECT2D) {
             if(static_pointer_cast<Object2D>(visualCast)->GetReqPerspective()) {
                 drawVector2D.push_back(visualCast);
