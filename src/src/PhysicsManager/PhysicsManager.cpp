@@ -49,6 +49,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     // Query + resolve collisions
     uint32_t environmentMask = static_cast<uint32_t>(ObjectType::Wall) |
         static_cast<uint32_t>(ObjectType::Trap) |
+        static_cast<uint32_t>(ObjectType::Default) |
         static_cast<uint32_t>(ObjectType::BreakableWall);
 
     vector<PhysicsNode*> candidates;

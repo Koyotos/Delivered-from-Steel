@@ -4,7 +4,7 @@ SpikePlatform::SpikePlatform(const unordered_map<string, std::any>& data)
     : Platform(data)
 {
 	state = SpikeState::Retracted;
-    timer = 0;
+    timer = fromMap(float, "startTime", data);
 
     extendTime = fromMap(float,"extendTime", data);
     retractTime = fromMap(float,"retractTime", data);
@@ -56,7 +56,7 @@ void SpikePlatform::Physics(const float& dt)
         case SpikeState::Extended:
             if (timer >= pauseDuration) {
                 state = (state == SpikeState::Extended) ? SpikeState::Retracting : SpikeState::Extending;
-                timer = 0;
+                timer -= pauseDuration;
             }
             break;
 
@@ -86,7 +86,7 @@ void SpikePlatform::Physics(const float& dt)
 
             if (timer >= moveDuration) {
                 state = (state == SpikeState::Retracting) ? SpikeState::Retracted : SpikeState::Extended;
-                timer = 0;
+                timer -= moveDuration;
             }
             break;
         }

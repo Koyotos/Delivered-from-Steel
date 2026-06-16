@@ -10,7 +10,7 @@ MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Pl
 	MovingDuration = fromMap(float, "movingDuration", data);
 	StopDuration = fromMap(float, "stopDuration", data);
 	startPosition = GetTransform().GetTranslation();
-	endPosition = vec3( fromMap(float, "XendPosition", data), fromMap(float, "YendPosition",data), startPosition.z) ;
+	endPosition = startPosition + vec3( fromMap(float, "XendPosition", data), fromMap(float, "YendPosition",data), 0.0f) ;
 	timer = 0.0f;
 }
 
