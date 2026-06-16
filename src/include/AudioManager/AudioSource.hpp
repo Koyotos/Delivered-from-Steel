@@ -12,12 +12,14 @@ private:
 	AudioHandle handle = 0;
 	std::string loopingSoundName = "";
 	VisualNode* owner;
+	bool is2D = false;
 
 public:
 	AudioSource(VisualNode* ownerNode);
 	~AudioSource();
 
 	void PlayLooping(const std::string& name, float volume = 1.0f, float pitch = 1.0f, float maxDistance = 10.0f, float refDistance = 1.0f);
+	void PlayLooping2D(const std::string& name, float volume = 1.0f, float pitch = 1.0f);
 	void Update();
 	void Stop();
 };

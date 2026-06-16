@@ -14,15 +14,29 @@ void AudioSource::PlayLooping(const std::string& name, float volume, float pitch
 
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		if (handle != 0) {
-			aum->StopSound3D(handle);
+			aum->StopSound(handle);
 		}
 		handle = aum->PlaySound3D(name, owner->GetTransform().GetTranslation(), volume, pitch, true, maxDistance, refDistance);
 		loopingSoundName = name;
+		is2D = false;
+	}
+}
+
+void AudioSource::PlayLooping2D(const std::string& name, float volume, float pitch) {
+	if (loopingSoundName == name && handle != 0) return;
+
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		if (handle != 0) {
+			aum->StopSound(handle);
+		}
+		handle = aum->PlaySound2D(name, volume, pitch, true);
+		loopingSoundName = name;
+		is2D = true;
 	}
 }
 
 void AudioSource::Update() {
-	if (handle != 0) {
+	if (handle != 0 && !is2D) {
 		if (auto aum = Globals::GetGlobals().audioManager) {
 			aum->UpdateSound3DPosition(handle, owner->GetTransform().GetTranslation());
 		}
@@ -32,7 +46,7 @@ void AudioSource::Update() {
 void AudioSource::Stop() {
 	if (handle != 0) {
 		if (auto aum = Globals::GetGlobals().audioManager) {
-			aum->StopSound3D(handle);
+			aum->StopSound(handle);
 		}
 		handle = 0;
 		loopingSoundName = "";

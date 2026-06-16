@@ -57,7 +57,7 @@ private:
 		ALuint source;
 		string name;
 	};
-	unordered_map<AudioHandle, Active3DSound> active3DSounds;
+	unordered_map<AudioHandle, Active3DSound> activeSounds;
 	AudioHandle nextHandleId = 1;
 
 	unordered_map<string, AudioStream> streams;
@@ -132,9 +132,9 @@ public:
 	 * @param2 float - volume (0.0 to 1.0)
 	 * @param3 float - pitch (1.0 default)
 	 * @param4 bool - should loop
-	 * @return void
+	 * @return AudioHandle - handle to the active sound, or 0 if failed
 	 */
-	void PlaySound2D(const string& name, float volume = 1.0f, float pitch = 1.0f, bool loop = false);
+	AudioHandle PlaySound2D(const string& name, float volume = 1.0f, float pitch = 1.0f, bool loop = false);
 	/**
 	 * @brief Plays a 3D sound effect with spatial attenuation.
 	 * @param1 const std::string& - sound name
@@ -148,7 +148,7 @@ public:
 	 */
 	AudioHandle PlaySound3D(const string& name, vec3 position, float volume = 1.0f, float pitch = 1.0f, bool loop = false, float maxDistance = 6.0f, float refDistance = 1.0f);
 	void UpdateSound3DPosition(AudioHandle handle, vec3 newPosition);
-	void StopSound3D(AudioHandle handle);
+	void StopSound(AudioHandle handle);
 
 	/**
 	 * @brief Registers an OGG file for streaming.

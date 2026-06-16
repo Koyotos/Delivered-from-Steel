@@ -280,13 +280,13 @@ ALuint AudioManager::GetAvailableSource() {
 	return 0;
 }
 
-void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bool loop) {
-	if (!context) return;
+AudioHandle AudioManager::PlaySound2D(const string& name, float volume, float pitch, bool loop) {
+	if (!context) return 0;
 	auto it = audioBuffers.find(name);
-	if (it == audioBuffers.end()) return;
+	if (it == audioBuffers.end()) return 0;
 
 	ALuint source = GetAvailableSource();
-	if (source == 0) return;
+	if (source == 0) return 0;
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
@@ -296,6 +296,10 @@ void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bo
 	alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
 
 	alSourcePlay(source);
+
+	AudioHandle handle = nextHandleId++;
+	activeSounds[handle] = { source, name };
+	return handle;
 }
 
 AudioHandle AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop, float maxDistance, float refDistance) {
@@ -319,34 +323,34 @@ AudioHandle AudioManager::PlaySound3D(const string& name, vec3 position, float v
 	alSourcePlay(source);
 
 	AudioHandle handle = nextHandleId++;
-	active3DSounds[handle] = { source, name };
+	activeSounds[handle] = { source, name };
 	return handle;
 }
 
 void AudioManager::UpdateSound3DPosition(AudioHandle handle, vec3 newPosition) {
 	if (!context || handle == 0) return;
 
-	auto it = active3DSounds.find(handle);
-	if (it == active3DSounds.end()) return;
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
 
 	ALuint source = it->second.source;
 	ALint state;
 	alGetSourcei(source, AL_SOURCE_STATE, &state);
 
 	if (state != AL_PLAYING && state != AL_PAUSED) {
-		active3DSounds.erase(it);
+		activeSounds.erase(it);
 		return;
 	}
 	float safeZ = newPosition.z + 3.0f;
 	alSource3f(source, AL_POSITION, newPosition.x, newPosition.y, safeZ);
 }
 
-void AudioManager::StopSound3D(AudioHandle handle) {
+void AudioManager::StopSound(AudioHandle handle) {
 	if (!context || handle == 0) return;
-	auto it = active3DSounds.find(handle);
-	if (it == active3DSounds.end()) return;
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
 	alSourceStop(it->second.source);
-	active3DSounds.erase(it);
+	activeSounds.erase(it);
 }
 
 void AudioManager::RegisterBGM(const string& name, const string& filepath) {
@@ -439,7 +443,7 @@ void AudioManager::StopAll() {
 	for (ALuint source : audioSources) {
 		alSourceStop(source);
 	}
-	active3DSounds.clear();
+	activeSounds.clear();
 	StopAllBGM();
 	isPlaylistActive = false;
 }

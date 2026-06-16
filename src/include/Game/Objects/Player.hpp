@@ -9,6 +9,8 @@
 #include "include/Game/Objects/ParticleEmitterNode.hpp"
 #include "include/Core/ISerializable.hpp"
 #include "include/Game/Objects/OrbitalParticleSystem.hpp"
+#include "include/AudioManager/AudioSource.hpp"
+#include <memory>
 
 class CardManager;
 
@@ -68,6 +70,8 @@ private:
 		static_cast<uint32_t>(ObjectType::Enemy) |
 		static_cast<uint32_t>(ObjectType::BreakableWall);
 
+	unique_ptr<AudioSource> audio;
+
 public:
 	bool CheckGrounded();
 	optional<RaycastHit> CheckRightWalledHit();
@@ -76,6 +80,7 @@ public:
 
 	Player();
 	Player(const std::unordered_map<std::string, std::any>& data);
+	void Disable() noexcept override;
 
 	void Init(std::shared_ptr<Scene> scene) override;
 	void Physics(const float& deltaTime) override;
