@@ -4,6 +4,7 @@
 #include "include/IOManager/IOManager.hpp"
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/EngineController/EngineController.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -102,6 +103,14 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	camConfig.maxCameraSpeed = GetSafe<float>(data, "maxCameraSpeed", 10000.0f);
 
 	cameraController.SetConfig(camConfig);
+	audio = make_unique<AudioSource>(this);
+}
+
+void Player::Disable() noexcept {
+	if (audio) {
+		audio->Stop();
+	}
+	Object2D::Disable();
 }
 
 void Player::SetCamera(std::shared_ptr<Camera> cam) {
@@ -477,6 +486,10 @@ bool Player::HandleMovement(float deltaTime) {
 		coyoteTimeCounter = 0.0f;
 		isGrounded = false;
 
+		if (auto aum = Globals::GetGlobals().audioManager) {
+			aum->PlaySound2D("player_jump", 0.4f, 1.0f, false);
+		}
+
 		if (!inputState.jumpHeld) {
 			currentVelocity.y = stats.jumpForce * stats.jumpCutMultiplier;
 		}
@@ -510,6 +523,7 @@ bool Player::HandleMovement(float deltaTime) {
 		if (GetCurrentAnimation() != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
 		}
+		audio->PlayLooping2D("player_dash", 0.5f, 1.0f);
 		float target = -stats.wallSlideSpeed;
 		if (currentVelocity.y < target)
 		{
@@ -520,6 +534,7 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
+		audio->Stop();
 	}
 
 	currentVelocity = currentVelocity + platformVelocity;
@@ -589,7 +604,9 @@ void Player::Physics(const float& deltaTime) {
 		glm::vec3 playerPos = GetTransform().GetTranslation();
 		pointVisualizer->UpdateOrbit(deltaTime, playerPos);
 	}
-
+	if (audio) {
+		audio->Update();
+	}
 }
 
 bool Player::Input(InputEvent& event) {
@@ -633,6 +650,9 @@ void Player::Shatter() {
 	SetPhysics(false);
 	SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_death", 0.6f, 1.0f, false);
+	}
 	if (Globals::GetGlobals().ioManager) {
 		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.3f);
 	}
@@ -649,6 +669,9 @@ void Player::ExecuteDash() {
 	isWallSnaping = false;
 	dashTimer = stats.dashDuration;
 	wasDashing = false;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_dash", 0.7f, 1.0f, false);
+	}
 }
 
 void Player::ExecuteBounce() {
@@ -669,6 +692,9 @@ void Player::ExecuteDoubleJump() {
 	SetVelocity(vel);
 	lastVelocity = GetVelocity();
 	canCutJump = false;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_jump", 0.4f, 1.2f, false);
+	}
 }
 
 void Player::ExecuteWallJump() {
@@ -684,6 +710,9 @@ void Player::ExecuteWallJump() {
 	jumpBufferCounter = 0.0f;
 
 	canCutJump = false;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_jump", 0.4f, 0.8f, false);
+	}
 }
 
 bool Player::CheckWallSnap() {

@@ -168,7 +168,7 @@ class Node {
     @brief Disables all active behaviours of the node.
     Simulates destruction without removing it from scene graph.
     */
-    void Disable() noexcept;
+    virtual void Disable() noexcept;
 
     /**
     @brief Enables all previously disabled behaviours of the node.

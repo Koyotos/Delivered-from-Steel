@@ -5,7 +5,11 @@
         "class": "Node",
         "process": true,
         "input": false,
-        "physics": false
+        "physics": false,
+        "sounds": [],
+		"bgms": ["dfs_track1"],
+		"playlist": ["dfs_track1"],
+		"ambient": "ambient1"
     },
     "2": {
         "parent": 1,

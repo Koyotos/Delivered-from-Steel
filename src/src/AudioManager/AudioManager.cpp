@@ -69,6 +69,16 @@ void AudioManager::CleanUp() {
 
 void AudioManager::Update(float deltaTime) {
 	if (!context) return;
+	for (auto it = activeSounds.begin(); it != activeSounds.end(); ) {
+		ALint state;
+		alGetSourcei(it->second.source, AL_SOURCE_STATE, &state);
+		if (state != AL_PLAYING && state != AL_PAUSED) {
+			it = activeSounds.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 	bool isMusicPlaying = false;
 	bool isAmbientPlaying = false;
 
@@ -227,7 +237,7 @@ ALuint AudioManager::LoadWav(const string& filepath) {
 
 ALuint AudioManager::LoadOgg(const string& filepath) {
 	if (!context) return 0;
-	
+
 	int channels, sampleRate;
 	short* decodedData;
 
@@ -280,13 +290,13 @@ ALuint AudioManager::GetAvailableSource() {
 	return 0;
 }
 
-void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bool loop) {
-	if (!context) return;
+AudioHandle AudioManager::PlaySound2D(const string& name, float volume, float pitch, bool loop) {
+	if (!context) return 0;
 	auto it = audioBuffers.find(name);
-	if (it == audioBuffers.end()) return;
+	if (it == audioBuffers.end()) return 0;
 
 	ALuint source = GetAvailableSource();
-	if (source == 0) return;
+	if (source == 0) return 0;
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
@@ -296,15 +306,19 @@ void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bo
 	alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
 
 	alSourcePlay(source);
+
+	AudioHandle handle = nextHandleId++;
+	activeSounds[handle] = { source, name };
+	return handle;
 }
 
-void AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop) {
-	if (!context) return;
+AudioHandle AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop, float maxDistance, float refDistance) {
+	if (!context) return 0;
 	auto it = audioBuffers.find(name);
-	if (it == audioBuffers.end()) return;
+	if (it == audioBuffers.end()) return 0;
 
 	ALuint source = GetAvailableSource();
-	if (source == 0) return;
+	if (source == 0) return 0;
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
@@ -314,12 +328,39 @@ void AudioManager::PlaySound3D(const string& name, vec3 position, float volume, 
 	float safeZ = position.z + 3.0f;
 	alSource3f(source, AL_POSITION, position.x, position.y, safeZ);
 
-	alSourcef(source, AL_REFERENCE_DISTANCE, 2.0f);
-	alSourcef(source, AL_MAX_DISTANCE, 15.0f);
-
+	alSourcef(source, AL_REFERENCE_DISTANCE, refDistance);
+	alSourcef(source, AL_MAX_DISTANCE, maxDistance);
 	alSourcePlay(source);
+
+	AudioHandle handle = nextHandleId++;
+	activeSounds[handle] = { source, name };
+	return handle;
 }
 
+void AudioManager::UpdateSound3DPosition(AudioHandle handle, vec3 newPosition) {
+	if (!context || handle == 0) return;
+
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
+
+	ALuint source = it->second.source;
+	ALint state;
+	alGetSourcei(source, AL_SOURCE_STATE, &state);
+
+	if (state != AL_PLAYING && state != AL_PAUSED) {
+		return;
+	}
+	float safeZ = newPosition.z + 3.0f;
+	alSource3f(source, AL_POSITION, newPosition.x, newPosition.y, safeZ);
+}
+
+void AudioManager::StopSound(AudioHandle handle) {
+	if (!context || handle == 0) return;
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
+	alSourceStop(it->second.source);
+	activeSounds.erase(it);
+}
 
 void AudioManager::RegisterBGM(const string& name, const string& filepath) {
 	if (!context) return;
@@ -411,6 +452,7 @@ void AudioManager::StopAll() {
 	for (ALuint source : audioSources) {
 		alSourceStop(source);
 	}
+	activeSounds.clear();
 	StopAllBGM();
 	isPlaylistActive = false;
 }

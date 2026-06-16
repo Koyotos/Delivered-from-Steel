@@ -1,4 +1,6 @@
 #include "include/Game/Objects/TurretEnemy.hpp"
+#include "include/Globals/Globals.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <iostream>
 
 TurretEnemy::TurretEnemy(const unordered_map<string, std::any>& data) : Enemy(data)
@@ -50,6 +52,9 @@ void TurretEnemy::AttackState(float dt) {
 			currentBarrelLock = barrelLockTime;
 			isWaiting = true;
 			playerInSight = false;
+			if (auto aum = Globals::GetGlobals().audioManager) {
+				aum->PlaySound3D("ui_1", GetTransform().GetTranslation(), 0.5f, 1.0f);
+			}
 		}
 	}
 }
@@ -88,6 +93,9 @@ void TurretEnemy::ChangeState(shared_ptr<Player> player) {
 	case EnemyState::Patrol: {
 		if (seePlayer) {
 			state = EnemyState::Attack;
+			if (auto aum = Globals::GetGlobals().audioManager) {
+				aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.3f, 1.0f);
+			}
 		}
 		break;
 	}
@@ -173,6 +181,7 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 void TurretEnemy::Init(shared_ptr<Scene> scene) {
 	Enemy::Init(scene);
+	audio->PlayLooping("cool_ass_dzwiek", 0.3f, 1.0f, 7.5f, 0.8f);
 	for(auto& child : GetChildren()) {
 		if(child->Type() == "Bullet") {
 			bullet = static_pointer_cast<Bullet>(child);

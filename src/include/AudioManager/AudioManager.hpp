@@ -19,6 +19,8 @@ using namespace glm;
 
 struct stb_vorbis;
 
+typedef uint32_t AudioHandle;
+
 /**
  * @brief Structure managing a single streaming audio channel (BGM).
  */
@@ -49,7 +51,14 @@ private:
 
 	unordered_map<string, ALuint> audioBuffers;
 	vector<ALuint> audioSources;
-	static constexpr int MAX_SOURCES = 32;
+	static constexpr int MAX_SOURCES = 64;
+
+	struct ActiveSound {
+		ALuint source;
+		string name;
+	};
+	unordered_map<AudioHandle, ActiveSound> activeSounds;
+	AudioHandle nextHandleId = 1;
 
 	unordered_map<string, AudioStream> streams;
 	static constexpr int BUFFER_SIZE = 32768;
@@ -123,9 +132,9 @@ public:
 	 * @param2 float - volume (0.0 to 1.0)
 	 * @param3 float - pitch (1.0 default)
 	 * @param4 bool - should loop
-	 * @return void
+	 * @return AudioHandle - handle to the active sound, or 0 if failed
 	 */
-	void PlaySound2D(const string& name, float volume = 1.0f, float pitch = 1.0f, bool loop = false);
+	AudioHandle PlaySound2D(const string& name, float volume = 1.0f, float pitch = 1.0f, bool loop = false);
 	/**
 	 * @brief Plays a 3D sound effect with spatial attenuation.
 	 * @param1 const std::string& - sound name
@@ -133,9 +142,13 @@ public:
 	 * @param3 float - volume
 	 * @param4 float - pitch
 	 * @param5 bool - should loop
-	 * @return void
+	 * @param6 float - max distance for attenuation
+	 * @param7 float - reference distance for attenuation
+	 * @return AudioHandle - handle to the active 3D sound
 	 */
-	void PlaySound3D(const string& name, vec3 position, float volume = 1.0f, float pitch = 1.0f, bool loop = false);
+	AudioHandle PlaySound3D(const string& name, vec3 position, float volume = 1.0f, float pitch = 1.0f, bool loop = false, float maxDistance = 6.0f, float refDistance = 1.0f);
+	void UpdateSound3DPosition(AudioHandle handle, vec3 newPosition);
+	void StopSound(AudioHandle handle);
 
 	/**
 	 * @brief Registers an OGG file for streaming.
