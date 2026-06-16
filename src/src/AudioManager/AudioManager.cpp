@@ -298,13 +298,13 @@ void AudioManager::PlaySound2D(const string& name, float volume, float pitch, bo
 	alSourcePlay(source);
 }
 
-void AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop) {
-	if (!context) return;
+AudioHandle AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop, float maxDistance, float refDistance) {
+	if (!context) return 0;
 	auto it = audioBuffers.find(name);
-	if (it == audioBuffers.end()) return;
+	if (it == audioBuffers.end()) return 0;
 
 	ALuint source = GetAvailableSource();
-	if (source == 0) return;
+	if (source == 0) return 0;
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
@@ -314,12 +314,40 @@ void AudioManager::PlaySound3D(const string& name, vec3 position, float volume, 
 	float safeZ = position.z + 3.0f;
 	alSource3f(source, AL_POSITION, position.x, position.y, safeZ);
 
-	alSourcef(source, AL_REFERENCE_DISTANCE, 2.0f);
-	alSourcef(source, AL_MAX_DISTANCE, 15.0f);
-
+	alSourcef(source, AL_REFERENCE_DISTANCE, refDistance);
+	alSourcef(source, AL_MAX_DISTANCE, maxDistance);
 	alSourcePlay(source);
+
+	AudioHandle handle = nextHandleId++;
+	active3DSounds[handle] = { source, name };
+	return handle;
 }
 
+void AudioManager::UpdateSound3DPosition(AudioHandle handle, vec3 newPosition) {
+	if (!context || handle == 0) return;
+
+	auto it = active3DSounds.find(handle);
+	if (it == active3DSounds.end()) return;
+
+	ALuint source = it->second.source;
+	ALint state;
+	alGetSourcei(source, AL_SOURCE_STATE, &state);
+
+	if (state != AL_PLAYING && state != AL_PAUSED) {
+		active3DSounds.erase(it);
+		return;
+	}
+	float safeZ = newPosition.z + 3.0f;
+	alSource3f(source, AL_POSITION, newPosition.x, newPosition.y, safeZ);
+}
+
+void AudioManager::StopSound3D(AudioHandle handle) {
+	if (!context || handle == 0) return;
+	auto it = active3DSounds.find(handle);
+	if (it == active3DSounds.end()) return;
+	alSourceStop(it->second.source);
+	active3DSounds.erase(it);
+}
 
 void AudioManager::RegisterBGM(const string& name, const string& filepath) {
 	if (!context) return;
@@ -411,6 +439,7 @@ void AudioManager::StopAll() {
 	for (ALuint source : audioSources) {
 		alSourceStop(source);
 	}
+	active3DSounds.clear();
 	StopAllBGM();
 	isPlaylistActive = false;
 }

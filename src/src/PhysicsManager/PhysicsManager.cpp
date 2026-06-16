@@ -98,7 +98,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 }
 
 void PhysicsManager::UpdateNode(shared_ptr<Node> node) {
-    if (node->RenderType() >= 3) {
+    if (node->RenderType() >= 2) {
 	    auto physicsNode = static_pointer_cast<PhysicsNode>(node);
 	    if (physicsNode && physicsNode->TestPhysics()) {
 	        currentNodes.push_back(physicsNode);
@@ -113,7 +113,7 @@ void PhysicsManager::UpdateNode(shared_ptr<Node> node) {
 
 void PhysicsManager::CollectPhysicsNodes(shared_ptr<Node> node, vector<shared_ptr<PhysicsNode>>& outNodes) {
 	if (!node) return;
-    if (node->RenderType() >= 3) {
+    if (node->RenderType() >= 2) {
         auto physicsNode = static_pointer_cast<PhysicsNode>(node);
         if (physicsNode) {
             outNodes.push_back(physicsNode);

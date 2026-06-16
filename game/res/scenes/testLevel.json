@@ -7,8 +7,8 @@
         "input": false,
         "physics": false,
 		"sounds": [],
-		"bgms": ["biom1"],
-		"playlist": ["biom1"],
+		"bgms": ["dfs_track1"],
+		"playlist": ["dfs_track1"],
 		"ambient": "ambient1"
     },
     "2": {
