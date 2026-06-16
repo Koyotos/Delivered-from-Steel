@@ -69,6 +69,16 @@ void AudioManager::CleanUp() {
 
 void AudioManager::Update(float deltaTime) {
 	if (!context) return;
+	for (auto it = activeSounds.begin(); it != activeSounds.end(); ) {
+		ALint state;
+		alGetSourcei(it->second.source, AL_SOURCE_STATE, &state);
+		if (state != AL_PLAYING && state != AL_PAUSED) {
+			it = activeSounds.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 	bool isMusicPlaying = false;
 	bool isAmbientPlaying = false;
 
@@ -227,7 +237,7 @@ ALuint AudioManager::LoadWav(const string& filepath) {
 
 ALuint AudioManager::LoadOgg(const string& filepath) {
 	if (!context) return 0;
-	
+
 	int channels, sampleRate;
 	short* decodedData;
 
@@ -338,7 +348,6 @@ void AudioManager::UpdateSound3DPosition(AudioHandle handle, vec3 newPosition) {
 	alGetSourcei(source, AL_SOURCE_STATE, &state);
 
 	if (state != AL_PLAYING && state != AL_PAUSED) {
-		activeSounds.erase(it);
 		return;
 	}
 	float safeZ = newPosition.z + 3.0f;

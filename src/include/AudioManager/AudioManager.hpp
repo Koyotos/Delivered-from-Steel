@@ -53,11 +53,11 @@ private:
 	vector<ALuint> audioSources;
 	static constexpr int MAX_SOURCES = 64;
 
-	struct Active3DSound {
+	struct ActiveSound {
 		ALuint source;
 		string name;
 	};
-	unordered_map<AudioHandle, Active3DSound> activeSounds;
+	unordered_map<AudioHandle, ActiveSound> activeSounds;
 	AudioHandle nextHandleId = 1;
 
 	unordered_map<string, AudioStream> streams;

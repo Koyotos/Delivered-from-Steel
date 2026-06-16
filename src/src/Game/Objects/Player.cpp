@@ -523,6 +523,7 @@ bool Player::HandleMovement(float deltaTime) {
 		if (GetCurrentAnimation() != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
 		}
+		audio->PlayLooping2D("player_dash", 0.5f, 1.0f);
 		float target = -stats.wallSlideSpeed;
 		if (currentVelocity.y < target)
 		{
@@ -533,6 +534,7 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
+		audio->Stop();
 	}
 
 	currentVelocity = currentVelocity + platformVelocity;
