@@ -223,7 +223,7 @@ void Drone::ReversePatrol() {
 	}
 }
 
-void Drone::OnCollisionEnter(shared_ptr<Collider> other) {
+void Drone::OnCollisionEnter(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Wall) {

@@ -51,9 +51,9 @@ protected:
 public:
 	Enemy(const unordered_map<string, std::any>&);
 
-	void OnCollisionStay(shared_ptr<Collider>) override;
+	void OnCollisionStay(Collider*) override;
 
-	void OnCollisionExit(shared_ptr<Collider>) override;
+	void OnCollisionExit(Collider*) override;
 
 	void Physics(const float&) override;
 

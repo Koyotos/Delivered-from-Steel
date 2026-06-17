@@ -112,7 +112,7 @@ void ChargingEnemy::ChangeState(shared_ptr<Player> player) {
 	}
 }
 
-void ChargingEnemy::OnCollisionStay(shared_ptr<Collider> other) {
+void ChargingEnemy::OnCollisionStay(Collider* other) {
 	Enemy::OnCollisionStay(other);
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (!owner) return;

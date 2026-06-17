@@ -5,19 +5,27 @@ Collider::Collider() : isTrigger(false), enabled(true) {
 	previousCollisions = {};
 }
 
-unordered_set<shared_ptr<Collider>>& Collider::GetCurrentCollisions() {
+unordered_set<Collider*>& Collider::GetCurrentCollisions() {
     return currentCollisions;
 }
 
-unordered_set<shared_ptr<Collider>>& Collider::GetPreviousCollisions() {
+unordered_set<Collider*>& Collider::GetPreviousCollisions() {
     return previousCollisions;
+}
+
+void Collider::AddCurrentCollisions(Collider* collider) {
+    currentCollisions.insert(collider);
+}
+
+void Collider::AddPreviousCollisions(Collider* collider) {
+    previousCollisions.insert(collider);
 }
 
 void Collider::ClearCurrentCollisions() {
 	currentCollisions.clear();
 }
 
-void Collider::AddToCurrentCollisions(shared_ptr<Collider> col) {
+void Collider::AddToCurrentCollisions(Collider* col) {
 	currentCollisions.insert(col);
 }
 

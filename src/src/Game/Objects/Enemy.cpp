@@ -69,18 +69,18 @@ void Enemy::UpdateState(float dt) {
 	}
 }
 
-void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
+void Enemy::OnCollisionStay(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
-		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+		CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
 
 		Attack(player);
 		glm::vec2 pos = GetTransform().GetTranslation();
 		auto trans = player->GetTransform();
 		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
-		std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
+		BoxCollider* box = static_cast<BoxCollider*>(GetCollider());
 
 		float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
 		float platformTop = box->GetMax().y;
@@ -92,18 +92,18 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	}
 }
 
-void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
+void Enemy::OnCollisionExit(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
-		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+		CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
 
 		Attack(player);
 		glm::vec2 pos = GetTransform().GetTranslation();
 		auto trans = player->GetTransform();
 		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
-		std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
+		BoxCollider* box = static_cast<BoxCollider*>(GetCollider());
 
 		float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
 		float platformTop = box->GetMax().y;

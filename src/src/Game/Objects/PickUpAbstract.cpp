@@ -57,7 +57,7 @@ void PickUpAbstract::Physics(const float& deltaTime) {
     }
 }
 
-void PickUpAbstract::OnCollisionEnter(std::shared_ptr<Collider> other) {
+void PickUpAbstract::OnCollisionEnter(Collider* other) {
     if (isCollected) return;
 
     std::shared_ptr<PhysicsNode> owner = other->GetOwner();

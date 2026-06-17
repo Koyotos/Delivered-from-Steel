@@ -6,7 +6,7 @@ Trap::Trap(const unordered_map<string, std::any>& data) : Object3D(data) {
 }
 
 
-void Trap::OnCollisionStay(shared_ptr<Collider> other) {
+void Trap::OnCollisionStay(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
     if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {

@@ -31,7 +31,7 @@ public:
 
     void Attack(shared_ptr<Player> player) override {};
 
-	void OnCollisionStay(shared_ptr<Collider> other) override;
+	void OnCollisionStay(Collider* other) override;
 };
 
 #endif // FE_CHARGINGENEMY

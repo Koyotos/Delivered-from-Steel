@@ -23,7 +23,7 @@ void CapsuleCollider::UpdatePosition(const Transform transform) {
     this->b = center - upDirection * segmentHalfLength;
 }
 
-bool CapsuleCollider::CheckCollision(shared_ptr<Collider> other) const {
+bool CapsuleCollider::CheckCollision(Collider* other) const {
     return CalculateCollisionInfo(other)->collided;
 }
 
@@ -31,14 +31,14 @@ uint8_t CapsuleCollider::Type() const noexcept {
     return 2;
 }
 
-shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(shared_ptr<Collider> other) const {
+shared_ptr<CollisionInfo> CapsuleCollider::CalculateCollisionInfo(Collider* other) const {
     if(other->Type() == 1) {
-        shared_ptr<CollisionInfo> info = other->CalculateCollisionInfo(const_pointer_cast<CapsuleCollider>(shared_from_this()));
+        shared_ptr<CollisionInfo> info = other->CalculateCollisionInfo(const_cast<CapsuleCollider*>(this));
         vec2 tempNormal = info->normal;
         info->normal = -tempNormal;
         return info;
     }
-    shared_ptr<CapsuleCollider> capsule = static_pointer_cast<CapsuleCollider>(other);
+    CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
 	vec2 closestCapsule = { capsule->a.x, std::clamp(b.y, capsule->b.y, capsule->a.y) };

@@ -14,8 +14,8 @@ void PhysicsNode::SetCollider(shared_ptr<Collider> col) {
     collider = col;
 }
 
-shared_ptr<Collider> PhysicsNode::GetCollider() {
-    return collider;
+Collider* PhysicsNode::GetCollider() {
+    return collider.get();
 }
 
 void PhysicsNode::SetStatic(bool value) {
@@ -38,14 +38,14 @@ void PhysicsNode::Physics(const float& dt) {
 	this->SetTransform(t);
 }
 
-shared_ptr<CollisionInfo> PhysicsNode::GetCollisionInfo(shared_ptr<Collider> other) {
+shared_ptr<CollisionInfo> PhysicsNode::GetCollisionInfo(Collider* other) {
     if (!collider || !other) return nullptr;
     if (other->Type() == 2) {
-        auto capsule = static_pointer_cast<CapsuleCollider>(other);
+        CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
         return collider->CalculateCollisionInfo(capsule);
     }
     else if (other->Type() == 1) {
-        auto box = static_pointer_cast<BoxCollider>(other);
+        BoxCollider* box = static_cast<BoxCollider*>(other);
         return collider->CalculateCollisionInfo(box);
     }
     return nullptr;
@@ -58,8 +58,8 @@ void PhysicsNode::ResolveCollision(PhysicsNode& other) {
     if (!info->collided) return;
     if (this->isStatic) return;
 
-	collider->GetCurrentCollisions().insert(other.collider);
-	other.collider->GetCurrentCollisions().insert(collider);
+	collider->AddCurrentCollisions(other.collider.get());
+	other.collider->AddCurrentCollisions(collider.get());
 
     vec2 separation = info->normal * info->depth;
 
@@ -192,7 +192,7 @@ optional<RaycastHit> PhysicsNode::Raycast(const vec2& offset, const vec2& direct
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
 
-    auto hit = PhysicsManager::GetPhysicsManager().Raycast(origin, direction, maxDistance, collider, type);
+    auto hit = PhysicsManager::GetPhysicsManager().Raycast(origin, direction, maxDistance, collider.get(), type);
     return hit;
 }
 
@@ -202,7 +202,7 @@ optional<RaycastHit> PhysicsNode::Raycast( const vec2& direction, float maxDista
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
 
-    auto hit = PhysicsManager::GetPhysicsManager().Raycast(origin, direction, maxDistance, collider, type);
+    auto hit = PhysicsManager::GetPhysicsManager().Raycast(origin, direction, maxDistance, collider.get(), type);
     return hit;
 }
 
@@ -211,7 +211,7 @@ vector<RaycastHit> PhysicsNode::RaycastAll(const vec2& offset, const vec2& direc
 
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x + offset.x, modelMatrix[3].y + offset.y);
-    auto hits = PhysicsManager::GetPhysicsManager().RaycastAll(origin, direction, maxDistance, collider, type);
+    auto hits = PhysicsManager::GetPhysicsManager().RaycastAll(origin, direction, maxDistance, collider.get(), type);
     return hits;
 }
 
@@ -220,6 +220,6 @@ vector<RaycastHit> PhysicsNode::RaycastAll(const vec2& direction, float maxDista
 
     mat4 modelMatrix = GetTransform().GetGlobal();
     vec2 origin = vec2(modelMatrix[3].x, modelMatrix[3].y);
-    auto hits = PhysicsManager::GetPhysicsManager().RaycastAll(origin, direction, maxDistance, collider, type);
+    auto hits = PhysicsManager::GetPhysicsManager().RaycastAll(origin, direction, maxDistance, collider.get(), type);
     return hits;
 }
