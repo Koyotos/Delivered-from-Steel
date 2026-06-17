@@ -38,33 +38,36 @@ void CardSlot::PlayUseAnimation() {
 
     card->ClearAllTweens();
 
-    /*
-    vec2 origScale = {
-    card->GetTransform().GetScale().x,
-    card->GetTransform().GetScale().y
-    };
+    //
+    //vec2 origScale = {
+    //card->GetTransform().GetScale().x,
+    //card->GetTransform().GetScale().y
+    //};
 
-    const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
+    //const vec2 halfSize = vec2(75.f / 2.f, 100.f / 2.f);
 
-    auto CompensatedPos = [&](vec2 newScale) -> vec2 {
-        return origPos - (newScale - origScale) * halfSize;
-        };
+    //auto CompensatedPos = [&](vec2 newScale) -> vec2 {
+    //    return origPos - (newScale - origScale) * halfSize;
+    //    };
 
-    vec2 s1 = { origScale.x * 0.88f, origScale.y * 0.95f };
-    vec2 s2 = { origScale.x * 1.1f,  origScale.y * 1.05f };
+    //vec2 s1 = { origScale.x * 0.70f, origScale.y * 0.95f };
+    //vec2 s2 = { origScale.x * 1.3f,  origScale.y * 1.05f };
 
-    card->ScaleTo(s1, 0.12f, EaseType::OutSine);
-    card->MoveTo(CompensatedPos(s1), 0.12f, EaseType::OutSine);
+    //card->ScaleTo(s1, 0.12f, EaseType::OutSine);
+    //card->MoveTo(CompensatedPos(s1), 0.12f, EaseType::OutSine);
 
-    card->ScaleTo(s2, 0.14f, EaseType::InOutSine, 0.12f);
-    card->MoveTo(CompensatedPos(s2), 0.14f, EaseType::InOutSine, 0.12f);
+    //card->ScaleTo(s2, 0.14f, EaseType::InOutSine, 0.12f);
+    //card->MoveTo(CompensatedPos(s2), 0.14f, EaseType::InOutSine, 0.12f, CompensatedPos(s1));
 
-    card->ScaleTo(origScale, 0.16f, EaseType::OutElastic, 0.26f);
-    card->MoveTo(origPos, 0.16f, EaseType::OutElastic, 0.26f);
-	*/
-    vec2 targetPos = vec2(origPos.x, origPos.y - 110.0f);
-    card->MoveTo(targetPos, 0.25f, EaseType::InSine);
-    card->MoveTo(vec2(origPos.x, origPos.y), 0.25f, EaseType::OutSine, 0.25f, targetPos);
+    //card->ScaleTo(origScale, 0.16f, EaseType::OutElastic, 0.26f);
+    //card->MoveTo(origPos, 0.16f, EaseType::OutElastic, 0.26f, CompensatedPos(s2));
+	
+
+    
+    vec2 targetPos = vec2(origPos.x, origPos.y - 220.0f);
+    card->MoveTo(targetPos, 0.35f, EaseType::OutQuad);
+    card->MoveTo(vec2(origPos.x, origPos.y), 0.2f, EaseType::InQuad, 0.35f, targetPos);
+    
 }
 
 
@@ -88,7 +91,7 @@ void CardSlot::SetCardTint(vec3 color) {
 
 void CardSlot::MoveTo(glm::vec2 target, float time, EaseType ease, float delay) {
     UIElement::MoveTo(target, time, ease, delay);
-    if (card) card->MoveTo(vec2(target.x, target.y - 30.0f), time, ease, delay);
+    if (card) card->MoveTo(vec2(target.x, target.y - 41.0f), time, ease, delay);
 
 }
 
@@ -120,7 +123,7 @@ void CardSlot::ScaleCardTo(glm::vec2 target, float time, EaseType ease, float de
     if (card)
     {
         auto CompensatedPos = [&](vec2 newScale) -> vec2 {
-            return showPos - (newScale - origScale) * halfSize;
+            return vec2(showPos.x, showPos.y-41.0f) - (newScale - origScale) * halfSize;
             };
 
         vec2 s1 = { origScale.x * target.x, origScale.y * target.y };
