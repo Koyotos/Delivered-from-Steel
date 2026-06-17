@@ -8,6 +8,7 @@ Trap::Trap(const unordered_map<string, std::any>& data) : Object3D(data) {
 
 void Trap::OnCollisionStay(shared_ptr<Collider> other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
+    if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
         shared_ptr<Player> player = static_pointer_cast<Player>(owner);
         ActivateEffect(player);

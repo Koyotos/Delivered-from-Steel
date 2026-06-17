@@ -61,6 +61,7 @@ void PickUpAbstract::OnCollisionEnter(std::shared_ptr<Collider> other) {
     if (isCollected) return;
 
     std::shared_ptr<PhysicsNode> owner = other->GetOwner();
+    if (!owner) return;
     if (owner && owner->GetObjectType() == ObjectType::Player) {
         isCollected = true;
         pointLight->Disable();

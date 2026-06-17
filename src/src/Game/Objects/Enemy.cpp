@@ -71,6 +71,7 @@ void Enemy::UpdateState(float dt) {
 
 void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
@@ -93,6 +94,7 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 
 void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);

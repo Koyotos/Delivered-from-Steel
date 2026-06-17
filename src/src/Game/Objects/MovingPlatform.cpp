@@ -78,6 +78,7 @@ void MovingPlatform::Physics(const float& deltaTime) {
 
 void MovingPlatform::OnCollisionStay(std::shared_ptr<Collider> other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
         std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
         if (playerNode) {
@@ -115,6 +116,7 @@ void MovingPlatform::OnCollisionStay(std::shared_ptr<Collider> other) {
 
 void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
+    if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
         std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
         if (playerNode) {

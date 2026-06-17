@@ -18,7 +18,7 @@ class Collider
     vec2 transform;
     bool isTrigger;
     bool enabled;
-    shared_ptr<PhysicsNode> owner;
+    weak_ptr<PhysicsNode> owner;
 
     private:
     unordered_set<shared_ptr<Collider>> currentCollisions;
@@ -53,8 +53,9 @@ class Collider
 
     float DistanceSquared(const vec2& a, const vec2& b) const;
 
-    shared_ptr<PhysicsNode>& GetOwner();
+    shared_ptr<PhysicsNode> GetOwner();
 
+    void SetOwner(std::shared_ptr<PhysicsNode> node);
 };
 
 #endif

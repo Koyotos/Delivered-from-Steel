@@ -44,6 +44,13 @@ float Collider::DistanceSquared(const vec2& a, const vec2& b) const {
     return dx * dx + dy * dy;
 }
 
-shared_ptr<PhysicsNode>& Collider::GetOwner() {
-    return owner;
+shared_ptr<PhysicsNode> Collider::GetOwner() {
+    if (auto ptr = owner.lock()) {
+        return ptr;
+    }
+    return nullptr;
+}
+
+void Collider::SetOwner(std::shared_ptr<PhysicsNode> node) {
+	owner = node;
 }

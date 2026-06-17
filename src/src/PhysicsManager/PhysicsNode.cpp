@@ -182,7 +182,7 @@ void PhysicsNode::processCollisions() {
 
 void PhysicsNode::Init() {
     if (collider) {
-        collider->GetOwner() = shared_from_this();
+        collider->SetOwner(shared_from_this());
     }
 }
 
