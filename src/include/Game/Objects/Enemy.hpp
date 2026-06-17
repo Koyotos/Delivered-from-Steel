@@ -4,6 +4,8 @@
 #include "include/Core/Object2D.hpp"
 #include "include/Game/Objects/Player.hpp"
 #include "include/Core/Scene.hpp"
+#include "include/AudioManager/AudioSource.hpp"
+#include <memory>
 
 enum class EnemyState {
 	Patrol,
@@ -48,8 +50,11 @@ protected:
 		static_cast<uint32_t>(ObjectType::Trap) |
 		static_cast<uint32_t>(ObjectType::BreakableWall);
 
+	unique_ptr<AudioSource> audio;
+
 public:
 	Enemy(const unordered_map<string, std::any>&);
+	void Disable() noexcept override;
 
 	void OnCollisionStay(Collider*) override;
 

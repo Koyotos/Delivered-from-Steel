@@ -6,7 +6,7 @@
     "process": true,
     "input": true,
     "physics": true,
-	"sounds": ["explosion", "player_spotted", "cool_ass_dzwiek", "ui_1", "ui_2"]
+	"sounds": ["explosion", "player_spotted", "cool_ass_dzwiek", "ui_1", "ui_2", "player_jump", "player_death", "player_dash"]
   },
 
   "2": {

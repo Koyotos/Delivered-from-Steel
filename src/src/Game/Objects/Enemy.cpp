@@ -21,6 +21,14 @@ Enemy::Enemy(const unordered_map<string, std::any>& data) : Object2D(data) {
 
 	damage = 100.0f;
 	atakDystanse = 0.5f;
+	audio = make_unique<AudioSource>(this);
+}
+
+void Enemy::Disable() noexcept {
+	if (audio) {
+		audio->Stop();
+	}
+	Object2D::Disable();
 }
 
 void Enemy::ChangeState(shared_ptr<Player> player) {
@@ -132,6 +140,9 @@ void Enemy::Physics(const float& deltaTime) {
 	realVelocity = pos - lastPosition;
 	lastPosition = pos;
 	UpdateState(deltaTime);
+	if (audio) {
+		audio->Update();
+	}
 }
 
 void Enemy::DetectPlayer() {

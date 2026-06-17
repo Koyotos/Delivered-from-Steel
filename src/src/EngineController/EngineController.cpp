@@ -483,6 +483,16 @@ void EngineController::UnloadPreviousLevel() {
 	if (activeScene && activeScene->GetRoot()) {
 		activeScene->GetRoot()->RemoveChild(previousLevelNode);
 	}
+
+	auto disableAll = [&](auto& self, const shared_ptr<Node>& node) -> void {
+		if (!node) return;
+		node->Disable();
+		for (auto& child : node->GetChildren()) {
+			self(self, child);
+		}
+		};
+
+	disableAll(disableAll, previousLevelNode);
 	FlattenForUnload(previousLevelNode);
 	previousLevelNode.reset();
 	previousLevelName = "";

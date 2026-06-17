@@ -1,4 +1,5 @@
 #include "include/Game/Objects/ShieldTankEnemy.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 
 ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : Enemy(data)
 {
@@ -98,9 +99,11 @@ void ShieldTankEnemy::Chase(float dt) {
 
 	if (groundHit.has_value() && !wallHit.has_value()) {
 		SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
+		audio->PlayLooping("ui_1", 0.5f, 1.0f);
 	}
 	else {
  		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
+		audio->PlayLooping("ui_2", 0.5f, 1.0f);
 	}
 }
 
@@ -118,6 +121,9 @@ void ShieldTankEnemy::AttackState(float dt) {
 		}
 		shieldOnCooldown = true;
 		attackStarted = true;
+		if (auto aum = Globals::GetGlobals().audioManager) {
+			aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+		}
 	}
 }
 
@@ -146,8 +152,12 @@ void ShieldTankEnemy::Physics(const float& deltaTime) {
 void ShieldTankEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
+		audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
 		if (seePlayer) {
 			state = EnemyState::Chase;
+			if (auto aum = Globals::GetGlobals().audioManager) {
+				aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+			}
 		}
 		break;
 	}

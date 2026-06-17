@@ -34,6 +34,7 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	startPos = GetTransform().GetTranslation();
 	targetPos = startPos + vec3(direction * patrolDistance, 0.0f, 0.0f);
 	endPos = targetPos;
+	audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
 }
 
 void Drone::Physics(const float& deltaTime) {
@@ -135,6 +136,7 @@ void Drone::ChangeState(shared_ptr<Player> p) {
 		vec3 currentPos = GetTransform().GetTranslation();
 		vec2 dir = vec2(diveTarget.x, diveTarget.y) - vec2(currentPos.x, currentPos.y);
 		currentDiveVelocity = glm::normalize(dir) * diveSpeed;
+		audio->PlayLooping("player_spotted", 0.5f, 1.0f);
 	}
 }
 
@@ -252,8 +254,9 @@ void Drone::Explode() {
 			player->takeDamage(explosionDamage);
 		}
 	}
-	if (Globals::GetGlobals().audioManager) {
-		Globals::GetGlobals().audioManager->PlaySound3D("explosion", GetTransform().GetTranslation());
+	audio->Stop();
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound3D("explosion", GetTransform().GetTranslation(), 0.5f, 1.0f);
 	}
 	if (spotLight) spotLight->Disable();
 
