@@ -25,7 +25,7 @@ public:
     void SetVisible(bool visible);
     bool GetVisible() const;
 
-    void OnCollisionEnter(std::shared_ptr<Collider>) override;
+    void OnCollisionEnter(Collider*) override;
     void Attack(std::shared_ptr<Player> player);
 
 	float GetSpeed() const { return speed; }

@@ -17,9 +17,9 @@ class CapsuleCollider : public Collider, public enable_shared_from_this<CapsuleC
 
     void UpdatePosition(const Transform transform) override;
 
-    bool CheckCollision(shared_ptr<Collider> other) const override;
+    bool CheckCollision(Collider* other) const override;
 
-    shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<Collider> other) const override;
+    shared_ptr<CollisionInfo> CalculateCollisionInfo(Collider* other) const override;
 
     optional<float> RayVsCircle(const vec2& origin, const vec2& dir, const vec2& center, float radius);
 

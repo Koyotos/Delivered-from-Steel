@@ -76,13 +76,14 @@ void MovingPlatform::Physics(const float& deltaTime) {
 }
 
 
-void MovingPlatform::OnCollisionStay(std::shared_ptr<Collider> other) {
+void MovingPlatform::OnCollisionStay(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
         std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
         if (playerNode) {
-            std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
-            std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
+            CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
+            BoxCollider* box = static_cast<BoxCollider*>(GetCollider());
 
             float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius + capsule->height/2);
             float platformTop = box->GetMax().y;
@@ -113,16 +114,17 @@ void MovingPlatform::OnCollisionStay(std::shared_ptr<Collider> other) {
     }
 }
 
-void MovingPlatform::OnCollisionExit(std::shared_ptr<Collider> other) {
+void MovingPlatform::OnCollisionExit(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
+    if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
         std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
         if (playerNode) {
 
-            std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+            CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
 
             float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius * 2 + capsule->height);
-			float platformTop = static_pointer_cast<BoxCollider>(GetCollider())->GetMax().y;
+			float platformTop = static_cast<BoxCollider*>(GetCollider())->GetMax().y;
 
             if (playerBottom >= platformTop) {
                 Transform trans = playerNode->GetTransform();

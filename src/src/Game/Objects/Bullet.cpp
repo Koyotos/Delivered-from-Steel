@@ -62,9 +62,10 @@ bool Bullet::GetVisible() const
     return isVisible;
 }
 
-void Bullet::OnCollisionEnter(std::shared_ptr<Collider> other)
+void Bullet::OnCollisionEnter(Collider* other)
 {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		Attack(player);
