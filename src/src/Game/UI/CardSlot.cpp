@@ -65,8 +65,8 @@ void CardSlot::PlayUseAnimation() {
 
     
     vec2 targetPos = vec2(origPos.x, origPos.y - 220.0f);
-    card->MoveTo(targetPos, 0.35f, EaseType::OutQuad);
-    card->MoveTo(vec2(origPos.x, origPos.y), 0.2f, EaseType::InQuad, 0.35f, targetPos);
+    card->MoveTo(targetPos, 0.3f, EaseType::OutQuad);
+    card->MoveTo(vec2(origPos.x, origPos.y), 0.1f, EaseType::OutQuad, 0.35f, targetPos);
     
 }
 
