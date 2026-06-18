@@ -59,14 +59,6 @@ void CardManager::UseCard(int index)
 
 }
 
-void CardManager::AddToHand(int slot, shared_ptr<Card> card)
-{
-
-	if (slot < 0 || slot >= currentHand.size()) return;
-	currentHand[slot] = card;
-	currentHandSaved[slot] = card;
-	slots[slot]->SetCard(card->GetDisplay());
-}
 
 
 void CardManager::ReachCheckpoint()
@@ -100,7 +92,7 @@ void CardManager::LearnCard(shared_ptr<Card> card)
 			removed->RotateTo(0.0f, 0.01f);
 			unlockedCardDisplays.push_back(removed);
 		}
-		slots[i]->SetCard(currentHand[i]->GetDisplay());
+		slots[i]->LearnCard(currentHand[i]->GetDisplay());
 	}
 
 }
@@ -266,9 +258,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
 	UnlockCard(CreateCard(CardType::Bounce));
-	UnlockCard(CreateCard(CardType::Dash));
 
-
+	
 }
 
 void CardManager::FindNodes(shared_ptr<Node> node)

@@ -154,13 +154,6 @@ public:
 	void UseCard(int index);
 
 	/*
-	 * @brief adds card to currentHand in specified slot, and handles all related animations
-	 * @param int : index of slot
-	 * @param shared_ptr<Card> : card to be added to hand
-	 */
-	void AddToHand(int slot, shared_ptr<Card> card);
-
-	/*
 	 * @brief Assigns player to all cards in deck, so they can use player-related functions
 	 * @param shared_ptr<Player> : player to be assigned
 	 */
