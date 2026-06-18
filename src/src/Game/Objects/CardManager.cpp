@@ -424,8 +424,6 @@ void CardManager::UpdateManaUI()
 	}
 
 	manaCounter->UpdateValue(currentManaPoints);
-
-	// if learning card TBD
 }
 
 void CardManager::ToggleMenu()
@@ -487,6 +485,15 @@ void CardManager::MoveSlots()
 			slots[i]->HideSlot(0.5f);
 		}
 	}
+}
+
+void CardManager::SetMaxMana(int value)
+{
+	maxManaPoints = value;
+	currentManaPoints = value;
+	manaCounter->UpdateMaxVal(value);
+	manaCounter->UpdateValue(value);
+	UpdateManaUI();
 }
 
 void CardManager::UpdateCardSelection()

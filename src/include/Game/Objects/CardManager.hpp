@@ -76,6 +76,8 @@ private:
 
 	void MoveSlots();
 
+
+
 	void UpdateCardSelection();
 
 	void AddCardToHand(int slot, shared_ptr<Card> card);
@@ -99,6 +101,8 @@ public:
 	 * @return vector<shared_ptr<Card>> : vector of all unlocked cards
 	 */
 	std::vector<shared_ptr<Card>> GetUnlockedCards();
+
+	void SetMaxMana(int value);
 
 
 	/*
