@@ -109,7 +109,7 @@ void ChargingEnemy::Chase(float dt) {
 void ChargingEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
-		audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
+		audio->PlayLooping("charger_engine", 0.3f, 1.0f, 7.5f, 0.8f);
 		if (seePlayer) {
 			state = EnemyState::Chase;
 			chargeCooldownTimer = 0;

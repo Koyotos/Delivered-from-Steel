@@ -181,7 +181,7 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 void TurretEnemy::Init(shared_ptr<Scene> scene) {
 	Enemy::Init(scene);
-	audio->PlayLooping("cool_ass_dzwiek", 0.3f, 1.0f, 7.5f, 0.8f);
+	audio->PlayLooping("drone_engine", 0.7f, 1.0f, 7.5f, 0.8f);
 	for(auto& child : GetChildren()) {
 		if(child->Type() == "Bullet") {
 			bullet = static_pointer_cast<Bullet>(child);
