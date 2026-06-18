@@ -70,6 +70,19 @@ void CardManager::ReachCheckpoint()
 		{
 			slots[i]->RemoveCard();
 			currentHand[i] = nullptr;
+			if (currentHandSaved[i] != nullptr)
+			{
+				currentHand[i] = currentHandSaved[i];
+				for (auto it = unlockedCardDisplays.begin(); it != unlockedCardDisplays.end(); ++it)
+				{
+					if ((*it)->GetCardType() == currentHandSaved[i]->GetCardType())
+					{
+						slots[i]->SetCard(*it);
+						unlockedCardDisplays.erase(it);
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -258,6 +271,9 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
 	UnlockCard(CreateCard(CardType::Bounce));
+
+	selectedCard = unlockedCardDisplays.size() - 1; // bounce
+	AddCardToHand(0, CreateCard(CardType::Bounce));
 
 	
 }
@@ -567,7 +583,7 @@ void CardManager::AddCardToHand(int slot, shared_ptr<Card> card)
 	}
 
 	selectedCard = std::min(selectedCard, (int)unlockedCardDisplays.size() - 1);
-	UpdateCardSelection();
+	if (menuOpen) UpdateCardSelection();
 }
 
 void CardManager::RemoveCardFromHand(int slot)
