@@ -10,7 +10,7 @@ private:
     float damage = 1000.0f;
 
 public:
-    void OnCollisionStay(shared_ptr<Collider> other) override;
+    void OnCollisionStay(Collider* other) override;
 
     Trap(const unordered_map<string, std::any>&);
 

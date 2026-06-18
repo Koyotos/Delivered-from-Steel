@@ -19,8 +19,7 @@ void Counter::UpdateValue(int newVal) {
 	}
     text->SetContent(std::to_string(currentVal));
     this->UpdateManaIconsValue();
-    // Add animation TBD
-    // update icon
+
 }
 
 void Counter::UpdateMaxVal(int newVal)
@@ -70,7 +69,7 @@ void Counter::UpdateManaIcons() {
             float x = beginX + t * (endX - beginX);
             manaIcons[i]->MoveTo(vec2(x, iconY), 0.01f);
             manaIcons[i]->FadeIn(0.01f);
-            manaIcons[i]->Play("unspent");
+            manaIcons[i]->Play("unspent", 0.25f);
         } else {
             manaIcons[i]->SetVisible(false);
         }
@@ -85,12 +84,12 @@ void Counter::UpdateManaIconsValue()
         for (int i = 0; i < maxVal; i++) {
             if (i >= currentVal)
             {
-                manaIcons[i]->Play("spent", 0.1f, false);
+                manaIcons[i]->Play("spent", 0.25f, false);
                 manaIcons[i]->FadeOut(0.01f, EaseType::Linear, 0.5f);
             }
             else if (i < currentVal)
             {
-                manaIcons[i]->Play("unspent");
+                manaIcons[i]->Play("unspent", 0.25f);
                 manaIcons[i]->FadeIn(0.01f);
             }
         }

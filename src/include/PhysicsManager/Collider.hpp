@@ -18,22 +18,22 @@ class Collider
     vec2 transform;
     bool isTrigger;
     bool enabled;
-    shared_ptr<PhysicsNode> owner;
+    weak_ptr<PhysicsNode> owner;
 
     private:
-    unordered_set<shared_ptr<Collider>> currentCollisions;
-    unordered_set<shared_ptr<Collider>> previousCollisions;
+    unordered_set<Collider*> currentCollisions;
+    unordered_set<Collider*> previousCollisions;
     void ClearCurrentCollisions();
 
     public:
     Collider();
     virtual ~Collider() = default;
 
-    virtual bool CheckCollision(shared_ptr<Collider> other) const = 0;
+    virtual bool CheckCollision(Collider* other) const = 0;
 
     virtual void UpdatePosition(const Transform transform) = 0;
 
-    virtual shared_ptr<CollisionInfo> CalculateCollisionInfo(shared_ptr<Collider> other) const = 0;
+    virtual shared_ptr<CollisionInfo> CalculateCollisionInfo(Collider* other) const = 0;
 
     virtual optional<RaycastHit> Raycast(const vec2& origin, const vec2& dir, float maxDist) = 0;
 
@@ -43,18 +43,21 @@ class Collider
 
 	bool GetTrigger() const;
 
-    unordered_set<shared_ptr<Collider>>& GetCurrentCollisions();
-    unordered_set<shared_ptr<Collider>>& GetPreviousCollisions();
+    unordered_set<Collider*>& GetCurrentCollisions();
+    void AddCurrentCollisions(Collider*);
+    unordered_set<Collider*>& GetPreviousCollisions();
+    void AddPreviousCollisions(Collider*);
 
-    void AddToCurrentCollisions(shared_ptr<Collider>);
+    void AddToCurrentCollisions(Collider*);
     void SetCurrentToPrevious();
 
     vec2 GetGlobalPosition2D() const;
 
     float DistanceSquared(const vec2& a, const vec2& b) const;
 
-    shared_ptr<PhysicsNode>& GetOwner();
+    shared_ptr<PhysicsNode> GetOwner();
 
+    void SetOwner(std::shared_ptr<PhysicsNode> node);
 };
 
 #endif

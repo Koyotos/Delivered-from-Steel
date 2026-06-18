@@ -26,11 +26,11 @@ uint8_t BoxCollider::Type() const noexcept {
     return 1;
 }
 
-bool BoxCollider::CheckCollision(shared_ptr<Collider> other) const {
+bool BoxCollider::CheckCollision(Collider* other) const {
     return CalculateCollisionInfo(other)->collided;
 }
 
-shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(shared_ptr<BoxCollider> other) const {
+shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(BoxCollider* other) const {
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     float overlapX = std::min(max.x, other->max.x) - std::max(min.x, other->min.x);
@@ -55,7 +55,7 @@ shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoB(shared_ptr<BoxCol
     return info;
 }
 
-shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(shared_ptr<CapsuleCollider> other) const {
+shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfoC(CapsuleCollider* other) const {
     shared_ptr<CollisionInfo> info = make_shared<CollisionInfo>();
 
     vec2 closest = { other->a.x, std::clamp(boxCenter.y, other->b.y, other->a.y)};
@@ -128,10 +128,10 @@ AABB BoxCollider::GetBounds() const {
     return { boxCenter - half, boxCenter + half };
 }
 
-shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(shared_ptr<Collider> other) const {
+shared_ptr<CollisionInfo> BoxCollider::CalculateCollisionInfo(Collider* other) const {
     if(other->Type() == 1) {
-        return CalculateCollisionInfoB(static_pointer_cast<BoxCollider>(other));
+        return CalculateCollisionInfoB(static_cast<BoxCollider*>(other));
     } else {
-        return CalculateCollisionInfoC(static_pointer_cast<CapsuleCollider>(other));
+        return CalculateCollisionInfoC(static_cast<CapsuleCollider*>(other));
     }
 }   

@@ -23,7 +23,7 @@ public:
 
     void Init(shared_ptr<Scene> scene) override;
 
-    void OnCollisionEnter(std::shared_ptr<Collider> other) override;
+    void OnCollisionEnter(Collider* other) override;
 
     virtual void OnPickUp();
 

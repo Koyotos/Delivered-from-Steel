@@ -187,7 +187,7 @@ void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
 }
 
 optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& direction, float maxDistance,
-	shared_ptr<Collider> collider, uint32_t type) {
+	Collider* collider, uint32_t type) {
 
 	float closest = maxDistance;
 	optional<RaycastHit> result;
@@ -207,7 +207,7 @@ optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& dir
 }
 
 vector<RaycastHit> PhysicsManager::RaycastAll(const vec2& origin, const vec2& direction, float maxDistance,
-	shared_ptr<Collider> collider, uint32_t type) {
+    Collider* collider, uint32_t type) {
 
 	float closest = maxDistance;
 	vector<RaycastHit> result;

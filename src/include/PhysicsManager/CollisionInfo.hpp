@@ -10,7 +10,7 @@ struct CollisionInfo {
     bool collided = false;
     glm::vec2 normal = { 0, 0 };
     float depth = 0.0f;
-    std::shared_ptr<Collider> collider;
+    Collider* collider;
     CollisionInfo() = default;
 };
 

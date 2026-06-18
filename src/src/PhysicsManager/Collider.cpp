@@ -5,19 +5,27 @@ Collider::Collider() : isTrigger(false), enabled(true) {
 	previousCollisions = {};
 }
 
-unordered_set<shared_ptr<Collider>>& Collider::GetCurrentCollisions() {
+unordered_set<Collider*>& Collider::GetCurrentCollisions() {
     return currentCollisions;
 }
 
-unordered_set<shared_ptr<Collider>>& Collider::GetPreviousCollisions() {
+unordered_set<Collider*>& Collider::GetPreviousCollisions() {
     return previousCollisions;
+}
+
+void Collider::AddCurrentCollisions(Collider* collider) {
+    currentCollisions.insert(collider);
+}
+
+void Collider::AddPreviousCollisions(Collider* collider) {
+    previousCollisions.insert(collider);
 }
 
 void Collider::ClearCurrentCollisions() {
 	currentCollisions.clear();
 }
 
-void Collider::AddToCurrentCollisions(shared_ptr<Collider> col) {
+void Collider::AddToCurrentCollisions(Collider* col) {
 	currentCollisions.insert(col);
 }
 
@@ -44,6 +52,13 @@ float Collider::DistanceSquared(const vec2& a, const vec2& b) const {
     return dx * dx + dy * dy;
 }
 
-shared_ptr<PhysicsNode>& Collider::GetOwner() {
-    return owner;
+shared_ptr<PhysicsNode> Collider::GetOwner() {
+    if (auto ptr = owner.lock()) {
+        return ptr;
+    }
+    return nullptr;
+}
+
+void Collider::SetOwner(std::shared_ptr<PhysicsNode> node) {
+	owner = node;
 }

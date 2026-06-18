@@ -13,7 +13,7 @@ private:
 public:
 	Item(const unordered_map<string, std::any>&);
 
-	void OnCollisionEnter(shared_ptr<Collider> other) override;
+	void OnCollisionEnter(Collider* other) override;
 
 	void GiveCard(shared_ptr<Player> player);
 };
