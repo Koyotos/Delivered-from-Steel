@@ -43,13 +43,20 @@
 #include <filesystem>
 #include <fstream>
 #include <future>
-
+#include <mutex>
+#include <algorithm>
+#include <cctype>
 
 class AudioManager;
 
 using namespace std;
 using namespace filesystem;
 using namespace nlohmann;
+
+static string ToLower(string str) {
+    transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return tolower(c); });
+    return str;
+}
 
 template<typename T> pair<string,function<shared_ptr<Node>(const unordered_map<string,std::any>&)>> 
     RegisterObjectType(const string& name) {
@@ -99,17 +106,20 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
 
 struct RefCountModel {
     shared_ptr<Model> model = nullptr;
-    uint8_t refCount = 0;
+    uint32_t refCount = 0;
+	string loweredName = "";
 };
 
 struct RefCountShader {
     shared_ptr<Shader> shader = nullptr;
-    uint8_t refCount = 0;
+    uint32_t refCount = 0;
+    string loweredName = "";
 };
 
 struct RefCountSprite {
     shared_ptr<Sprite> sprite = nullptr;
-    uint8_t refCount = 0;
+    uint32_t refCount = 0;
+    string loweredName = "";
 };
 
 class ResourceManager {
@@ -118,8 +128,7 @@ class ResourceManager {
     path spritesPath;
     path audioPath;
     path shadersPath;
-
-    fstream resourceStream;
+    mutex rsmMutex;
 
     vector<future<shared_ptr<Scene>>> sceneAsyncQueue; 
 
@@ -171,6 +180,8 @@ class ResourceManager {
     // Asynchronous loading
     void LoadSceneAsync(const path&) noexcept;
     shared_ptr<Scene> GetLoadedAsync(const string&) noexcept;
+
+	void PreloadAllResources();
 
     ResourceManager();
     ~ResourceManager();
