@@ -21,8 +21,8 @@ class CardManager : public Node, public ISerializable
 private:
 	int maxHandSize = 3;
 
-	int maxManaPoints = 15;
-	int currentManaPoints = 15;
+	int maxManaPoints = 14;
+	int currentManaPoints = 14;
 
 	int selectedCard = -1;
 	int selectedCardUp = 0;
@@ -103,6 +103,8 @@ public:
 	std::vector<shared_ptr<Card>> GetUnlockedCards();
 
 	void SetMaxMana(int value);
+
+	void AddMaxMana(int value);
 
 
 	/*

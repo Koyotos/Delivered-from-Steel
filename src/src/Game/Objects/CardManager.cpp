@@ -496,6 +496,11 @@ void CardManager::SetMaxMana(int value)
 	UpdateManaUI();
 }
 
+void CardManager::AddMaxMana(int value)
+{
+	SetMaxMana(maxManaPoints + value);
+}
+
 void CardManager::UpdateCardSelection()
 {
 

@@ -16,6 +16,6 @@ void ManaFind::OnPickUp() {
     auto cardManager = Globals::GetGlobals().cardManager;
 
     if (cardManager) {
-		// cardManager-> funkjca dodaj¹ca manê
+		cardManager->AddMaxMana(1);
     }
 }
