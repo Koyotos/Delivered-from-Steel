@@ -19,11 +19,14 @@ CardFind::CardFind(const unordered_map<string, std::any>& data) : PickUpAbstract
 CardFind::~CardFind() {}
 
 void CardFind::OnPickUp() {
-    auto cardManager = Globals::GetGlobals().cardManager;
+    auto& globals = Globals::GetGlobals();
+    auto cardManager = globals.cardManager;
 
     if (cardManager) {
         std::shared_ptr<Card> newCard = cardManager->CreateCard(cardTypeToUnlock);
         newCard->AssignPlayer(player);
+        cardManager->ReachCheckpoint();
+        player->SetRespawnPoint(GetTransform().GetTranslation(), globals.activeLevelName);
         cardManager->LearnCard(newCard);
     }
 }
