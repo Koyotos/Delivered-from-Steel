@@ -41,6 +41,8 @@ class EngineController {
     shared_ptr<MenuManager> mm;
     shared_ptr<Scene> menuScene;
     unordered_set<const Node*> registeredSerializableRoots;
+	shared_ptr<Scene> activeScene = nullptr;
+	shared_ptr<Scene> previousScene = nullptr;
 
     string pendingStreamLevel = "";
     bool pendingUnload = false;

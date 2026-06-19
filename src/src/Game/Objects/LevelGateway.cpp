@@ -75,10 +75,10 @@ void LevelGateway::OnCollisionExit(Collider* other) {
 
 	if (active != targetActive) {
 		engine->QueueSwapActiveAndPrevious();
+		engine->QueueUnloadPreviousLevel();
 	}
 	else {
 		engine->CancelAsyncLoad();
 	}
-	engine->QueueUnloadPreviousLevel();
 	hasTriggered = false;
 }
