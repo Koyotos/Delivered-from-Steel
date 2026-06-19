@@ -149,7 +149,7 @@ void Enemy::DetectPlayer() {
 	if (player && player->TestDraw()) {
 
 		glm::vec3 enemyPos3 = transform.GetTranslation();
-		enemyPos3.y -= groundCheckDistance/2;
+		enemyPos3.y -= groundCheckDistance/3;
 		glm::vec3 playerPos3 = player->GetTransform().GetTranslation();
 
 		glm::vec2 enemyPos(enemyPos3);

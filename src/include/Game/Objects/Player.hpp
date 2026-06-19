@@ -107,6 +107,7 @@ public:
 	void Unsuspend() {
 		isSuspended = false;
 	}
+	bool IsWallSliding() const { return isWallSliding; }
 
 	void ExecuteDash();
 	void ExecuteBounce();
