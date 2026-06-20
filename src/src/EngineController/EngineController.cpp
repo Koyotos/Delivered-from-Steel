@@ -260,7 +260,6 @@ void EngineController::Run() {
 
 		EndFrame();
 
-		//test save/load
 		if (globals->wantsToSave) {
 			SaveGame("save_0.json");
 			globals->Log("Game Saved (Autosave)");

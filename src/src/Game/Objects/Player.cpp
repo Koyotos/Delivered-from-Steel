@@ -612,7 +612,6 @@ void Player::Physics(const float& deltaTime) {
 bool Player::Input(InputEvent& event) {
 	if (isSuspended) return false;
 	if (!event.handled) {
-		//test save/load
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
 			if (event.key == GLFW_KEY_F9) {
 				Globals::GetGlobals().wantsToLoad = true;
