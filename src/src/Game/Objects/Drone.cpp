@@ -77,7 +77,7 @@ void Drone::DetectPlayer() {
 	if (state == EnemyState::Chase) return;
 
 	vec2 dronePos = GetTransform().GetTranslation();
-	vec2 playerPos = player->GetTransform().GetTranslation();
+	vec2 playerPos = player->GetTransform().GetTranslation() + vec3(0,-0.02f,0.0f);
 	vec2 dirToPlayer = playerPos - dronePos;
 	float dist = glm::length(dirToPlayer);
 

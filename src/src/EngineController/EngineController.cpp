@@ -42,6 +42,7 @@ void EngineController::Init() {
 
 		rsm->ConfigurePaths();
 		renderer->Init(*rsm);
+		rsm->PreloadAllResources();
 		iom->Init(renderer->GetWindow());
 		crm->Init(rsm);
 		globals->SetGameFont(Font("res/fonts/8bit_wonder/8-BIT-WONDER.ttf",{32,32}));
@@ -202,6 +203,7 @@ void EngineController::Run() {
 				if (pendingF9 || pendingRespawn || discardAsyncResult) {
 					discardAsyncResult = false;
 					FlattenForUnload(loadedScene->GetRoot());
+					rsm->UnloadScene(loadedScene);
 					isAsyncLoading = false;
 					asyncLoadingName = "";
 				}
@@ -258,16 +260,15 @@ void EngineController::Run() {
 
 		EndFrame();
 
-		//test save/load
 		if (globals->wantsToSave) {
 			SaveGame("save_0.json");
-			globals->Log("TEST: Game Saved (F5)");
+			globals->Log("Game Saved (Autosave)");
 			globals->wantsToSave = false;
 		}
 
 		if (globals->wantsToLoad) {
 			LoadGame("save_0.json");
-			globals->Log("TEST: Game Loaded (F9)");
+			globals->Log("Game Loaded");
 			globals->wantsToLoad = false;
 		}
 	}
@@ -289,6 +290,7 @@ void EngineController::ActivateLoadedScene(shared_ptr<Scene> loadedScene, const 
 		return;
 	}
 
+	activeScene = loadedScene;
 	activeLevelName = levelName;
 	globals->activeLevelName = activeLevelName;
 	activeLevelNode = loadedScene->GetRoot();
@@ -450,22 +452,25 @@ void EngineController::LoadLevel(const string& levelName) {
 		return;
 	}
 
+	std::filesystem::path fullPath = globals->GetExecDir() / "res" / "scenes" / (levelName + ".json");
+	shared_ptr<Scene> loadedLevel = rsm->LoadScene(fullPath);
+	if (!loadedLevel) return;
+
 	if (previousLevelNode) {
 		UnloadPreviousLevel();
 	}
 
-	std::filesystem::path fullPath = globals->GetExecDir() / "res" / "scenes" / (levelName + ".json");
-
 	if (activeLevelNode) {
 		previousLevelNode = activeLevelNode;
 		previousLevelName = activeLevelName;
+		if (activeScene) {
+			previousScene = activeScene;
+		}
 		UnloadPreviousLevel();
 		activeLevelNode = nullptr;
 		activeLevelName = "";
+		activeScene = nullptr;
 	}
-
-	shared_ptr<Scene> loadedLevel = rsm->LoadScene(fullPath);
-	if (!loadedLevel) return;
 
 	ActivateLoadedScene(loadedLevel, levelName);
 }
@@ -496,6 +501,10 @@ void EngineController::UnloadPreviousLevel() {
 	FlattenForUnload(previousLevelNode);
 	previousLevelNode.reset();
 	previousLevelName = "";
+	if (previousScene) {
+		rsm->UnloadScene(previousScene);
+		previousScene.reset();
+	}
 }
 
 void EngineController::SwapActiveAndPrevious() {
@@ -504,6 +513,9 @@ void EngineController::SwapActiveAndPrevious() {
 	if (activeLevelNode) {
 		previousLevelNode = activeLevelNode;
 		previousLevelName = activeLevelName;
+	}
+	if (activeScene) {
+		previousScene = activeScene;
 	}
 	
 	ActivateLoadedScene(nextLevelScene, nextLevelName);
@@ -525,7 +537,7 @@ void EngineController::FlattenForUnload(shared_ptr<Node> node) {
 	for (auto& child : node->GetChildren()) {
 		FlattenForUnload(child);
 	}
-	node->GetChildren().clear();
+	node->ClearChildren();
 	nodesToUnload.push_back(node);
 }
 
@@ -611,6 +623,7 @@ void EngineController::LoadGame(const string& filepath) {
 
 	svm->ApplyLoaded();
 	ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+	ApplyWorldStateToNode(scm->GetActive()->GetRoot(), "base");
 
 	if (psm) {
 		psm->Update(active, 0.0f);

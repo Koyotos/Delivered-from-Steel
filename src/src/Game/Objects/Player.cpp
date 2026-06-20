@@ -612,13 +612,7 @@ void Player::Physics(const float& deltaTime) {
 bool Player::Input(InputEvent& event) {
 	if (isSuspended) return false;
 	if (!event.handled) {
-		//test save/load
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
-			if (event.key == GLFW_KEY_F5) {
-				Globals::GetGlobals().wantsToSave = true;
-				event.handled = true;
-				return true;
-			}
 			if (event.key == GLFW_KEY_F9) {
 				Globals::GetGlobals().wantsToLoad = true;
 				event.handled = true;
@@ -756,11 +750,6 @@ nlohmann::json Player::Serialize() const {
 
 	j["hp"] = this->health.GetHP();
 
-	glm::vec3 pos = this->GetTransform().GetTranslation();
-	j["posX"] = pos.x;
-	j["posY"] = pos.y;
-	j["posZ"] = pos.z;
-
 	j["respawnPosX"] = this->respawnPoint.x;
 	j["respawnPosY"] = this->respawnPoint.y;
 	j["respawnPosZ"] = this->respawnPoint.z;
@@ -773,14 +762,12 @@ void Player::Deserialize(const nlohmann::json& data) {
 	if (data.contains("hp")) {
 		this->health.SetHP(data["hp"]);
 	}
-	if (data.contains("posX") && data.contains("posY") && data.contains("posZ")) {
-		glm::vec3 loadedPos(data["posX"], data["posY"], data["posZ"]);
+	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
+		glm::vec3 loadedPos(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
 		Transform t = this->GetTransform();
 		t.SetTranslation(loadedPos);
 		this->SetTransform(t);
-	}
-	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
-		this->respawnPoint = glm::vec3(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
+		this->respawnPoint = loadedPos;
 	}
 	if (data.contains("respawnLevel")) {
 		this->respawnLevelName = data["respawnLevel"];

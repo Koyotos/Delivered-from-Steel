@@ -73,6 +73,8 @@ void Checkpoint::Physics(const float& deltaTime) {
             if (!isActivated) Activate();
 			playerInsideAndVisible = true;
             player->SetRespawnPoint(vec3(checkpointPos,-5), globals.activeLevelName);
+            Globals::GetGlobals().wantsToSave = true;
+            Globals::GetGlobals().Log("Checkpoint activated. Triggering save.");
         }
     }
     else {
@@ -151,6 +153,9 @@ void Checkpoint::Activate() {
             auto& globals = Globals::GetGlobals();
             if (globals.worldStateManager) {
                 std::string currentLevel = globals.activeLevelName;
+                if (id.find("base_") == 0) {
+                    currentLevel = "base";
+                }
                 globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
             }
         }
