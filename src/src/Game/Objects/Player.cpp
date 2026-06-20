@@ -791,6 +791,10 @@ nlohmann::json Player::Serialize() const {
 void Player::Deserialize(const nlohmann::json& data) {
 	if (data.contains("hp")) {
 		this->health.SetHP(data["hp"]);
+		if (this->health.GetHP() > 0.0f) {
+			this->health.Revive();
+			this->wasDead = false;
+		}
 	}
 	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
 		glm::vec3 loadedPos(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
