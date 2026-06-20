@@ -303,5 +303,39 @@
             0.0
         ],
         "data4": 0.0
-    }
+    },
+	"11": {
+    "parent": 3,
+	"name": "BounceBubble",
+	"transform": [
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		0.0,
+		1.0,
+		1.0,
+		1.0
+	],
+	"class": "Object2D",
+	"process": true,
+	"input": false,
+	"physics": false,
+	"draw": false,
+	"ignoreParent": false,
+	"static": true,
+	"addCollider": false,
+	"ResolveCollision": false,
+	"colliderPosX": 0.0,
+	"colliderPosY": 0.0,
+	"colliderType": false,
+	"cull": 0.5,
+	"zIndex": 0,
+	"shader": "player",
+	"sprite": "bubble",
+	"reqPerspective": true,
+	"height": 1.0,
+	"width": 1.0
+	}
 }

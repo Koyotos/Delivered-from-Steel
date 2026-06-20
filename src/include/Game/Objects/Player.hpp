@@ -23,6 +23,7 @@ private:
 	PlayerCameraController cameraController;
 	std::shared_ptr<ParticleEmitterNode> deathEmitter;
 	std::shared_ptr<ParticleEmitterNode> wallSnapEmitter;
+	std::shared_ptr<Object2D> bounceBubbleNode;
 	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
 	std::shared_ptr<CardManager> cardManager;
 

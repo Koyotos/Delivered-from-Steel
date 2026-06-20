@@ -137,8 +137,14 @@ void Player::Init(std::shared_ptr<Scene> scene) {
 				wallSnapEmitter = emitter;
 			}
 		}
-		if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
+		else if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
 			pointVisualizer = std::static_pointer_cast<OrbitalParticleSystem>(child);
+		}
+		else if (child->GetName() == "BounceBubble" && child->Type() == "Object2D") {
+			bounceBubbleNode = std::static_pointer_cast<Object2D>(child);
+			if (bounceBubbleNode) {
+				bounceBubbleNode->Play("BubbleAnim", 0.15f, true);
+			}
 		}
 	}
 }
@@ -235,6 +241,14 @@ void Player::Process() {
 	else {
 		int currentPoints = cardManager->getCurrentManaPoints();
 		pointVisualizer->UpdatePlayerState(currentPoints);
+	}
+	if (bounceBubbleNode) {
+		Transform bubbleTransform = bounceBubbleNode->GetTransform();
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, 0.01f);
+		bubbleTransform.SetTranslation(localOffset);
+		bubbleTransform.SetScale(glm::vec3(facingDirection, 1.0f, 1.0f));
+		bounceBubbleNode->SetTransform(bubbleTransform);
+		bounceBubbleNode->SetDraw(isBounceActive);
 	}
 
 	wasDead = health.IsDead();
@@ -516,9 +530,6 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isWallSliding) {
-		if (GetCurrentAnimation() != "CourierWallSlide") {
-			Play("CourierWallSlide", 0.1f, true);
-		}
 		audio->PlayLooping2D("player_dash", 0.5f, 1.0f);
 		float target = -stats.wallSlideSpeed;
 		if (currentVelocity.y < target)
@@ -551,6 +562,18 @@ void Player::HandleAnimations() {
 	glm::vec2 currentVelocity = GetVelocity();
 	bool isJumpPlaying = (GetCurrentAnimation() == "CourierJump" && IsPlaying());
 
+	if (isDashing || isWallSnaping) {
+		if (GetCurrentAnimation() != "CourierDash") {
+			Play("CourierDash", 0.1f, true);
+		}
+		return;
+	}
+	if (isWallSliding) {
+		if (GetCurrentAnimation() != "WallGrab") {
+			Play("WallGrab", 0.1f, true);
+		}
+		return;
+	}
 	if (!isGrounded) {
 		if (currentVelocity.y > 0.0f) {
 			if (GetCurrentAnimation() != "CourierJump" && GetCurrentAnimation() != "CourierAirUp") {
