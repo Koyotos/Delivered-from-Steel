@@ -263,13 +263,13 @@ void EngineController::Run() {
 		//test save/load
 		if (globals->wantsToSave) {
 			SaveGame("save_0.json");
-			globals->Log("TEST: Game Saved (F5)");
+			globals->Log("Game Saved (Autosave)");
 			globals->wantsToSave = false;
 		}
 
 		if (globals->wantsToLoad) {
 			LoadGame("save_0.json");
-			globals->Log("TEST: Game Loaded (F9)");
+			globals->Log("Game Loaded");
 			globals->wantsToLoad = false;
 		}
 	}
