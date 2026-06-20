@@ -151,6 +151,9 @@ void Checkpoint::Activate() {
             auto& globals = Globals::GetGlobals();
             if (globals.worldStateManager) {
                 std::string currentLevel = globals.activeLevelName;
+                if (id.find("base_") == 0) {
+                    currentLevel = "base";
+                }
                 globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
             }
         }

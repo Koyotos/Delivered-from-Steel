@@ -538,7 +538,7 @@ void EngineController::FlattenForUnload(shared_ptr<Node> node) {
 	for (auto& child : node->GetChildren()) {
 		FlattenForUnload(child);
 	}
-	node->GetChildren().clear();
+	node->ClearChildren();
 	nodesToUnload.push_back(node);
 }
 
@@ -624,6 +624,7 @@ void EngineController::LoadGame(const string& filepath) {
 
 	svm->ApplyLoaded();
 	ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+	ApplyWorldStateToNode(scm->GetActive()->GetRoot(), "base");
 
 	if (psm) {
 		psm->Update(active, 0.0f);
