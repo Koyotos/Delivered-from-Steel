@@ -151,7 +151,7 @@
     "13": {
     "parent": 1,
     "transform": [
-        528.0,
+        530.0,
         1017.0,
         0.0,
         0.0,
@@ -1235,6 +1235,39 @@
     "ResolveCollision": false,
     "animated": false,
     "name": "mana_icon"
+},
+"45": {
+    "parent": 1,
+    "transform": [
+        527.0,
+        1007.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.5,
+        1.5,
+        1.0
+    ],
+    "sprite": "infinityIcon",
+    "class": "Icon",
+    "shader": "ui",
+    "active": "infinityIcon",
+    "process": true,
+    "input": false,
+    "physics": false,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": false,
+    "static": true,
+    "visible": true,
+    "alpha": 0.0,
+    "addCollider": false,
+    "cull": 0.0,
+    "zIndex": 22,
+    "ResolveCollision": false,
+    "animated": false,
+    "name": "infinity_icon"
 }
 
 

@@ -13,7 +13,7 @@ void Counter::UpdateValue(int newVal) {
     }
 	valueChanged = true;
     if (newVal < 10) {
-        text->SetTextPos(ivec2(origTextPosX + 9.0f, text->GetTransform().GetTranslation().y)); // Adjust position for single-digit numbers
+        text->SetTextPos(ivec2(origTextPosX + 14.0f, text->GetTransform().GetTranslation().y)); // Adjust position for single-digit numbers
     } else {
         text->SetTextPos(ivec2(origTextPosX, text->GetTransform().GetTranslation().y)); // Reset to original position for double-digit numbers
 	}
@@ -28,6 +28,28 @@ void Counter::UpdateMaxVal(int newVal)
     this->UpdateManaIcons();
 }
 
+void Counter::IsLearning(bool value)
+{
+    learning = value;
+    if (learning) {
+        infinityIcon->FadeIn(0.25f);
+        infinityIcon->Tint(vec3(0.14, 0.62, 0.87), 0.01f);
+        text->FadeOut(0.1f);
+
+        for (auto& icon : manaIcons) {
+			icon->Tint(vec3(0.4, 0.4, 0.4), 0.2f);
+		}
+    }
+    else {
+        infinityIcon->FadeOut(0.1f);
+        text->FadeIn(0.25f);
+
+        for (auto& icon : manaIcons) {
+            icon->Tint(vec3(1.0f, 1.0f, 1.0f), 0.2f);
+        }
+    }
+}
+
 void Counter::SetText(shared_ptr<TextUI> newText) {
     text = newText;
 	origTextPosX = text->GetLeftBound();
@@ -35,6 +57,10 @@ void Counter::SetText(shared_ptr<TextUI> newText) {
 
 void Counter::SetIcon(shared_ptr<Icon> newIcon) {
     icon = newIcon;
+}
+
+void Counter::SetInfinityIcon(shared_ptr<Icon> newIcon) {
+    infinityIcon = newIcon;
 }
 
 void Counter::AddManaIcon(shared_ptr<Icon> newIcon) {

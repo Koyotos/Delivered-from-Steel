@@ -27,8 +27,8 @@ void TextUI::SetTextSize(const ivec2& size) {
 
 void TextUI::Draw(shared_ptr<Shader> sh) {
     if (!GetVisible()) return;
-    this->shader->SetFloat("alpha", GetAlpha());
     this->shader->SetMat4("VP", glm::ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f));
+    this->shader->SetFloat("alpha", GetAlpha());
     textNode.SetColor(GetTint());
     textNode.Draw(this->shader);
 }

@@ -84,6 +84,7 @@ void CardManager::ReachCheckpoint()
 				}
 			}
 		}
+		manaCounter->IsLearning(false);
 	}
 
 
@@ -107,6 +108,7 @@ void CardManager::LearnCard(shared_ptr<Card> card)
 		}
 		slots[i]->LearnCard(currentHand[i]->GetDisplay());
 	}
+	manaCounter->IsLearning(true);
 
 }
 
@@ -301,7 +303,8 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 	else if (node->Type() == "Icon") {
 		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
- 		else if (cast->GetName() == "mana_icon") manaCounter->AddManaIcon(cast);
+		else if (cast->GetName() == "mana_icon") manaCounter->AddManaIcon(cast);
+		else if (cast->GetName() == "infinity_icon") manaCounter->SetInfinityIcon(cast);
 		else if (cast->GetName() == "checkpoint_bg") checkpointBackground = cast;
 		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
 		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
