@@ -275,6 +275,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	selectedCard = unlockedCardDisplays.size() - 1; // bounce
 	AddCardToHand(0, CreateCard(CardType::Bounce));
 
+	UpdateManaUI();
+
 	
 }
 

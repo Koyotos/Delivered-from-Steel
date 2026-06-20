@@ -60,7 +60,7 @@ void Counter::UpdateManaIcons() {
 
     float beginX = 625.0f;
     float endX = 1250.0f;
-	float iconY = manaIcons[0]->GetTransform().GetTranslation().y;
+	float iconY = 1005.0f;
 
     for (int i = 0; i < manaIcons.size(); i++) {
         if (i < maxVal) {
@@ -79,20 +79,18 @@ void Counter::UpdateManaIcons() {
 
 void Counter::UpdateManaIconsValue()
 {
-    if (valueChanged)
-    {
-        for (int i = 0; i < maxVal; i++) {
-            if (i >= currentVal)
-            {
-                manaIcons[i]->Play("spent", 0.25f, false);
-                manaIcons[i]->FadeOut(0.01f, EaseType::Linear, 0.5f);
-            }
-            else if (i < currentVal)
-            {
-                manaIcons[i]->Play("unspent", 0.25f);
-                manaIcons[i]->FadeIn(0.01f);
-            }
-        }
-        valueChanged = false;
-    }
+
+	for (int i = 0; i < maxVal; i++) {
+		if (i >= currentVal)
+		{
+			manaIcons[i]->Play("spent", 0.25f, false);
+			manaIcons[i]->FadeOut(0.01f, EaseType::Linear, 0.5f);
+		}
+		else if (i < currentVal)
+		{
+			manaIcons[i]->Play("unspent", 0.25f);
+			manaIcons[i]->FadeIn(0.01f);
+		}
+	}
+    
 }
