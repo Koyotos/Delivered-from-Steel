@@ -22,7 +22,7 @@ private:
 	PlayerRaycastConfig raycastConfig;
 	PlayerCameraController cameraController;
 	std::shared_ptr<ParticleEmitterNode> deathEmitter;
-	std::shared_ptr<ParticleEmitterNode> pixelEmitter;
+	std::shared_ptr<ParticleEmitterNode> wallSnapEmitter;
 	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
 	std::shared_ptr<CardManager> cardManager;
 

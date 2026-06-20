@@ -133,8 +133,8 @@ void Player::Init(std::shared_ptr<Scene> scene) {
 			if (child->GetName() == "DeathEmitter") {
 				deathEmitter = emitter;
 			}
-			else if (child->GetName() == "PixelEmitter") {
-				pixelEmitter = emitter;
+			else if (child->GetName() == "WallSnapEmitter") {
+				wallSnapEmitter = emitter;
 			}
 		}
 		if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
@@ -229,14 +229,6 @@ void Player::Process() {
 		}
 	}
 
-	if (pixelEmitter) {
-		if (!wasDead && health.IsDead()) {
-			//pixelEmitter->isEmitting = true;
-		}
-		else if (!health.IsDead()) {
-			pixelEmitter->isEmitting = false;
-		}
-	}
 	if (health.IsDead()) {
 		pointVisualizer->Reset();
 	}
@@ -320,6 +312,10 @@ bool Player::HandleMovement(float deltaTime) {
 		Transform t = this->GetTransform();
 		t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
 		this->SetTransform(t);
+
+		if (wallSnapEmitter && wallSnapEmitter->GetTargetSystem()) {
+			wallSnapEmitter->GetTargetSystem()->KillParticlesBehindX(this->GetTransform().GetTranslation().x, facingDirection);
+		}
 
 		if (isWalled) {
 			if (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f) {
@@ -739,6 +735,17 @@ void Player::ExecuteWallSnap() {
 	lastVelocity = glm::vec2(0.0f);
 	isWallSnaping = true;
 	isDashing = false;
+
+	if (wallSnapEmitter) {
+		glm::vec3 startPos = GetTransform().GetTranslation();
+		glm::vec3 endPos = startPos;
+		endPos.x = wallSnapPosX;
+		float distance = std::abs(endPos.x - startPos.x);
+		float particleDensity = 4.0f;
+		int particleCount = static_cast<int>(distance * particleDensity);
+		particleCount = std::clamp(particleCount, 3, 12);
+		wallSnapEmitter->BurstAlongLine(startPos, endPos, particleCount, 0.1f);
+	}
 }
 
 std::string Player::GetSerializeKey() const {
