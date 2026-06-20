@@ -260,16 +260,15 @@ void EngineController::Run() {
 
 		EndFrame();
 
-		//test save/load
 		if (globals->wantsToSave) {
 			SaveGame("save_0.json");
-			globals->Log("TEST: Game Saved (F5)");
+			globals->Log("Game Saved (Autosave)");
 			globals->wantsToSave = false;
 		}
 
 		if (globals->wantsToLoad) {
 			LoadGame("save_0.json");
-			globals->Log("TEST: Game Loaded (F9)");
+			globals->Log("Game Loaded");
 			globals->wantsToLoad = false;
 		}
 	}
@@ -538,7 +537,7 @@ void EngineController::FlattenForUnload(shared_ptr<Node> node) {
 	for (auto& child : node->GetChildren()) {
 		FlattenForUnload(child);
 	}
-	node->GetChildren().clear();
+	node->ClearChildren();
 	nodesToUnload.push_back(node);
 }
 
@@ -624,6 +623,7 @@ void EngineController::LoadGame(const string& filepath) {
 
 	svm->ApplyLoaded();
 	ApplyWorldStateToNode(activeLevelNode, activeLevelName);
+	ApplyWorldStateToNode(scm->GetActive()->GetRoot(), "base");
 
 	if (psm) {
 		psm->Update(active, 0.0f);

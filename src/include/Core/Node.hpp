@@ -65,7 +65,9 @@ class Node {
     @brief Returns vector of pointers to all node's children.
     @return vector<shared_ptr<Node>> - vector of children
     */
-    vector<shared_ptr<Node>> GetChildren();
+    const vector<shared_ptr<Node>>& GetChildren() const;
+
+	void ClearChildren();
 
     /*
     @brief Adds new child to Node.

@@ -1,7 +1,11 @@
 #include "include/Core/Node.hpp"
 
-vector<shared_ptr<Node>> Node::GetChildren() {
+const vector<shared_ptr<Node>>& Node::GetChildren() const {
     return children;
+}
+
+void Node::ClearChildren() {
+    children.clear();
 }
 
 void Node::AddChild(shared_ptr<Node> node) {
