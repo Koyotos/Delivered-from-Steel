@@ -9,7 +9,6 @@ Tooltip::Tooltip(const std::unordered_map<std::string, std::any>& data) : UIElem
 	deactivated = fromMap(bool, "deactivated", data);
 	activationTime = fromMap(float, "activationTime", data);
 	deactivationTime = fromMap(float, "deactivationTime", data);
-
 }
 
 void Tooltip::Activate()
@@ -30,10 +29,31 @@ void Tooltip::Process()
 	if (counter >= activationTime)
 	{
 		if (!isShown) ShowTooltip();
-	}
-	if (counter >= deactivationTime && deactivated)
+	} 
+	if (counter >= (deactivationTime + activationTime) && deactivated)
 	{
 		HideTooltip();
+	}
+}
+
+void Tooltip::OnCollisionEnter(Collider* other)
+{
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
+	if (owner->GetObjectType() == ObjectType::Player)
+	{
+		Activate();
+	}
+}
+
+void Tooltip::OnCollisionExit(Collider* other)
+{
+	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
+	if (owner->GetObjectType() == ObjectType::Player)
+	{
+		Deactivate();
+		this->SetPhysics(false);
 	}
 }
 

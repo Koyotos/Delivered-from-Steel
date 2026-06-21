@@ -17,6 +17,9 @@ class Tooltip : public UIElement
 	bool deactivated;
 	bool isShown = false;
 
+	float proximityRadius;
+	vec2 pos;
+
 	void ShowTooltip();
 	void HideTooltip();
 
@@ -30,6 +33,9 @@ class Tooltip : public UIElement
 	void Deactivate();
 	void Process() override;
 	string Type() override;
+
+	void OnCollisionEnter(Collider* other) override;
+	void OnCollisionExit(Collider* other) override;
 };
 
 #endif

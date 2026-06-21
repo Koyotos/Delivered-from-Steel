@@ -1302,7 +1302,8 @@
     "animated": false,
     "deactivated": false,
     "activationTime": 0.25,
-    "deactivationTime": 5.0
+    "deactivationTime": 5.0,
+    "proximityActivation": false
 }
 
 
