@@ -457,8 +457,7 @@ bool Player::HandleMovement(float deltaTime) {
 	isWallSliding = isSlidingDownWall && inputState.moveInput != 0.0f;
 
 	if (isDoubleJumping || isWallJumping) {
-		jumpOutlineTimer -= deltaTime;
-		if (jumpOutlineTimer <= 0.0f) {
+		if (currentVelocity.y <= 0.0f) {
 			isDoubleJumping = false;
 			isWallJumping = false;
 		}
@@ -611,11 +610,11 @@ void Player::HandleAnimations() {
 
 		if (isDashing) targetCollective = "outlineRed";
 		else if (isWallSnaping) targetCollective = "outlineBlue";
-		else if (isWallJumping) targetCollective = "outlineOrange";
-		else if (isDoubleJumping) targetCollective = "outlineGreen";
+		else if (isWallJumping) targetCollective = (targetPlayerAnim == "CourierAirUp") ? "orangeAirUp" : "outlineOrange";
+		else if (isDoubleJumping) targetCollective = (targetPlayerAnim == "CourierAirUp") ? "greenAirUp" : "outlineGreen";
 
 		if (!targetCollective.empty() && outlineCollectiveNode->GetCurrentAnimation() != targetCollective) {
-			bool loopAnim = isDashing || isWallSnaping;
+			bool loopAnim = isDashing || isWallSnaping || targetCollective == "orangeAirUp" || targetCollective == "greenAirUp";
 			outlineCollectiveNode->Play(targetCollective, 0.1f, loopAnim);
 		}
 	}
@@ -754,7 +753,6 @@ void Player::ExecuteDoubleJump() {
 	isWallSnaping = false;
 	isWallJumping = false;
 	isDoubleJumping = true;
-	jumpOutlineTimer = 0.1f;
 	glm::vec2 vel = GetVelocity();
 	vel.y = stats.jumpForce * 1.3f;
 	SetVelocity(vel);
@@ -770,7 +768,6 @@ void Player::ExecuteWallJump() {
 	isWallSnaping = false;
 	isWallJumping = true;
 	isDoubleJumping = false;
-	jumpOutlineTimer = 0.1f;
 	glm::vec2 vel = GetVelocity();
 
 	vel.y = stats.wallJumpForceY;

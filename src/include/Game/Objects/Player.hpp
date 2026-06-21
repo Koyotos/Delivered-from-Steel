@@ -57,7 +57,6 @@ private:
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
 	float respawnProtectionTimer = 0.0f;
-	float jumpOutlineTimer = 0.0f;
 
 	float smoothedFallIntensity = 0.0f;
 
