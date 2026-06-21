@@ -555,8 +555,7 @@ void Player::HandleAnimations() {
 	}
 	else if (!isGrounded) {
 		if (currentVelocity.y > 0.0f) {
-			bool isSpecialJump = isDoubleJumping || isWallJumping;
-			if (currentAnim != "CourierJump" && (currentAnim != "CourierAirUp" || isSpecialJump)) {
+			if (currentAnim != "CourierJump" && currentAnim != "CourierAirUp") {
 				targetPlayerAnim = "CourierJump";
 				Play("CourierJump", 0.1f, false);
 			}
@@ -577,7 +576,7 @@ void Player::HandleAnimations() {
 				}
 			}
 			else {
-				if (!isJumpPlaying && currentAnim != "CourierFall") {
+				if (!isJumpPlaying) {
 					targetPlayerAnim = "CourierAirLoop";
 					if (currentAnim != "CourierAirLoop") {
 						Play("CourierAirLoop", 0.1f, true);
@@ -759,6 +758,10 @@ void Player::ExecuteDoubleJump() {
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		aum->PlaySound2D("player_jump", 0.4f, 1.2f, false);
 	}
+	Play("CourierJump", 0.1f, false);
+	if (outlineCollectiveNode) {
+		outlineCollectiveNode->Play("outlineGreen", 0.1f, false);
+	}
 }
 
 void Player::ExecuteWallJump() {
@@ -779,6 +782,10 @@ void Player::ExecuteWallJump() {
 	canCutJump = false;
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		aum->PlaySound2D("player_jump", 0.4f, 0.8f, false);
+	}
+	Play("CourierJump", 0.1f, false);
+	if (outlineCollectiveNode) {
+		outlineCollectiveNode->Play("outlineOrange", 0.1f, false);
 	}
 }
 
