@@ -205,12 +205,11 @@ void Player::GatherInput(float deltaTime) {
 	}
 
 	float leftX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_X);
-	if (std::abs(leftX) > 0.1f) {
-		float normalizedSpeed = std::clamp((std::abs(leftX) - 0.1f) / (0.9f - 0.1f), 0.0f, 1.0f);
-		inputState.moveInput = normalizedSpeed * std::copysign(1.0f, leftX);
+	if (std::abs(leftX) > Globals::GetGlobals().gamepadDeadzone) {
+		inputState.moveInput = (leftX > 0.0f) ? 1.0f : -1.0f;
 	}
 
-	if (!isHanging && std::abs(inputState.moveInput) > 0.01f) {
+	if (std::abs(inputState.moveInput) > 0.01f) {
 		facingDirection = std::copysign(1.0f, inputState.moveInput);
 		Transform t = GetTransform();
 		glm::vec3 scale = t.GetScale();
@@ -219,7 +218,6 @@ void Player::GatherInput(float deltaTime) {
 		SetTransform(t);
 	}
 
-	inputState.wantsToDrop = Globals::GetGlobals().GetKeyState(GLFW_KEY_S) || Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_Y) > 0.5f;
 	inputState.rightStick.x = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_X);
 	inputState.rightStick.y = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_Y);
 }
@@ -259,7 +257,6 @@ void Player::Process() {
 
 	if (health.IsDead()) {
 		inputState.moveInput = 0.0f;
-		if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
 		SetVelocity(glm::vec2(0.0f));
 
 		if (health.CheckAndResetRespawn(deltaTime)) {
@@ -294,8 +291,6 @@ void Player::UpdateVignette() {
 }
 
 bool Player::HandleMovement(float deltaTime) {
-	if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
-
 	glm::vec2 currentVelocity = GetVelocity();
 
 	Transform t = this->GetTransform();
@@ -459,44 +454,6 @@ bool Player::HandleMovement(float deltaTime) {
 		}
 	}
 	lastVelocity = currentVelocity;
-
-	if (isHanging) {
-		if (GetCurrentAnimation() != "CourierLedgeGrab") {
-			Play("CourierLedgeGrab", 0.3f, true);
-		}
-		if (wantsToJump) {
-			isHanging = false;
-			Transform t = GetTransform();
-			t.SetTranslation(t.GetTranslation() + glm::vec3(0.0f, 0.1f, 0.0f));
-			SetTransform(t);
-			currentVelocity.y = stats.jumpForce;
-			currentVelocity.x = -facingDirection * 2.0f;
-			canCutJump = true;
-			inputState.jumpReleased = false;
-			facingDirection = -facingDirection;
-			ledgeDropCooldown = 0.3f;
-			inputState.jumpPressed = false;
-			jumpBufferCounter = 0.0f;
-			coyoteTimeCounter = 0.0f;
-		}
-		else if (inputState.wantsToDrop) {
-			isHanging = false;
-			ledgeDropCooldown = 0.3f;
-		}
-
-		SetVelocity(currentVelocity);
-
-		if (isHanging) {
-			SetVelocity(glm::vec2(0.0f, 0.0f));
-			Transform t = GetTransform();
-			glm::vec3 scale = t.GetScale();
-			scale.x = std::abs(scale.x) * facingDirectionHang;
-			t.SetScale(scale);
-			SetTransform(t);
-			cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
-			return true;
-		}
-	}
 
 	bool isSlidingDownWall = stats.enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
 	isWallSliding = isSlidingDownWall && inputState.moveInput != 0.0f;
@@ -687,10 +644,6 @@ void Player::Shatter() {
 	if (Globals::GetGlobals().ioManager) {
 		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.3f);
 	}
-}
-
-bool Player::IsHanging() {
-	return isHanging;
 }
 
 void Player::ExecuteDash() {

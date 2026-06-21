@@ -53,7 +53,6 @@ struct PlayerInputState {
 	bool jumpReleased = false;
 	bool jumpHeld = false;
 	float moveInput = 0.0f;
-	bool wantsToDrop = false;
 	bool lastJumpInput = false;
 	float timeSinceLastRelease = 100.0f;
 	glm::vec2 rightStick = { 0.0f, 0.0f };

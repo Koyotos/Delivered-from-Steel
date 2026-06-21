@@ -32,7 +32,6 @@ private:
 	bool isGrounded = false;
 	bool isWalled = false;
 	bool isWallSliding = false;
-	bool isHanging = false;
 	bool canCutJump = false;
 	bool wasDead = false;
 	bool isDashing = false;
@@ -51,7 +50,6 @@ private:
 	float facingDirectionHang = 1.0f;
 	float coyoteTimeCounter = 0.0f;
 	float jumpBufferCounter = 0.0f;
-	float ledgeDropCooldown = 0.0f;
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
 	float respawnProtectionTimer = 0.0f;
@@ -94,7 +92,6 @@ public:
 	void TriggerCameraShake(float duration, float intensity);
 	void takeDamage(float damage);
 	void Shatter();
-	bool IsHanging();
 	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity = velocity; }
 	void SetRespawnPoint(glm::vec3 point, const std::string& levelName) {
 		respawnPoint = point;
