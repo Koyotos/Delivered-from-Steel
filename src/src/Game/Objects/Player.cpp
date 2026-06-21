@@ -146,6 +146,12 @@ void Player::Init(std::shared_ptr<Scene> scene) {
 				bounceBubbleNode->Play("BubbleAnim", 0.15f, true);
 			}
 		}
+		else if (child->GetName() == "outlineCollective" && child->Type() == "Object2D") {
+			outlineCollectiveNode = std::static_pointer_cast<Object2D>(child);
+		}
+		else if (child->GetName() == "outlineYellow" && child->Type() == "Object2D") {
+			outlineYellowNode = std::static_pointer_cast<Object2D>(child);
+		}
 	}
 }
 
@@ -251,6 +257,20 @@ void Player::Process() {
 		bubbleTransform.SetScale(glm::vec3(facingDirection, 1.0f, 1.0f));
 		bounceBubbleNode->SetTransform(bubbleTransform);
 		bounceBubbleNode->SetDraw(isBounceActive);
+	}
+	if (outlineCollectiveNode) {
+		Transform outlineCollectiveTransform = outlineCollectiveNode->GetTransform();
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.02f);
+		outlineCollectiveTransform.SetTranslation(localOffset);
+		outlineCollectiveNode->SetTransform(outlineCollectiveTransform);
+		outlineCollectiveNode->SetDraw(isDashing || isDoubleJumping || isWallJumping || isWallSnaping);
+	}
+	if (outlineYellowNode) {
+		Transform outlineYellowTransform = outlineYellowNode->GetTransform();
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.01f);
+		outlineYellowTransform.SetTranslation(localOffset);
+		outlineYellowNode->SetTransform(outlineYellowTransform);
+		outlineYellowNode->SetDraw(isFeatherFalling && !isDashing && !isDoubleJumping && !isWallJumping && !isWallSnaping);
 	}
 
 	wasDead = health.IsDead();
@@ -458,6 +478,14 @@ bool Player::HandleMovement(float deltaTime) {
 	bool isSlidingDownWall = stats.enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
 	isWallSliding = isSlidingDownWall && inputState.moveInput != 0.0f;
 
+	if (isDoubleJumping || isWallJumping) {
+		jumpOutlineTimer -= deltaTime;
+		if (jumpOutlineTimer <= 0.0f) {
+			isDoubleJumping = false;
+			isWallJumping = false;
+		}
+	}
+
 	bool canJump = (stats.enableCoyoteTime && coyoteTimeCounter > 0.0f) || (!stats.enableCoyoteTime && isGrounded);
 
 	if (wantsToJump && canJump) {
@@ -581,6 +609,43 @@ void Player::HandleAnimations() {
 			Play("CourierStanding", 0.2f, true);
 		}
 	}
+	if (outlineCollectiveNode && outlineCollectiveNode->TestDraw()) {
+		std::string playerAnim = GetCurrentAnimation();
+		std::string targetCollective = "";
+
+		if (isDashing) targetCollective = "outlineRed";
+		else if (isWallSnaping) targetCollective = "outlineBlue";
+		else if (isWallJumping) targetCollective = "outlineOrange";
+		else if (isDoubleJumping) targetCollective = "outlineGreen";
+
+		if (!targetCollective.empty() && outlineCollectiveNode->GetCurrentAnimation() != targetCollective) {
+			if (isDashing || isWallSnaping) {
+				outlineCollectiveNode->Play(targetCollective, 0.1f, true);
+			}
+			else {
+				outlineCollectiveNode->Play(targetCollective, 0.1f, false);
+			}
+		}
+	}
+
+	if (outlineYellowNode && outlineYellowNode->TestDraw()) {
+		std::string playerAnim = GetCurrentAnimation();
+		std::string targetYellow = "";
+
+		if (playerAnim == "CourierFall") targetYellow = "Fall";
+		else if (playerAnim == "CourierWalk") targetYellow = "Walking";
+		else if (playerAnim == "CourierStanding") targetYellow = "Standing";
+		else targetYellow = "AirLoop";
+
+		if (!targetYellow.empty() && outlineYellowNode->GetCurrentAnimation() != targetYellow) {
+			if (playerAnim != "CourierStanding") {
+				outlineYellowNode->Play(targetYellow, 0.1f, true);
+			}
+			 else {
+				 outlineYellowNode->Play(targetYellow, 0.2f, true);
+			}
+		}
+	}
 }
 
 void Player::Physics(const float& deltaTime) {
@@ -635,6 +700,8 @@ void Player::Shatter() {
 	isDashing = false;
 	isWallSnaping = false;
 	isFeatherFalling = false;
+	isWallJumping = false;
+	isDoubleJumping = false;
 	SetPhysics(false);
 	SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");
@@ -671,6 +738,10 @@ void Player::ExecuteFeatherFalling() {
 
 void Player::ExecuteDoubleJump() {
 	isDashing = false;
+	isWallSnaping = false;
+	isWallJumping = false;
+	isDoubleJumping = true;
+	jumpOutlineTimer = 0.1f;
 	glm::vec2 vel = GetVelocity();
 	vel.y = stats.jumpForce * 1.3f;
 	SetVelocity(vel);
@@ -683,6 +754,10 @@ void Player::ExecuteDoubleJump() {
 
 void Player::ExecuteWallJump() {
 	isDashing = false;
+	isWallSnaping = false;
+	isWallJumping = true;
+	isDoubleJumping = false;
+	jumpOutlineTimer = 0.1f;
 	glm::vec2 vel = GetVelocity();
 
 	vel.y = stats.wallJumpForceY;

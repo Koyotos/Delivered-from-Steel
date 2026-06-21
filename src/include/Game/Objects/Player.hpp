@@ -24,6 +24,8 @@ private:
 	std::shared_ptr<ParticleEmitterNode> deathEmitter;
 	std::shared_ptr<ParticleEmitterNode> wallSnapEmitter;
 	std::shared_ptr<Object2D> bounceBubbleNode;
+	std::shared_ptr<Object2D> outlineCollectiveNode;
+	std::shared_ptr<Object2D> outlineYellowNode;
 	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
 	std::shared_ptr<CardManager> cardManager;
 
@@ -41,6 +43,8 @@ private:
 	bool isWallSnaping = false;
 	int wallJumpFacedDirection = 1.0f;
 	bool isSuspended = false;
+	bool isDoubleJumping = false;
+	bool isWallJumping = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -53,6 +57,7 @@ private:
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
 	float respawnProtectionTimer = 0.0f;
+	float jumpOutlineTimer = 0.0f;
 
 	float smoothedFallIntensity = 0.0f;
 
