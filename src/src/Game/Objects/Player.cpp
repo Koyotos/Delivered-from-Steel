@@ -704,6 +704,9 @@ void Player::ExecuteWallJump() {
 	coyoteTimeCounter = 0.0f;
 	jumpBufferCounter = 0.0f;
 
+	isWallSliding = false;
+	platformVelocity = glm::vec2(0.0f);
+
 	canCutJump = false;
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		aum->PlaySound2D("player_jump", 0.4f, 0.8f, false);
