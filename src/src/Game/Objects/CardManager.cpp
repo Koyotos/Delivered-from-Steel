@@ -65,6 +65,7 @@ void CardManager::ReachCheckpoint()
 {
 	if (learningCard)
 	{
+		if (learningCard->GetCardType() == CardType::FeatherFalling) ffTooltip->Activate();
 		learningCard = nullptr;
 		for (int i = 0; i < currentHand.size(); i++)
 		{
@@ -314,7 +315,8 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 	else if (node->Type() == "Tooltip")
 	{
 		shared_ptr<Tooltip> cast = static_pointer_cast<Tooltip>(node);
-		checkpointTooltip = cast;
+		if (cast->GetName() == "ff") ffTooltip = cast;
+		else if (cast->GetName() == "checkpoint") checkpointTooltip = cast;
 	}
 
 

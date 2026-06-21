@@ -57,6 +57,8 @@ private:
 	std::vector<shared_ptr<Icon>> slotIcons;
 
 	shared_ptr<Tooltip> checkpointTooltip;
+	shared_ptr<Tooltip> ffTooltip;
+
 	bool firstCheckpoint;
 
 	bool menuOpen = false;
