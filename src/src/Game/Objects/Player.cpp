@@ -59,7 +59,7 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	raycastConfig.groundedOffsetX = colX - (raycastConfig.groundedRayLength / 2.0f);
 	raycastConfig.groundedOffsetY = -(-colY + halfHeight) - skinWidth;
 
-	
+
 	raycastConfig.ceilingRayLength = radius;
 	raycastConfig.ceilingRayDir = { 1.0f, 0.0f };
 	raycastConfig.ceilingOffsetX = colX - (raycastConfig.ceilingRayLength / 2.0f);
@@ -495,7 +495,7 @@ bool Player::HandleMovement(float deltaTime) {
 
 	if (currentVelocity.y < 0) {
 		if (isFeatherFalling) {
-			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime /3;
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime / 3;
 		}
 		else {
 			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
@@ -539,30 +539,51 @@ void Player::HandleAnimations() {
 	glm::vec2 currentVelocity = GetVelocity();
 	string currentAnim = GetCurrentAnimation();
 	bool isJumpPlaying = (currentAnim == "CourierJump" && IsPlaying());
-	string targetPlayerAnim = currentAnim;
 
 	if (isDashing || isWallSnaping) {
-		targetPlayerAnim = "CourierDash";
 		if (currentAnim != "CourierDash") {
 			Play("CourierDash", 0.1f, true);
+			if (outlineCollectiveNode) {
+				outlineCollectiveNode->Play(isDashing ? "outlineRed" : "outlineBlue", 0.1f, true);
+			}
 		}
 	}
 	else if (isWallSliding) {
-		targetPlayerAnim = "CourierWallSlide";
 		if (currentAnim != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
+			if (outlineYellowNode) {
+				outlineYellowNode->Play("Grabing", 0.1f, true);
+			}
 		}
 	}
 	else if (!isGrounded) {
 		if (currentVelocity.y > 0.0f) {
 			if (currentAnim != "CourierJump" && currentAnim != "CourierAirUp") {
-				targetPlayerAnim = "CourierJump";
 				Play("CourierJump", 0.1f, false);
+				if (outlineCollectiveNode) {
+					if (isWallJumping) {
+						outlineCollectiveNode->Play("outlineOrange", 0.1f, false);
+					}
+					else if (isDoubleJumping) {
+						outlineCollectiveNode->Play("outlineGreen", 0.1f, false);
+					}
+				}
+				if (outlineYellowNode) {
+					outlineYellowNode->Play("Jump", 0.1f, false);
+				}
 			}
 			else if (!isJumpPlaying && currentAnim == "CourierJump") {
-				targetPlayerAnim = "CourierAirUp";
-				if (currentAnim != "CourierAirUp") {
-					Play("CourierAirUp", 0.1f, true);
+				Play("CourierAirUp", 0.1f, true);
+				if (outlineCollectiveNode) {
+					if (isWallJumping) {
+						outlineCollectiveNode->Play("orangeAirUp", 0.1f, true);
+					}
+					else if (isDoubleJumping) {
+						outlineCollectiveNode->Play("greenAirUp", 0.1f, true);
+					}
+				}
+				if (outlineYellowNode) {
+					outlineYellowNode->Play("AirUp", 0.1f, true);
 				}
 			}
 		}
@@ -570,16 +591,20 @@ void Player::HandleAnimations() {
 			float anticipationDistance = 0.1f;
 			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, static_cast<uint32_t>(ObjectType::Wall));
 			if (hitGroundSoon.has_value()) {
-				targetPlayerAnim = "CourierFall";
 				if (currentAnim != "CourierFall") {
 					Play("CourierFall", 0.1f, false);
+					if (outlineYellowNode) {
+						outlineYellowNode->Play("Fall", 0.1f, false);
+					}
 				}
 			}
 			else {
 				if (!isJumpPlaying) {
-					targetPlayerAnim = "CourierAirLoop";
 					if (currentAnim != "CourierAirLoop") {
 						Play("CourierAirLoop", 0.1f, true);
+						if (outlineYellowNode) {
+							outlineYellowNode->Play("AirLoop", 0.1f, true);
+						}
 					}
 				}
 			}
@@ -589,48 +614,21 @@ void Player::HandleAnimations() {
 		bool isStopping = (currentAnim == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
 		if (inputState.moveInput != 0.0f || isStopping) {
 			if (std::abs(currentVelocity.x) > 0.01f) {
-				targetPlayerAnim = "CourierWalk";
 				if (currentAnim != "CourierWalk") {
 					Play("CourierWalk", 0.1f, true);
+					if (outlineYellowNode) {
+						outlineYellowNode->Play("Walking", 0.1f, true);
+					}
 				}
 			}
 		}
 		else {
-			targetPlayerAnim = "CourierStanding";
 			if (currentAnim != "CourierStanding") {
 				Play("CourierStanding", 0.2f, true);
+				if (outlineYellowNode) {
+					outlineYellowNode->Play("Standing", 0.2f, true);
+				}
 			}
-		}
-	}
-
-	if (outlineCollectiveNode) {
-		std::string targetCollective = "";
-
-		if (isDashing) targetCollective = "outlineRed";
-		else if (isWallSnaping) targetCollective = "outlineBlue";
-		else if (isWallJumping) targetCollective = (targetPlayerAnim == "CourierAirUp") ? "orangeAirUp" : "outlineOrange";
-		else if (isDoubleJumping) targetCollective = (targetPlayerAnim == "CourierAirUp") ? "greenAirUp" : "outlineGreen";
-
-		if (!targetCollective.empty() && outlineCollectiveNode->GetCurrentAnimation() != targetCollective) {
-			bool loopAnim = isDashing || isWallSnaping || targetCollective == "orangeAirUp" || targetCollective == "greenAirUp";
-			outlineCollectiveNode->Play(targetCollective, 0.1f, loopAnim);
-		}
-	}
-
-	if (outlineYellowNode) {
-		std::string targetYellow = "";
-
-		if (targetPlayerAnim == "CourierFall") targetYellow = "Fall";
-		else if (targetPlayerAnim == "CourierWalk") targetYellow = "Walking";
-		else if (targetPlayerAnim == "CourierStanding") targetYellow = "Standing";
-		else if (targetPlayerAnim == "CourierJump") targetYellow = "Jump";
-		else if (targetPlayerAnim == "CourierAirUp") targetYellow = "AirUp";
-		else if (targetPlayerAnim == "CourierWallSlide") targetYellow = "Grabing";
-		else targetYellow = "AirLoop";
-
-		if (!targetYellow.empty() && outlineYellowNode->GetCurrentAnimation() != targetYellow) {
-			float speed = (targetPlayerAnim == "CourierStanding") ? 0.2f : 0.1f;
-			outlineYellowNode->Play(targetYellow, speed, true);
 		}
 	}
 }
@@ -760,7 +758,6 @@ void Player::ExecuteDoubleJump() {
 	}
 	Play("CourierJump", 0.1f, false);
 	if (outlineCollectiveNode) {
-		outlineCollectiveNode->Play("outlineRed", 0.0f, false);
 		outlineCollectiveNode->Play("outlineGreen", 0.1f, false);
 	}
 }
@@ -786,7 +783,6 @@ void Player::ExecuteWallJump() {
 	}
 	Play("CourierJump", 0.1f, false);
 	if (outlineCollectiveNode) {
-		outlineCollectiveNode->Play("outlineRed", 0.0f, false);
 		outlineCollectiveNode->Play("outlineOrange", 0.1f, false);
 	}
 }
