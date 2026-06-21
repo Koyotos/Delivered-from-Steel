@@ -138,3 +138,19 @@ void ParticleSystemNode::Draw(std::shared_ptr<Shader> sh) {
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);
 }
+
+void ParticleSystemNode::KillParticlesBehindX(float playerX, float direction) {
+	for (size_t i = 0; i < activeParticleCount; ) {
+		if ((direction < 0 && positions[i].x > playerX) || (direction > 0 && positions[i].x < playerX)) {
+			size_t lastIdx = activeParticleCount - 1;
+			positions[i] = positions[lastIdx];
+			velocities[i] = velocities[lastIdx];
+			colors[i] = colors[lastIdx];
+			lives[i] = lives[lastIdx];
+			activeParticleCount--;
+		}
+		else {
+			i++;
+		}
+	}
+}
