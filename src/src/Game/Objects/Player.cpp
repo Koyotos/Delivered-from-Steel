@@ -538,51 +538,70 @@ bool Player::HandleMovement(float deltaTime) {
 
 void Player::HandleAnimations() {
 	glm::vec2 currentVelocity = GetVelocity();
-	bool isJumpPlaying = (GetCurrentAnimation() == "CourierJump" && IsPlaying());
+	string currentAnim = GetCurrentAnimation();
+	bool isJumpPlaying = (currentAnim == "CourierJump" && IsPlaying());
+	string targetPlayerAnim = currentAnim;
 
 	if (isDashing || isWallSnaping) {
-		if (GetCurrentAnimation() != "CourierDash") {
+		targetPlayerAnim = "CourierDash";
+		if (currentAnim != "CourierDash") {
 			Play("CourierDash", 0.1f, true);
 		}
 	}
 	else if (isWallSliding) {
-		if (GetCurrentAnimation() != "CourierWallSlide") {
+		targetPlayerAnim = "CourierWallSlide";
+		if (currentAnim != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
 		}
 	}
 	else if (!isGrounded) {
 		if (currentVelocity.y > 0.0f) {
-			if (GetCurrentAnimation() != "CourierJump" && GetCurrentAnimation() != "CourierAirUp") {
+			bool isSpecialJump = isDoubleJumping || isWallJumping;
+			if (currentAnim != "CourierJump" && (currentAnim != "CourierAirUp" || isSpecialJump)) {
+				targetPlayerAnim = "CourierJump";
 				Play("CourierJump", 0.1f, false);
 			}
-			else if (!isJumpPlaying && GetCurrentAnimation() == "CourierJump") {
-				Play("CourierAirUp", 0.1f, true);
+			else if (!isJumpPlaying && currentAnim == "CourierJump") {
+				targetPlayerAnim = "CourierAirUp";
+				if (currentAnim != "CourierAirUp") {
+					Play("CourierAirUp", 0.1f, true);
+				}
 			}
 		}
 		else {
 			float anticipationDistance = 0.1f;
 			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, static_cast<uint32_t>(ObjectType::Wall));
 			if (hitGroundSoon.has_value()) {
-				if (GetCurrentAnimation() != "CourierFall") {
+				targetPlayerAnim = "CourierFall";
+				if (currentAnim != "CourierFall") {
 					Play("CourierFall", 0.1f, false);
 				}
 			}
 			else {
-				if (!isJumpPlaying && GetCurrentAnimation() != "CourierFall") {
-					Play("CourierAirLoop", 0.1f, true);
+				if (!isJumpPlaying && currentAnim != "CourierFall") {
+					targetPlayerAnim = "CourierAirLoop";
+					if (currentAnim != "CourierAirLoop") {
+						Play("CourierAirLoop", 0.1f, true);
+					}
 				}
 			}
 		}
 	}
-	else if (!(GetCurrentAnimation() == "CourierFall" && IsPlaying())) {
-		bool isStopping = (GetCurrentAnimation() == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
+	else if (!(currentAnim == "CourierFall" && IsPlaying())) {
+		bool isStopping = (currentAnim == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
 		if (inputState.moveInput != 0.0f || isStopping) {
 			if (std::abs(currentVelocity.x) > 0.01f) {
-				Play("CourierWalk", 0.1f, true);
+				targetPlayerAnim = "CourierWalk";
+				if (currentAnim != "CourierWalk") {
+					Play("CourierWalk", 0.1f, true);
+				}
 			}
 		}
 		else {
-			Play("CourierStanding", 0.2f, true);
+			targetPlayerAnim = "CourierStanding";
+			if (currentAnim != "CourierStanding") {
+				Play("CourierStanding", 0.2f, true);
+			}
 		}
 	}
 
@@ -603,19 +622,18 @@ void Player::HandleAnimations() {
 
 	bool drawYellow = isFeatherFalling && !drawCollective;
 	if (outlineYellowNode && drawYellow) {
-		std::string playerAnim = GetCurrentAnimation();
 		std::string targetYellow = "";
 
-		if (playerAnim == "CourierFall") targetYellow = "Fall";
-		else if (playerAnim == "CourierWalk") targetYellow = "Walking";
-		else if (playerAnim == "CourierStanding") targetYellow = "Standing";
-		else if (playerAnim == "CourierJump") targetYellow = "Jump";
-		else if (playerAnim == "CourierAirUp") targetYellow = "AirUp";
-		else if (playerAnim == "CourierWallSlide") targetYellow = "Grabing";
+		if (targetPlayerAnim == "CourierFall") targetYellow = "Fall";
+		else if (targetPlayerAnim == "CourierWalk") targetYellow = "Walking";
+		else if (targetPlayerAnim == "CourierStanding") targetYellow = "Standing";
+		else if (targetPlayerAnim == "CourierJump") targetYellow = "Jump";
+		else if (targetPlayerAnim == "CourierAirUp") targetYellow = "AirUp";
+		else if (targetPlayerAnim == "CourierWallSlide") targetYellow = "Grabing";
 		else targetYellow = "AirLoop";
 
 		if (!targetYellow.empty() && outlineYellowNode->GetCurrentAnimation() != targetYellow) {
-			float speed = (playerAnim == "CourierStanding") ? 0.2f : 0.1f;
+			float speed = (targetPlayerAnim == "CourierStanding") ? 0.2f : 0.1f;
 			outlineYellowNode->Play(targetYellow, speed, true);
 		}
 	}
