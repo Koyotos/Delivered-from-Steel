@@ -712,6 +712,9 @@ void Player::Shatter() {
 	isDoubleJumping = false;
 	SetPhysics(false);
 	SetDraw(false);
+	if (bounceBubbleNode) bounceBubbleNode->SetDraw(false);
+	if (outlineCollectiveNode) outlineCollectiveNode->SetDraw(false);
+	if (outlineYellowNode) outlineYellowNode->SetDraw(false);
 	Globals::GetGlobals().Log("Shatter");
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		aum->PlaySound2D("player_death", 0.6f, 1.0f, false);
