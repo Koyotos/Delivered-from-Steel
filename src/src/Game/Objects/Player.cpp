@@ -250,28 +250,6 @@ void Player::Process() {
 		int currentPoints = cardManager->getCurrentManaPoints();
 		pointVisualizer->UpdatePlayerState(currentPoints, GetTransform().GetTranslation());
 	}
-	if (bounceBubbleNode) {
-		Transform bubbleTransform = bounceBubbleNode->GetTransform();
-		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, 0.01f);
-		bubbleTransform.SetTranslation(localOffset);
-		bubbleTransform.SetScale(glm::vec3(facingDirection, 1.0f, 1.0f));
-		bounceBubbleNode->SetTransform(bubbleTransform);
-		bounceBubbleNode->SetDraw(isBounceActive);
-	}
-	if (outlineCollectiveNode) {
-		Transform outlineCollectiveTransform = outlineCollectiveNode->GetTransform();
-		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.02f);
-		outlineCollectiveTransform.SetTranslation(localOffset);
-		outlineCollectiveNode->SetTransform(outlineCollectiveTransform);
-		outlineCollectiveNode->SetDraw(isDashing || isDoubleJumping || isWallJumping || isWallSnaping);
-	}
-	if (outlineYellowNode) {
-		Transform outlineYellowTransform = outlineYellowNode->GetTransform();
-		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.01f);
-		outlineYellowTransform.SetTranslation(localOffset);
-		outlineYellowNode->SetTransform(outlineYellowTransform);
-		outlineYellowNode->SetDraw(isFeatherFalling && !isDashing && !isDoubleJumping && !isWallJumping && !isWallSnaping);
-	}
 
 	wasDead = health.IsDead();
 
@@ -566,15 +544,13 @@ void Player::HandleAnimations() {
 		if (GetCurrentAnimation() != "CourierDash") {
 			Play("CourierDash", 0.1f, true);
 		}
-		return;
 	}
-	if (isWallSliding) {
+	else if (isWallSliding) {
 		if (GetCurrentAnimation() != "CourierWallSlide") {
 			Play("CourierWallSlide", 0.1f, true);
 		}
-		return;
 	}
-	if (!isGrounded) {
+	else if (!isGrounded) {
 		if (currentVelocity.y > 0.0f) {
 			if (GetCurrentAnimation() != "CourierJump" && GetCurrentAnimation() != "CourierAirUp") {
 				Play("CourierJump", 0.1f, false);
@@ -609,8 +585,9 @@ void Player::HandleAnimations() {
 			Play("CourierStanding", 0.2f, true);
 		}
 	}
-	if (outlineCollectiveNode && outlineCollectiveNode->TestDraw()) {
-		std::string playerAnim = GetCurrentAnimation();
+
+	bool drawCollective = isDashing || isDoubleJumping || isWallJumping || isWallSnaping;
+	if (outlineCollectiveNode && drawCollective) {
 		std::string targetCollective = "";
 
 		if (isDashing) targetCollective = "outlineRed";
@@ -619,31 +596,27 @@ void Player::HandleAnimations() {
 		else if (isDoubleJumping) targetCollective = "outlineGreen";
 
 		if (!targetCollective.empty() && outlineCollectiveNode->GetCurrentAnimation() != targetCollective) {
-			if (isDashing || isWallSnaping) {
-				outlineCollectiveNode->Play(targetCollective, 0.1f, true);
-			}
-			else {
-				outlineCollectiveNode->Play(targetCollective, 0.1f, false);
-			}
+			bool loopAnim = isDashing || isWallSnaping;
+			outlineCollectiveNode->Play(targetCollective, 0.1f, loopAnim);
 		}
 	}
 
-	if (outlineYellowNode && outlineYellowNode->TestDraw()) {
+	bool drawYellow = isFeatherFalling && !drawCollective;
+	if (outlineYellowNode && drawYellow) {
 		std::string playerAnim = GetCurrentAnimation();
 		std::string targetYellow = "";
 
 		if (playerAnim == "CourierFall") targetYellow = "Fall";
 		else if (playerAnim == "CourierWalk") targetYellow = "Walking";
 		else if (playerAnim == "CourierStanding") targetYellow = "Standing";
+		else if (playerAnim == "CourierJump") targetYellow = "Jump";
+		else if (playerAnim == "CourierAirUp") targetYellow = "AirUp";
+		else if (playerAnim == "CourierWallSlide") targetYellow = "Grabing";
 		else targetYellow = "AirLoop";
 
 		if (!targetYellow.empty() && outlineYellowNode->GetCurrentAnimation() != targetYellow) {
-			if (playerAnim != "CourierStanding") {
-				outlineYellowNode->Play(targetYellow, 0.1f, true);
-			}
-			 else {
-				 outlineYellowNode->Play(targetYellow, 0.2f, true);
-			}
+			float speed = (playerAnim == "CourierStanding") ? 0.2f : 0.1f;
+			outlineYellowNode->Play(targetYellow, speed, true);
 		}
 	}
 }
@@ -656,6 +629,28 @@ void Player::Physics(const float& deltaTime) {
 		if (!skipAnimations) {
 			HandleAnimations();
 		}
+	}
+	if (bounceBubbleNode) {
+		Transform bubbleTransform = bounceBubbleNode->GetTransform();
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, 0.01f);
+		bubbleTransform.SetTranslation(localOffset);
+		bubbleTransform.SetScale(glm::vec3(facingDirection, 1.0f, 1.0f));
+		bounceBubbleNode->SetTransform(bubbleTransform);
+		bounceBubbleNode->SetDraw(isBounceActive);
+	}
+	if (outlineCollectiveNode) {
+		Transform outlineCollectiveTransform = outlineCollectiveNode->GetTransform();
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.02f);
+		outlineCollectiveTransform.SetTranslation(localOffset);
+		outlineCollectiveNode->SetTransform(outlineCollectiveTransform);
+		outlineCollectiveNode->SetDraw(isDashing || isDoubleJumping || isWallJumping || isWallSnaping);
+	}
+	if (outlineYellowNode) {
+		Transform outlineYellowTransform = outlineYellowNode->GetTransform();
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.01f);
+		outlineYellowTransform.SetTranslation(localOffset);
+		outlineYellowNode->SetTransform(outlineYellowTransform);
+		outlineYellowNode->SetDraw(isFeatherFalling && !isDashing && !isDoubleJumping && !isWallJumping && !isWallSnaping);
 	}
 
 	if (pointVisualizer) {
