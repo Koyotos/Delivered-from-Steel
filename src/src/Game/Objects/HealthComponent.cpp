@@ -35,3 +35,9 @@ bool HealthComponent::CheckAndResetRespawn(float deltaTime) {
 	}
 	return false;
 }
+
+void HealthComponent::Revive() {
+	isDead = false;
+	canTakeDamage = true;
+	respawnTimer = 0.0f;
+}

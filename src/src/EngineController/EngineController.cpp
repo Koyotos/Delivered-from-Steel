@@ -134,6 +134,13 @@ void EngineController::ReadApplyConf() {
 		valueF = fromMap(float, "ambientVolume", confData);
 		aum->SetAmbientVolume(valueF);
 	}
+
+	if (confData.find("gamepadDeadzone") != confData.end()) {
+		Globals::GetGlobals().gamepadDeadzone = fromMap(float, "gamepadDeadzone", confData);
+	} 
+	else {
+		Globals::GetGlobals().gamepadDeadzone = 0.1f;
+	}
 }
 
 void EngineController::Run() {

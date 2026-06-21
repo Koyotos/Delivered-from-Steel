@@ -32,7 +32,7 @@ void OrbitalParticleSystem::Process() {
 	Object2D::Process();
 }
 
-void OrbitalParticleSystem::UpdatePlayerState(int currentPoints) {
+void OrbitalParticleSystem::UpdatePlayerState(int currentPoints, const glm::vec3& playerPos) {
 	size_t targetOrbitCount = (currentPoints <= showThreshold) ? currentPoints : 0;
 
 	if (targetOrbitCount < points) {
@@ -55,7 +55,7 @@ void OrbitalParticleSystem::UpdatePlayerState(int currentPoints) {
 				colors[activeParticleCount] = colors[i];
 				activeParticleCount++;
 			}
-			positions[i] = glm::vec4(0.0f, 0.0f, -5.0f, 0.0f);
+			positions[i] = glm::vec4(playerPos.x, playerPos.y, playerPos.z, 0.0f);
 		}
 	}
 

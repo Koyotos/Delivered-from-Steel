@@ -56,6 +56,8 @@ class Globals {
 
     bool wantsToSave = false;
     bool wantsToLoad = false;
+    
+    float gamepadDeadzone = 0.1f;
 
     std::string activeLevelName = "";
 

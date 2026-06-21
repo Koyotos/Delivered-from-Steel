@@ -86,3 +86,20 @@ void ParticleEmitterNode::Burst(int count) {
 		targetSystem->Emit(spawnPos, randomVelocity, startColor, lifeTime, randomRot);
 	}
 }
+
+void ParticleEmitterNode::BurstAlongLine(const glm::vec3& start, const glm::vec3& end, int count, float scatterRadius) {
+	if (!targetSystem) return;
+	for (int i = 0; i < count; i++) {
+		float t = (count > 1) ? static_cast<float>(i) / (count - 1) : 0.5f;
+		glm::vec3 spawnPos = start + t * (end - start);
+		spawnPos.x += RandomFloat(-scatterRadius, scatterRadius);
+		spawnPos.y += RandomFloat(-scatterRadius, scatterRadius);
+		glm::vec3 randomVelocity = baseVelocity + glm::vec3(
+			RandomFloat(-velocityVariation.x, velocityVariation.x),
+			RandomFloat(-velocityVariation.y, velocityVariation.y),
+			0.0f
+		);
+		float randomRot = RandomFloat(0.0f, 6.28f);
+		targetSystem->Emit(spawnPos, randomVelocity, startColor, lifeTime, randomRot);
+	}
+}

@@ -21,6 +21,7 @@ public:
 
 	float GetHP() const { return hp; }
 	void SetHP(float value) { hp = value; }
+	void Revive();
 };
 
 #endif
