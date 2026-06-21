@@ -5,10 +5,11 @@
 
 Tooltip::Tooltip(const std::unordered_map<std::string, std::any>& data) : UIElement(data)
 {
-	activated = false;
+ 	activated = false;
 	deactivated = fromMap(bool, "deactivated", data);
 	activationTime = fromMap(float, "activationTime", data);
 	deactivationTime = fromMap(float, "deactivationTime", data);
+	name = fromMap(string, "name", data);
 }
 
 void Tooltip::Activate()
@@ -79,4 +80,9 @@ string Tooltip::Type()
 void Tooltip::Draw(shared_ptr<Shader> sh)
 {
 	UIElement::Draw(sh);
+}
+
+string Tooltip::GetName()
+{
+	return name;
 }

@@ -34,6 +34,8 @@ class Tooltip : public UIElement
 	void Process() override;
 	string Type() override;
 
+	string GetName();
+
 	void OnCollisionEnter(Collider* other) override;
 	void OnCollisionExit(Collider* other) override;
 };
