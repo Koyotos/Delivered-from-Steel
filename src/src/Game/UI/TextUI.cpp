@@ -62,6 +62,21 @@ TextUI::TextUI(const unordered_map<string, std::any>& data) : UIElement(data) {
 
 }
 
+TextUI::TextUI(vec3 color, vec2 size, vec2 pos, float scale, float alpha, string content)
+{
+    SetTint(color);
+    SetAlpha(alpha);
+    SetProcess(true);
+    SetPhysics(false);
+    SetVisible(true);
+
+    textNode.SetColor(color);
+    textNode.SetSize(size);
+    textNode.SetPos(pos);
+    textNode.SetScale(scale);
+    textNode.SetContent(content);
+}
+
 float TextUI::GetLeftBound() const {
     auto& global = GetTransform().GetGlobal();
     return global[3].x;
