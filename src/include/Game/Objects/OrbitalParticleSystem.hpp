@@ -11,7 +11,7 @@ public:
 	void Process() override;
 	void UpdateOrbit(float deltaTime, const glm::vec3& playerPos);
 	void Reset() { activeParticleCount = 0; points = 0; }
-	void UpdatePlayerState(int currentPoints);
+	void UpdatePlayerState(int currentPoints, const glm::vec3& playerPos);
 
 	int showThreshold = 15;
 	bool unorganizedMode = false;

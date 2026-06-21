@@ -229,6 +229,10 @@ void Player::Process() {
 	Object2D::Process();
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
+	if (respawnProtectionTimer > 0.0f) {
+		respawnProtectionTimer -= deltaTime;
+	}
+
 	if (deathEmitter) {
 		if (!wasDead && health.IsDead()) {
 			deathEmitter->Burst(10);
@@ -240,7 +244,7 @@ void Player::Process() {
 	}
 	else {
 		int currentPoints = cardManager->getCurrentManaPoints();
-		pointVisualizer->UpdatePlayerState(currentPoints);
+		pointVisualizer->UpdatePlayerState(currentPoints, GetTransform().GetTranslation());
 	}
 	if (bounceBubbleNode) {
 		Transform bubbleTransform = bounceBubbleNode->GetTransform();
@@ -261,6 +265,8 @@ void Player::Process() {
 		if (health.CheckAndResetRespawn(deltaTime)) {
 			SetVelocity(glm::vec2(0.0f));
 			lastVelocity = glm::vec2(0.0f);
+			wasDead = false;
+			respawnProtectionTimer = 0.2f;
 			Globals::GetGlobals().engineController->TriggerRespawn();
 		}
 		return;
@@ -305,13 +311,19 @@ bool Player::HandleMovement(float deltaTime) {
 	isWalled = isWalledRight || isWalledLeft;
 
 	if (isWalledRight && isWalledLeft && (WalledLeftHit.value().collider != WalledRightHit.value().collider)) {
-		Shatter();
+		if (respawnProtectionTimer <= 0.0f) {
+			Shatter();
+			return false;
+		}
 	}
 
 	if (isGrounded) {
 		coyoteTimeCounter = stats.coyoteTime;
 		if (isCeiling) {
-			Shatter();
+			if (respawnProtectionTimer <= 0.0f) {
+				Shatter();
+				return false;
+			}
 		}
 	}
 	else {
@@ -441,7 +453,10 @@ bool Player::HandleMovement(float deltaTime) {
 	bool wantsToJump = (stats.enableJumpBuffer && jumpBufferCounter > 0.0f) || (!stats.enableJumpBuffer && inputState.jumpPressed);
 
 	if (abs(lastVelocity.y) - stats.fallDamageSpeed > abs(currentVelocity.y)) {
-		Shatter();
+		if (respawnProtectionTimer <= 0.0f) {
+			Shatter();
+			return false;
+		}
 	}
 	lastVelocity = currentVelocity;
 
@@ -613,10 +628,12 @@ void Player::HandleAnimations() {
 
 void Player::Physics(const float& deltaTime) {
 	if (isSuspended) return;
-	bool skipAnimations = HandleMovement(deltaTime);
 
-	if (!skipAnimations) {
-		HandleAnimations();
+	if (!health.IsDead()) {
+		bool skipAnimations = HandleMovement(deltaTime);
+		if (!skipAnimations) {
+			HandleAnimations();
+		}
 	}
 
 	if (pointVisualizer) {
@@ -655,6 +672,7 @@ void Player::takeDamage(float damage) {
 }
 
 void Player::Shatter() {
+	if (health.IsDead()) return;
 	health.Shatter();
 	isBounceActive = false;
 	isDashing = false;
