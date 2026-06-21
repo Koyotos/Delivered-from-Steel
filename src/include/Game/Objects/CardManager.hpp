@@ -7,6 +7,7 @@
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Core/ISerializable.hpp"
 #include "include/Game/UI/Counter.hpp"
+#include "include/Game/UI/Tooltip.hpp"
 
 
 
@@ -54,6 +55,9 @@ private:
 
 	shared_ptr<Icon> checkpointBackground;
 	std::vector<shared_ptr<Icon>> slotIcons;
+
+	shared_ptr<Tooltip> checkpointTooltip;
+	bool firstCheckpoint;
 
 	bool menuOpen = false;
 

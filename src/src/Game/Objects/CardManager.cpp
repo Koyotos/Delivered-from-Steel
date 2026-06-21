@@ -87,7 +87,6 @@ void CardManager::ReachCheckpoint()
 		manaCounter->IsLearning(false);
 	}
 
-
 	currentManaPoints = maxManaPoints;
 	UpdateManaUI();
 
@@ -279,6 +278,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 
 	UpdateManaUI();
 
+	firstCheckpoint = true;
+
 	
 }
 
@@ -309,6 +310,11 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
 		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
 		else if (cast->GetName() == "button_b") slotIcons[2] = cast;
+	}
+	else if (node->Type() == "Tooltip")
+	{
+		shared_ptr<Tooltip> cast = static_pointer_cast<Tooltip>(node);
+		checkpointTooltip = cast;
 	}
 
 
@@ -443,6 +449,10 @@ void CardManager::ToggleMenu()
 		checkpointBackground->MoveTo(vec2(0.0f, 0.0f), 0.5f, EaseType::OutQuad);
 		MoveUnlockedCards();
 		MoveSlots();
+		if (firstCheckpoint)
+		{
+			checkpointTooltip->Activate();
+		}
 	}
 	else
 	{
@@ -451,6 +461,7 @@ void CardManager::ToggleMenu()
 		MoveUnlockedCards();
 		MoveSlots();
 		player->SetPhysics(true);
+		checkpointTooltip->Deactivate();
 	}
 }
 

@@ -1268,6 +1268,41 @@
     "ResolveCollision": false,
     "animated": false,
     "name": "infinity_icon"
+},
+"46": {
+    "parent": 1,
+    "transform": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        3.75,
+        3.75,
+        1.0
+    ],
+    "sprite": "checkpointTooltip",
+    "class": "Tooltip",
+    "shader": "ui",
+    "active": "checkpointTooltip",
+    "process": true,
+    "input": false,
+    "physics": false,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": false,
+    "static": true,
+    "visible": true,
+    "alpha": 0.0,
+    "addCollider": false,
+    "cull": 0.0,
+    "zIndex": 25,
+    "ResolveCollision": false,
+    "animated": false,
+    "deactivated": false,
+    "activationTime": 0.25,
+    "deactivationTime": 5.0
 }
 
 

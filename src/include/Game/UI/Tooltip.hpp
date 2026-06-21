@@ -14,15 +14,22 @@ class Tooltip : public UIElement
 	float counter = 0.0f;
 	string name;
 	bool activated;
+	bool deactivated;
+	bool isShown = false;
 
 	void ShowTooltip();
+	void HideTooltip();
+
 
 	public:
 
+	Tooltip();
 	Tooltip(const std::unordered_map<std::string, std::any>& data);
+	void Draw(shared_ptr<Shader> sh = nullptr) override;
 	void Activate();
-	void HideTooltip();
+	void Deactivate();
 	void Process() override;
+	string Type() override;
 };
 
 #endif
