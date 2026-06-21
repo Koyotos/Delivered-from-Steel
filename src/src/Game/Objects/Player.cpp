@@ -541,8 +541,8 @@ void Player::HandleAnimations() {
 		return;
 	}
 	if (isWallSliding) {
-		if (GetCurrentAnimation() != "WallGrab") {
-			Play("WallGrab", 0.1f, true);
+		if (GetCurrentAnimation() != "CourierWallSlide") {
+			Play("CourierWallSlide", 0.1f, true);
 		}
 		return;
 	}
