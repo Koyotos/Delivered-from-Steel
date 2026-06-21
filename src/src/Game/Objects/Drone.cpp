@@ -198,9 +198,9 @@ void Drone::Patrol(float dt) {
 	}
 
 	constexpr float slowdownRadius = 1.0f;
-	constexpr float minSpeed = 0.5f;
 	float currentSpeed = patrolSpeed;
 	if (dist < slowdownRadius) {
+		float minSpeed = 0.5f * patrolSpeed;
 		float t = dist / slowdownRadius;
 		currentSpeed = minSpeed + (patrolSpeed - minSpeed) * t;
 	}

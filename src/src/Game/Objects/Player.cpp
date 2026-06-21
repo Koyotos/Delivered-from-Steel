@@ -215,7 +215,7 @@ void Player::GatherInput(float deltaTime) {
 		inputState.moveInput = (leftX > 0.0f) ? 1.0f : -1.0f;
 	}
 
-	if (std::abs(inputState.moveInput) > 0.01f) {
+	if (std::abs(inputState.moveInput) > 0.01f && !isDashing) {
 		facingDirection = std::copysign(1.0f, inputState.moveInput);
 		Transform t = GetTransform();
 		glm::vec3 scale = t.GetScale();
@@ -338,15 +338,16 @@ bool Player::HandleMovement(float deltaTime) {
 
 		if (isWalled) {
 			if (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f) {
-				currentVelocity.x = beforeCardVelocityX;
+				currentVelocity.x = 0.0f;
 				currentVelocity.y = stats.wallSnapJump;
 				SetVelocity(currentVelocity);
 				isWallSnaping = false;
 				return false;
 			}
 		}
-		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || (facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
-			currentVelocity.x = beforeCardVelocityX;
+		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
+			(facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
+			currentVelocity.x = 0.0f;
 			currentVelocity.y = stats.wallSnapJump;
 			SetVelocity(currentVelocity);
 			isWallSnaping = false;
@@ -776,6 +777,9 @@ void Player::ExecuteWallJump() {
 
 	coyoteTimeCounter = 0.0f;
 	jumpBufferCounter = 0.0f;
+
+	isWallSliding = false;
+	platformVelocity = glm::vec2(0.0f);
 
 	canCutJump = false;
 	if (auto aum = Globals::GetGlobals().audioManager) {

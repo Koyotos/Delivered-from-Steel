@@ -11,7 +11,7 @@ MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Pl
 	StopDuration = fromMap(float, "stopDuration", data);
 	startPosition = GetTransform().GetTranslation();
 	endPosition = startPosition + vec3( fromMap(float, "XendPosition", data), fromMap(float, "YendPosition",data), 0.0f) ;
-	timer = 0.0f;
+	timer = fromMap(float, "movingOffset", data);
 }
 
 vec3 Lerp(const vec3& a, const vec3& b, float t) {
@@ -40,7 +40,7 @@ void MovingPlatform::Physics(const float& deltaTime) {
             state = (state == MovingPlatformState::StopEnd)
                 ? MovingPlatformState::MovingToStart
                 : MovingPlatformState::MovingToEnd;
-            timer = 0;
+            timer -= pauseDuration;
         }
         break;
 
@@ -60,7 +60,7 @@ void MovingPlatform::Physics(const float& deltaTime) {
             state = (state == MovingPlatformState::MovingToStart)
                 ? MovingPlatformState::StopStart
                 : MovingPlatformState::StopEnd;
-            timer = 0;
+            timer -= moveDuration;
         }
         break;
     }
@@ -88,7 +88,7 @@ void MovingPlatform::OnCollisionStay(Collider* other) {
             float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height/2);
             float platformTop = box->GetMax().y;
 
-            if (playerBottom >= platformTop) {
+            if (playerBottom >= platformTop || player->IsWallSliding()) {
                 Transform trans = player->GetTransform();
 
                 vec3 pos = trans.GetTranslation();
@@ -126,7 +126,7 @@ void MovingPlatform::OnCollisionExit(Collider* other) {
             float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius * 2 + capsule->height);
 			float platformTop = static_cast<BoxCollider*>(GetCollider())->GetMax().y;
 
-            if (playerBottom >= platformTop || player->IsWallSliding()) {
+            if (playerBottom >= platformTop) {
                 Transform trans = player->GetTransform();
 
                 vec3 pos = trans.GetTranslation();
@@ -137,7 +137,7 @@ void MovingPlatform::OnCollisionExit(Collider* other) {
                 player->SetTransform(trans);
             }
 
-            if (playerBottom + 0.05f >= platformTop) {
+            if (playerBottom + 0.05f >= platformTop || player->IsWallSliding()) {
                 Transform trans = player->GetTransform();
 
                 vec3 pos = trans.GetTranslation();
