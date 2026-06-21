@@ -760,6 +760,7 @@ void Player::ExecuteDoubleJump() {
 	}
 	Play("CourierJump", 0.1f, false);
 	if (outlineCollectiveNode) {
+		outlineCollectiveNode->Play("outlineRed", 0.0f, false);
 		outlineCollectiveNode->Play("outlineGreen", 0.1f, false);
 	}
 }
@@ -785,6 +786,7 @@ void Player::ExecuteWallJump() {
 	}
 	Play("CourierJump", 0.1f, false);
 	if (outlineCollectiveNode) {
+		outlineCollectiveNode->Play("outlineRed", 0.0f, false);
 		outlineCollectiveNode->Play("outlineOrange", 0.1f, false);
 	}
 }
