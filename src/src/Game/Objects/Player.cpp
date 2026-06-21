@@ -604,8 +604,7 @@ void Player::HandleAnimations() {
 		}
 	}
 
-	bool drawCollective = isDashing || isDoubleJumping || isWallJumping || isWallSnaping;
-	if (outlineCollectiveNode && drawCollective) {
+	if (outlineCollectiveNode) {
 		std::string targetCollective = "";
 
 		if (isDashing) targetCollective = "outlineRed";
@@ -619,8 +618,7 @@ void Player::HandleAnimations() {
 		}
 	}
 
-	bool drawYellow = isFeatherFalling && !drawCollective;
-	if (outlineYellowNode && drawYellow) {
+	if (outlineYellowNode) {
 		std::string targetYellow = "";
 
 		if (targetPlayerAnim == "CourierFall") targetYellow = "Fall";
@@ -648,7 +646,7 @@ void Player::Physics(const float& deltaTime) {
 		}
 	}
 	if (bounceBubbleNode) {
-		Transform bubbleTransform = bounceBubbleNode->GetTransform();
+		Transform bubbleTransform;
 		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, 0.01f);
 		bubbleTransform.SetTranslation(localOffset);
 		bubbleTransform.SetScale(glm::vec3(facingDirection, 1.0f, 1.0f));
@@ -656,14 +654,14 @@ void Player::Physics(const float& deltaTime) {
 		bounceBubbleNode->SetDraw(isBounceActive);
 	}
 	if (outlineCollectiveNode) {
-		Transform outlineCollectiveTransform = outlineCollectiveNode->GetTransform();
+		Transform outlineCollectiveTransform;
 		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.02f);
 		outlineCollectiveTransform.SetTranslation(localOffset);
 		outlineCollectiveNode->SetTransform(outlineCollectiveTransform);
 		outlineCollectiveNode->SetDraw(isDashing || isDoubleJumping || isWallJumping || isWallSnaping);
 	}
 	if (outlineYellowNode) {
-		Transform outlineYellowTransform = outlineYellowNode->GetTransform();
+		Transform outlineYellowTransform;
 		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.01f);
 		outlineYellowTransform.SetTranslation(localOffset);
 		outlineYellowNode->SetTransform(outlineYellowTransform);
