@@ -62,6 +62,7 @@ class CardSlot : public UIElement {
 	void ShowSlot(float time);
 	void HideSlot(float time);
 
+	void LearnCard(std::shared_ptr<CardUI> card);
 
 	
 

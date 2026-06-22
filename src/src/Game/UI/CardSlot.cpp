@@ -8,7 +8,8 @@ void CardSlot::SetCard(std::shared_ptr<CardUI> newCard) {
 	card->SetVisible(true);
     card->ScaleTo(vec2(GetTransform().GetScale().x, GetTransform().GetScale().y), 0.2f);
     card->RotateTo(this->GetTransform().GetRotation().z, 0.2f, EaseType::InOutSine);
-    card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y - 30.0f), 0.2f, EaseType::InOutSine);
+    card->MoveTo(vec2(this->GetTransform().GetTranslation().x, this->GetTransform().GetTranslation().y), 0.2f, EaseType::InOutSine);
+    isLearning = false;
 }
 
 
@@ -167,4 +168,14 @@ void CardSlot::HideSlot(float time)
     this->FadeOut(time, EaseType::InOutSine);
     this->MoveTo(vec2(origPos.x, origPos.y), time, EaseType::InOutSine);
     if (card) card->MoveTo(vec2(origPos.x, origPos.y), time, EaseType::InOutSine);
+}
+
+void CardSlot::LearnCard(std::shared_ptr<CardUI> card)
+{
+  
+    if (!card) return;
+
+    // wazne zeby byla ta kolejnosc
+	this->SetCard(card);
+    isLearning = true;
 }

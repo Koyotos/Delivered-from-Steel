@@ -827,6 +827,7 @@ void Player::ExecuteWallSnap() {
 	isWallSnaping = true;
 	isDashing = false;
 
+	canCutJump = false;
 	if (wallSnapEmitter) {
 		glm::vec3 startPos = GetTransform().GetTranslation();
 		glm::vec3 endPos = startPos;

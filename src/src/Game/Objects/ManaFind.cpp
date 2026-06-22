@@ -18,6 +18,6 @@ void ManaFind::OnPickUp() {
 
     if (cardManager) {
         player->SetRespawnPoint(GetTransform().GetTranslation(), globals.activeLevelName);
-		// cardManager-> funkjca dodaj¹ca manê
+		cardManager->AddMaxMana(1);
     }
 }

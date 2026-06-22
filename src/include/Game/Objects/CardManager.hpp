@@ -7,6 +7,7 @@
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Core/ISerializable.hpp"
 #include "include/Game/UI/Counter.hpp"
+#include "include/Game/UI/Tooltip.hpp"
 
 
 
@@ -21,8 +22,8 @@ class CardManager : public Node, public ISerializable
 private:
 	int maxHandSize = 3;
 
-	int maxManaPoints = 15;
-	int currentManaPoints = 15;
+	int maxManaPoints = 14;
+	int currentManaPoints = 14;
 
 	int selectedCard = -1;
 	int selectedCardUp = 0;
@@ -55,6 +56,11 @@ private:
 	shared_ptr<Icon> checkpointBackground;
 	std::vector<shared_ptr<Icon>> slotIcons;
 
+	shared_ptr<Tooltip> checkpointTooltip;
+	shared_ptr<Tooltip> ffTooltip;
+
+	bool firstCheckpoint;
+
 	bool menuOpen = false;
 
 	/*
@@ -75,6 +81,8 @@ private:
 	void AddCardUI(shared_ptr<CardUI> cardUI);
 
 	void MoveSlots();
+
+
 
 	void UpdateCardSelection();
 
@@ -99,6 +107,10 @@ public:
 	 * @return vector<shared_ptr<Card>> : vector of all unlocked cards
 	 */
 	std::vector<shared_ptr<Card>> GetUnlockedCards();
+
+	void SetMaxMana(int value);
+
+	void AddMaxMana(int value);
 
 
 	/*
@@ -152,13 +164,6 @@ public:
 	 * @param int : index of slot
 	 */
 	void UseCard(int index);
-
-	/*
-	 * @brief adds card to currentHand in specified slot, and handles all related animations
-	 * @param int : index of slot
-	 * @param shared_ptr<Card> : card to be added to hand
-	 */
-	void AddToHand(int slot, shared_ptr<Card> card);
 
 	/*
 	 * @brief Assigns player to all cards in deck, so they can use player-related functions
