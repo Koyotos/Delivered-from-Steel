@@ -715,6 +715,11 @@ void Player::Shatter() {
 	if (bounceBubbleNode) bounceBubbleNode->SetDraw(false);
 	if (outlineCollectiveNode) outlineCollectiveNode->SetDraw(false);
 	if (outlineYellowNode) outlineYellowNode->SetDraw(false);
+	if (wallSnapEmitter) {
+		if (wallSnapEmitter->GetTargetSystem()) {
+			wallSnapEmitter->GetTargetSystem()->Reset();
+		}
+	}
 	Globals::GetGlobals().Log("Shatter");
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		aum->PlaySound2D("player_death", 0.6f, 1.0f, false);
