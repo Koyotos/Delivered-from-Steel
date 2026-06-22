@@ -44,6 +44,8 @@ private:
 	bool isSuspended = false;
 	bool isDoubleJumping = false;
 	bool isWallJumping = false;
+	bool wasWallSlinding = false;
+	bool wasGrounded = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -73,7 +75,8 @@ private:
 		static_cast<uint32_t>(ObjectType::Enemy) |
 		static_cast<uint32_t>(ObjectType::BreakableWall);
 
-	unique_ptr<AudioSource> audio;
+	unique_ptr<AudioSource> audio = nullptr;
+	unique_ptr<AudioSource> featherFallingAudio = nullptr;
 
 public:
 	bool CheckGrounded();

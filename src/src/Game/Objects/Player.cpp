@@ -104,11 +104,15 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 
 	cameraController.SetConfig(camConfig);
 	audio = make_unique<AudioSource>(this);
+	featherFallingAudio = make_unique<AudioSource>(this);
 }
 
 void Player::Disable() noexcept {
 	if (audio) {
 		audio->Stop();
+	}
+	if (featherFallingAudio) {
+		featherFallingAudio->Stop();
 	}
 	Object2D::Disable();
 }
@@ -294,6 +298,14 @@ bool Player::HandleMovement(float deltaTime) {
 	bool isWalledRight = WalledRightHit.has_value();
 	isWalled = isWalledRight || isWalledLeft;
 
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		if (isGrounded && !wasGrounded && lastVelocity.y < -4.0f && lastVelocity.y > -stats.fallDamageSpeed) {
+			float volume = std::clamp(std::abs(lastVelocity.y) / stats.fallDamageSpeed, 0.2f, 1.0f);
+			aum->PlaySound2D("player_dash", volume, 1.0f, false);
+		}
+	}
+	wasGrounded = isGrounded;
+
 	if (isWalledRight && isWalledLeft && (WalledLeftHit.value().collider != WalledRightHit.value().collider)) {
 		if (respawnProtectionTimer <= 0.0f) {
 			Shatter();
@@ -336,7 +348,7 @@ bool Player::HandleMovement(float deltaTime) {
 				return false;
 			}
 		}
-		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
+		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) ||
 			(facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
 			currentVelocity.x = 0.0f;
 			currentVelocity.y = stats.wallSnapJump;
@@ -354,6 +366,9 @@ bool Player::HandleMovement(float deltaTime) {
 			lastVelocity = currentVelocity;
 			isBounceActive = false;
 			isDashing = false;
+			if (auto aum = Globals::GetGlobals().audioManager) {
+				aum->PlaySound2D("player_jump", 0.4f, 1.2f, false);
+			}
 		}
 
 		lastSpeedForBounceY = currentVelocity.y;
@@ -418,6 +433,9 @@ bool Player::HandleMovement(float deltaTime) {
 		featherFallingTimer -= deltaTime;
 		if (featherFallingTimer <= 0.0f) {
 			isFeatherFalling = false;
+			if (featherFallingAudio) {
+				featherFallingAudio->Stop();
+			}
 		}
 		else {
 			if (currentVelocity.y < -stats.maxFeatherFallingSpeed) {
@@ -500,6 +518,7 @@ bool Player::HandleMovement(float deltaTime) {
 
 	if (isWallSliding) {
 		audio->PlayLooping2D("player_dash", 0.5f, 1.0f);
+		wasWallSlinding = true;
 		float target = -stats.wallSlideSpeed;
 		if (currentVelocity.y < target)
 		{
@@ -510,7 +529,10 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
-		audio->Stop();
+		if (wasWallSlinding == true) {
+			audio->Stop();
+			wasWallSlinding = false;
+		}
 	}
 
 	currentVelocity = currentVelocity + platformVelocity;
@@ -664,6 +686,9 @@ void Player::Physics(const float& deltaTime) {
 	if (audio) {
 		audio->Update();
 	}
+	if (featherFallingAudio) {
+		featherFallingAudio->Update();
+	}
 }
 
 bool Player::Input(InputEvent& event) {
@@ -714,6 +739,12 @@ void Player::Shatter() {
 			wallSnapEmitter->GetTargetSystem()->Reset();
 		}
 	}
+	if (audio) {
+		audio->Stop();
+	}
+	if (featherFallingAudio) {
+		featherFallingAudio->Stop();
+	}
 	Globals::GetGlobals().Log("Shatter");
 	if (auto aum = Globals::GetGlobals().audioManager) {
 		aum->PlaySound2D("player_death", 0.6f, 1.0f, false);
@@ -747,6 +778,9 @@ void Player::ExecuteBounce() {
 void Player::ExecuteFeatherFalling() {
 	isFeatherFalling = true;
 	featherFallingTimer = stats.featherFallingDuration;
+	if (featherFallingAudio) {
+		featherFallingAudio->PlayLooping2D("boiler_engine", 0.5f, 1.0f);
+	}
 }
 
 void Player::ExecuteDoubleJump() {
@@ -836,6 +870,9 @@ void Player::ExecuteWallSnap() {
 		int particleCount = static_cast<int>(distance * particleDensity);
 		particleCount = std::clamp(particleCount, 3, 12);
 		wallSnapEmitter->BurstAlongLine(startPos, endPos, particleCount, 0.1f);
+	}
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_jump", 0.4f, 1.2f, false);
 	}
 }
 
