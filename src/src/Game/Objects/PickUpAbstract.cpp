@@ -26,13 +26,24 @@ PickUpAbstract::PickUpAbstract(const unordered_map<string, std::any>& data) : Ob
     pointLight->colorDiffuse = color1;
 
     AddChild(pointLight);
+    audio = make_unique<AudioSource>(this);
 }
 
 PickUpAbstract::~PickUpAbstract() {}
 
+void PickUpAbstract::Disable() noexcept {
+    if (audio) {
+        audio->Stop();
+	}
+    Object2D::Disable();
+}
+
 void PickUpAbstract::Physics(const float& deltaTime) {
     if (isCollected) {
 		pointLight->Disable();
+        if (audio) {
+            audio->Stop();
+		}
         return;
     }
     if (pointLight) {
@@ -54,6 +65,10 @@ void PickUpAbstract::Physics(const float& deltaTime) {
 
         pointLight->colorDiffuse = glm::mix(color1, color2, tempColorTransitionProgress);
         pointLight->colorSpecular = glm::mix(specular1, specular2, tempColorTransitionProgress);
+    }
+    if (audio) {
+        audio->PlayLooping(loopSoundName, 0.5f, 1.0f, 7.5f, 0.8f);
+		audio->Update();
     }
 }
 

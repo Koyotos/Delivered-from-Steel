@@ -166,7 +166,12 @@ void EngineController::Run() {
 		shared_ptr<Scene> active = scm->GetActive();
 
 		if (active && aum && active->GetPlayer()) {
-			aum->SetListenerPosition(active->GetPlayer()->GetTransform().GetTranslation());
+			//aum->SetListenerPosition(active->GetPlayer()->GetTransform().GetTranslation());
+			auto playerCam = active->GetPlayer()->GetCamera();
+			if (playerCam) {
+				auto camPos = playerCam->GetPos();
+				aum->SetListenerPosition(glm::vec3(camPos.x,camPos.y,-5.0f));
+			}
 		}
 
 		PROFILER_BEGIN_FRAME(static_cast<float>(deltaTime));

@@ -92,6 +92,7 @@ public:
 	void SetCardManager(std::shared_ptr<CardManager> mgr);
 
 	void SetCamera(std::shared_ptr<Camera> cam);
+	std::shared_ptr<Camera> GetCamera() const { return cameraController.GetCamera(); }
 	void TriggerCameraShake(float duration, float intensity);
 	void takeDamage(float damage);
 	void Shatter();

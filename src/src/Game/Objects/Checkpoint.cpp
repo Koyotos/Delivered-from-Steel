@@ -2,6 +2,7 @@
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/SaveManager/WorldStateManager.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 
 Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : Object3D(data) {
 
@@ -28,7 +29,16 @@ Checkpoint::Checkpoint(const std::unordered_map<std::string, std::any>& data) : 
     pointLight->Disable();
 
     AddChild(pointLight);
+	audio = make_unique<AudioSource>(this);
 }
+
+void Checkpoint::Disable() noexcept {
+    if (audio) {
+        audio->Stop();
+	}
+    Object3D::Disable();
+}
+
 void Checkpoint::Init(std::shared_ptr<Scene> scene) {
     player = scene->GetPlayer();
 
@@ -43,6 +53,7 @@ void Checkpoint::Init(std::shared_ptr<Scene> scene) {
 			buttonNormalScale = castedButton->GetTransform().GetScale();
         }
     }
+    audio->PlayLooping("boiler_engine", 0.1f, 1.0f, 7.5f, 0.8f);
 }
 
 void Checkpoint::Physics(const float& deltaTime) {
@@ -116,6 +127,9 @@ void Checkpoint::Physics(const float& deltaTime) {
         }
 
     }
+    if (audio) {
+		audio->Update();
+    }
 }
 
 void Checkpoint::MenuToggle() {
@@ -146,6 +160,7 @@ bool Checkpoint::Input(InputEvent& event) {
 void Checkpoint::Activate() {
     isActivated = true;
 
+    audio->PlayLooping("cool_ass_dzwiek", 0.1f, 1.0f, 7.5f, 0.8f);
     pointLight->Enable();
     if (clothObject && clothObject->TestDraw()) {
         std::string id = clothObject->GetSaveID();
@@ -158,6 +173,9 @@ void Checkpoint::Activate() {
                 }
                 globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
             }
+        }
+        if (auto aum = Globals::GetGlobals().audioManager) {
+            aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
         }
         clothObject->Disable();
     }

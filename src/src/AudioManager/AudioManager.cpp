@@ -22,7 +22,14 @@ bool AudioManager::Init() {
 	}
 
 	audioSources.resize(MAX_SOURCES);
+	alGetError();
 	alGenSources(MAX_SOURCES, audioSources.data());
+	ALenum error = alGetError();
+	if (error != AL_NO_ERROR) {
+		Globals::GetGlobals().Log("AUDIO WARNING: Could not allocate " + std::to_string(MAX_SOURCES) + " sources. Error code: " + std::to_string(error));
+		audioSources.resize(32);
+		alGenSources(32, audioSources.data());
+	}
 
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 	Globals::GetGlobals().Log("Audio Manager initialized.");
@@ -444,6 +451,7 @@ void AudioManager::StopAllBGM() {
 
 void AudioManager::SetListenerPosition(vec3 position) {
 	if (!context) return;
+	currentListenerPosition = position;
 	alListener3f(AL_POSITION, position.x, position.y, position.z);
 }
 
