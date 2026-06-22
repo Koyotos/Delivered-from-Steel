@@ -16,8 +16,7 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	explosionDamage = fromMap(float, "explosionDamage", data);
 	turnSpeed = fromMap(float, "turnSpeed", data);
 
-	respawnHeight = 3.0f;
-	//respawnHeight = fromMap(float, "respawnHeight", data);
+	respawnHeight = fromMap(float, "respawnHeight", data);
 
 	colorLightActivationTime = 2.0f;
 
@@ -25,7 +24,6 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 
 	colorDiffuseTarget = vec3(1.0f, 0.9f, 0.1f);
 	Spawn();
-	spotLight->colorDiffuse = colorDiffuseTarget;
 
 	AddChild(spotLight);
 }
@@ -37,7 +35,7 @@ void Drone::Spawn() {
 	spotLight->data1 = GetTransform().GetTranslation();
 	spotLight->data4 = glm::radians(visionAngle);
 	spotLight->data2 = vec3(0.001f, -1.0f, 0.0f);
-	spotLight->colorDiffuse = vec3(0.0f);
+	spotLight->colorDiffuse = colorDiffuseTarget;
 	spotLight->data3 = vec3(1.0f, -1.3f, 0.8f);
 
 	audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
@@ -55,6 +53,8 @@ void Drone::Respawn() {
 	SetTransform(t);
 
 	Spawn();
+
+	spotLight->colorDiffuse = vec3(0.0f);
 
 	Enable();
 	if (spotLight) spotLight->Enable();
@@ -193,7 +193,8 @@ void Drone::Chase(float dt) {
 
 	if (!player) return;
 
-	vec3 currentPos = GetTransform().GetTranslation();
+	//vec3 currentPos = GetTransform().GetTranslation();
+	vec3 currentPos = GetTransform().GetTranslation() + vec3(GetCollider()->GetGlobalPosition2D(), 0.0f);
 	vec3 playerPos = player->GetTransform().GetTranslation();
 	vec2 desiredDir = vec2(playerPos.x, playerPos.y) - vec2(currentPos.x, currentPos.y);
 	float distToPlayer = glm::length(desiredDir);
@@ -208,14 +209,14 @@ void Drone::Chase(float dt) {
 	vec2 diveDir = glm::normalize(currentDiveVelocity);
 	currentDiveVelocity = diveDir * diveSpeed;
 
-	if (distToPlayer < explosionRadius * 0.7f) {
+	if (distToPlayer < explosionRadius * 0.5f) {
 		Explode();
 		return;
 	}
 	vec3 moveStep = vec3(currentDiveVelocity.x, currentDiveVelocity.y, 0.0f) * dt;
 
 	Transform t = GetTransform();
-	t.SetTranslation(currentPos + moveStep);
+	t.SetTranslation(GetTransform().GetTranslation() + moveStep);
 	direction = (currentDiveVelocity.x > 0) ? 1 : -1;
 	glm::vec3 scale = t.GetScale();
 	scale.x = std::abs(scale.x) * direction;
