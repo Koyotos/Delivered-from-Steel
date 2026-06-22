@@ -16,17 +16,48 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	explosionDamage = fromMap(float, "explosionDamage", data);
 	turnSpeed = fromMap(float, "turnSpeed", data);
 
+	respawnHeight = 3.0f;
+	//respawnHeight = fromMap(float, "respawnHeight", data);
+
+	colorLightActivationTime = 2.0f;
+
 	spotLight = make_shared<Light>();
+
+	colorDiffuseTarget = vec3(1.0f, 0.9f, 0.1f);
+	Spawn();
+	spotLight->colorDiffuse = colorDiffuseTarget;
+
+	AddChild(spotLight);
+}
+
+void Drone::Spawn() {
 	spotLight->type = LIGHT_SPOT;
 	spotLight->colorAmbient = vec3(0.0f, 0.0f, 0.0f);
 	spotLight->colorSpecular = vec3(0.0f, 0.0f, 0.0f);
 	spotLight->data1 = GetTransform().GetTranslation();
 	spotLight->data4 = glm::radians(visionAngle);
 	spotLight->data2 = vec3(0.001f, -1.0f, 0.0f);
-	spotLight->colorDiffuse = vec3(1.0f, 0.9f, 0.1f);
+	spotLight->colorDiffuse = vec3(0.0f);
 	spotLight->data3 = vec3(1.0f, -1.3f, 0.8f);
 
-	AddChild(spotLight);
+	audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
+}
+
+void Drone::Respawn() {
+	isExploding = false;
+
+	state = EnemyState::Patrol;
+
+	colorLightActivationTimer = colorLightActivationTime;
+
+	Transform t = GetTransform();
+	t.SetTranslation(vec3((startPos.x + endPos.x) / 2, startPos.y + respawnHeight, startPos.z));
+	SetTransform(t);
+
+	Spawn();
+
+	Enable();
+	if (spotLight) spotLight->Enable();
 }
 
 void Drone::Init(shared_ptr<Scene> scene) {
@@ -34,11 +65,17 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	startPos = GetTransform().GetTranslation();
 	targetPos = startPos + vec3(direction * patrolDistance, 0.0f, 0.0f);
 	endPos = targetPos;
+	//audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
 }
 
 void Drone::Physics(const float& deltaTime) {
 	if (spotLight) {
 		spotLight->data1 = GetTransform().GetTranslation();
+		if (colorLightActivationTimer > 0.0f) {
+			colorLightActivationTimer -= deltaTime;
+			colorLightActivationTimer = glm::max(0.0f, colorLightActivationTimer);
+			spotLight->colorDiffuse = glm::mix(colorDiffuseTarget, vec3(0.0f, 0.0f, 0.0f), colorLightActivationTimer / colorLightActivationTime);
+		}
 	}
 	vec2 currentVel = GetVelocity();
 	SetVelocity(vec2(currentVel.x, 10.0f * deltaTime));
@@ -50,6 +87,7 @@ void Drone::Process() {
 	if (isExploding) {
 		if (GetCurrentAnimation() == "explosion" && !IsPlaying()) {
 			Disable();
+			Respawn(); // chwilowo to bedzie
 		}
 		return;
 	}
@@ -74,6 +112,11 @@ void Drone::DetectPlayer() {
 	if (!player) return;
 
 	if (state == EnemyState::Chase) return;
+
+	if (player -> isDead()) {
+		seePlayer = false;
+		return;
+	}
 
 	vec2 dronePos = GetTransform().GetTranslation();
 	vec2 playerPos = player->GetTransform().GetTranslation();
@@ -136,6 +179,10 @@ void Drone::ChangeState(shared_ptr<Player> p) {
 		vec2 dir = vec2(diveTarget.x, diveTarget.y) - vec2(currentPos.x, currentPos.y);
 		currentDiveVelocity = glm::normalize(dir) * diveSpeed;
 	}
+	else if (state == EnemyState::Chase && player->isDead()) {
+		state = EnemyState::Patrol;
+		Spawn();
+	}
 }
 
 void Drone::Chase(float dt) {
@@ -159,7 +206,7 @@ void Drone::Chase(float dt) {
 	vec2 diveDir = glm::normalize(currentDiveVelocity);
 	currentDiveVelocity = diveDir * diveSpeed;
 
-	if (distToPlayer < explosionRadius * 0.5f) {
+	if (distToPlayer < explosionRadius * 0.7f) {
 		Explode();
 		return;
 	}
@@ -180,7 +227,7 @@ void Drone::Patrol(float dt) {
 
 	vec3 currentPos = GetTransform().GetTranslation();
 	vec3 dir = targetPos - currentPos;
-	dir.y = 0.0f;
+	//dir.y = 0.0f;
 	float dist = glm::length(dir);
 
 	if (dist < 0.1f) {
@@ -223,7 +270,7 @@ void Drone::ReversePatrol() {
 	}
 }
 
-void Drone::OnCollisionEnter(shared_ptr<Collider> other) {
+void Drone::OnCollisionEnter(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (owner->GetObjectType() == ObjectType::Wall) {
 		Explode();
@@ -235,6 +282,9 @@ void Drone::OnCollisionEnter(shared_ptr<Collider> other) {
 		Explode();
 	}
 	if (owner->GetObjectType() == ObjectType::Trap) {
+		Explode();
+	}
+	if (owner->GetObjectType() == ObjectType::Player) {
 		Explode();
 	}
 }
@@ -255,13 +305,4 @@ void Drone::Explode() {
 	//	Globals::GetGlobals().audioManager->PlaySound3D("drone_explode", GetTransform().GetTranslation());
 	//}
 	if (spotLight) spotLight->Disable();
-
-	std::string id = this->GetSaveID();
-	if (!id.empty()) {
-		auto& globals = Globals::GetGlobals();
-		if (globals.worldStateManager) {
-			std::string currentLevel = globals.activeLevelName;
-			globals.worldStateManager->MarkAsDestroyed(currentLevel, id);
-		}
-	}
 }
