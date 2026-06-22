@@ -472,7 +472,7 @@
     "alpha": 1.0,
     "addCollider": false,
     "cull": 0.0,
-    "zIndex": 20,
+    "zIndex": 25,
     "ResolveCollision": false,
     "animated": false,
     "name": "button_x"
@@ -505,7 +505,7 @@
     "alpha": 1.0,
     "addCollider": false,
     "cull": 0.0,
-    "zIndex": 20,
+    "zIndex": 25,
     "ResolveCollision": false,
     "animated": false,
     "name": "button_y"
@@ -538,7 +538,7 @@
     "alpha": 1.0,
     "addCollider": false,
     "cull": 0.0,
-    "zIndex": 20,
+    "zIndex": 25,
     "ResolveCollision": false,
     "animated": false,
     "name": "button_b"

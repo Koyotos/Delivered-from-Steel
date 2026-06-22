@@ -118,6 +118,7 @@ class EngineController {
     void SetActiveScene(const uint16_t&);
 
     void TransitionToMenu();
+    void TransitionToCutscene(string path);
 
     shared_ptr<MenuManager> GetMenuManager() const;
 

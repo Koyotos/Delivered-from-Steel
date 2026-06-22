@@ -440,6 +440,13 @@ void EngineController::TransitionToMenu() {
 	}
 }
 
+void EngineController::TransitionToCutscene(string path)
+{
+	shared_ptr<Scene> cutscene = rsm->LoadScene(path);
+	scm->AddScene(cutscene);
+	scm->SetActive(cutscene);
+}
+
 void EngineController::SetActiveScene(const uint16_t& idx) {
 	scm->SetActive(idx);
 }
