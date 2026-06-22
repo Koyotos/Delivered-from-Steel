@@ -35,7 +35,6 @@ private:
 	bool isWalled = false;
 	bool isWallSliding = false;
 	bool canCutJump = false;
-	bool wasDead = false;
 	bool isDashing = false;
 	bool wasDashing = false;
 	bool isBounceActive = false;

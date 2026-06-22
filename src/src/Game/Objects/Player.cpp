@@ -237,12 +237,6 @@ void Player::Process() {
 		respawnProtectionTimer -= deltaTime;
 	}
 
-	if (deathEmitter) {
-		if (!wasDead && health.IsDead()) {
-			deathEmitter->Burst(10);
-		}
-	}
-
 	if (health.IsDead()) {
 		pointVisualizer->Reset();
 	}
@@ -251,8 +245,6 @@ void Player::Process() {
 		pointVisualizer->UpdatePlayerState(currentPoints, GetTransform().GetTranslation());
 	}
 
-	wasDead = health.IsDead();
-
 	if (health.IsDead()) {
 		inputState.moveInput = 0.0f;
 		SetVelocity(glm::vec2(0.0f));
@@ -260,7 +252,6 @@ void Player::Process() {
 		if (health.CheckAndResetRespawn(deltaTime)) {
 			SetVelocity(glm::vec2(0.0f));
 			lastVelocity = glm::vec2(0.0f);
-			wasDead = false;
 			respawnProtectionTimer = 0.2f;
 			Globals::GetGlobals().engineController->TriggerRespawn();
 		}
@@ -703,6 +694,9 @@ void Player::takeDamage(float damage) {
 
 void Player::Shatter() {
 	if (health.IsDead()) return;
+	if (deathEmitter) {
+		deathEmitter->Burst(10);
+	}
 	health.Shatter();
 	isBounceActive = false;
 	isDashing = false;
@@ -727,6 +721,9 @@ void Player::Shatter() {
 	if (Globals::GetGlobals().ioManager) {
 		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.3f);
 	}
+	Transform t = GetTransform();
+	t.SetTranslation(respawnPoint);
+	SetTransform(t);
 }
 
 void Player::ExecuteDash() {
@@ -864,7 +861,6 @@ void Player::Deserialize(const nlohmann::json& data) {
 		this->health.SetHP(data["hp"]);
 		if (this->health.GetHP() > 0.0f) {
 			this->health.Revive();
-			this->wasDead = false;
 		}
 	}
 	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
