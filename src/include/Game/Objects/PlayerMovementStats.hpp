@@ -27,7 +27,7 @@ struct PlayerMovementStats {
 	float wallJumpForceX = 2.0f;
 	float wallSnapSpeed = 4.0f;
 	float wallSnapDistance = 5.0f;
-	float wallSnapJump = 3.0f;
+	float wallSnapJump = 3.5f;
 	float fallDamageSpeed = 7.9f;
 };
 
@@ -53,7 +53,6 @@ struct PlayerInputState {
 	bool jumpReleased = false;
 	bool jumpHeld = false;
 	float moveInput = 0.0f;
-	bool wantsToDrop = false;
 	bool lastJumpInput = false;
 	float timeSinceLastRelease = 100.0f;
 	glm::vec2 rightStick = { 0.0f, 0.0f };

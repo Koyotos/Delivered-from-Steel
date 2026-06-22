@@ -11,7 +11,7 @@ MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Pl
 	StopDuration = fromMap(float, "stopDuration", data);
 	startPosition = GetTransform().GetTranslation();
 	endPosition = startPosition + vec3( fromMap(float, "XendPosition", data), fromMap(float, "YendPosition",data), 0.0f) ;
-	timer = 0.0f;
+	timer = fromMap(float, "movingOffset", data);
 }
 
 vec3 Lerp(const vec3& a, const vec3& b, float t) {
@@ -40,7 +40,7 @@ void MovingPlatform::Physics(const float& deltaTime) {
             state = (state == MovingPlatformState::StopEnd)
                 ? MovingPlatformState::MovingToStart
                 : MovingPlatformState::MovingToEnd;
-            timer = 0;
+            timer -= pauseDuration;
         }
         break;
 
@@ -60,7 +60,7 @@ void MovingPlatform::Physics(const float& deltaTime) {
             state = (state == MovingPlatformState::MovingToStart)
                 ? MovingPlatformState::StopStart
                 : MovingPlatformState::StopEnd;
-            timer = 0;
+            timer -= moveDuration;
         }
         break;
     }
@@ -80,22 +80,22 @@ void MovingPlatform::OnCollisionStay(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
-        std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
-        if (playerNode) {
+        std::shared_ptr<Player> player = std::static_pointer_cast<Player>(owner);
+        if (player) {
             CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
             BoxCollider* box = static_cast<BoxCollider*>(GetCollider());
 
-            float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius + capsule->height/2);
+            float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height/2);
             float platformTop = box->GetMax().y;
 
-            if (playerBottom >= platformTop) {
-                Transform trans = playerNode->GetTransform();
+            if (playerBottom >= platformTop || player->IsWallSliding()) {
+                Transform trans = player->GetTransform();
 
                 vec3 pos = trans.GetTranslation();
                 pos += velocityDelta;
 
                 trans.SetTranslation(pos);
-                playerNode->SetTransform(trans);
+                player->SetTransform(trans);
             }
         }
     }
@@ -118,35 +118,35 @@ void MovingPlatform::OnCollisionExit(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
     if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
-        std::shared_ptr<Player> playerNode = std::static_pointer_cast<Player>(owner);
-        if (playerNode) {
+        std::shared_ptr<Player> player = std::static_pointer_cast<Player>(owner);
+        if (player) {
 
             CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
 
-            float playerBottom = playerNode->GetTransform().GetTranslation().y - (capsule->radius * 2 + capsule->height);
+            float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius * 2 + capsule->height);
 			float platformTop = static_cast<BoxCollider*>(GetCollider())->GetMax().y;
 
             if (playerBottom >= platformTop) {
-                Transform trans = playerNode->GetTransform();
+                Transform trans = player->GetTransform();
 
                 vec3 pos = trans.GetTranslation();
 
                 pos += vec3(0.0f, velocityDelta.y * 1.0f,0.0f);
 
                 trans.SetTranslation(pos);
-                playerNode->SetTransform(trans);
+                player->SetTransform(trans);
             }
 
-            if (playerBottom + 0.05f >= platformTop) {
-                Transform trans = playerNode->GetTransform();
+            if (playerBottom + 0.05f >= platformTop || player->IsWallSliding()) {
+                Transform trans = player->GetTransform();
 
                 vec3 pos = trans.GetTranslation();
 
                 pos += vec3(velocityDelta.x * 1.0f, velocityDelta.y * 1.0f, 0.0f);
 
                 trans.SetTranslation(pos);
-                playerNode->SetTransform(trans);
-                playerNode->addPlatformVelocity(velocity * 1.0f);
+                player->SetTransform(trans);
+                player->addPlatformVelocity(velocity * 1.0f);
             }
         }
     }

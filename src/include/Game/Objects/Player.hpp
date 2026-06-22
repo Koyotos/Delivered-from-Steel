@@ -22,7 +22,10 @@ private:
 	PlayerRaycastConfig raycastConfig;
 	PlayerCameraController cameraController;
 	std::shared_ptr<ParticleEmitterNode> deathEmitter;
-	std::shared_ptr<ParticleEmitterNode> pixelEmitter;
+	std::shared_ptr<ParticleEmitterNode> wallSnapEmitter;
+	std::shared_ptr<Object2D> bounceBubbleNode;
+	std::shared_ptr<Object2D> outlineCollectiveNode;
+	std::shared_ptr<Object2D> outlineYellowNode;
 	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
 	std::shared_ptr<CardManager> cardManager;
 
@@ -31,9 +34,7 @@ private:
 	bool isGrounded = false;
 	bool isWalled = false;
 	bool isWallSliding = false;
-	bool isHanging = false;
 	bool canCutJump = false;
-	bool wasDead = false;
 	bool isDashing = false;
 	bool wasDashing = false;
 	bool isBounceActive = false;
@@ -41,6 +42,8 @@ private:
 	bool isWallSnaping = false;
 	int wallJumpFacedDirection = 1.0f;
 	bool isSuspended = false;
+	bool isDoubleJumping = false;
+	bool isWallJumping = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -50,9 +53,9 @@ private:
 	float facingDirectionHang = 1.0f;
 	float coyoteTimeCounter = 0.0f;
 	float jumpBufferCounter = 0.0f;
-	float ledgeDropCooldown = 0.0f;
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
+	float respawnProtectionTimer = 0.0f;
 
 	float smoothedFallIntensity = 0.0f;
 
@@ -92,7 +95,6 @@ public:
 	void TriggerCameraShake(float duration, float intensity);
 	void takeDamage(float damage);
 	void Shatter();
-	bool IsHanging();
 	void addPlatformVelocity(glm::vec2 velocity) { platformVelocity = velocity; }
 	void SetRespawnPoint(glm::vec3 point, const std::string& levelName) {
 		respawnPoint = point;
@@ -107,6 +109,7 @@ public:
 	void Unsuspend() {
 		isSuspended = false;
 	}
+	bool IsWallSliding() const { return isWallSliding; }
 
 	void ExecuteDash();
 	void ExecuteBounce();

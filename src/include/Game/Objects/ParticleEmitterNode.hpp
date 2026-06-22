@@ -14,6 +14,8 @@ public:
 	void Init(std::shared_ptr<Scene> scene) override;
 	void Process() override;
 	void Burst(int count);
+	void BurstAlongLine(const glm::vec3& start, const glm::vec3& end, int count, float scatterRadius);
+	shared_ptr<ParticleSystemNode> GetTargetSystem() const { return targetSystem; }
 
 	bool isEmitting;
 
