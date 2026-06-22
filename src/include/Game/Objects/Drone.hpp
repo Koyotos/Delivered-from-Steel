@@ -13,7 +13,10 @@ private:
 	float visionAngle;
 	float explosionRadius;
 	float explosionDamage;
+	float respawnHeight;
 	float turnSpeed = 2.5f;
+	float colorLightActivationTime;
+	float colorLightActivationTimer;
 	vec2 currentDiveVelocity = vec2(0.0f);
 	bool isExploding = false;
 
@@ -21,6 +24,7 @@ private:
 	vec3 endPos;
 	vec3 targetPos;
 	vec3 diveTarget;
+	vec3 colorDiffuseTarget;
 	shared_ptr<Light> spotLight;
 
 	void ReversePatrol();
@@ -33,6 +37,11 @@ public:
 	void Process() override;
 
 	void OnCollisionEnter(Collider* other) override;
+	void OnCollisionStay(Collider* other) override {};
+
+	void Spawn();
+	void Respawn();
+
 
 	void DetectPlayer() override;
 	void ChangeState(shared_ptr<Player> player) override;

@@ -319,9 +319,7 @@ bool Player::HandleMovement(float deltaTime) {
 		currentVelocity.x = facingDirection * stats.dashSpeed;
 		SetVelocity(currentVelocity);
 
-		Transform t = this->GetTransform();
-		t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
-		this->SetTransform(t);
+
 
 		if (wallSnapEmitter && wallSnapEmitter->GetTargetSystem()) {
 			wallSnapEmitter->GetTargetSystem()->KillParticlesBehindX(this->GetTransform().GetTranslation().x, facingDirection);
@@ -335,13 +333,17 @@ bool Player::HandleMovement(float deltaTime) {
 				isWallSnaping = false;
 				return false;
 			}
-		}
-		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
+		} else if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
 			(facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
 			currentVelocity.x = 0.0f;
 			currentVelocity.y = stats.wallSnapJump;
 			SetVelocity(currentVelocity);
 			isWallSnaping = false;
+		}
+		else {
+			Transform t = this->GetTransform();
+			t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
+			this->SetTransform(t);
 		}
 
 		return false;
@@ -827,6 +829,7 @@ void Player::ExecuteWallSnap() {
 	isWallSnaping = true;
 	isDashing = false;
 
+	canCutJump = false;
 	if (wallSnapEmitter) {
 		glm::vec3 startPos = GetTransform().GetTranslation();
 		glm::vec3 endPos = startPos;
