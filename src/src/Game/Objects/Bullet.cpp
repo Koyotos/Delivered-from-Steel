@@ -9,7 +9,6 @@ Bullet::Bullet(const std::unordered_map<std::string, std::any>& data)
 	damage = 100.0f;
 	direction = vec2(0.0f, 0.0f);
 	lifeTime = 2.f;
-	SetVisible(false);
 }
 
 void Bullet::Physics(const float& deltaTime)
@@ -63,9 +62,10 @@ bool Bullet::GetVisible() const
     return isVisible;
 }
 
-void Bullet::OnCollisionEnter(std::shared_ptr<Collider> other)
+void Bullet::OnCollisionEnter(Collider* other)
 {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
 		Attack(player);

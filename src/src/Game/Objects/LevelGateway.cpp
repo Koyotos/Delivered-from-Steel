@@ -20,7 +20,7 @@ string LevelGateway::Type() {
 	return "LevelGateway";
 }
 
-void LevelGateway::OnCollisionEnter(shared_ptr<Collider> other) {
+void LevelGateway::OnCollisionEnter(Collider* other){
 	if (hasTriggered) return;
 
 	auto owner = other ? other->GetOwner() : nullptr;
@@ -43,7 +43,7 @@ void LevelGateway::OnCollisionEnter(shared_ptr<Collider> other) {
 	}
 }
 
-void LevelGateway::OnCollisionExit(shared_ptr<Collider> other) {
+void LevelGateway::OnCollisionExit(Collider* other) {
 	auto owner = other ? other->GetOwner() : nullptr;
 	if (!owner || owner->GetObjectType() != ObjectType::Player) return;
 
@@ -75,10 +75,10 @@ void LevelGateway::OnCollisionExit(shared_ptr<Collider> other) {
 
 	if (active != targetActive) {
 		engine->QueueSwapActiveAndPrevious();
+		engine->QueueUnloadPreviousLevel();
 	}
 	else {
 		engine->CancelAsyncLoad();
 	}
-	engine->QueueUnloadPreviousLevel();
 	hasTriggered = false;
 }

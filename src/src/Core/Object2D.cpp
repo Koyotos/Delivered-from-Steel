@@ -1,5 +1,4 @@
 #include "include/Core/Object2D.hpp"
-#include "include/Globals/Globals.hpp"
 
 void Object2D::Draw(shared_ptr<Shader> sh) {
     if(sh == nullptr) {

@@ -36,12 +36,12 @@ public:
 	void Physics(const float& deltaTime) override;
 	void Process() override;
 
-
 	void OnCollisionEnter(Collider* other) override;
 	void OnCollisionStay(Collider* other) override {};
 
 	void Spawn();
 	void Respawn();
+
 
 	void DetectPlayer() override;
 	void ChangeState(shared_ptr<Player> player) override;

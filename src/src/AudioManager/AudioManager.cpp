@@ -1,8 +1,4 @@
 #include "include/AudioManager/AudioManager.hpp"
-#include "include/Globals/Globals.hpp"
-#define STB_VORBIS_HEADER_ONLY
-#include <stb_vorbis.c>
-#include <fstream>
 
 AudioManager::AudioManager() : device(nullptr), context(nullptr) {}
 
@@ -36,6 +32,7 @@ bool AudioManager::Init() {
 void AudioManager::CleanUp() {
 	StopAll();
 	StopAllBGM();
+	StopAllAmbient();
 
 	if (!audioSources.empty() && context) {
 		alDeleteSources(audioSources.size(), audioSources.data());
@@ -70,13 +67,38 @@ void AudioManager::CleanUp() {
 	}
 }
 
-void AudioManager::Update() {
+void AudioManager::Update(float deltaTime) {
 	if (!context) return;
-	bool isAnyStreamPlaying = false;
+	for (auto it = activeSounds.begin(); it != activeSounds.end(); ) {
+		ALint state;
+		alGetSourcei(it->second.source, AL_SOURCE_STATE, &state);
+		if (state != AL_PLAYING && state != AL_PAUSED) {
+			it = activeSounds.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+	bool isMusicPlaying = false;
+	bool isAmbientPlaying = false;
 
 	for (auto& pair : streams) {
 		AudioStream& stream = pair.second;
 		if (!stream.isPlaying) continue;
+
+		if (stream.fadeState != 0) {
+			stream.currentFadeMultiplier += (stream.fadeState * stream.fadeSpeed * deltaTime);
+			stream.currentFadeMultiplier = glm::clamp(stream.currentFadeMultiplier, 0.0f, 1.0f);
+			float currentVolume = stream.isAmbient ? ambientVolume : bgmVolume;
+			alSourcef(stream.source, AL_GAIN, stream.baseVolume * stream.currentFadeMultiplier * currentVolume);
+			if (stream.fadeState == -1 && stream.currentFadeMultiplier <= 0.0f) {
+				StopStream(pair.first);
+				continue;
+			}
+			if (stream.fadeState == 1 && stream.currentFadeMultiplier >= 1.0f) {
+				stream.fadeState = 0;
+			}
+		}
 
 		ALint processed;
 		alGetSourcei(stream.source, AL_BUFFERS_PROCESSED, &processed);
@@ -110,10 +132,15 @@ void AudioManager::Update() {
 			alSourcePlay(stream.source);
 		}
 
-		isAnyStreamPlaying = true;
+		if (stream.isAmbient) {
+			isAmbientPlaying = true;
+		}
+		else {
+			isMusicPlaying = true;
+		}
 	}
 
-	if (isPlaylistActive && !isAnyStreamPlaying) {
+	if (isPlaylistActive && !isMusicPlaying) {
 		if (currentPlaylist.empty()) {
 			isPlaylistActive = false;
 			return;
@@ -132,10 +159,10 @@ void AudioManager::Update() {
 	}
 }
 
-ALuint AudioManager::LoadWav(const std::string& filepath) {
+ALuint AudioManager::LoadWav(const string& filepath) {
 	if (!context) return 0;
 
-	std::ifstream file(filepath, std::ios::binary);
+	ifstream file(filepath, ios::binary);
 	if (!file.is_open()) {
 		Globals::GetGlobals().Log("AUDIO ERROR: Can't find " + filepath);
 		return 0;
@@ -144,12 +171,12 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	char buffer[5] = { 0 };
 
 	file.read(buffer, 4);
-	if (std::string(buffer) != "RIFF") { Globals::GetGlobals().Log("AUDIO ERROR: File is not RIFF"); return 0; }
-	file.seekg(4, std::ios::cur);
+	if (string(buffer) != "RIFF") { Globals::GetGlobals().Log("AUDIO ERROR: File is not RIFF"); return 0; }
+	file.seekg(4, ios::cur);
 	file.read(buffer, 4);
-	if (std::string(buffer) != "WAVE") { Globals::GetGlobals().Log("AUDIO ERROR: File is not WAVE"); return 0; }
+	if (string(buffer) != "WAVE") { Globals::GetGlobals().Log("AUDIO ERROR: File is not WAVE"); return 0; }
 	file.read(buffer, 4);
-	if (std::string(buffer) != "fmt ") { Globals::GetGlobals().Log("AUDIO ERROR: Missing fmt chunk"); return 0; }
+	if (string(buffer) != "fmt ") { Globals::GetGlobals().Log("AUDIO ERROR: Missing fmt chunk"); return 0; }
 
 	uint32_t fmtSize;
 	file.read(reinterpret_cast<char*>(&fmtSize), 4);
@@ -166,18 +193,18 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	file.read(reinterpret_cast<char*>(&blockAlign), 2);
 	file.read(reinterpret_cast<char*>(&bitsPerSample), 2);
 
-	if (fmtSize > 16) file.seekg(fmtSize - 16, std::ios::cur);
+	if (fmtSize > 16) file.seekg(fmtSize - 16, ios::cur);
 
 	uint32_t dataSize = 0;
 	bool foundData = false;
 
 	while (file.read(buffer, 4)) {
 		file.read(reinterpret_cast<char*>(&dataSize), 4);
-		if (std::string(buffer, 4) == "data") {
+		if (string(buffer, 4) == "data") {
 			foundData = true;
 			break;
 		}
-		file.seekg(dataSize, std::ios::cur);
+		file.seekg(dataSize, ios::cur);
 	}
 
 	if (!foundData) { Globals::GetGlobals().Log("AUDIO ERROR: Missing data chunk"); return 0; }
@@ -187,7 +214,7 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 		return 0;
 	}
 
-	std::vector<char> audioData(dataSize);
+	vector<char> audioData(dataSize);
 	file.read(audioData.data(), dataSize);
 
 	ALenum format = 0;
@@ -208,11 +235,44 @@ ALuint AudioManager::LoadWav(const std::string& filepath) {
 	return alBuffer;
 }
 
-void AudioManager::LoadSound(const std::string& name, const std::string& filepath) {
+ALuint AudioManager::LoadOgg(const string& filepath) {
+	if (!context) return 0;
+
+	int channels, sampleRate;
+	short* decodedData;
+
+	int numSamples = stb_vorbis_decode_filename(filepath.c_str(), &channels, &sampleRate, &decodedData);
+	if (numSamples < 0) {
+		Globals::GetGlobals().Log("AUDIO ERROR: Failed to decode OGG file: " + filepath);
+		return 0;
+	}
+
+	ALenum format = (channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
+	int dataSize = numSamples * channels * sizeof(short);
+
+	ALuint alBuffer;
+	alGenBuffers(1, &alBuffer);
+	alBufferData(alBuffer, format, decodedData, dataSize, sampleRate);
+	free(decodedData);
+	return alBuffer;
+}
+
+void AudioManager::LoadSound(const string& name, const string& filepath) {
 	if (!context) return;
 	if (audioBuffers.find(name) != audioBuffers.end()) return;
 
-	ALuint buffer = LoadWav(filepath);
+	ALuint buffer = 0;
+
+	if (filepath.ends_with(".wav")) {
+		buffer = LoadWav(filepath);
+	}
+	else if (filepath.ends_with(".ogg")) {
+		buffer = LoadOgg(filepath);
+	}
+	else {
+		Globals::GetGlobals().Log("AUDIO ERROR: Unsupported audio format for " + filepath);
+		return;
+	}
 	if (buffer != 0) {
 		audioBuffers[name] = buffer;
 	}
@@ -230,48 +290,79 @@ ALuint AudioManager::GetAvailableSource() {
 	return 0;
 }
 
-void AudioManager::PlaySound2D(const std::string& name, float volume, float pitch, bool loop) {
-	if (!context) return;
+AudioHandle AudioManager::PlaySound2D(const string& name, float volume, float pitch, bool loop) {
+	if (!context) return 0;
 	auto it = audioBuffers.find(name);
-	if (it == audioBuffers.end()) return;
+	if (it == audioBuffers.end()) return 0;
 
 	ALuint source = GetAvailableSource();
-	if (source == 0) return;
+	if (source == 0) return 0;
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
-	alSourcef(source, AL_GAIN, volume);
+	alSourcef(source, AL_GAIN, volume * sfxVolume);
 	alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 	alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
 	alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
 
 	alSourcePlay(source);
+
+	AudioHandle handle = nextHandleId++;
+	activeSounds[handle] = { source, name };
+	return handle;
 }
 
-void AudioManager::PlaySound3D(const std::string& name, glm::vec3 position, float volume, float pitch, bool loop) {
-	if (!context) return;
+AudioHandle AudioManager::PlaySound3D(const string& name, vec3 position, float volume, float pitch, bool loop, float maxDistance, float refDistance) {
+	if (!context) return 0;
 	auto it = audioBuffers.find(name);
-	if (it == audioBuffers.end()) return;
+	if (it == audioBuffers.end()) return 0;
 
 	ALuint source = GetAvailableSource();
-	if (source == 0) return;
+	if (source == 0) return 0;
 
 	alSourcei(source, AL_BUFFER, it->second);
 	alSourcef(source, AL_PITCH, pitch);
-	alSourcef(source, AL_GAIN, volume);
+	alSourcef(source, AL_GAIN, volume * sfxVolume);
 	alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 	alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
 	float safeZ = position.z + 3.0f;
 	alSource3f(source, AL_POSITION, position.x, position.y, safeZ);
 
-	alSourcef(source, AL_REFERENCE_DISTANCE, 2.0f);
-	alSourcef(source, AL_MAX_DISTANCE, 15.0f);
-
+	alSourcef(source, AL_REFERENCE_DISTANCE, refDistance);
+	alSourcef(source, AL_MAX_DISTANCE, maxDistance);
 	alSourcePlay(source);
+
+	AudioHandle handle = nextHandleId++;
+	activeSounds[handle] = { source, name };
+	return handle;
 }
 
+void AudioManager::UpdateSound3DPosition(AudioHandle handle, vec3 newPosition) {
+	if (!context || handle == 0) return;
 
-void AudioManager::RegisterBGM(const std::string& name, const std::string& filepath) {
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
+
+	ALuint source = it->second.source;
+	ALint state;
+	alGetSourcei(source, AL_SOURCE_STATE, &state);
+
+	if (state != AL_PLAYING && state != AL_PAUSED) {
+		return;
+	}
+	float safeZ = newPosition.z + 3.0f;
+	alSource3f(source, AL_POSITION, newPosition.x, newPosition.y, safeZ);
+}
+
+void AudioManager::StopSound(AudioHandle handle) {
+	if (!context || handle == 0) return;
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
+	alSourceStop(it->second.source);
+	activeSounds.erase(it);
+}
+
+void AudioManager::RegisterBGM(const string& name, const string& filepath) {
 	if (!context) return;
 	if (streams.find(name) != streams.end()) return;
 
@@ -280,6 +371,7 @@ void AudioManager::RegisterBGM(const std::string& name, const std::string& filep
 	alGenBuffers(4, newStream.buffers);
 	newStream.currentFile = filepath;
 	newStream.isPlaying = false;
+	newStream.isAmbient = false;
 
 	streams[name] = newStream;
 }
@@ -287,7 +379,7 @@ void AudioManager::RegisterBGM(const std::string& name, const std::string& filep
 bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	if (!context || !stream.oggStream) return false;
 
-	thread_local std::vector<short> pcm;
+	thread_local vector<short> pcm;
 	if (pcm.size() != BUFFER_SIZE) {
 		pcm.resize(BUFFER_SIZE);
 	}
@@ -314,54 +406,12 @@ bool AudioManager::StreamBufferData(ALuint buffer, AudioStream& stream) {
 	return false;
 }
 
-bool AudioManager::PlayBGM(const std::string& name, float volume, bool loop) {
-	if (!context) return false;
-	auto it = streams.find(name);
-	if (it == streams.end()) return false;
-
-	AudioStream& stream = it->second;
-	if (stream.isPlaying) return true;
-
-	StopAllBGM();
-
-	int error;
-	stream.oggStream = stb_vorbis_open_filename(stream.currentFile.c_str(), &error, nullptr);
-	if (!stream.oggStream) {
-		Globals::GetGlobals().Log("AUDIO ERROR: Can't open ogg file: " + stream.currentFile);
-		return false;
-	}
-
-	stb_vorbis_info info = stb_vorbis_get_info(stream.oggStream);
-	stream.format = (info.channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-	stream.sampleRate = info.sample_rate;
-	stream.loop = loop;
-
-	ALuint queuedBuffers[4];
-	int filledBufferCount = 0;
-	for (int i = 0; i < 4; ++i) {
-		if (StreamBufferData(stream.buffers[i], stream)) {
-			queuedBuffers[filledBufferCount++] = stream.buffers[i];
-		}
-	}
-
-	if (filledBufferCount == 0) {
-		stb_vorbis_close(stream.oggStream);
-		stream.oggStream = nullptr;
-		stream.isPlaying = false;
-		return false;
-	}
-
-	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
-	alSourcef(stream.source, AL_GAIN, volume);
-	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
-
-	alSourcePlay(stream.source);
-	stream.isPlaying = true;
-	return true;
+bool AudioManager::PlayBGM(const string& name, float volume, bool loop) {
+	return StartStream(name, volume, loop);
 }
 
 
-void AudioManager::StopBGM(const std::string& name) {
+void AudioManager::StopStream(const string& name) {
 	if (!context) return;
 	auto it = streams.find(name);
 	if (it == streams.end()) return;
@@ -386,11 +436,13 @@ void AudioManager::StopBGM(const std::string& name) {
 void AudioManager::StopAllBGM() {
 	isPlaylistActive = false;
 	for (auto& pair : streams) {
-		StopBGM(pair.first);
+		if (!pair.second.isAmbient) {
+			StopStream(pair.first);
+		}
 	}
 }
 
-void AudioManager::SetListenerPosition(glm::vec3 position) {
+void AudioManager::SetListenerPosition(vec3 position) {
 	if (!context) return;
 	alListener3f(AL_POSITION, position.x, position.y, position.z);
 }
@@ -400,11 +452,12 @@ void AudioManager::StopAll() {
 	for (ALuint source : audioSources) {
 		alSourceStop(source);
 	}
+	activeSounds.clear();
 	StopAllBGM();
 	isPlaylistActive = false;
 }
 
-void AudioManager::PlayPlaylist(const std::vector<std::string>& trackNames, float volume) {
+void AudioManager::PlayPlaylist(const vector<string>& trackNames, float volume) {
 	if (!context || trackNames.empty()) return;
 
 	currentPlaylist = trackNames;
@@ -414,4 +467,133 @@ void AudioManager::PlayPlaylist(const std::vector<std::string>& trackNames, floa
 
 	PlayBGM(currentPlaylist[currentPlaylistIndex], volume, false);
 	isPlaylistActive = true;
+}
+
+void AudioManager::SetMasterVolume(float volume) {
+	masterVolume = glm::clamp(volume, 0.0f, 1.0f);
+	alListenerf(AL_GAIN, masterVolume);
+}
+
+void AudioManager::SetSFXVolume(float volume) {
+	sfxVolume = glm::clamp(volume, 0.0f, 1.0f);
+}
+
+void AudioManager::SetBGMVolume(float volume) {
+	bgmVolume = glm::clamp(volume, 0.0f, 1.0f);
+	for (auto& pair : streams) {
+		if (pair.second.isPlaying && !pair.second.isAmbient) {
+			alSourcef(pair.second.source, AL_GAIN, pair.second.baseVolume * playlistVolume * bgmVolume);
+		}
+	}
+}
+
+void AudioManager::SetAmbientVolume(float volume) {
+	ambientVolume = glm::clamp(volume, 0.0f, 1.0f);
+	for (auto& pair : streams) {
+		if (pair.second.isPlaying && pair.second.isAmbient) {
+			alSourcef(pair.second.source, AL_GAIN, pair.second.baseVolume * ambientVolume);
+		}
+	}
+}
+
+void AudioManager::RegisterAmbient(const string& name, const string& filepath) {
+	if (!context) return;
+	if (streams.find(name) != streams.end()) return;
+
+	AudioStream newStream;
+	alGenSources(1, &newStream.source);
+	alGenBuffers(4, newStream.buffers);
+	newStream.currentFile = filepath;
+	newStream.isPlaying = false;
+	newStream.isAmbient = true;
+	streams[name] = newStream;
+}
+
+bool AudioManager::PlayAmbient(const string& name, float volume, bool loop) {
+	return StartStream(name, volume, loop);
+}
+
+void AudioManager::StopAllAmbient() {
+	for (auto& pair : streams) {
+		if (pair.second.isAmbient) {
+			StopStream(pair.first);
+		}
+	}
+}
+
+bool AudioManager::StartStream(const string& name, float volume, bool loop) {
+	if (!context) return false;
+	auto it = streams.find(name);
+	if (it == streams.end()) return false;
+
+	AudioStream& stream = it->second;
+	if (stream.isPlaying) return true;
+
+	if (stream.isAmbient) {
+		FadeOutAllAmbient(1.5f);
+	}
+	else {
+		FadeOutAllBGM(1.5f);
+	}
+
+	int error;
+	stream.oggStream = stb_vorbis_open_filename(stream.currentFile.c_str(), &error, nullptr);
+	if (!stream.oggStream) {
+		Globals::GetGlobals().Log("AUDIO ERROR: Can't open ogg file: " + stream.currentFile);
+		return false;
+	}
+
+	stb_vorbis_info info = stb_vorbis_get_info(stream.oggStream);
+	stream.format = (info.channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
+	stream.sampleRate = info.sample_rate;
+	stream.loop = loop;
+	stream.baseVolume = volume;
+	stream.currentFadeMultiplier = 0.0f;
+	stream.fadeState = 1;
+	stream.fadeSpeed = 1.0f / 1.5f;
+
+	ALuint queuedBuffers[4];
+	int filledBufferCount = 0;
+	for (int i = 0; i < 4; ++i) {
+		if (StreamBufferData(stream.buffers[i], stream)) {
+			queuedBuffers[filledBufferCount++] = stream.buffers[i];
+		}
+	}
+
+	if (filledBufferCount == 0) {
+		stb_vorbis_close(stream.oggStream);
+		stream.oggStream = nullptr;
+		stream.isPlaying = false;
+		return false;
+	}
+
+	alSourceQueueBuffers(stream.source, filledBufferCount, queuedBuffers);
+	float currentVolume = stream.isAmbient ? ambientVolume : bgmVolume;
+	alSourcef(stream.source, AL_GAIN, stream.baseVolume * stream.currentFadeMultiplier * currentVolume);
+	alSourcei(stream.source, AL_SOURCE_RELATIVE, AL_TRUE);
+
+	alSourcePlay(stream.source);
+	stream.isPlaying = true;
+	return true;
+}
+
+void AudioManager::FadeOutAllBGM(float duration) {
+	isPlaylistActive = false;
+	float speed = (duration > 0.0f) ? (1.0f / duration) : 1000.0f;
+	for (auto& pair : streams) {
+		if (!pair.second.isAmbient && pair.second.isPlaying) {
+			pair.second.fadeState = -1;
+			pair.second.fadeSpeed = speed;
+		}
+	}
+}
+
+void AudioManager::FadeOutAllAmbient(float duration) {
+	float speed = (duration > 0.0f) ? (1.0f / duration) : 1000.0f;
+	for (auto& pair : streams) {
+		if (pair.second.isAmbient && pair.second.isPlaying) {
+			pair.second.fadeState = -1;
+			pair.second.fadeSpeed = speed;
+		}
+	}
 }

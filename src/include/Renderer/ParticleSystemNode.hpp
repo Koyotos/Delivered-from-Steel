@@ -16,6 +16,8 @@ public:
 	void Process() override;
 	void Draw(std::shared_ptr<Shader> sh = nullptr) override;
 	void Emit(const glm::vec3& position, const glm::vec3& velocity, const glm::vec4& color, float lifeTime, float rotation = 0.0f);
+	void KillParticlesBehindX(float playerX, float direction);
+	void Reset() { activeParticleCount = 0; }
 
 protected:
 	size_t maxParticles;

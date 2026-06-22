@@ -36,7 +36,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
     uint8_t RenderType() override;
 
     void SetCollider(shared_ptr<Collider> col);
-    shared_ptr<Collider> GetCollider();
+    Collider* GetCollider();
 
     void SetStatic(bool value);
     bool GetStatic() const;
@@ -54,9 +54,9 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
 	void SetDebugShader(shared_ptr<Shader> shader);
     shared_ptr<Shader> GetDebugShader() const { return debugShader; };
 
-    virtual void OnCollisionEnter(shared_ptr<Collider> other) {}
-    virtual void OnCollisionStay(shared_ptr<Collider> other) {}
-    virtual void OnCollisionExit(shared_ptr<Collider> other) {}
+    virtual void OnCollisionEnter(Collider* other) {}
+    virtual void OnCollisionStay(Collider* other) {}
+    virtual void OnCollisionExit(Collider* other) {}
 
     vec2 GetVelocity() const { return velocity; }
     void SetVelocity(const vec2& v) { velocity = v; }
@@ -67,7 +67,7 @@ class PhysicsNode : public VisualNode, public enable_shared_from_this<PhysicsNod
 
 	ObjectType GetObjectType() const { return objectType; }
 
-	shared_ptr<CollisionInfo> GetCollisionInfo(shared_ptr<Collider> other);
+	shared_ptr<CollisionInfo> GetCollisionInfo(Collider* other);
 
     PhysicsNode();
 

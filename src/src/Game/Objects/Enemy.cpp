@@ -21,6 +21,14 @@ Enemy::Enemy(const unordered_map<string, std::any>& data) : Object2D(data) {
 
 	damage = 100.0f;
 	atakDystanse = 0.5f;
+	audio = make_unique<AudioSource>(this);
+}
+
+void Enemy::Disable() noexcept {
+	if (audio) {
+		audio->Stop();
+	}
+	Object2D::Disable();
 }
 
 void Enemy::ChangeState(shared_ptr<Player> player) {
@@ -69,17 +77,18 @@ void Enemy::UpdateState(float dt) {
 	}
 }
 
-void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
+void Enemy::OnCollisionStay(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
-		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+		CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
 
 		Attack(player);
 		glm::vec2 pos = GetTransform().GetTranslation();
 		auto trans = player->GetTransform();
 		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
-		std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
+		BoxCollider* box = static_cast<BoxCollider*>(GetCollider());
 
 		float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
 		float platformTop = box->GetMax().y;
@@ -91,17 +100,18 @@ void Enemy::OnCollisionStay(shared_ptr<Collider> other) {
 	}
 }
 
-void Enemy::OnCollisionExit(shared_ptr<Collider> other) {
+void Enemy::OnCollisionExit(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		shared_ptr<Player> player = static_pointer_cast<Player>(owner);
-		std::shared_ptr<CapsuleCollider> capsule = std::static_pointer_cast<CapsuleCollider>(other);
+		CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
 
 		Attack(player);
 		glm::vec2 pos = GetTransform().GetTranslation();
 		auto trans = player->GetTransform();
 		trans.SetTranslation(trans.GetTranslation() + vec3(realVelocity, 0.0f));
-		std::shared_ptr<BoxCollider> box = std::static_pointer_cast<BoxCollider>(GetCollider());
+		BoxCollider* box = static_cast<BoxCollider*>(GetCollider());
 
 		float playerBottom = player->GetTransform().GetTranslation().y - (capsule->radius + capsule->height / 2);
 		float platformTop = box->GetMax().y;
@@ -130,13 +140,16 @@ void Enemy::Physics(const float& deltaTime) {
 	realVelocity = pos - lastPosition;
 	lastPosition = pos;
 	UpdateState(deltaTime);
+	if (audio) {
+		audio->Update();
+	}
 }
 
 void Enemy::DetectPlayer() {
 	if (player && player->TestDraw()) {
 
 		glm::vec3 enemyPos3 = transform.GetTranslation();
-		enemyPos3.y -= groundCheckDistance/2;
+		enemyPos3.y -= groundCheckDistance/3;
 		glm::vec3 playerPos3 = player->GetTransform().GetTranslation();
 
 		glm::vec2 enemyPos(enemyPos3);

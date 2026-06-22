@@ -18,8 +18,8 @@ public:
 
 	string Type() override;
 
-	void OnCollisionEnter(shared_ptr<Collider> other) override;
-	void OnCollisionExit(shared_ptr<Collider> other) override;
+	void OnCollisionEnter(Collider* other) override;
+	void OnCollisionExit(Collider* other) override;
 };
 
 #endif

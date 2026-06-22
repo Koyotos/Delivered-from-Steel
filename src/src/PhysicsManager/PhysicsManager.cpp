@@ -13,11 +13,13 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update physics
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         node->Physics(dt);
     }
 
     // Process collisions
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             node->processCollisions();
@@ -29,6 +31,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
     // Update collider positions
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             col->UpdatePosition(node->GetTransform());
@@ -37,6 +40,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     // Build quadtree
     quadTree = QuadTree(0, WorldBounds);
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (col)
             quadTree.Insert(node.get());
@@ -45,12 +49,14 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     // Query + resolve collisions
     uint32_t environmentMask = static_cast<uint32_t>(ObjectType::Wall) |
         static_cast<uint32_t>(ObjectType::Trap) |
+        static_cast<uint32_t>(ObjectType::Default) |
         static_cast<uint32_t>(ObjectType::BreakableWall);
 
     vector<PhysicsNode*> candidates;
     vector<pair<PhysicsNode*, CollisionInfo>> actualHits;
 
     for (auto& node : currentNodes) {
+        if (!node->TestPhysics()) continue;
         auto col = node->GetCollider();
         if (!col) continue;
 
@@ -64,6 +70,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
 
         for (auto& other : candidates) {
             if (node.get() == other) continue;
+            if (!node->TestPhysics()) continue;
 
             auto otherCol = other->GetCollider();
             if (!otherCol) continue;
@@ -75,7 +82,7 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
             }
         }
 
-        std::sort(actualHits.begin(), actualHits.end(), [](const pair<PhysicsNode*, CollisionInfo>& a, const pair<PhysicsNode*, CollisionInfo>& b) {
+        sort(actualHits.begin(), actualHits.end(), [](const pair<PhysicsNode*, CollisionInfo>& a, const pair<PhysicsNode*, CollisionInfo>& b) {
             bool aIsDown = a.second.normal.y < 0.0f;
             bool bIsDown = (b.second.normal.y < 0.0f);
 
@@ -91,12 +98,14 @@ void PhysicsManager::Update(shared_ptr<Scene> scene, float dt) {
     }
 }
 
-void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
-	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
-	if (physicsNode && physicsNode->TestPhysics()) {
-	    currentNodes.push_back(physicsNode);
-		physicsNode->Init();
-	}
+void PhysicsManager::UpdateNode(shared_ptr<Node> node) {
+    if (node->RenderType() >= 2) {
+	    auto physicsNode = static_pointer_cast<PhysicsNode>(node);
+	    if (physicsNode && physicsNode->TestPhysics()) {
+	        currentNodes.push_back(physicsNode);
+		    physicsNode->Init();
+	    }
+    }
 
 	for (const auto& child : node->GetChildren()) {
 		UpdateNode(child);
@@ -105,11 +114,12 @@ void PhysicsManager::UpdateNode(std::shared_ptr<Node> node) {
 
 void PhysicsManager::CollectPhysicsNodes(shared_ptr<Node> node, vector<shared_ptr<PhysicsNode>>& outNodes) {
 	if (!node) return;
-
-	auto physicsNode = dynamic_pointer_cast<PhysicsNode>(node);
-	if (physicsNode) {
-		outNodes.push_back(physicsNode);
-	}
+    if (node->RenderType() >= 2) {
+        auto physicsNode = static_pointer_cast<PhysicsNode>(node);
+        if (physicsNode) {
+            outNodes.push_back(physicsNode);
+        }
+    }
 
 	for (const auto& child : node->GetChildren()) {
 		CollectPhysicsNodes(child, outNodes);
@@ -123,8 +133,8 @@ void PhysicsManager::RecalculateWorldBounds() {
 		auto col = node->GetCollider();
 		if (!col) continue;
 		auto b = col->GetBounds();
-		WorldBounds.min = glm::min(WorldBounds.min, b.min);
-		WorldBounds.max = glm::max(WorldBounds.max, b.max);
+		WorldBounds.min = min(WorldBounds.min, b.min);
+		WorldBounds.max = max(WorldBounds.max, b.max);
 	}
 }
 
@@ -151,7 +161,7 @@ void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
 	vector<shared_ptr<PhysicsNode>> nodesToRemove;
 	CollectPhysicsNodes(node, nodesToRemove);
 
-	std::unordered_set<shared_ptr<PhysicsNode>> nodesToRemoveSet(nodesToRemove.begin(), nodesToRemove.end());
+	unordered_set<shared_ptr<PhysicsNode>> nodesToRemoveSet(nodesToRemove.begin(), nodesToRemove.end());
 
     for (auto& removeNode : nodesToRemove) {
         auto colToRemove = removeNode->GetCollider();
@@ -168,7 +178,7 @@ void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
         colToRemove->GetPreviousCollisions().clear();
     }
 
-    currentNodes.erase(std::remove_if(currentNodes.begin(), currentNodes.end(),
+    currentNodes.erase(remove_if(currentNodes.begin(), currentNodes.end(),
         [&nodesToRemoveSet](const shared_ptr<PhysicsNode>& node) {
             return nodesToRemoveSet.find(node) != nodesToRemoveSet.end();
 		}), currentNodes.end());
@@ -177,7 +187,7 @@ void PhysicsManager::UnregisterNode(shared_ptr<Node> node) {
 }
 
 optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& direction, float maxDistance,
-	shared_ptr<Collider> collider, uint32_t type) {
+	Collider* collider, uint32_t type) {
 
 	float closest = maxDistance;
 	optional<RaycastHit> result;
@@ -197,7 +207,7 @@ optional<RaycastHit> PhysicsManager::Raycast(const vec2& origin, const vec2& dir
 }
 
 vector<RaycastHit> PhysicsManager::RaycastAll(const vec2& origin, const vec2& direction, float maxDistance,
-	shared_ptr<Collider> collider, uint32_t type) {
+    Collider* collider, uint32_t type) {
 
 	float closest = maxDistance;
 	vector<RaycastHit> result;

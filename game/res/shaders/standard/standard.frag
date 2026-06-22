@@ -40,7 +40,7 @@ uniform int dirSpotCount;
 vec3 matDiffuse  = vec3(0.0);
 vec3 matSpecular = vec3(0.0);
 
-vec3 sampleOffsetDirections[20] = vec3[](
+const vec3 sampleOffsetDirections[20] = vec3[](
     vec3( 1,  1,  1), vec3(-1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1),
     vec3( 1,  1, -1), vec3(-1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1),
     vec3( 1,  0,  0), vec3(-1,  0,  0),
@@ -51,7 +51,7 @@ vec3 sampleOffsetDirections[20] = vec3[](
     vec3( 1,  0,  1), vec3(-1,  0,  1)
 );
 
-vec2 poissonDisk[16] = vec2[](
+const vec2 poissonDisk[16] = vec2[](
     vec2(-0.94201624, -0.39906216),
     vec2( 0.94558609, -0.76890725),
     vec2(-0.09418410, -0.92938870),
@@ -116,14 +116,14 @@ float ShadowCube(int i, vec3 normal) {
     float bias = max(0.01 * (1.0 - dot(normal, lightDir)), 0.002);
 
     float shadow = 0.0;
-    int samples = 20;
+    int samples = 10;
 
     float diskRadius = (0.5 + currentDepth / farPlane) * 0.02;
     vec3 baseDir = normalize(fragToLight);
 
     for (int s = 0; s < samples; ++s) {
-        vec3 offsetDir = normalize(sampleOffsetDirections[s]) * diskRadius;
-        vec3 sampleDir = normalize(baseDir + offsetDir);
+        vec3 offsetDir = sampleOffsetDirections[s] * diskRadius;
+        vec3 sampleDir = baseDir + offsetDir;
 
         // Use pointIndex as cube-array layer
         float closestDepth = texture(shadowCubemaps, vec4(sampleDir, pointIndex)).r;
@@ -138,9 +138,13 @@ float ShadowCube(int i, vec3 normal) {
 vec3 DirectionalLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     vec3 lightDir = normalize(-light.data1);
 
+    float diff = dot(normal, lightDir);
+    if(diff <= 0.0)
+        return light.colorAmbient * matDiffuse;
+    diff = max(diff, 0.0);
+
     float shadow = Shadow2D(i, normal, lightDir);
 
-    float diff = max(dot(normal, lightDir), 0.0);
     vec3 halfwayDir = normalize(lightDir + viewDirection);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
@@ -158,9 +162,12 @@ vec3 DirectionalLight(int i, Light light, vec3 normal, vec3 viewDirection) {
 vec3 PointLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     vec3 lightDir = normalize(light.data1 - FragPos);
 
-    float shadow = ShadowCube(i, normal);
+    float diff = dot(normal, lightDir);
+    if(diff <= 0.0)
+        return light.colorAmbient * matDiffuse;
+    diff = max(diff, 0.0);
 
-    float diff = max(dot(normal, lightDir), 0.0);
+    float shadow = ShadowCube(i, normal);
     vec3 halfwayDir = normalize(lightDir + viewDirection);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
@@ -186,9 +193,12 @@ vec3 SpotLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     vec3 lightPos = light.data1;
     vec3 lightDir = normalize(lightPos - FragPos);
 
-    float shadow = Shadow2D(i, normal, lightDir);
+    float diff = dot(normal, lightDir);
+    if(diff <= 0.0)
+        return light.colorAmbient * matDiffuse;
+    diff = max(diff, 0.0);
 
-    float diff = max(dot(normal, lightDir), 0.0);
+    float shadow = Shadow2D(i, normal, lightDir);
     vec3 halfwayDir = normalize(lightDir + viewDirection);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
@@ -247,8 +257,9 @@ void main() {
     FragColor = vec4(result, 1.0);
 
     float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-    if (brightness > 1.0)
+
+    if (brightness > 0.8)
         BrightColor = vec4(FragColor.rgb, 1.0);
     else
-        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+        BrightColor = vec4(0.0);
 }

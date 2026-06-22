@@ -1,12 +1,8 @@
 #ifndef FE_SCENE
 #define FE_SCENE
 
-#include "include/Core/Node.hpp"
 #include "include/Game/Objects/Player.hpp"
-#include "include/Renderer/Camera.hpp"
 #include "include/Renderer/Light.hpp"
-#include "include/Renderer/Model.hpp"
-#include "include/Renderer/Shader.hpp"
 #include <memory>
 
 using namespace std;
@@ -57,6 +53,9 @@ class Scene {
     * @param parent The parent's transformation.
     */
     void UpdateTransforms(shared_ptr<Node>, Transform);
+
+    vector<string> scenePlaylist;
+    string sceneAmbient = "";
 
     std::string GetName() const { return name; }
 };

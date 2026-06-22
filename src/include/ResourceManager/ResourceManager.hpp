@@ -43,13 +43,20 @@
 #include <filesystem>
 #include <fstream>
 #include <future>
-
+#include <mutex>
+#include <algorithm>
+#include <cctype>
 
 class AudioManager;
 
 using namespace std;
 using namespace filesystem;
 using namespace nlohmann;
+
+static string ToLower(string str) {
+    transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return tolower(c); });
+    return str;
+}
 
 template<typename T> pair<string,function<shared_ptr<Node>(const unordered_map<string,std::any>&)>> 
     RegisterObjectType(const string& name) {
@@ -99,17 +106,20 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
 
 struct RefCountModel {
     shared_ptr<Model> model = nullptr;
-    uint8_t refCount = 0;
+    uint32_t refCount = 0;
+	string loweredName = "";
 };
 
 struct RefCountShader {
     shared_ptr<Shader> shader = nullptr;
-    uint8_t refCount = 0;
+    uint32_t refCount = 0;
+    string loweredName = "";
 };
 
 struct RefCountSprite {
     shared_ptr<Sprite> sprite = nullptr;
-    uint8_t refCount = 0;
+    uint32_t refCount = 0;
+    string loweredName = "";
 };
 
 class ResourceManager {
@@ -118,8 +128,7 @@ class ResourceManager {
     path spritesPath;
     path audioPath;
     path shadersPath;
-
-    fstream resourceStream;
+    mutex rsmMutex;
 
     vector<future<shared_ptr<Scene>>> sceneAsyncQueue; 
 
@@ -134,13 +143,6 @@ class ResourceManager {
     inline shared_ptr<Model> LoadModel(const string&);
     inline shared_ptr<Sprite> LoadSprite(const string&);
 
-    // Helper
-    inline string LoadPlainText(const path&);
-
-    // Json methods
-    inline std::any JSONtoAny(const json&);
-    inline unordered_map<string, std::any> LoadJSON(const path&);
-
     // Node parser helpers
     inline void ApplyAssetsGFX(shared_ptr<Node>, unordered_map<string,std::any>);
     inline void ApplyAssetsSFX(shared_ptr<Node>, unordered_map<string,std::any>);
@@ -151,6 +153,14 @@ class ResourceManager {
     shared_ptr<AudioManager> audioManager;
 
     public:
+
+    // Helper
+    inline string LoadPlainText(const path&);
+
+    // Json methods
+    inline std::any JSONtoAny(const json&);
+    inline unordered_map<string, std::any> LoadJSON(const path&);
+
     shared_ptr<Scene> LoadScene(const path&) noexcept;
     void UnloadScene(shared_ptr<Scene>);
     void ConfigurePaths();
@@ -170,6 +180,8 @@ class ResourceManager {
     // Asynchronous loading
     void LoadSceneAsync(const path&) noexcept;
     shared_ptr<Scene> GetLoadedAsync(const string&) noexcept;
+
+	void PreloadAllResources();
 
     ResourceManager();
     ~ResourceManager();

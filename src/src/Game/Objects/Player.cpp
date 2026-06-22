@@ -4,6 +4,7 @@
 #include "include/IOManager/IOManager.hpp"
 #include "include/Game/Objects/CardManager.hpp"
 #include "include/EngineController/EngineController.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cmath>
@@ -58,7 +59,7 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	raycastConfig.groundedOffsetX = colX - (raycastConfig.groundedRayLength / 2.0f);
 	raycastConfig.groundedOffsetY = -(-colY + halfHeight) - skinWidth;
 
-	
+
 	raycastConfig.ceilingRayLength = radius;
 	raycastConfig.ceilingRayDir = { 1.0f, 0.0f };
 	raycastConfig.ceilingOffsetX = colX - (raycastConfig.ceilingRayLength / 2.0f);
@@ -102,6 +103,14 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	camConfig.maxCameraSpeed = GetSafe<float>(data, "maxCameraSpeed", 10000.0f);
 
 	cameraController.SetConfig(camConfig);
+	audio = make_unique<AudioSource>(this);
+}
+
+void Player::Disable() noexcept {
+	if (audio) {
+		audio->Stop();
+	}
+	Object2D::Disable();
 }
 
 void Player::SetCamera(std::shared_ptr<Camera> cam) {
@@ -124,12 +133,24 @@ void Player::Init(std::shared_ptr<Scene> scene) {
 			if (child->GetName() == "DeathEmitter") {
 				deathEmitter = emitter;
 			}
-			else if (child->GetName() == "PixelEmitter") {
-				pixelEmitter = emitter;
+			else if (child->GetName() == "WallSnapEmitter") {
+				wallSnapEmitter = emitter;
 			}
 		}
-		if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
+		else if (child->GetName() == "OrbitalPoints" && child->Type() == "OrbitalParticleSystem") {
 			pointVisualizer = std::static_pointer_cast<OrbitalParticleSystem>(child);
+		}
+		else if (child->GetName() == "BounceBubble" && child->Type() == "Object2D") {
+			bounceBubbleNode = std::static_pointer_cast<Object2D>(child);
+			if (bounceBubbleNode) {
+				bounceBubbleNode->Play("BubbleAnim", 0.15f, true);
+			}
+		}
+		else if (child->GetName() == "outlineCollective" && child->Type() == "Object2D") {
+			outlineCollectiveNode = std::static_pointer_cast<Object2D>(child);
+		}
+		else if (child->GetName() == "outlineYellow" && child->Type() == "Object2D") {
+			outlineYellowNode = std::static_pointer_cast<Object2D>(child);
 		}
 	}
 }
@@ -190,12 +211,11 @@ void Player::GatherInput(float deltaTime) {
 	}
 
 	float leftX = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_X);
-	if (std::abs(leftX) > 0.1f) {
-		float normalizedSpeed = std::clamp((std::abs(leftX) - 0.1f) / (0.9f - 0.1f), 0.0f, 1.0f);
-		inputState.moveInput = normalizedSpeed * std::copysign(1.0f, leftX);
+	if (std::abs(leftX) > Globals::GetGlobals().gamepadDeadzone) {
+		inputState.moveInput = (leftX > 0.0f) ? 1.0f : -1.0f;
 	}
 
-	if (!isHanging && std::abs(inputState.moveInput) > 0.01f) {
+	if (std::abs(inputState.moveInput) > 0.01f && !isDashing) {
 		facingDirection = std::copysign(1.0f, inputState.moveInput);
 		Transform t = GetTransform();
 		glm::vec3 scale = t.GetScale();
@@ -204,7 +224,6 @@ void Player::GatherInput(float deltaTime) {
 		SetTransform(t);
 	}
 
-	inputState.wantsToDrop = Globals::GetGlobals().GetKeyState(GLFW_KEY_S) || Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_LEFT_Y) > 0.5f;
 	inputState.rightStick.x = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_X);
 	inputState.rightStick.y = Globals::GetGlobals().GetGamepadAxisState(GLFW_GAMEPAD_AXIS_RIGHT_Y);
 }
@@ -214,38 +233,26 @@ void Player::Process() {
 	Object2D::Process();
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
 
-	if (deathEmitter) {
-		if (!wasDead && health.IsDead()) {
-			deathEmitter->Burst(10);
-		}
+	if (respawnProtectionTimer > 0.0f) {
+		respawnProtectionTimer -= deltaTime;
 	}
 
-	if (pixelEmitter) {
-		if (!wasDead && health.IsDead()) {
-			//pixelEmitter->isEmitting = true;
-		}
-		else if (!health.IsDead()) {
-			pixelEmitter->isEmitting = false;
-		}
-	}
 	if (health.IsDead()) {
 		pointVisualizer->Reset();
 	}
 	else {
 		int currentPoints = cardManager->getCurrentManaPoints();
-		pointVisualizer->UpdatePlayerState(currentPoints);
+		pointVisualizer->UpdatePlayerState(currentPoints, GetTransform().GetTranslation());
 	}
-
-	wasDead = health.IsDead();
 
 	if (health.IsDead()) {
 		inputState.moveInput = 0.0f;
-		if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
 		SetVelocity(glm::vec2(0.0f));
 
 		if (health.CheckAndResetRespawn(deltaTime)) {
 			SetVelocity(glm::vec2(0.0f));
 			lastVelocity = glm::vec2(0.0f);
+			respawnProtectionTimer = 0.2f;
 			Globals::GetGlobals().engineController->TriggerRespawn();
 		}
 		return;
@@ -273,8 +280,6 @@ void Player::UpdateVignette() {
 }
 
 bool Player::HandleMovement(float deltaTime) {
-	if (ledgeDropCooldown > 0.0f) ledgeDropCooldown -= deltaTime;
-
 	glm::vec2 currentVelocity = GetVelocity();
 
 	Transform t = this->GetTransform();
@@ -290,13 +295,19 @@ bool Player::HandleMovement(float deltaTime) {
 	isWalled = isWalledRight || isWalledLeft;
 
 	if (isWalledRight && isWalledLeft && (WalledLeftHit.value().collider != WalledRightHit.value().collider)) {
-		Shatter();
+		if (respawnProtectionTimer <= 0.0f) {
+			Shatter();
+			return false;
+		}
 	}
 
 	if (isGrounded) {
 		coyoteTimeCounter = stats.coyoteTime;
 		if (isCeiling) {
-			Shatter();
+			if (respawnProtectionTimer <= 0.0f) {
+				Shatter();
+				return false;
+			}
 		}
 	}
 	else {
@@ -312,17 +323,22 @@ bool Player::HandleMovement(float deltaTime) {
 		t.SetTranslation(t.GetTranslation() + glm::vec3(currentVelocity * deltaTime, 0.0f));
 		this->SetTransform(t);
 
+		if (wallSnapEmitter && wallSnapEmitter->GetTargetSystem()) {
+			wallSnapEmitter->GetTargetSystem()->KillParticlesBehindX(this->GetTransform().GetTranslation().x, facingDirection);
+		}
+
 		if (isWalled) {
 			if (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f) {
-				currentVelocity.x = beforeCardVelocityX;
+				currentVelocity.x = 0.0f;
 				currentVelocity.y = stats.wallSnapJump;
 				SetVelocity(currentVelocity);
 				isWallSnaping = false;
 				return false;
 			}
 		}
-		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || (facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
-			currentVelocity.x = beforeCardVelocityX;
+		if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
+			(facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
+			currentVelocity.x = 0.0f;
 			currentVelocity.y = stats.wallSnapJump;
 			SetVelocity(currentVelocity);
 			isWallSnaping = false;
@@ -422,50 +438,22 @@ bool Player::HandleMovement(float deltaTime) {
 	bool wantsToJump = (stats.enableJumpBuffer && jumpBufferCounter > 0.0f) || (!stats.enableJumpBuffer && inputState.jumpPressed);
 
 	if (abs(lastVelocity.y) - stats.fallDamageSpeed > abs(currentVelocity.y)) {
-		Shatter();
+		if (respawnProtectionTimer <= 0.0f) {
+			Shatter();
+			return false;
+		}
 	}
 	lastVelocity = currentVelocity;
 
-	if (isHanging) {
-		if (GetCurrentAnimation() != "CourierLedgeGrab") {
-			Play("CourierLedgeGrab", 0.3f, true);
-		}
-		if (wantsToJump) {
-			isHanging = false;
-			Transform t = GetTransform();
-			t.SetTranslation(t.GetTranslation() + glm::vec3(0.0f, 0.1f, 0.0f));
-			SetTransform(t);
-			currentVelocity.y = stats.jumpForce;
-			currentVelocity.x = -facingDirection * 2.0f;
-			canCutJump = true;
-			inputState.jumpReleased = false;
-			facingDirection = -facingDirection;
-			ledgeDropCooldown = 0.3f;
-			inputState.jumpPressed = false;
-			jumpBufferCounter = 0.0f;
-			coyoteTimeCounter = 0.0f;
-		}
-		else if (inputState.wantsToDrop) {
-			isHanging = false;
-			ledgeDropCooldown = 0.3f;
-		}
-
-		SetVelocity(currentVelocity);
-
-		if (isHanging) {
-			SetVelocity(glm::vec2(0.0f, 0.0f));
-			Transform t = GetTransform();
-			glm::vec3 scale = t.GetScale();
-			scale.x = std::abs(scale.x) * facingDirectionHang;
-			t.SetScale(scale);
-			SetTransform(t);
-			cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
-			return true;
-		}
-	}
-
 	bool isSlidingDownWall = stats.enableWallSlide && isWalled && !isGrounded && currentVelocity.y < 0.0f;
 	isWallSliding = isSlidingDownWall && inputState.moveInput != 0.0f;
+
+	if (isDoubleJumping || isWallJumping) {
+		if (currentVelocity.y <= 0.0f) {
+			isDoubleJumping = false;
+			isWallJumping = false;
+		}
+	}
 
 	bool canJump = (stats.enableCoyoteTime && coyoteTimeCounter > 0.0f) || (!stats.enableCoyoteTime && isGrounded);
 
@@ -476,6 +464,10 @@ bool Player::HandleMovement(float deltaTime) {
 		jumpBufferCounter = 0.0f;
 		coyoteTimeCounter = 0.0f;
 		isGrounded = false;
+
+		if (auto aum = Globals::GetGlobals().audioManager) {
+			aum->PlaySound2D("player_jump", 0.4f, 1.0f, false);
+		}
 
 		if (!inputState.jumpHeld) {
 			currentVelocity.y = stats.jumpForce * stats.jumpCutMultiplier;
@@ -495,7 +487,7 @@ bool Player::HandleMovement(float deltaTime) {
 
 	if (currentVelocity.y < 0) {
 		if (isFeatherFalling) {
-			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime /3;
+			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime / 3;
 		}
 		else {
 			currentVelocity.y -= 10.0f * stats.fallGravityMultiplier * deltaTime;
@@ -507,9 +499,7 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 
 	if (isWallSliding) {
-		if (GetCurrentAnimation() != "CourierWallSlide") {
-			Play("CourierWallSlide", 0.1f, true);
-		}
+		audio->PlayLooping2D("player_dash", 0.5f, 1.0f);
 		float target = -stats.wallSlideSpeed;
 		if (currentVelocity.y < target)
 		{
@@ -520,6 +510,7 @@ bool Player::HandleMovement(float deltaTime) {
 	}
 	else {
 		currentVelocity.y = std::max(currentVelocity.y, -maxFallSpeed);
+		audio->Stop();
 	}
 
 	currentVelocity = currentVelocity + platformVelocity;
@@ -538,70 +529,147 @@ bool Player::HandleMovement(float deltaTime) {
 
 void Player::HandleAnimations() {
 	glm::vec2 currentVelocity = GetVelocity();
-	bool isJumpPlaying = (GetCurrentAnimation() == "CourierJump" && IsPlaying());
+	string currentAnim = GetCurrentAnimation();
+	bool isJumpPlaying = (currentAnim == "CourierJump" && IsPlaying());
 
-	if (!isGrounded) {
-		if (currentVelocity.y > 0.0f) {
-			if (GetCurrentAnimation() != "CourierJump" && GetCurrentAnimation() != "CourierAirUp") {
-				Play("CourierJump", 0.1f, false);
+	if (isDashing || isWallSnaping) {
+		if (currentAnim != "CourierDash") {
+			Play("CourierDash", 0.1f, true);
+			if (outlineCollectiveNode) {
+				outlineCollectiveNode->Play(isDashing ? "outlineRed" : "outlineBlue", 0.1f, true);
 			}
-			else if (!isJumpPlaying && GetCurrentAnimation() == "CourierJump") {
+		}
+	}
+	else if (isWallSliding) {
+		if (currentAnim != "CourierWallSlide") {
+			Play("CourierWallSlide", 0.1f, true);
+			if (outlineYellowNode) {
+				outlineYellowNode->Play("Grabing", 0.1f, true);
+			}
+		}
+	}
+	else if (!isGrounded) {
+		if (currentVelocity.y > 0.0f) {
+			if (currentAnim != "CourierJump" && currentAnim != "CourierAirUp") {
+				Play("CourierJump", 0.1f, false);
+				if (outlineCollectiveNode) {
+					if (isWallJumping) {
+						outlineCollectiveNode->Play("outlineOrange", 0.1f, false);
+					}
+					else if (isDoubleJumping) {
+						outlineCollectiveNode->Play("outlineGreen", 0.1f, false);
+					}
+				}
+				if (outlineYellowNode) {
+					outlineYellowNode->Play("Jump", 0.1f, false);
+				}
+			}
+			else if (!isJumpPlaying && currentAnim == "CourierJump") {
 				Play("CourierAirUp", 0.1f, true);
+				if (outlineCollectiveNode) {
+					if (isWallJumping) {
+						outlineCollectiveNode->Play("orangeAirUp", 0.1f, true);
+					}
+					else if (isDoubleJumping) {
+						outlineCollectiveNode->Play("greenAirUp", 0.1f, true);
+					}
+				}
+				if (outlineYellowNode) {
+					outlineYellowNode->Play("AirUp", 0.1f, true);
+				}
 			}
 		}
 		else {
 			float anticipationDistance = 0.1f;
 			auto hitGroundSoon = Raycast(glm::vec2(0.0f, -0.7f), glm::vec2(0.0f, -1.0f), anticipationDistance, static_cast<uint32_t>(ObjectType::Wall));
 			if (hitGroundSoon.has_value()) {
-				if (GetCurrentAnimation() != "CourierFall") {
+				if (currentAnim != "CourierFall") {
 					Play("CourierFall", 0.1f, false);
+					if (outlineYellowNode) {
+						outlineYellowNode->Play("Fall", 0.1f, false);
+					}
 				}
 			}
 			else {
-				if (!isJumpPlaying && GetCurrentAnimation() != "CourierFall") {
-					Play("CourierAirLoop", 0.1f, true);
+				if (!isJumpPlaying) {
+					if (currentAnim != "CourierAirLoop") {
+						Play("CourierAirLoop", 0.1f, true);
+						if (outlineYellowNode) {
+							outlineYellowNode->Play("AirLoop", 0.1f, true);
+						}
+					}
 				}
 			}
 		}
 	}
-	else if (!(GetCurrentAnimation() == "CourierFall" && IsPlaying())) {
-		bool isStopping = (GetCurrentAnimation() == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
+	else if (!(currentAnim == "CourierFall" && IsPlaying())) {
+		bool isStopping = (currentAnim == "CourierWalk" && std::abs(currentVelocity.x) > 0.1f);
 		if (inputState.moveInput != 0.0f || isStopping) {
 			if (std::abs(currentVelocity.x) > 0.01f) {
-				Play("CourierWalk", 0.1f, true);
+				if (currentAnim != "CourierWalk") {
+					Play("CourierWalk", 0.1f, true);
+					if (outlineYellowNode) {
+						outlineYellowNode->Play("Walking", 0.1f, true);
+					}
+				}
 			}
 		}
 		else {
-			Play("CourierStanding", 0.2f, true);
+			if (currentAnim != "CourierStanding") {
+				Play("CourierStanding", 0.2f, true);
+				if (outlineYellowNode) {
+					outlineYellowNode->Play("Standing", 0.2f, true);
+				}
+			}
 		}
 	}
 }
 
 void Player::Physics(const float& deltaTime) {
 	if (isSuspended) return;
-	bool skipAnimations = HandleMovement(deltaTime);
 
-	if (!skipAnimations) {
-		HandleAnimations();
+	if (!health.IsDead()) {
+		bool skipAnimations = HandleMovement(deltaTime);
+		if (!skipAnimations) {
+			HandleAnimations();
+		}
+	}
+	if (bounceBubbleNode) {
+		Transform bubbleTransform;
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, 0.01f);
+		bubbleTransform.SetTranslation(localOffset);
+		bubbleTransform.SetScale(glm::vec3(facingDirection, 1.0f, 1.0f));
+		bounceBubbleNode->SetTransform(bubbleTransform);
+		bounceBubbleNode->SetDraw(isBounceActive);
+	}
+	if (outlineCollectiveNode) {
+		Transform outlineCollectiveTransform;
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.02f);
+		outlineCollectiveTransform.SetTranslation(localOffset);
+		outlineCollectiveNode->SetTransform(outlineCollectiveTransform);
+		outlineCollectiveNode->SetDraw(isDashing || isDoubleJumping || isWallJumping || isWallSnaping);
+	}
+	if (outlineYellowNode) {
+		Transform outlineYellowTransform;
+		glm::vec3 localOffset = glm::vec3(0.0f, 0.0f, -0.01f);
+		outlineYellowTransform.SetTranslation(localOffset);
+		outlineYellowNode->SetTransform(outlineYellowTransform);
+		outlineYellowNode->SetDraw(isFeatherFalling && !isDashing && !isDoubleJumping && !isWallJumping && !isWallSnaping);
 	}
 
 	if (pointVisualizer) {
 		glm::vec3 playerPos = GetTransform().GetTranslation();
 		pointVisualizer->UpdateOrbit(deltaTime, playerPos);
 	}
-
+	if (audio) {
+		audio->Update();
+	}
 }
 
 bool Player::Input(InputEvent& event) {
 	if (isSuspended) return false;
 	if (!event.handled) {
-		//test save/load
 		if (event.type == InputType::KEYBOARD && event.action == GLFW_PRESS) {
-			if (event.key == GLFW_KEY_F5) {
-				Globals::GetGlobals().wantsToSave = true;
-				event.handled = true;
-				return true;
-			}
 			if (event.key == GLFW_KEY_F9) {
 				Globals::GetGlobals().wantsToLoad = true;
 				event.handled = true;
@@ -625,21 +693,37 @@ void Player::takeDamage(float damage) {
 }
 
 void Player::Shatter() {
+	if (health.IsDead()) return;
+	if (deathEmitter) {
+		deathEmitter->Burst(10);
+	}
 	health.Shatter();
 	isBounceActive = false;
 	isDashing = false;
 	isWallSnaping = false;
 	isFeatherFalling = false;
+	isWallJumping = false;
+	isDoubleJumping = false;
 	SetPhysics(false);
 	SetDraw(false);
+	if (bounceBubbleNode) bounceBubbleNode->SetDraw(false);
+	if (outlineCollectiveNode) outlineCollectiveNode->SetDraw(false);
+	if (outlineYellowNode) outlineYellowNode->SetDraw(false);
+	if (wallSnapEmitter) {
+		if (wallSnapEmitter->GetTargetSystem()) {
+			wallSnapEmitter->GetTargetSystem()->Reset();
+		}
+	}
 	Globals::GetGlobals().Log("Shatter");
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_death", 0.6f, 1.0f, false);
+	}
 	if (Globals::GetGlobals().ioManager) {
 		Globals::GetGlobals().ioManager->Vibrate(0.7f, 0.7f, 0.3f);
 	}
-}
-
-bool Player::IsHanging() {
-	return isHanging;
+	Transform t = GetTransform();
+	t.SetTranslation(respawnPoint);
+	SetTransform(t);
 }
 
 void Player::ExecuteDash() {
@@ -649,6 +733,9 @@ void Player::ExecuteDash() {
 	isWallSnaping = false;
 	dashTimer = stats.dashDuration;
 	wasDashing = false;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_dash", 0.7f, 1.0f, false);
+	}
 }
 
 void Player::ExecuteBounce() {
@@ -664,15 +751,28 @@ void Player::ExecuteFeatherFalling() {
 
 void Player::ExecuteDoubleJump() {
 	isDashing = false;
+	isWallSnaping = false;
+	isWallJumping = false;
+	isDoubleJumping = true;
 	glm::vec2 vel = GetVelocity();
-	vel.y = stats.jumpForce;
+	vel.y = stats.jumpForce * 1.3f;
 	SetVelocity(vel);
 	lastVelocity = GetVelocity();
 	canCutJump = false;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_jump", 0.4f, 1.2f, false);
+	}
+	Play("CourierJump", 0.1f, false);
+	if (outlineCollectiveNode) {
+		outlineCollectiveNode->Play("outlineGreen", 0.1f, false);
+	}
 }
 
 void Player::ExecuteWallJump() {
 	isDashing = false;
+	isWallSnaping = false;
+	isWallJumping = true;
+	isDoubleJumping = false;
 	glm::vec2 vel = GetVelocity();
 
 	vel.y = stats.wallJumpForceY;
@@ -683,7 +783,17 @@ void Player::ExecuteWallJump() {
 	coyoteTimeCounter = 0.0f;
 	jumpBufferCounter = 0.0f;
 
+	isWallSliding = false;
+	platformVelocity = glm::vec2(0.0f);
+
 	canCutJump = false;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound2D("player_jump", 0.4f, 0.8f, false);
+	}
+	Play("CourierJump", 0.1f, false);
+	if (outlineCollectiveNode) {
+		outlineCollectiveNode->Play("outlineOrange", 0.1f, false);
+	}
 }
 
 bool Player::CheckWallSnap() {
@@ -716,6 +826,17 @@ void Player::ExecuteWallSnap() {
 	lastVelocity = glm::vec2(0.0f);
 	isWallSnaping = true;
 	isDashing = false;
+
+	if (wallSnapEmitter) {
+		glm::vec3 startPos = GetTransform().GetTranslation();
+		glm::vec3 endPos = startPos;
+		endPos.x = wallSnapPosX;
+		float distance = std::abs(endPos.x - startPos.x);
+		float particleDensity = 4.0f;
+		int particleCount = static_cast<int>(distance * particleDensity);
+		particleCount = std::clamp(particleCount, 3, 12);
+		wallSnapEmitter->BurstAlongLine(startPos, endPos, particleCount, 0.1f);
+	}
 }
 
 std::string Player::GetSerializeKey() const {
@@ -726,11 +847,6 @@ nlohmann::json Player::Serialize() const {
 	nlohmann::json j;
 
 	j["hp"] = this->health.GetHP();
-
-	glm::vec3 pos = this->GetTransform().GetTranslation();
-	j["posX"] = pos.x;
-	j["posY"] = pos.y;
-	j["posZ"] = pos.z;
 
 	j["respawnPosX"] = this->respawnPoint.x;
 	j["respawnPosY"] = this->respawnPoint.y;
@@ -743,15 +859,16 @@ nlohmann::json Player::Serialize() const {
 void Player::Deserialize(const nlohmann::json& data) {
 	if (data.contains("hp")) {
 		this->health.SetHP(data["hp"]);
+		if (this->health.GetHP() > 0.0f) {
+			this->health.Revive();
+		}
 	}
-	if (data.contains("posX") && data.contains("posY") && data.contains("posZ")) {
-		glm::vec3 loadedPos(data["posX"], data["posY"], data["posZ"]);
+	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
+		glm::vec3 loadedPos(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
 		Transform t = this->GetTransform();
 		t.SetTranslation(loadedPos);
 		this->SetTransform(t);
-	}
-	if (data.contains("respawnPosX") && data.contains("respawnPosY") && data.contains("respawnPosZ")) {
-		this->respawnPoint = glm::vec3(data["respawnPosX"], data["respawnPosY"], data["respawnPosZ"]);
+		this->respawnPoint = loadedPos;
 	}
 	if (data.contains("respawnLevel")) {
 		this->respawnLevelName = data["respawnLevel"];

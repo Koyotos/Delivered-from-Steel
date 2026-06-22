@@ -1,4 +1,6 @@
 #include "include/Game/Objects/ChargingEnemy.hpp"
+#include "include/Globals/Globals.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 
 ChargingEnemy::ChargingEnemy(const unordered_map<string, std::any>& data) : Enemy(data)
 {
@@ -94,6 +96,10 @@ void ChargingEnemy::Chase(float dt) {
 		stunned = true;
 		state = EnemyState::Patrol;
 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
+		if (auto aum = Globals::GetGlobals().audioManager) {
+			aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+		}
+		audio->PlayLooping("ui_1", 0.5f, 1.0f);
 	}
 	else {
 		SetVelocity(glm::vec2(chargingSpeed* direction, GetVelocity().y));
@@ -103,18 +109,24 @@ void ChargingEnemy::Chase(float dt) {
 void ChargingEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
+		audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
 		if (seePlayer) {
 			state = EnemyState::Chase;
 			chargeCooldownTimer = 0;
+			if (auto aum = Globals::GetGlobals().audioManager) {
+				aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+			}
+			audio->PlayLooping("ui_1", 0.5f, 1.0f);
 		}
 		break;
 	}
 	}
 }
 
-void ChargingEnemy::OnCollisionStay(shared_ptr<Collider> other) {
+void ChargingEnemy::OnCollisionStay(Collider* other) {
 	Enemy::OnCollisionStay(other);
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Player) {
 		TryToAttackPlayer();
 	}

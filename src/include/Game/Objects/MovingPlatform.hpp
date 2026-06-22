@@ -36,9 +36,9 @@ public:
 
     void Physics(const float& deltaTime) override;
 
-    void OnCollisionStay(shared_ptr<Collider> other) override;
+    void OnCollisionStay(Collider* other) override;
 
-    void OnCollisionExit(shared_ptr<Collider> other) override;
+    void OnCollisionExit(Collider* other) override;
 
     void Init(shared_ptr<Scene>) override;
 };

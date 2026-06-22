@@ -66,6 +66,7 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	targetPos = startPos + vec3(direction * patrolDistance, 0.0f, 0.0f);
 	endPos = targetPos;
 	//audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
+
 }
 
 void Drone::Physics(const float& deltaTime) {
@@ -119,7 +120,7 @@ void Drone::DetectPlayer() {
 	}
 
 	vec2 dronePos = GetTransform().GetTranslation();
-	vec2 playerPos = player->GetTransform().GetTranslation();
+	vec2 playerPos = player->GetTransform().GetTranslation() + vec3(0,-0.02f,0.0f);
 	vec2 dirToPlayer = playerPos - dronePos;
 	float dist = glm::length(dirToPlayer);
 
@@ -178,6 +179,7 @@ void Drone::ChangeState(shared_ptr<Player> p) {
 		vec3 currentPos = GetTransform().GetTranslation();
 		vec2 dir = vec2(diveTarget.x, diveTarget.y) - vec2(currentPos.x, currentPos.y);
 		currentDiveVelocity = glm::normalize(dir) * diveSpeed;
+		audio->PlayLooping("player_spotted", 0.5f, 1.0f);
 	}
 	else if (state == EnemyState::Chase && player->isDead()) {
 		state = EnemyState::Patrol;
@@ -243,9 +245,9 @@ void Drone::Patrol(float dt) {
 	}
 
 	constexpr float slowdownRadius = 1.0f;
-	constexpr float minSpeed = 0.5f;
 	float currentSpeed = patrolSpeed;
 	if (dist < slowdownRadius) {
+		float minSpeed = 0.5f * patrolSpeed;
 		float t = dist / slowdownRadius;
 		currentSpeed = minSpeed + (patrolSpeed - minSpeed) * t;
 	}
@@ -272,6 +274,7 @@ void Drone::ReversePatrol() {
 
 void Drone::OnCollisionEnter(Collider* other) {
 	shared_ptr<PhysicsNode> owner = other->GetOwner();
+	if (!owner) return;
 	if (owner->GetObjectType() == ObjectType::Wall) {
 		Explode();
 	}
@@ -301,8 +304,9 @@ void Drone::Explode() {
 			player->takeDamage(explosionDamage);
 		}
 	}
-	//if (Globals::GetGlobals().audioManager) {
-	//	Globals::GetGlobals().audioManager->PlaySound3D("drone_explode", GetTransform().GetTranslation());
-	//}
+	audio->Stop();
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		aum->PlaySound3D("explosion", GetTransform().GetTranslation(), 0.5f, 1.0f);
+	}
 	if (spotLight) spotLight->Disable();
 }

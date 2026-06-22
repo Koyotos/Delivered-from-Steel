@@ -9,12 +9,12 @@ void ResourceManager::ConfigurePaths() {
 }
 
 string ResourceManager::LoadPlainText(const path& p) {
-    resourceStream.open(p, ios::in);
-    if(!resourceStream.good()) {
+    ifstream file(p, ios::in);
+    if(!file.good()) {
         throw runtime_error("Can't open file!");
     }
-    string str(istreambuf_iterator<char>{resourceStream}, {});
-    resourceStream.close();
+    string str(istreambuf_iterator<char>{file}, {});
+    file.close();
     return str;
 }
 
@@ -64,8 +64,10 @@ unordered_map<string, std::any> ResourceManager::LoadJSON(const path& jsonFile) 
 }
 
 shared_ptr<Model> ResourceManager::LoadModel(const string& name) {
+	string loweredName = ToLower(name);
+	lock_guard<mutex> lock(rsmMutex);
     for(auto& loadedEntry : models) {
-        if(loadedEntry.model->GetDir() == modelsPath/name) {
+        if(loadedEntry.loweredName == loweredName) {
             loadedEntry.refCount++;
             return loadedEntry.model;       
         }
@@ -73,13 +75,16 @@ shared_ptr<Model> ResourceManager::LoadModel(const string& name) {
     RefCountModel newRCM;
     newRCM.model = make_shared<Model>((modelsPath / name / path(name + ".obj")).string());
     newRCM.refCount = 1;
+	newRCM.loweredName = loweredName;
     models.push_back(newRCM);
     return newRCM.model;
 }
 
 shared_ptr<Sprite> ResourceManager::LoadSprite(const string& name) {
+    string loweredName = ToLower(name);
+	lock_guard<mutex> lock(rsmMutex);
     for(auto& loadedEntry : sprites) {
-        if(loadedEntry.sprite->GetDir() == spritesPath/name) {
+        if(loadedEntry.loweredName == loweredName) {
             loadedEntry.refCount++;
             return loadedEntry.sprite;       
         }
@@ -87,13 +92,16 @@ shared_ptr<Sprite> ResourceManager::LoadSprite(const string& name) {
     RefCountSprite newRCS;
     newRCS.sprite = make_shared<Sprite>((spritesPath/name).string());
     newRCS.refCount = 1;
+	newRCS.loweredName = loweredName;
     sprites.push_back(newRCS);
     return newRCS.sprite;
 }
 
 shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
+    string loweredName = ToLower(name);
+	lock_guard<mutex> lock(rsmMutex);
     for(auto& loadedEntry : shaders) {
-        if(loadedEntry.shader->GetName() == name) {
+        if(loadedEntry.loweredName == loweredName) {
             loadedEntry.refCount++;
             return loadedEntry.shader;       
         }
@@ -109,6 +117,7 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
         sources[3] = LoadPlainText(shadersPath/name/path(name + ".frag"));
         newRCS.shader = make_shared<Shader>(sources,name);
         newRCS.refCount = 1;
+		newRCS.loweredName = loweredName;
         shaders.push_back(newRCS);
         return newRCS.shader;
     } catch(const exception& except) {
@@ -117,17 +126,22 @@ shared_ptr<Shader> ResourceManager::LoadShader(const string& name) {
 }
 
 void ResourceManager::ApplyAssetsSFX(shared_ptr<Node> node, unordered_map<string,std::any> data) {
+    auto resolveAudioPath = [&](const string& name) -> string {
+		path oggPath = audioPath / (name + ".ogg");
+        if (filesystem::exists(oggPath)) {
+			return oggPath.string();
+        }
+		return (audioPath / (name + ".wav")).string();
+	};
     if(data.contains("sound") && audioManager) {
         string soundName = fromMap(string, "sound", data);
-        string fullPath = (audioPath / (soundName + ".wav")).string();
-        audioManager->LoadSound(soundName, fullPath);
+        audioManager->LoadSound(soundName, resolveAudioPath(soundName));
     }
     if(data.contains("sounds") && audioManager) {
         vector<std::any> soundList = fromMap(vector<std::any>, "sounds", data);
         for (const auto& soundAny : soundList) {
             string soundName = std::any_cast<string>(soundAny);
-            string fullPath = (audioPath / (soundName + ".wav")).string();
-            audioManager->LoadSound(soundName, fullPath);
+            audioManager->LoadSound(soundName, resolveAudioPath(soundName));
         }
     }
 }
@@ -181,11 +195,14 @@ void ResourceManager::ManageAudio(unordered_map<string,std::any> data) {
         }
         if (data.contains("playlist") && audioManager) {
             vector<std::any> playlistAny = fromMap(vector<std::any>, "playlist", data);
-            vector<string> playlistNames;
             for (const auto& song : playlistAny) {
-                playlistNames.push_back(std::any_cast<string>(song));
+                currentlyLoading->scenePlaylist.push_back(std::any_cast<string>(song));
             }
-            audioManager->PlayPlaylist(playlistNames, 0.4f);
+        }
+        if (data.contains("ambient") && audioManager) {
+			string ambientName = fromMap(string, "ambient", data);
+			audioManager->RegisterAmbient(ambientName, (audioPath / (ambientName + ".ogg")).string());
+			currentlyLoading->sceneAmbient = ambientName;
         }
 }
 
@@ -199,6 +216,7 @@ vector<tuple<shared_ptr<Node>, int64_t, int64_t>> ResourceManager::ParseNodes(un
                 shared_ptr<Node> node = octEntry.second(objVarList);
                 ApplyAssetsGFX(node, objVarList);
                 ApplyAssetsSFX(node, objVarList);
+				ManageAudio(objVarList);
                 nodes.push_back({node, fromMap(int64_t, "parent", objVarList), stoi(name)});
             }
         }
@@ -218,17 +236,6 @@ void ResourceManager::LinkScene(vector<tuple<shared_ptr<Node>, int64_t, int64_t>
             }
         }
     }
-    auto& mVec =  currentlyLoading->sceneModels;
-    auto resized = unique(mVec.begin(), mVec.end());
-    mVec.resize(std::distance(mVec.begin(), resized));
-
-    auto& sVec =  currentlyLoading->sceneSprites;
-    auto resized2 = unique(sVec.begin(), sVec.end());
-    sVec.resize(std::distance(sVec.begin(), resized2));
-
-    auto& shVec =  currentlyLoading->sceneShaders;
-    auto resized3 = unique(shVec.begin(), shVec.end());
-    shVec.resize(std::distance(shVec.begin(), resized3));
     scene->SetRoot(root);
 }
 
@@ -270,6 +277,7 @@ shared_ptr<Scene> ResourceManager::GetLoadedAsync(const string& name) noexcept {
 }
 
 void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
+	lock_guard<mutex> lock(rsmMutex);
     for(auto& model : scene->sceneModels) {
         for(uint16_t i = 0; i < models.size(); i++) {
             if(model == models[i].model) {
@@ -277,6 +285,7 @@ void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
                 if(models[i].refCount == 0) {
                     models.erase(models.begin()+i);
                 }
+                break;
             }
         }
     }
@@ -288,6 +297,7 @@ void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
                 if(shaders[i].refCount == 0) {
                     shaders.erase(shaders.begin()+i);
                 }
+                break;
             }
         }
     }
@@ -299,6 +309,7 @@ void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
                 if(sprites[i].refCount == 0) {
                     sprites.erase(sprites.begin()+i);
                 }
+                break;
             }
         }
     }
@@ -311,10 +322,27 @@ void ResourceManager::UnloadScene(shared_ptr<Scene> scene) {
     }
 }
 
+void ResourceManager::PreloadAllResources() {
+    auto scanAndLoad = [](const path& dirPath, auto&& loadFunc) {
+        if (!exists(dirPath)) {
+            throw runtime_error("Resource directory does not exist: " + dirPath.string());
+	    }
+        for (const auto& entry : directory_iterator(dirPath)) {
+            if (entry.is_directory()) {
+                loadFunc(entry.path().filename().string());
+            }
+        }
+        };
+	scanAndLoad(modelsPath, [this](const string& name) { LoadModel(name); });
+	scanAndLoad(spritesPath, [this](const string& name) { LoadSprite(name); });
+	scanAndLoad(shadersPath, [this](const string& name) { LoadShader(name); });
+	Globals::GetGlobals().Log("Preloaded all resources.");
+}
+
 ResourceManager::ResourceManager() {
 
 }
 
 ResourceManager::~ResourceManager() {
-    resourceStream.close();
+
 }

@@ -1,14 +1,16 @@
 #ifndef FE_NODE
 #define FE_NODE
 
+#include "include/IOManager/InputEvent.hpp"
+#include "include/Renderer/Shader.hpp"
+
 #include <any>
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include "include/IOManager/InputEvent.hpp"
-#include "include/Renderer/Shader.hpp"
+#include <algorithm>
 #include <stdexcept>
 
 #define fromMap(type,key,data) FromMap<type>(data,key)
@@ -23,6 +25,8 @@ T FromMap(const std::unordered_map<std::string, std::any>& data, const std::stri
 
     return std::any_cast<T>(it->second);
 }
+
+typedef vector<std::any> jsonVector;
 
 using namespace std;
 
@@ -61,7 +65,9 @@ class Node {
     @brief Returns vector of pointers to all node's children.
     @return vector<shared_ptr<Node>> - vector of children
     */
-    vector<shared_ptr<Node>> GetChildren();
+    const vector<shared_ptr<Node>>& GetChildren() const;
+
+	void ClearChildren();
 
     /*
     @brief Adds new child to Node.
@@ -164,7 +170,7 @@ class Node {
     @brief Disables all active behaviours of the node.
     Simulates destruction without removing it from scene graph.
     */
-    void Disable() noexcept;
+    virtual void Disable() noexcept;
 
     /**
     @brief Enables all previously disabled behaviours of the node.

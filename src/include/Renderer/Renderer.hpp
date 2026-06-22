@@ -1,15 +1,7 @@
 #ifndef FE_RENDERER
 #define FE_RENDERER
 
-#include "include/Core/Scene.hpp"
-#include "include/Core/Transform.hpp"
-#include "include/Core/VisualNode.hpp"
-#include "include/Renderer/Shader.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
-
-#include "GLFW/glfw3.h"
-#include "include/Renderer/Camera.hpp"
-#include "include/Renderer/Light.hpp"
 
 #define GL_VERSION_MAJOR 4
 #define GL_VERSION_MINOR 6
@@ -59,7 +51,8 @@ enum RendererCommand {
     RCMD_DIR_DISTANCE = 8,
     RCMD_LIGHT_CULL_RADIUS = 9,
     RCMD_SATURATION_CONTROL = 10, 
-    RCMD_SATURATION_VALUE = 11
+    RCMD_SATURATION_VALUE = 11,
+    RCMD_FULLSCREEN = 12
 };
 
 struct RenderData { 
@@ -68,10 +61,29 @@ struct RenderData {
     vector<mat4> matrices;
 };
 
+struct BatchKey {
+    Model* model;
+    Shader* shader;
+
+    bool operator==(const BatchKey& other) const {
+        return model == other.model &&
+        shader == other.shader;
+    }
+};
+
+struct BatchKeyHash {
+    size_t operator()(const BatchKey& k) const {
+        size_t h1 = std::hash<Model*>{}(k.model);
+        size_t h2 = std::hash<Shader*>{}(k.shader);
+        return h1 ^ (h2 << 1);
+    }
+};
+
 class Renderer {
     private: 
     // Window
     GLFWwindow* window;
+    GLFWmonitor* monitor;
     uint16_t windowW;
     uint16_t windowH;
 
@@ -90,8 +102,10 @@ class Renderer {
     mat4 frameO;
     mat4 frameV;
     mat4 frameP;
-    vector<Shader*> updatedShaders;
+    unordered_set<Shader*> updatedShaders;
     float lightCullRadius = 15.0f;
+    unordered_map<BatchKey,size_t,BatchKeyHash> drawLookup;
+    unordered_map<BatchKey,size_t,BatchKeyHash> casterLookup;
  
     // Depth Pass
     int16_t shadowW = SHADOW_WIDTH;
@@ -111,6 +125,7 @@ class Renderer {
     GLuint screenQuadVAO;
     GLuint screenQuadVBO;
     GLuint screenQuadEBO;
+    GLuint bloomTexture;
     shared_ptr<Shader> postProcessingShader;
     shared_ptr<Shader> blurShader;
     vec3 sunDir;
@@ -134,6 +149,7 @@ class Renderer {
     // Drawing
     shared_ptr<Scene> currentScene;
     vector<RenderData> drawVector;
+    vector<shared_ptr<VisualNode>> drawVector2D;
     vector<shared_ptr<VisualNode>> drawVectorUI;
     vector<pair<shared_ptr<Light>,float>> lightsPos;
     vector<pair<shared_ptr<Light>,float>> lightsPosPoint;
@@ -146,9 +162,9 @@ class Renderer {
 
     // Drawing pipeline
     inline void PrepareDraw(shared_ptr<Node>, Transform);
-    inline void PrepareDrawNode(shared_ptr<VisualNode>, Transform&);
+    inline void PrepareDrawNode(shared_ptr<VisualNode>);
     inline void PrepareDrawLight(shared_ptr<Light>);
-    inline void CreateRenderData(shared_ptr<Object3D>, vector<RenderData>&);
+    inline void CreateRenderData(shared_ptr<Object3D>, vector<RenderData>&, unordered_map<BatchKey, size_t, BatchKeyHash>&);
    
     inline void DepthPass();
     inline void PostProcessingPass();
