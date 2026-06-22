@@ -27,5 +27,6 @@ public:
 
     TextUI();
     TextUI(const unordered_map<string, std::any>& data);
+    TextUI(vec3 color, vec2 size, vec2 pos, float scale, float alpha, string content);
 };
 #endif

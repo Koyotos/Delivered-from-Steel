@@ -45,7 +45,7 @@ void EngineController::Init() {
 		rsm->PreloadAllResources();
 		iom->Init(renderer->GetWindow());
 		crm->Init(rsm);
-		globals->SetGameFont(Font("res/fonts/8bit_wonder/8-BIT-WONDER.ttf",{32,32}));
+		globals->SetGameFont(Font("res/fonts/Tiny5/Tiny5-Regular.ttf",{64,64}));
 
 		svm->Register(static_pointer_cast<ISerializable>(wsm));
 		svm->Register(static_pointer_cast<ISerializable>(crm));
