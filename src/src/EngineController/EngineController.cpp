@@ -423,13 +423,18 @@ void EngineController::TransitionToMenu() {
 	if (!mm) {
 		mm = make_shared<MenuManager>();
 		mm->Init(rsm);
+		mm->SetOnStartGame([this]()
+			{
+				TransitionToCutscene("res/scenes/OpeningCutscene.json");
+			});
 		menuScene = mm->GetMenuScene();
 		menuScene->GetRoot()->AddChild(mm);
 		scm->AddScene(menuScene);
 	}
 
 	menuScene->GetRoot()->InitRecursive(menuScene);
-	scm->SetActive(menuScene);   // raw swap, no crm/cards injected
+	scm->SetActive(menuScene);  
+	
 	if (aum) {
 		if (!menuScene->scenePlaylist.empty()) {
 			aum->PlayPlaylist(menuScene->scenePlaylist);
