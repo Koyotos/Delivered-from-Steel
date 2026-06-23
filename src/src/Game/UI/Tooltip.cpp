@@ -63,7 +63,7 @@ void Tooltip::ShowTooltip()
 {
 	this->SetVisible(true);
 	this->FadeIn(0.3f, EaseType::OutSine);
-	Globals::GetGlobals().audioManager->PlaySound2D("tooltip");
+	Globals::GetGlobals().audioManager->PlaySound2D("tooltip", 0.5f, 1.0f, false);
 	isShown = true;
 }
 

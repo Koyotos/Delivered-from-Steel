@@ -100,14 +100,11 @@ void ShieldTankEnemy::Chase(float dt) {
 	if (groundHit.has_value() && !wallHit.has_value()) {
 		SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
 		if (audio) {
-			audio->PlayLooping("ui_1", 0.4f, 1.0f);
+			audio->PlayLooping("ui_1", 0.2f, 1.0f);
 		}
 	}
 	else {
  		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
-		if (audio) {
-			audio->PlayLooping("ui_2", 0.4f, 1.0f);
-		}
 	}
 }
 
@@ -157,7 +154,7 @@ void ShieldTankEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
 		if (audio) {
-			audio->PlayLooping("boiler_engine", 0.1f, 1.0f, 7.5f, 0.8f);
+			audio->PlayLooping("boiler_engine", 0.05f, 1.0f, 7.5f, 0.8f);
 		}
 		if (seePlayer) {
 			state = EnemyState::Chase;

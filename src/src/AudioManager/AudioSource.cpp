@@ -39,7 +39,10 @@ void AudioSource::PlayLooping2D(const std::string& name, float volume, float pit
 			handle = 0;
 		}
 
-		if (loopingSoundName == name && handle != 0) return;
+		if (loopingSoundName == name && handle != 0) {
+			aum->UpdateSoundParams(handle, volume, pitch);
+			return;
+		}
 
 		if (handle != 0) {
 			Stop();

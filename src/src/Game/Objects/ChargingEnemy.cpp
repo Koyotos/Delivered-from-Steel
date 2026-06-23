@@ -97,9 +97,9 @@ void ChargingEnemy::Chase(float dt) {
 		state = EnemyState::Patrol;
 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
 		if (auto aum = Globals::GetGlobals().audioManager) {
-			aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+			aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.4f, 1.0f);
 		}
-		audio->PlayLooping("ui_1", 0.5f, 1.0f);
+		audio->Stop();
 	}
 	else {
 		SetVelocity(glm::vec2(chargingSpeed* direction, GetVelocity().y));
@@ -109,14 +109,14 @@ void ChargingEnemy::Chase(float dt) {
 void ChargingEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
-		audio->PlayLooping("charger_engine", 0.3f, 1.0f, 7.5f, 0.8f);
+		audio->PlayLooping("charger_engine", 0.1f, 1.0f, 7.5f, 0.8f);
 		if (seePlayer) {
 			state = EnemyState::Chase;
 			chargeCooldownTimer = 0;
 			if (auto aum = Globals::GetGlobals().audioManager) {
-				aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+				aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.3f, 1.0f);
 			}
-			audio->PlayLooping("ui_1", 0.5f, 1.0f);
+			audio->PlayLooping("ui_1", 0.25f, 1.0f);
 		}
 		break;
 	}

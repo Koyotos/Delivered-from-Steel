@@ -101,7 +101,7 @@ void SpikePlatform::Physics(const float& dt)
                 timer -= moveDuration;
             }
             if (audio) {
-                audio->PlayLooping("boiler_engine", 0.1f, 1.0f, 7.5f, 0.8f);
+                audio->PlayLooping("boiler_engine", 0.18f, 0.5f, 5.5f, 0.8f);
             }
             break;
         }

@@ -38,7 +38,7 @@ void Drone::Spawn() {
 	spotLight->colorDiffuse = colorDiffuseTarget;
 	spotLight->data3 = vec3(1.0f, -1.3f, 0.8f);
 
-	audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
+	audio->PlayLooping("drone_engine", 0.3f, 1.5f, 5.5f, 0.5f);
 }
 
 void Drone::Respawn() {
@@ -65,7 +65,7 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	startPos = GetTransform().GetTranslation();
 	targetPos = startPos + vec3(direction * patrolDistance, 0.0f, 0.0f);
 	endPos = targetPos;
-	audio->PlayLooping("drone_engine", 0.7f, 1.0f, 7.5f, 0.8f);
+	audio->PlayLooping("drone_engine", 0.3f, 1.5f, 5.5f, 0.5f);
 }
 
 void Drone::Physics(const float& deltaTime) {

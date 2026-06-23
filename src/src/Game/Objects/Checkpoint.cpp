@@ -53,9 +53,6 @@ void Checkpoint::Init(std::shared_ptr<Scene> scene) {
 			buttonNormalScale = castedButton->GetTransform().GetScale();
         }
     }
-    if (audio) {
-        audio->PlayLooping("boiler_engine", 1.0f, 1.0f, 7.5f, 0.8f);
-	}
 }
 
 void Checkpoint::Physics(const float& deltaTime) {
@@ -177,7 +174,7 @@ void Checkpoint::Activate() {
             }
         }
         if (auto aum = Globals::GetGlobals().audioManager) {
-            aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+            aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.3f, 1.0f);
         }
         clothObject->Disable();
     }

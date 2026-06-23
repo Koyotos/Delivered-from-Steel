@@ -75,7 +75,7 @@ void MovingPlatform::Physics(const float& deltaTime) {
             timer -= moveDuration;
         }
         if (audio) {
-            audio->PlayLooping("moving_platform", 0.08f, 0.5f, 7.5f, 2.0f);
+            audio->PlayLooping("boiler_engine", 0.1f, 0.2f, 6.5f, 2.0f);
         }
         break;
     }

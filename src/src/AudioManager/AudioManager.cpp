@@ -629,3 +629,14 @@ void AudioManager::FadeOutAllAmbient(float duration) {
 		}
 	}
 }
+
+void AudioManager::UpdateSoundParams(AudioHandle handle, float volume, float pitch) {
+	if (!context || handle == 0) return;
+
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
+
+	ALuint source = it->second.source;
+	alSourcef(source, AL_PITCH, pitch);
+	alSourcef(source, AL_GAIN, volume * sfxVolume);
+}
