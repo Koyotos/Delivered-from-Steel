@@ -177,12 +177,17 @@ void EngineController::Run() {
 		if (active) {
 			iom->ProcessInput(active->GetRoot());
 			ProcessNode(active->GetRoot());
+			if (!globals->IsPaused()) {
 
-			while (accumulator >= fixedDeltaTime) {
-				psm->Update(active, static_cast<float>(fixedDeltaTime));
-				accumulator -= fixedDeltaTime;
-				t += fixedDeltaTime;
-				globals->SetPhysicsTime(t);
+				while (accumulator >= fixedDeltaTime) {
+					psm->Update(active, static_cast<float>(fixedDeltaTime));
+					accumulator -= fixedDeltaTime;
+					t += fixedDeltaTime;
+					globals->SetPhysicsTime(t);
+				}
+			}
+			else {
+				accumulator = 0.0;
 			}
 		}
 

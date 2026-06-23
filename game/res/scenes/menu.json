@@ -220,8 +220,8 @@
     "7": {
         "parent": 1,
         "transform": [
-            848.0,
-            349.0,
+            879.0,
+            422.0,
             0.0,
             0.0,
             0.0,
@@ -245,7 +245,7 @@
 		"alpha" : 0.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 3,
+        "zIndex" : 6,
         "ResolveCollision": false,
         "animated" : false,
         "name": "buttonText"
@@ -253,8 +253,8 @@
     "8": {
         "parent": 1,
         "transform": [
-            798.0,
-            429.0,
+            842.0,
+            502.0,
             0.0,
             0.0,
             0.0,
@@ -278,7 +278,7 @@
 		"alpha" : 0.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 3,
+        "zIndex" : 6,
         "ResolveCollision": false,
         "animated" : false,
         "name": "buttonText"
@@ -286,8 +286,8 @@
     "9": {
         "parent": 1,
         "transform": [
-            873.0,
-            510.0,
+            898.0,
+            601.0,
             0.0,
             0.0,
             0.0,
@@ -311,7 +311,7 @@
 		"alpha" : 0.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 3,
+        "zIndex" : 6,
         "ResolveCollision": false,
         "animated" : false,
         "name": "buttonText"
@@ -345,7 +345,7 @@
 		"alpha" : 0.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 3,
+        "zIndex" : 6,
         "ResolveCollision": false,
         "animated" : false,
         "name": "buttonIcon",
@@ -381,9 +381,11 @@
 		"alpha" : 0.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 3,
+        "zIndex" : 6,
         "ResolveCollision": false,
         "animated" : false,
+        "playAnimation": "Idle",
+        "animSpeed": 0.32, 
         "name": "buttonIcon"
     },
     "15": {
@@ -414,9 +416,42 @@
 		"alpha" : 1.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 5,
+        "zIndex" : 10,
         "ResolveCollision": false,
         "beginState": true
+    },
+    "16": {
+        "parent": 1,
+        "transform": [
+            660.0,
+            310.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+        ],
+        "sprite": "buttonsBackground",
+        "class": "Icon",
+        "shader": "ui",
+        "active" : "buttonsBackground",
+        "process": true,
+        "input": true,
+        "physics": false,
+        "draw": true,
+        "ignoreParent": true,
+        "reqPerspective" : false,
+        "static" : true,
+		"visible" : true,
+		"alpha" : 0.0,
+        "addCollider": false,
+        "cull" : 0.0,
+        "zIndex" : 5,
+        "ResolveCollision": false,
+        "animated" : false,
+        "name": "buttonsBackground"
     }
     
 }

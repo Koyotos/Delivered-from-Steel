@@ -33,6 +33,7 @@ private:
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
     shared_ptr<Icon> moon;
+    shared_ptr<Icon> buttonsBackground;
 
     shared_ptr<Transition> transition;
 

@@ -32,6 +32,8 @@ class Globals {
 
     Font gameFont;
 
+    bool isPaused;
+
 	std::unordered_map<int, bool> inputMap;
     std::unordered_map<int, bool> mouseMap;
 	std::unordered_map<int, bool> gamepadBtnMap;
@@ -106,6 +108,8 @@ class Globals {
 
 	void SetKeyState(int key, bool isPressed);
 	bool GetKeyState(int key) const;
+
+    bool IsPaused() const;
 
 	void SetMouseState(int button, bool isPressed);
 	bool GetMouseState(int button) const;

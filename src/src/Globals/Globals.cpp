@@ -122,6 +122,11 @@ float Globals::GetDeltaTime() const {
     return deltaTime;
 }
 
+bool Globals::IsPaused() const
+{
+    return isPaused;
+}
+
 void Globals::SetPhysicsTime(double t) { physicsTime = t; }
 double Globals::GetPhysicsTime() const { return physicsTime; }
 
@@ -135,6 +140,8 @@ Globals::Globals() {
     if(!log.good()) {
         //throw runtime_error("Can't open log.");
     }
+
+    isPaused = false;
 }
 
 Globals::~Globals() {

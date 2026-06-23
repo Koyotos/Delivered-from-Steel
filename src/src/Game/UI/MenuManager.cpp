@@ -134,6 +134,10 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		else if (cast->GetName() == "moon") {
 			moon = cast;
 		}
+		else if (cast->GetName() == "buttonsBackground")
+		{
+			buttonsBackground = cast;
+		}
 		else if (cast->GetName() == "buttonText")
 		{
 			shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
@@ -167,6 +171,9 @@ void MenuManager::ToMainMenu()
 			icon->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 		}
 	}
+	if (buttonsBackground) {
+		buttonsBackground->FadeIn(0.5f, EaseType::OutSine, 2.0f);
+	}
 	if (!buttonText.empty())
 	{
 		UpdateText();
@@ -191,8 +198,8 @@ void MenuManager::UpdateText() {
 				float y = buttonText[i]->GetTransform().GetTranslation().y;
 				float iconOffset = 56.0f;  
 
-				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y-4.0f), 0.2f, EaseType::InOutSine);
-				buttonIcons[1]->MoveTo(vec2(right, y-4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y+4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[1]->MoveTo(vec2(right + 4.0f, y+4.0f), 0.2f, EaseType::InOutSine);
 			}
 			else {
 				buttonText[i]->Tint(baseButtonColor, 0.2f, EaseType::InOutSine);
