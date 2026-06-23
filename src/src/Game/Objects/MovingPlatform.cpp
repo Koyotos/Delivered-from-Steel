@@ -60,6 +60,9 @@ void MovingPlatform::Physics(const float& deltaTime) {
             state = (state == MovingPlatformState::MovingToStart)
                 ? MovingPlatformState::StopStart
                 : MovingPlatformState::StopEnd;
+            if (playerOnPlatform && velocity.y > 1.0f) {
+                player.lock()->addPlatformVelocity(vec2(0.0f, velocity.y * 1.0f));
+            }
             timer -= moveDuration;
         }
         break;
@@ -80,6 +83,7 @@ void MovingPlatform::OnCollisionStay(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
 	if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
+		playerOnPlatform = true;
         std::shared_ptr<Player> player = std::static_pointer_cast<Player>(owner);
         if (player) {
             CapsuleCollider* capsule = static_cast<CapsuleCollider*>(other);
@@ -118,6 +122,7 @@ void MovingPlatform::OnCollisionExit(Collider* other) {
     shared_ptr<PhysicsNode> owner = other->GetOwner();
     if (!owner) return;
     if (owner->GetObjectType() == ObjectType::Player) {
+        playerOnPlatform = false;
         std::shared_ptr<Player> player = std::static_pointer_cast<Player>(owner);
         if (player) {
 

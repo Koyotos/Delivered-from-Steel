@@ -27,6 +27,7 @@ private:
 
     weak_ptr<Player> player;
 
+	bool playerOnPlatform = false;
     float timer;
 
 public:

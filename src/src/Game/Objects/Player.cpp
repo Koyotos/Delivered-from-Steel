@@ -325,14 +325,12 @@ bool Player::HandleMovement(float deltaTime) {
 			wallSnapEmitter->GetTargetSystem()->KillParticlesBehindX(this->GetTransform().GetTranslation().x, facingDirection);
 		}
 
-		if (isWalled) {
-			if (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f) {
-				currentVelocity.x = 0.0f;
-				currentVelocity.y = stats.wallSnapJump;
-				SetVelocity(currentVelocity);
-				isWallSnaping = false;
-				return false;
-			}
+		if (isWalled && (isWalledLeft && facingDirection == -1.0f || isWalledRight && facingDirection == 1.0f)) {
+			currentVelocity.x = 0.0f;
+			currentVelocity.y = stats.wallSnapJump;
+			SetVelocity(currentVelocity);
+			isWallSnaping = false;
+			return false;
 		} else if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
 			(facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
 			currentVelocity.x = 0.0f;
