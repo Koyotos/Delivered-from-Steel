@@ -27,6 +27,7 @@ void EngineController::Init() {
 		svm = make_shared<SaveManager>();
 		wsm = make_shared<WorldStateManager>();
 		aum = make_shared<AudioManager>();
+		pimp = make_shared<PauseManager>();
 
 		globals->ioManager = iom;
 		globals->renderer = renderer;
@@ -46,6 +47,7 @@ void EngineController::Init() {
 		rsm->PreloadAllResources();
 		iom->Init(renderer->GetWindow());
 		crm->Init(rsm);
+		pimp->Init(rsm);
 		globals->SetGameFont(Font("res/fonts/Tiny5/Tiny5-Regular.ttf",{64,64}));
 
 		svm->Register(static_pointer_cast<ISerializable>(wsm));
@@ -67,6 +69,7 @@ void EngineController::LinkSceneObjects() {
 
 	crm->AssignPlayer(active->GetPlayer());
 	active->GetPlayer()->SetCardManager(crm);
+
 
 	if (active->GetPlayer()) {
 		svm->Register(static_pointer_cast<ISerializable>(active->GetPlayer()));
@@ -395,8 +398,15 @@ void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
 		cardRoot = crm->GetCardScene()->GetRoot();
 	}
 
+	shared_ptr<Node> pauseRoot = nullptr;
+	if (pimp && pimp->GetScene()) {
+		pauseRoot = pimp->GetScene()->GetRoot();
+	}
+
 	bool hasCards = false;
 	bool hasCardRoot = false;
+	bool hasPause = false;
+	bool hasPauseRoot = false;
 
 	for (auto& child : root->GetChildren()) {
 		if (child == crm) {
@@ -405,7 +415,15 @@ void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
 		if (cardRoot && child == cardRoot) {
 			hasCardRoot = true;
 		}
-		if (hasCards && hasCardRoot) {
+		if (child == pimp)
+		{
+			hasPause = true;
+		}
+		if (pauseRoot && child == pauseRoot)
+		{
+			hasPauseRoot = true;
+		}
+		if (hasCards && hasCardRoot & hasPause & hasPauseRoot) {
 			break;
 		}
 	}
@@ -415,6 +433,15 @@ void EngineController::SetActiveScene(shared_ptr<Scene> scn) {
 	}
 	if (!hasCards && crm) {
 		root->AddChild(crm);
+	}
+
+	if (!hasPauseRoot && pauseRoot)
+	{
+		root->AddChild(pauseRoot);
+	}
+	if (!hasPause && pimp)
+	{
+		root->AddChild(pimp);
 	}
 
 	scm->SetActive(scn);

@@ -14,8 +14,6 @@ shared_ptr<Scene> MenuManager::GetMenuScene() {
 
 void MenuManager::Init(shared_ptr<ResourceManager> rsm)
 {
-	SetProcess(true);
-	SetInput(true);
 
 	// load scene
 	menuScene = rsm->LoadScene("res/scenes/menu.json");
@@ -39,6 +37,7 @@ void MenuManager::Init(shared_ptr<ResourceManager> rsm)
 MenuManager::MenuManager()
 {
 	SetProcess(true);
+	SetInput(true);
 	init = false;
 }
 

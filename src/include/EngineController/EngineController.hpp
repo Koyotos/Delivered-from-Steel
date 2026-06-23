@@ -13,6 +13,7 @@
 #include "include/SaveManager/SaveManager.hpp"
 #include "include/SaveManager/WorldStateManager.hpp"
 #include "include/Game/UI/MenuManager.hpp"
+#include "include/Game/UI/PauseManager.hpp"
 #include "include/Game/UI/Slide.hpp"
 
 /*
@@ -34,6 +35,8 @@ class EngineController {
 	shared_ptr<CardManager> crm;
     shared_ptr<SaveManager> svm;
     shared_ptr<WorldStateManager> wsm;
+    shared_ptr<PauseManager> pimp;
+
 
     shared_ptr<Node> activeLevelNode = nullptr;
     shared_ptr<Node> previousLevelNode = nullptr;
