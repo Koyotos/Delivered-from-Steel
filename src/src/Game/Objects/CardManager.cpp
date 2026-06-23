@@ -127,6 +127,9 @@ CardManager::CardManager()
 	slotIcons.resize(3);
 	manaCounter = make_shared<Counter>(nullptr, nullptr, maxManaPoints);
 
+	SetInput(true);
+	SetProcess(true);
+
 }
 
 void CardManager::Process()

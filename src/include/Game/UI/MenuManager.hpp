@@ -37,7 +37,7 @@ private:
     shared_ptr<Transition> transition;
 
     vector<shared_ptr<Icon>> buttonIcons;
-	vector<shared_ptr<TextUI>> buttonText;
+	vector<shared_ptr<Icon>> buttonText;
 
     function<void()> onStartGame;
 	shared_ptr<Scene> menuScene;

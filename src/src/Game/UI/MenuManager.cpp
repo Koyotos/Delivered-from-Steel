@@ -134,12 +134,13 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		else if (cast->GetName() == "moon") {
 			moon = cast;
 		}
-	}
-	if (node->Type() == "TextUI") {
-		shared_ptr<TextUI> cast = static_pointer_cast<TextUI>(node);
-		buttonText.push_back(cast);
-		baseButtonColor = buttonText[0]->GetTint();
-		std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
+		else if (cast->GetName() == "buttonText")
+		{
+			shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
+			buttonText.push_back(cast);
+			baseButtonColor = buttonText[0]->GetTint();
+			std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<Icon>& a, const std::shared_ptr<Icon>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
+		}
 	}
 	if (node->Type() == "Transition")
 	{
@@ -185,9 +186,9 @@ void MenuManager::UpdateText() {
 			if (i == selectedButton) {
 				buttonText[i]->Tint(vec3(1.0f, 0.9f, 0.05f), 0.2f, EaseType::InOutSine);
 
-				float left = buttonText[i]->GetLeftBound();
-				float right = buttonText[i]->GetRightBound();
-				float y = buttonText[i]->GetTransform().GetGlobal()[3].y;
+				float left = buttonText[i]->GetTransform().GetTranslation().x;
+				float right = buttonText[i]->GetTransform().GetTranslation().x + buttonText[i]->GetSprite()->GetSize().x;
+				float y = buttonText[i]->GetTransform().GetTranslation().y;
 				float iconOffset = 56.0f;  
 
 				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y-4.0f), 0.2f, EaseType::InOutSine);
