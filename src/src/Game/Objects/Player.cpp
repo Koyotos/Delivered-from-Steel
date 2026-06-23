@@ -284,7 +284,7 @@ bool Player::HandleMovement(float deltaTime) {
 
 	Transform t = this->GetTransform();
 
-	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick);
+	cameraController.UpdateCamera(deltaTime, glm::vec2(t.GetTranslation().x, t.GetTranslation().y), GetVelocity(), inputState.moveInput, inputState.rightStick, isGrounded);
 
 	isGrounded = CheckGrounded();
 	bool isCeiling = CheckCeiling();

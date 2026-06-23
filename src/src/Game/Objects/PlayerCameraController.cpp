@@ -40,7 +40,7 @@ namespace {
 	}
 }
 
-void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& playerPos, const glm::vec2& playerVel, float moveInput, const glm::vec2& rightStick) {
+void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& playerPos, const glm::vec2& playerVel, float moveInput, const glm::vec2& rightStick, bool isGrounded) {
 	if (!camera) return;
 
 	if (!isCameraInitialized) {
@@ -54,6 +54,27 @@ void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& play
 	if (std::abs(playerVel.x) > 1.0f && std::abs(moveInput) > 0.01f) {
 		targetLookAheadX = std::copysign(1.0f, playerVel.x) * config.lookAheadDistance;
 	}
+
+	if (isGrounded) {
+		if (!platformYAssign) {
+			float potencialLookAheadY = lastPlatformY - playerPos.y;
+			if (abs(potencialLookAheadY) > 0.2f) {
+				if (sign(targetLookAheadY) == sign(potencialLookAheadY) && std::abs(potencialLookAheadY) > std::abs(targetLookAheadY))
+					targetLookAheadY = potencialLookAheadY;
+				else if (sign(targetLookAheadY) != sign(potencialLookAheadY))
+					targetLookAheadY = potencialLookAheadY;
+
+				targetLookAheadY = std::clamp(targetLookAheadY, -1.0f, 0.5f);
+				lastPlatformY = playerPos.y;
+			}
+			platformYAssign = true;
+		}
+	}
+	else {
+		platformYAssign = false;
+	}
+
+	currentLookAheadY = MoveTowards(targetLookAheadY, 0.0f, config.lookAheadReturnSpeed * deltaTime);
 
 	float currentSpeed = (targetLookAheadX == 0.0f) ? config.lookAheadReturnSpeed : config.lookAheadSpeed;
 	currentLookAheadX = MoveTowards(currentLookAheadX, targetLookAheadX, currentSpeed * deltaTime);
@@ -70,7 +91,7 @@ void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& play
 	if (std::abs(yDistance) > config.deadZone.y)
 		cameraTargetPos.y = focusPosition.y - std::copysign(config.deadZone.y, yDistance);
 
-	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, config.verticalOffset);
+	glm::vec2 desiredPosition = cameraTargetPos + glm::vec2(0.0f, config.verticalOffset - currentLookAheadY);
 
 	if (glm::length(rightStick) > 0.1f) {
 		desiredPosition += glm::vec2(rightStick.x, -rightStick.y) * config.rightStickDistance;
@@ -103,6 +124,8 @@ void PlayerCameraController::UpdateCamera(float deltaTime, const glm::vec2& play
 	}
 
 	camera->SetPos(smoothedPosition);
+
+	lastPlayerVelocity = playerVel;
 }
 
 void PlayerCameraController::TriggerCameraShake(float duration, float intensity) {

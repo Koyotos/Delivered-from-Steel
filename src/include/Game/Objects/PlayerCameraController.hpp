@@ -12,16 +12,22 @@ private:
 	PlayerCameraConfig config;
 	glm::vec2 cameraTargetPos = { 0.0f, 0.0f };
 	glm::vec2 cameraVelocity = { 0.0f, 0.0f };
+	glm::vec2 lastPlayerVelocity = { 0.0f, 0.0f };
+	float lastPlatformY = 0.0f;
 	float currentLookAheadX = 0.0f;
+	float currentLookAheadY = 0.0f;
+	float targetLookAheadY = 0.0f;
+	float LookAheadY = 0.0f;
 	float activeSmoothTime = 0.15f;
 	float cameraShakeTimer = 0.0f;
 	float cameraShakeIntensity = 0.0f;
 	bool isCameraInitialized = false;
+	bool platformYAssign = true;
 
 public:
 	void SetConfig(const PlayerCameraConfig& newConfig) { config = newConfig; }
 	void SetCamera(std::shared_ptr<Camera> cam) { camera = cam; }
-	void UpdateCamera(float deltaTime, const glm::vec2& playerPos, const glm::vec2& playerVel, float moveInput, const glm::vec2& rightStick);
+	void UpdateCamera(float deltaTime, const glm::vec2& playerPos, const glm::vec2& playerVel, float moveInput, const glm::vec2& rightStick, bool isGrounded);
 	void TriggerCameraShake(float duration, float intensity);
 };
 
