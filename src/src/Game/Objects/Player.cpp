@@ -105,6 +105,7 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	cameraController.SetConfig(camConfig);
 	audio = make_unique<AudioSource>(this);
 	featherFallingAudio = make_unique<AudioSource>(this);
+	footstepAudio = make_unique<AudioSource>(this);
 }
 
 void Player::Disable() noexcept {
@@ -113,6 +114,9 @@ void Player::Disable() noexcept {
 	}
 	if (featherFallingAudio) {
 		featherFallingAudio->Stop();
+	}
+	if (footstepAudio) {
+		footstepAudio->Stop();
 	}
 	Object2D::Disable();
 }
@@ -298,13 +302,15 @@ bool Player::HandleMovement(float deltaTime) {
 	bool isWalledRight = WalledRightHit.has_value();
 	isWalled = isWalledRight || isWalledLeft;
 
-	//if (auto aum = Globals::GetGlobals().audioManager) {
-	//	if (isGrounded && !wasGrounded && lastVelocity.y < -5.0f && lastVelocity.y > -stats.fallDamageSpeed) {
-	//		float volume = std::clamp(std::abs(lastVelocity.y) / stats.fallDamageSpeed, 0.1f, 0.3f);
-	//		aum->PlaySound2D("Player_Land", volume, 1.0f, false);
-	//	}
-	//}
-	//wasGrounded = isGrounded;
+	if (auto aum = Globals::GetGlobals().audioManager) {
+		if (isGrounded && !wasGrounded && lastVelocity.y < -1.0f && lastVelocity.y > -stats.fallDamageSpeed) {
+			float fallRatio = std::abs(lastVelocity.y) / stats.fallDamageSpeed;
+			float volume = std::clamp(0.3f + (fallRatio * 0.7f), 0.3f, 1.0f);
+			float pitch = std::clamp(1.1f - (fallRatio * 0.3f), 0.8f, 1.1f);
+			aum->PlaySound2D("Player_Land", volume, pitch, false);
+		}
+	}
+	wasGrounded = isGrounded;
 
 	if (isWalledRight && isWalledLeft && (WalledLeftHit.value().collider != WalledRightHit.value().collider)) {
 		if (respawnProtectionTimer <= 0.0f) {
@@ -345,7 +351,8 @@ bool Player::HandleMovement(float deltaTime) {
 				isWallSnaping = false;
 				return false;
 			}
-		} else if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) || 
+		}
+		else if ((facingDirection == -1 && wallSnapPosX > GetTransform().GetTranslation().x) ||
 			(facingDirection == 1 && wallSnapPosX < GetTransform().GetTranslation().x)) {
 			currentVelocity.x = 0.0f;
 			currentVelocity.y = stats.wallSnapJump;
@@ -548,6 +555,17 @@ bool Player::HandleMovement(float deltaTime) {
 	inputState.jumpPressed = false;
 	inputState.jumpReleased = false;
 
+	if (footstepAudio) {
+		bool isWalking = isGrounded && std::abs(currentVelocity.x) > 0.1f && !isDashing && !isWallSnaping;
+
+		if (isWalking) {
+			footstepAudio->PlayLooping2D("Player_Footsteps", 0.4f, 0.7f);
+		}
+		else {
+			footstepAudio->Stop();
+		}
+	}
+
 	return false;
 }
 
@@ -691,6 +709,9 @@ void Player::Physics(const float& deltaTime) {
 	if (featherFallingAudio) {
 		featherFallingAudio->Update();
 	}
+	if (footstepAudio) {
+		footstepAudio->Update();
+	}
 }
 
 bool Player::Input(InputEvent& event) {
@@ -746,6 +767,9 @@ void Player::Shatter() {
 	}
 	if (featherFallingAudio) {
 		featherFallingAudio->Stop();
+	}
+	if (footstepAudio) {
+		footstepAudio->Stop();
 	}
 	Globals::GetGlobals().Log("Shatter");
 	if (auto aum = Globals::GetGlobals().audioManager) {

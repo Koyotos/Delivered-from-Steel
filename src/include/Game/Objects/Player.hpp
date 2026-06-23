@@ -77,6 +77,7 @@ private:
 
 	unique_ptr<AudioSource> audio = nullptr;
 	unique_ptr<AudioSource> featherFallingAudio = nullptr;
+	std::unique_ptr<AudioSource> footstepAudio = nullptr;
 
 public:
 	bool CheckGrounded();
