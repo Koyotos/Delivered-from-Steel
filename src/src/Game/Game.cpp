@@ -5,13 +5,14 @@ void Game::Init() {
     engine.Init();
 
     
-    // engine.TransitionToMenu();
-     
+    engine.TransitionToMenu();
+    
+    /*
     shared_ptr<Scene> gameScene = engine.LoadScene("res/scenes/base.json");
 	engine.SetActiveScene(gameScene); 
 	engine.LinkSceneObjects();  
 	engine.LoadLevel("testLevel");
-	 
+	 */
      
      
 
