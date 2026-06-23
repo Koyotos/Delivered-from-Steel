@@ -10,11 +10,13 @@ class Counter : public UIElement {
 	private:
 	std::shared_ptr<TextUI> text;
 	std::shared_ptr<Icon> icon;
+	std::shared_ptr<Icon> infinityIcon;
 	std::vector<std::shared_ptr<Icon>> manaIcons;
 	float origTextPosX;
 	int maxVal;
 	int currentVal;
 	bool valueChanged = false;
+	bool learning = false;
 
 	void UpdateManaIcons();
 	void UpdateManaIconsValue();
@@ -25,9 +27,11 @@ class Counter : public UIElement {
 
 	void SetText(shared_ptr<TextUI> newText);
 	void SetIcon(shared_ptr<Icon> newIcon);
+	void SetInfinityIcon(shared_ptr<Icon> newIcon);
 	void AddManaIcon(shared_ptr<Icon> newIcon);
 	void UpdateValue(int newVal);
 	void UpdateMaxVal(int newVal);
+	void IsLearning(bool value);
 
 
 	void FinishAllTweens();

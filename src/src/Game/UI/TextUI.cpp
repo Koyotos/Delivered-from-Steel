@@ -27,8 +27,8 @@ void TextUI::SetTextSize(const ivec2& size) {
 
 void TextUI::Draw(shared_ptr<Shader> sh) {
     if (!GetVisible()) return;
-    this->shader->SetFloat("alpha", GetAlpha());
     this->shader->SetMat4("VP", glm::ortho(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f));
+    this->shader->SetFloat("alpha", GetAlpha());
     textNode.SetColor(GetTint());
     textNode.Draw(this->shader);
 }
@@ -60,6 +60,21 @@ TextUI::TextUI(const unordered_map<string, std::any>& data) : UIElement(data) {
     textNode.SetContent(fromMap(string, "content", data));
 
 
+}
+
+TextUI::TextUI(vec3 color, vec2 size, vec2 pos, float scale, float alpha, string content)
+{
+    SetTint(color);
+    SetAlpha(alpha);
+    SetProcess(true);
+    SetPhysics(false);
+    SetVisible(true);
+
+    textNode.SetColor(color);
+    textNode.SetSize(size);
+    textNode.SetPos(pos);
+    textNode.SetScale(scale);
+    textNode.SetContent(content);
 }
 
 float TextUI::GetLeftBound() const {

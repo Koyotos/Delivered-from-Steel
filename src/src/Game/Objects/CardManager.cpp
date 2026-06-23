@@ -59,28 +59,34 @@ void CardManager::UseCard(int index)
 
 }
 
-void CardManager::AddToHand(int slot, shared_ptr<Card> card)
-{
-
-	if (slot < 0 || slot >= currentHand.size()) return;
-	currentHand[slot] = card;
-	currentHandSaved[slot] = card;
-	slots[slot]->SetCard(card->GetDisplay());
-}
 
 
 void CardManager::ReachCheckpoint()
 {
 	if (learningCard)
 	{
+		if (learningCard->GetCardType() == CardType::FeatherFalling) ffTooltip->Activate();
 		learningCard = nullptr;
 		for (int i = 0; i < currentHand.size(); i++)
 		{
 			slots[i]->RemoveCard();
 			currentHand[i] = nullptr;
+			if (currentHandSaved[i] != nullptr)
+			{
+				currentHand[i] = currentHandSaved[i];
+				for (auto it = unlockedCardDisplays.begin(); it != unlockedCardDisplays.end(); ++it)
+				{
+					if ((*it)->GetCardType() == currentHandSaved[i]->GetCardType())
+					{
+						slots[i]->SetCard(*it);
+						unlockedCardDisplays.erase(it);
+						break;
+					}
+				}
+			}
 		}
+		manaCounter->IsLearning(false);
 	}
-
 
 	currentManaPoints = maxManaPoints;
 	UpdateManaUI();
@@ -100,8 +106,9 @@ void CardManager::LearnCard(shared_ptr<Card> card)
 			removed->RotateTo(0.0f, 0.01f);
 			unlockedCardDisplays.push_back(removed);
 		}
-		slots[i]->SetCard(currentHand[i]->GetDisplay());
+		slots[i]->LearnCard(currentHand[i]->GetDisplay());
 	}
+	manaCounter->IsLearning(true);
 
 }
 
@@ -266,9 +273,15 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 	UnlockCard(CreateCard(CardType::DoubleJump));
 	UnlockCard(CreateCard(CardType::FeatherFalling));
 	UnlockCard(CreateCard(CardType::Bounce));
-	UnlockCard(CreateCard(CardType::Dash));
 
+	selectedCard = unlockedCardDisplays.size() - 1; // bounce
+	AddCardToHand(0, CreateCard(CardType::Bounce));
 
+	UpdateManaUI();
+
+	firstCheckpoint = true;
+
+	
 }
 
 void CardManager::FindNodes(shared_ptr<Node> node)
@@ -292,11 +305,18 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 	else if (node->Type() == "Icon") {
 		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
 		if (cast->GetName() == "mana_wheel") manaCounter->SetIcon(cast);
- 		else if (cast->GetName() == "mana_icon") manaCounter->AddManaIcon(cast);
+		else if (cast->GetName() == "mana_icon") manaCounter->AddManaIcon(cast);
+		else if (cast->GetName() == "infinity_icon") manaCounter->SetInfinityIcon(cast);
 		else if (cast->GetName() == "checkpoint_bg") checkpointBackground = cast;
 		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
 		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
 		else if (cast->GetName() == "button_b") slotIcons[2] = cast;
+	}
+	else if (node->Type() == "Tooltip")
+	{
+		shared_ptr<Tooltip> cast = static_pointer_cast<Tooltip>(node);
+		if (cast->GetName() == "ff") ffTooltip = cast;
+		else if (cast->GetName() == "checkpoint") checkpointTooltip = cast;
 	}
 
 
@@ -417,8 +437,6 @@ void CardManager::UpdateManaUI()
 	}
 
 	manaCounter->UpdateValue(currentManaPoints);
-
-	// if learning card TBD
 }
 
 void CardManager::ToggleMenu()
@@ -433,6 +451,10 @@ void CardManager::ToggleMenu()
 		checkpointBackground->MoveTo(vec2(0.0f, 0.0f), 0.5f, EaseType::OutQuad);
 		MoveUnlockedCards();
 		MoveSlots();
+		if (firstCheckpoint)
+		{
+			checkpointTooltip->Activate();
+		}
 	}
 	else
 	{
@@ -441,6 +463,7 @@ void CardManager::ToggleMenu()
 		MoveUnlockedCards();
 		MoveSlots();
 		player->SetPhysics(true);
+		checkpointTooltip->Deactivate();
 	}
 }
 
@@ -480,6 +503,20 @@ void CardManager::MoveSlots()
 			slots[i]->HideSlot(0.5f);
 		}
 	}
+}
+
+void CardManager::SetMaxMana(int value)
+{
+	maxManaPoints = value;
+	currentManaPoints = value;
+	manaCounter->UpdateMaxVal(value);
+	manaCounter->UpdateValue(value);
+	UpdateManaUI();
+}
+
+void CardManager::AddMaxMana(int value)
+{
+	SetMaxMana(maxManaPoints + value);
 }
 
 void CardManager::UpdateCardSelection()
@@ -576,7 +613,7 @@ void CardManager::AddCardToHand(int slot, shared_ptr<Card> card)
 	}
 
 	selectedCard = std::min(selectedCard, (int)unlockedCardDisplays.size() - 1);
-	UpdateCardSelection();
+	if (menuOpen) UpdateCardSelection();
 }
 
 void CardManager::RemoveCardFromHand(int slot)

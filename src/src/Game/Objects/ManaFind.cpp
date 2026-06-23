@@ -14,10 +14,12 @@ ManaFind::ManaFind(const unordered_map<string, std::any>& data) : PickUpAbstract
 ManaFind::~ManaFind() {}
 
 void ManaFind::OnPickUp() {
-    auto cardManager = Globals::GetGlobals().cardManager;
+    auto& globals = Globals::GetGlobals();
+    auto cardManager = globals.cardManager;
 
     if (cardManager) {
-		// cardManager-> funkjca dodaj¹ca manê
+        player->SetRespawnPoint(GetTransform().GetTranslation(), globals.activeLevelName);
+		cardManager->AddMaxMana(1);
     }
     if (auto aum = Globals::GetGlobals().audioManager) {
         aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);

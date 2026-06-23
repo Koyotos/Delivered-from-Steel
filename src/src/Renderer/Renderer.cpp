@@ -303,7 +303,8 @@ void Renderer::DepthPass() {
             case LIGHT_SPOT: {
                 vec3 dir = normalize(light->data2);
                 vec3 up = abs(dot(dir, vec3(0,1,0))) > 0.999f ? vec3(0,0,1) : vec3(0,1,0);
-                projection = perspective(light->data4, 1.f, 0.1f, 10.f);
+                float outerAngle = light->data4 * 0.5f + glm::radians(5.0f);
+                projection = glm::perspective(outerAngle * 2.0f, 1.0f, 0.1f, 10.0f);
                 view = lookAt(light->data1,light->data1 + dir,up);
                 lightSpaceMatrices[i] = projection * view;
 
