@@ -19,7 +19,7 @@ void BreakableWall::BreakWall() {
 		}
 	}
 	if (auto aum = Globals::GetGlobals().audioManager) {
-		aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+		aum->PlaySound3D("Break_Wall", GetTransform().GetTranslation(), 1.0f, 1.0f);
 	}
 	Disable();
 	// You can add some visual effects or sounds here to indicate the wall breaking

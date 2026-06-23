@@ -8,7 +8,7 @@
 ManaFind::ManaFind() : PickUpAbstract() {}
 
 ManaFind::ManaFind(const unordered_map<string, std::any>& data) : PickUpAbstract(data) {
-    loopSoundName = "charger_engine";
+    loopSoundName = "pickable_loop";
 }
 
 ManaFind::~ManaFind() {}

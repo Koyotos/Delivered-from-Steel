@@ -67,7 +67,7 @@ void PickUpAbstract::Physics(const float& deltaTime) {
         pointLight->colorSpecular = glm::mix(specular1, specular2, tempColorTransitionProgress);
     }
     if (audio) {
-        audio->PlayLooping(loopSoundName, 0.5f, 1.0f, 7.5f, 0.8f);
+        audio->PlayLooping(loopSoundName, 0.55f, 1.0f, 6.5f, 1.0f);
 		audio->Update();
     }
 }

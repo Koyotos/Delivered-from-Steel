@@ -15,7 +15,7 @@ CardFind::CardFind(const unordered_map<string, std::any>& data) : PickUpAbstract
 	color1 = color2 * 0.5f;
 	specular1 = color1 * 0.05f;
 	specular2 = color2 * 0.05f;
-    loopSoundName = "charger_engine";
+    loopSoundName = "pickable_loop";
 }
 
 CardFind::~CardFind() {}
