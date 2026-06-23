@@ -442,9 +442,20 @@ void EngineController::TransitionToMenu() {
 
 void EngineController::TransitionToCutscene(string path)
 {
-	shared_ptr<Scene> cutscene = rsm->LoadScene(path);
+	shared_ptr<Slide> slides = make_shared<Slide>();
+	slides->Init(rsm, path);
+	QueueStreamNextLevel("testLevel");
+	slides->SetOnEndScene([this]() {
+		SetActiveScene(LoadScene("res/scenes/base.json"));
+		LinkSceneObjects();
+		pendingSwap = true;
+	});
+
+	shared_ptr<Scene> cutscene = slides->GetScene();
+	cutscene->GetRoot()->AddChild(slides);
 	scm->AddScene(cutscene);
 	scm->SetActive(cutscene);
+
 }
 
 void EngineController::SetActiveScene(const uint16_t& idx) {

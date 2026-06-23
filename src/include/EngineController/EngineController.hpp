@@ -13,6 +13,7 @@
 #include "include/SaveManager/SaveManager.hpp"
 #include "include/SaveManager/WorldStateManager.hpp"
 #include "include/Game/UI/MenuManager.hpp"
+#include "include/Game/UI/Slide.hpp"
 
 /*
 @brief Main engine class that acts as a facade for modules. It hides low-level mechanisms of modules

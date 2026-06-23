@@ -13,6 +13,9 @@ class Slide : public UIElement
 	private:
 
 	float loadTime;
+
+	function<void()> onEndScene;
+
 	
 	vector<shared_ptr<Icon>> slides;
 	vector<shared_ptr<TextUI>> texts;
@@ -25,6 +28,9 @@ class Slide : public UIElement
 	void Init(shared_ptr<ResourceManager> rsm, string path);
 	void FindNodes(shared_ptr<Node> node);
 	void SetLoadTime(float value);
+	void SetOnEndScene(function<void()> cb);
+	void Process() override;
+
 
 	shared_ptr<Scene> GetScene();
 
