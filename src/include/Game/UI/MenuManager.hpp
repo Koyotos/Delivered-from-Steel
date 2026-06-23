@@ -6,6 +6,7 @@
 #include "include/ResourceManager/ResourceManager.hpp"
 #include "include/Game/UI/Icon.hpp"
 #include "include/Game/UI/TextUI.hpp"
+#include "include/Game/UI/Transition.hpp"
 
 
 enum class MenuButtonEvent
@@ -21,6 +22,7 @@ class MenuManager : public Node
 private:
     bool init;
     bool toMainMenu;
+    bool startPressed = false;
 
     int selectedButton = 0;
 
@@ -31,6 +33,8 @@ private:
     shared_ptr<Icon> logo;
     shared_ptr<Icon> platform;
     shared_ptr<Icon> moon;
+
+    shared_ptr<Transition> transition;
 
     vector<shared_ptr<Icon>> buttonIcons;
 	vector<shared_ptr<TextUI>> buttonText;

@@ -14,6 +14,9 @@ shared_ptr<Scene> MenuManager::GetMenuScene() {
 
 void MenuManager::Init(shared_ptr<ResourceManager> rsm)
 {
+	SetProcess(true);
+	SetInput(true);
+
 	// load scene
 	menuScene = rsm->LoadScene("res/scenes/menu.json");
 	FindNodes(menuScene->GetRoot());
@@ -45,7 +48,11 @@ MenuManager::~MenuManager()
 
 void MenuManager::Process()
 {
-	
+	if (!startPressed) return;
+	if (!transition->GetCurrentState())
+	{
+		if (onStartGame) onStartGame();
+	}
 }
 
 bool MenuManager::Input(InputEvent& event)
@@ -90,7 +97,8 @@ bool MenuManager::Input(InputEvent& event)
 				else if ((event.type == InputType::KEYBOARD && event.key == GLFW_KEY_ENTER) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A)) {
 					switch (selectedButton) {
 					case 0:
-						if (onStartGame) onStartGame();
+						transition->ChangeState(0.0f);
+						startPressed = true;
 						break;
 					case 1:
 						// ToOptions();
@@ -132,6 +140,11 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		buttonText.push_back(cast);
 		baseButtonColor = buttonText[0]->GetTint();
 		std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
+	}
+	if (node->Type() == "Transition")
+	{
+		shared_ptr<Transition> cast = static_pointer_cast<Transition>(node);
+		transition = cast;
 	}
 
 	for (auto& k : node->GetChildren()) {

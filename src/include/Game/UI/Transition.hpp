@@ -1,8 +1,7 @@
-#ifndef FE_SLIDE
-#define FE_SLIDE
+#ifndef FE_TRANSITION
+#define FE_TRANSITION
 
 #include "include/Game/UI/UIElement.hpp"
-#include "include/ResourceManager/ResourceManager.hpp"
 
 
 class Transition : public UIElement
@@ -20,6 +19,9 @@ class Transition : public UIElement
 	void ChangeState(float delay);
 	bool GetCurrentState() const;
 	void Process() override;
+	string Type() override;
+	void Draw(shared_ptr<Shader> sh = nullptr) override;
+
 
 
 };

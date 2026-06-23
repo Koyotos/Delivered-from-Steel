@@ -213,5 +213,37 @@
     "ResolveCollision": false,
     "animated": false,
     "name": "slide_bckg"
+    },
+    "15": {
+        "parent": 1,
+        "transform": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            7.5,
+            7.5,
+            1.0
+        ],
+        "sprite": "Metal",
+        "class": "Transition",
+        "shader": "ui",
+        "active" : "Metal",
+        "process": true,
+        "input": true,
+        "physics": false,
+        "draw": true,
+        "ignoreParent": true,
+        "reqPerspective" : false,
+        "static" : true,
+		"visible" : true,
+		"alpha" : 1.0,
+        "addCollider": false,
+        "cull" : 0.0,
+        "zIndex" : 5,
+        "ResolveCollision": false,
+        "beginState": false
     }
 }
