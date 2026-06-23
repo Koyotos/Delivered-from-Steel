@@ -54,6 +54,7 @@ VisualNode::VisualNode(const unordered_map<string, std::any>& data) : Node(data)
     transform = Transform(fromMap(vector<std::any>, "transform", data));
     flags[3] = fromMap(bool, "draw", data);
     flags[4] = fromMap(bool, "ignoreParent", data);
+    flags[5] = true;
     cullRadius = fromMap(float,"cull",data);
     zIndex = (uint8_t)(fromMap(int64_t,"zIndex",data));
 }

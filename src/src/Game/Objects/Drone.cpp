@@ -26,6 +26,10 @@ Drone::Drone(const unordered_map<string, std::any>& data) : Enemy(data) {
 	Spawn();
 
 	AddChild(spotLight);
+
+	colorLightActivationTimer = 0.0f;
+
+	spotLight->Enable();
 }
 
 void Drone::Spawn() {
@@ -65,7 +69,6 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	startPos = GetTransform().GetTranslation();
 	targetPos = startPos + vec3(direction * patrolDistance, 0.0f, 0.0f);
 	endPos = targetPos;
-	//audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
 
 }
 
@@ -175,6 +178,7 @@ void Drone::DetectPlayer() {
 void Drone::ChangeState(shared_ptr<Player> p) {
 	if (state == EnemyState::Patrol && seePlayer) {
 		state = EnemyState::Chase;
+		colorLightActivationTimer = 0.0f;
 		spotLight->colorDiffuse = vec3(1.0f, 0.0f, 0.0f);
 		vec3 currentPos = GetTransform().GetTranslation();
 		vec2 dir = vec2(diveTarget.x, diveTarget.y) - vec2(currentPos.x, currentPos.y);
