@@ -208,6 +208,7 @@ public:
 
 	void FadeOutAllBGM(float duration = 1.5f);
 	void FadeOutAllAmbient(float duration = 1.5f);
+	bool IsSoundActive(AudioHandle handle) { return activeSounds.find(handle) != activeSounds.end(); }
 };
 
 #endif

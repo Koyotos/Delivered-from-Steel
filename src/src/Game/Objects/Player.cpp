@@ -484,7 +484,7 @@ bool Player::HandleMovement(float deltaTime) {
 		isGrounded = false;
 
 		if (auto aum = Globals::GetGlobals().audioManager) {
-			aum->PlaySound2D("player_jump", 0.4f, 1.0f, false);
+			aum->PlaySound2D("player_jump", 0.7f, 1.0f, false);
 		}
 
 		if (!inputState.jumpHeld) {
@@ -765,7 +765,7 @@ void Player::ExecuteDash() {
 	dashTimer = stats.dashDuration;
 	wasDashing = false;
 	if (auto aum = Globals::GetGlobals().audioManager) {
-		aum->PlaySound2D("player_dash", 0.7f, 1.0f, false);
+		aum->PlaySound2D("player_dash", 0.4f, 1.0f, false);
 	}
 }
 
@@ -779,7 +779,7 @@ void Player::ExecuteFeatherFalling() {
 	isFeatherFalling = true;
 	featherFallingTimer = stats.featherFallingDuration;
 	if (featherFallingAudio) {
-		featherFallingAudio->PlayLooping2D("boiler_engine", 0.5f, 1.0f);
+		featherFallingAudio->PlayLooping2D("feather_falling", 1.0f, 1.0f);
 	}
 }
 
@@ -872,7 +872,7 @@ void Player::ExecuteWallSnap() {
 		wallSnapEmitter->BurstAlongLine(startPos, endPos, particleCount, 0.1f);
 	}
 	if (auto aum = Globals::GetGlobals().audioManager) {
-		aum->PlaySound2D("player_jump", 0.4f, 1.2f, false);
+		aum->PlaySound2D("player_dash", 0.4f, 1.2f, false);
 	}
 }
 

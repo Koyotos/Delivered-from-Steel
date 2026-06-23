@@ -53,7 +53,9 @@ void Checkpoint::Init(std::shared_ptr<Scene> scene) {
 			buttonNormalScale = castedButton->GetTransform().GetScale();
         }
     }
-    audio->PlayLooping("boiler_engine", 0.1f, 1.0f, 7.5f, 0.8f);
+    if (audio) {
+        audio->PlayLooping("boiler_engine", 1.0f, 1.0f, 7.5f, 0.8f);
+	}
 }
 
 void Checkpoint::Physics(const float& deltaTime) {
