@@ -64,12 +64,14 @@ void PauseManager::PauseGame()
 	if (!isPaused)
 	{
 		Globals::GetGlobals().isPaused = true;
+		Globals::GetGlobals().lockPlayerMovement = true;
 		// show menu
 		isPaused = true;
 	}
 	else
 	{
 		Globals::GetGlobals().isPaused = false;
+		Globals::GetGlobals().lockPlayerMovement = false;
 
 		isPaused = false;
 	}

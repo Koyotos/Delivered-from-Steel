@@ -59,6 +59,7 @@ class Globals {
 
 
     bool isPaused;
+    bool lockPlayerMovement = false;
     
     float gamepadDeadzone = 0.1f;
 

@@ -44,6 +44,7 @@ void Tooltip::Process()
 		{
 			Deactivate();
 			Globals::GetGlobals().isPaused = false;
+			Globals::GetGlobals().lockPlayerMovement = false;
 			featherFallLearn = false;
 		}
 	}
