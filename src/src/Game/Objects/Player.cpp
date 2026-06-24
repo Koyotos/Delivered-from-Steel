@@ -575,10 +575,7 @@ bool Player::HandleMovement(float deltaTime) {
 		bool isWalking = isGrounded && footstepDelayTimer <= 0.0f && std::abs(currentVelocity.x) > 0.1f && !isDashing && !isWallSnaping;
 
 		if (isWalking) {
-			float speedRatio = std::min(std::abs(currentVelocity.x) / stats.maxWalkSpeed, 1.0f);
-			float footstepPitch = 0.65f + (speedRatio * 0.1f);
-
-			footstepAudio->PlayLooping2D("Player_Footsteps", 1.0f, footstepPitch);
+			footstepAudio->PlayLooping2D("Player_Footsteps", 0.25f, 0.7f);
 		}
 		else {
 			footstepAudio->Stop();
