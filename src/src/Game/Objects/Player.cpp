@@ -229,7 +229,7 @@ void Player::GatherInput(float deltaTime) {
 }
 
 void Player::Process() {
-	if (Globals::GetGlobals().IsPaused()) return;
+	if (Globals::GetGlobals().lockPlayerMovement) return;
 	if (isSuspended) return;
 	Object2D::Process();
 	float deltaTime = Globals::GetGlobals().GetDeltaTime();
