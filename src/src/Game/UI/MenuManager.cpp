@@ -70,7 +70,7 @@ bool MenuManager::Input(InputEvent& event)
 					logo->FinishAllTweens();
 					moon->FinishAllTweens();
 				}
-			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty() || !moon->GetActiveTweens().empty())) {
+			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty() || !moon->GetActiveTweens().empty() || !buttonsBackground->GetActiveTweens().empty())) {
 
 				logo->FinishAllTweens();
 				platform->FinishAllTweens();
@@ -81,6 +81,7 @@ bool MenuManager::Input(InputEvent& event)
 					text->FinishAllTweens();
 				}
 				moon->FinishAllTweens();
+				buttonsBackground->FinishAllTweens();
 
 			} else if (toMainMenu) {
 				bool up = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_UP) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_UP);
