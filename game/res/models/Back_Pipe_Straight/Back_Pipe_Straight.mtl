@@ -1,0 +1,13 @@
+# Blender 5.0.0 MTL File: 'shitter_pipes.blend'
+# www.blender.org
+
+newmtl Material.002
+Ns 34.731403
+Ka 0.372727 0.372727 0.372727
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd Back_Pipe_Straight_diff.png
+map_Ks Back_Pipe_Straight_spec.png
+map_Bump -bm 1.000000 Back_Pipe_Straight_normals.png
