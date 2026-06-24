@@ -5,7 +5,7 @@
 #include "include/Game/UI/TextUI.hpp"
 #include "include/Game/UI/Icon.hpp"
 #include "include/ResourceManager/ResourceManager.hpp"
-#include "Include/Core/Scene.hpp"
+#include "include/Core/Scene.hpp"
 
 
 class Slide : public UIElement
