@@ -90,6 +90,7 @@ void CardManager::ReachCheckpoint()
 
 	currentManaPoints = maxManaPoints;
 	UpdateManaUI();
+	manaCounter->ReachCheckpoint();
 
 }
 
@@ -161,14 +162,27 @@ bool CardManager::Input(InputEvent& event)
 			} break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_UP: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false;
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_DOWN: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false; 
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
+
 				event.handled = true;
 			} break;
 			}
@@ -198,6 +212,12 @@ bool CardManager::Input(InputEvent& event)
 			{
 				if (event.valueX > 0.5f && !axisHeldY) {
 					rowDown = !rowDown;
+
+					if (rowDown && unlockedCardDisplays.empty())
+					{
+						rowDown = false;
+					}
+
 					selectedCard = 0;
 					UpdateCardSelection();
 					axisHeldY = true;
@@ -205,6 +225,12 @@ bool CardManager::Input(InputEvent& event)
 				}
 				else if (event.valueX < -0.5f && !axisHeldY) {
 					rowDown = !rowDown;
+
+					if (rowDown && unlockedCardDisplays.empty())
+					{
+						rowDown = false; 
+					}
+
 					selectedCard = 0;
 					UpdateCardSelection();
 					axisHeldY = true;
@@ -236,12 +262,24 @@ bool CardManager::Input(InputEvent& event)
 			} break;
 			case GLFW_KEY_W: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false; 
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_KEY_S: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false; 
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
