@@ -127,6 +127,9 @@ CardManager::CardManager()
 	slotIcons.resize(3);
 	manaCounter = make_shared<Counter>(nullptr, nullptr, maxManaPoints);
 
+	SetInput(true);
+	SetProcess(true);
+
 }
 
 void CardManager::Process()
@@ -269,13 +272,8 @@ void CardManager::Init(shared_ptr<ResourceManager> rsm)
 
 
 	UnlockCard(CreateCard(CardType::WallJump));
-	UnlockCard(CreateCard(CardType::WallSnap));
-	UnlockCard(CreateCard(CardType::DoubleJump));
-	UnlockCard(CreateCard(CardType::FeatherFalling));
-	UnlockCard(CreateCard(CardType::Bounce));
+	UnlockCard(CreateCard(CardType::Dash));
 
-	selectedCard = unlockedCardDisplays.size() - 1; // bounce
-	AddCardToHand(0, CreateCard(CardType::Bounce));
 
 	UpdateManaUI();
 

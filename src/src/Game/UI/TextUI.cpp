@@ -59,7 +59,6 @@ TextUI::TextUI(const unordered_map<string, std::any>& data) : UIElement(data) {
     textNode.SetScale(fromMap(float, "textScale", data));
     textNode.SetContent(fromMap(string, "content", data));
 
-
 }
 
 TextUI::TextUI(vec3 color, vec2 size, vec2 pos, float scale, float alpha, string content)

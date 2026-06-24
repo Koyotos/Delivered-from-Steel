@@ -102,7 +102,7 @@ void UIElement::MoveTo(glm::vec2 target, float time, EaseType ease, float delay,
 	t.delay = delay;
 
 	if (overrideStartPos != vec2(0.0f, 0.0f)) t.startPos = overrideStartPos;
-	else t.startPos = glm::vec2(GetTransform().GetGlobal()[3].x, GetTransform().GetGlobal()[3].y); // get global position
+	else t.startPos = glm::vec2(GetTransform().GetTranslation().x, GetTransform().GetTranslation().y); // get global position
 	t.targetPos = target;
 
 	tweens.push_back(t);

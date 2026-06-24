@@ -1,0 +1,10 @@
+{
+  "name": "openingCutscene",
+  "1": {
+    "parent": 0,
+    "class": "Node",
+    "process": true,
+    "input": false,
+    "physics": false
+  }
+}

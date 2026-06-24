@@ -14,6 +14,7 @@ shared_ptr<Scene> MenuManager::GetMenuScene() {
 
 void MenuManager::Init(shared_ptr<ResourceManager> rsm)
 {
+
 	// load scene
 	menuScene = rsm->LoadScene("res/scenes/menu.json");
 	FindNodes(menuScene->GetRoot());
@@ -36,6 +37,7 @@ void MenuManager::Init(shared_ptr<ResourceManager> rsm)
 MenuManager::MenuManager()
 {
 	SetProcess(true);
+	SetInput(true);
 	init = false;
 }
 
@@ -45,7 +47,11 @@ MenuManager::~MenuManager()
 
 void MenuManager::Process()
 {
-	
+	if (!startPressed) return;
+	if (!transition->GetCurrentState())
+	{
+		if (onStartGame) onStartGame();
+	}
 }
 
 bool MenuManager::Input(InputEvent& event)
@@ -90,7 +96,8 @@ bool MenuManager::Input(InputEvent& event)
 				else if ((event.type == InputType::KEYBOARD && event.key == GLFW_KEY_ENTER) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A)) {
 					switch (selectedButton) {
 					case 0:
-						if (onStartGame) onStartGame();
+						transition->ChangeState(0.0f);
+						startPressed = true;
 						break;
 					case 1:
 						// ToOptions();
@@ -126,12 +133,22 @@ void MenuManager::FindNodes(shared_ptr<Node> node) {
 		else if (cast->GetName() == "moon") {
 			moon = cast;
 		}
+		else if (cast->GetName() == "buttonsBackground")
+		{
+			buttonsBackground = cast;
+		}
+		else if (cast->GetName() == "buttonText")
+		{
+			shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
+			buttonText.push_back(cast);
+			baseButtonColor = buttonText[0]->GetTint();
+			std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<Icon>& a, const std::shared_ptr<Icon>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
+		}
 	}
-	if (node->Type() == "TextUI") {
-		shared_ptr<TextUI> cast = static_pointer_cast<TextUI>(node);
-		buttonText.push_back(cast);
-		baseButtonColor = buttonText[0]->GetTint();
-		std::sort(buttonText.begin(), buttonText.end(), [](const std::shared_ptr<TextUI>& a, const std::shared_ptr<TextUI>& b) {return a->GetTransform().GetGlobal()[3].y < b->GetTransform().GetGlobal()[3].y; });
+	if (node->Type() == "Transition")
+	{
+		shared_ptr<Transition> cast = static_pointer_cast<Transition>(node);
+		transition = cast;
 	}
 
 	for (auto& k : node->GetChildren()) {
@@ -153,6 +170,9 @@ void MenuManager::ToMainMenu()
 			icon->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 		}
 	}
+	if (buttonsBackground) {
+		buttonsBackground->FadeIn(0.5f, EaseType::OutSine, 2.0f);
+	}
 	if (!buttonText.empty())
 	{
 		UpdateText();
@@ -172,13 +192,13 @@ void MenuManager::UpdateText() {
 			if (i == selectedButton) {
 				buttonText[i]->Tint(vec3(1.0f, 0.9f, 0.05f), 0.2f, EaseType::InOutSine);
 
-				float left = buttonText[i]->GetLeftBound();
-				float right = buttonText[i]->GetRightBound();
-				float y = buttonText[i]->GetTransform().GetGlobal()[3].y;
+				float left = buttonText[i]->GetTransform().GetTranslation().x;
+				float right = buttonText[i]->GetTransform().GetTranslation().x + buttonText[i]->GetSprite()->GetSize().x;
+				float y = buttonText[i]->GetTransform().GetTranslation().y;
 				float iconOffset = 56.0f;  
 
-				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y-4.0f), 0.2f, EaseType::InOutSine);
-				buttonIcons[1]->MoveTo(vec2(right, y-4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y+4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[1]->MoveTo(vec2(right + 4.0f, y+4.0f), 0.2f, EaseType::InOutSine);
 			}
 			else {
 				buttonText[i]->Tint(baseButtonColor, 0.2f, EaseType::InOutSine);
