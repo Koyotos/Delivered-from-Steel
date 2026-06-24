@@ -590,31 +590,48 @@ void CardManager::UpdateCardSelection()
 
 void CardManager::Select(int slot)
 {
-	if (!menuOpen) return;
-	if (rowDown && selectedCard >= 0)
+	if (!menuOpen)
+		return;
+
+	if (rowDown)
 	{
+		if (selectedCard < 0 ||
+			selectedCard >= (int)unlockedCardDisplays.size())
+			return;
+
 		shared_ptr<Card> found = nullptr;
-		for (auto& card : unlockedCards) {
-			if (card->GetCardType() == unlockedCardDisplays[selectedCard]->GetCardType()) {
+
+		CardType selectedType =
+			unlockedCardDisplays[selectedCard]->GetCardType();
+
+		for (auto& card : unlockedCards)
+		{
+			if (card->GetCardType() == selectedType)
+			{
 				found = card;
 				break;
 			}
 		}
+
+		if (!found)
+			return;
+
 		switch (slot)
 		{
 		case 0: AddCardToHand(0, found); break;
 		case 1: AddCardToHand(1, found); break;
 		case 2: AddCardToHand(2, found); break;
 		default: AddCardToHand(found); break;
-
 		}
 	}
-	else if (!rowDown && selectedCard >= 0)
+	else
 	{
-		RemoveCardFromHand(selectedCard);
-		
-	}
+		if (selectedCard < 0 ||
+			selectedCard >= (int)currentHand.size())
+			return;
 
+		RemoveCardFromHand(selectedCard);
+	}
 }
 void CardManager::AddCardToHand(shared_ptr<Card> card)
 {
