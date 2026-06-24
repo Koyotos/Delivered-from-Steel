@@ -22,7 +22,7 @@ void ManaFind::OnPickUp() {
 		cardManager->AddMaxMana(1);
     }
     if (auto aum = Globals::GetGlobals().audioManager) {
-        aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+        aum->PlaySound3D("mana_pickup", GetTransform().GetTranslation(), 1.5f, 1.0f);
     }
     if (audio) {
         audio->Stop();

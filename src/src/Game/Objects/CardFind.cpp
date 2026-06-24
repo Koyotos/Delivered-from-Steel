@@ -32,7 +32,7 @@ void CardFind::OnPickUp() {
         cardManager->LearnCard(newCard);
     }
     if (auto aum = Globals::GetGlobals().audioManager) {
-        aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+        aum->PlaySound3D("card_pickup", GetTransform().GetTranslation(), 1.0f, 1.0f);
     }
     if (audio) {
         audio->Stop();

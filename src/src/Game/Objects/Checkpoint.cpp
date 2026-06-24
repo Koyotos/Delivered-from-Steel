@@ -174,7 +174,7 @@ void Checkpoint::Activate() {
             }
         }
         if (auto aum = Globals::GetGlobals().audioManager) {
-            aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.3f, 1.0f);
+            aum->PlaySound3D("cloth_pulled", GetTransform().GetTranslation(), 3.0f, 1.0f);
         }
         clothObject->Disable();
     }
