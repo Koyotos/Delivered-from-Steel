@@ -695,6 +695,19 @@ void Player::takeDamage(float damage) {
 	}
 }
 
+void Player::ForceStop()
+{
+	isDashing = false;
+	wasDashing = false;
+	isWallSnaping = false;
+	isBounceActive = false;
+	isFeatherFalling = false;
+	SetVelocity(glm::vec2(0.0f));
+	lastVelocity = glm::vec2(0.0f);
+	beforeCardVelocityX = 0.0f;
+	lastSpeedForBounceY = 0.0f;
+}
+
 void Player::Shatter() {
 	if (health.IsDead()) return;
 	if (deathEmitter) {
