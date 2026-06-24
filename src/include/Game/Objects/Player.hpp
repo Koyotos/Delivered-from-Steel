@@ -128,6 +128,8 @@ public:
 	bool CheckWallJump();
 	bool isDead() const { return health.IsDead(); }
 
+	void StopAllLoopingAudio();
+
 	std::string GetSerializeKey() const override;
 	nlohmann::json Serialize() const override;
 	void Deserialize(const nlohmann::json& data) override;

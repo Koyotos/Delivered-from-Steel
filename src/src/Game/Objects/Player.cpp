@@ -968,3 +968,9 @@ bool Player::CheckWallJump() {
 	wallJumpFacedDirection = isWalledLeft ? 1.0f : (isWalledRight ? -1.0f : 0.0f);
 	return (isWalledLeft || isWalledRight);
 }
+
+void Player::StopAllLoopingAudio() {
+	if (audio) audio->Stop();
+	if (featherFallingAudio) featherFallingAudio->Stop();
+	if (footstepAudio) footstepAudio->Stop();
+}
