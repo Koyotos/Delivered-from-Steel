@@ -1,5 +1,6 @@
 #include "include/Game/UI/Tooltip.hpp"
 
+#include "GLFW/glfw3.h"
 #include "include/AudioManager/AudioManager.hpp"
 #include "include/Globals/Globals.hpp"
 
@@ -10,6 +11,7 @@ Tooltip::Tooltip(const std::unordered_map<std::string, std::any>& data) : UIElem
 	activationTime = fromMap(float, "activationTime", data);
 	deactivationTime = fromMap(float, "deactivationTime", data);
 	name = fromMap(string, "name", data);
+	featherFallLearn = fromMap(bool, "featherFallLearn", data);
 }
 
 void Tooltip::Activate()
@@ -35,6 +37,17 @@ void Tooltip::Process()
 	{
 		HideTooltip();
 	}
+	if (featherFallLearn)
+	{
+		if (Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_X) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_Y) || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_B)
+			|| Globals::GetGlobals().GetKeyState(GLFW_KEY_J) || Globals::GetGlobals().GetKeyState(GLFW_KEY_K) || Globals::GetGlobals().GetKeyState(GLFW_KEY_L))
+		{
+			Deactivate();
+			Globals::GetGlobals().isPaused = false;
+			featherFallLearn = false;
+		}
+	}
+
 }
 
 void Tooltip::OnCollisionEnter(Collider* other)
@@ -44,6 +57,7 @@ void Tooltip::OnCollisionEnter(Collider* other)
 	if (owner->GetObjectType() == ObjectType::Player)
 	{
 		Activate();
+		if (featherFallLearn) Globals::GetGlobals().isPaused = true;
 	}
 }
 

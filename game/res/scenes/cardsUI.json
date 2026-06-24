@@ -1303,7 +1303,8 @@
     "deactivated": false,
     "activationTime": 0.25,
     "deactivationTime": 5.0,
-    "name": "checkpoint"
+    "name": "checkpoint",
+    "featherFallLearn": false
 },
 "47": {
     "parent": 1,
@@ -1339,7 +1340,8 @@
     "deactivated": true,
     "activationTime": 0.0,
     "deactivationTime": 7.0,
-    "name": "ff"
+    "name": "ff",
+    "featherFallLearn": false
 }
 
 

@@ -16,6 +16,7 @@ class Tooltip : public UIElement
 	bool activated;
 	bool deactivated;
 	bool isShown = false;
+	bool featherFallLearn;
 
 	float proximityRadius;
 	vec2 pos;
