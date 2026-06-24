@@ -381,7 +381,7 @@ bool Player::HandleMovement(float deltaTime) {
 			isBounceActive = false;
 			isDashing = false;
 			if (auto aum = Globals::GetGlobals().audioManager) {
-				aum->PlaySound2D("bounce", 0.2f, 1.2f, false);
+				aum->PlaySound2D("bounce", 0.16f, 1.2f, false);
 			}
 		}
 

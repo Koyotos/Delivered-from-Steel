@@ -97,7 +97,7 @@ void ChargingEnemy::Chase(float dt) {
 		state = EnemyState::Patrol;
 		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
 		if (auto aum = Globals::GetGlobals().audioManager) {
-			aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.4f, 1.0f);
+			aum->PlaySound3D("charger_wall", GetTransform().GetTranslation(), 0.4f, 1.0f);
 		}
 		audio->Stop();
 	}
