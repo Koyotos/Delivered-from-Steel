@@ -634,14 +634,23 @@ void CardManager::RemoveCardFromHand(int slot)
 
 void CardManager::ChangeSelection(bool left)
 {
+	size_t count = rowDown
+		? unlockedCardDisplays.size()
+		: slots.size();
+
+	if (count == 0)
+		return;
+
 	if (!left)
 	{
-		selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+		selectedCard = (selectedCard + 1) % count;
 	}
 	else
 	{
-		if (selectedCard == 0) selectedCard = (rowDown ? unlockedCardDisplays.size() : slots.size()) - 1;
-		else selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+		if (selectedCard == 0)
+			selectedCard = count - 1;
+		else
+			selectedCard = (selectedCard - 1) % count;
 	}
 }
 
