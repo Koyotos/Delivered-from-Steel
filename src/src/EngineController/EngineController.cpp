@@ -48,6 +48,14 @@ void EngineController::Init() {
 		iom->Init(renderer->GetWindow());
 		crm->Init(rsm);
 		pimp->Init(rsm);
+		pimp->SetOnRestart([this]()
+			{
+				TransitionToCutscene("res/scenes/OpeningCutscene.json");
+			});
+		pimp->SetOnQuit([this]()
+			{
+				TransitionToMenu();
+			});
 		globals->SetGameFont(Font("res/fonts/Tiny5/Tiny5-Regular.ttf",{64,64}));
 
 		svm->Register(static_pointer_cast<ISerializable>(wsm));
@@ -480,8 +488,23 @@ void EngineController::TransitionToMenu() {
 
 void EngineController::TransitionToCutscene(string path)
 {
+	pimp = make_shared<PauseManager>();
+	pimp->Init(rsm);
+	pimp->SetOnRestart([this]() {
+		TransitionToCutscene("res/scenes/OpeningCutscene.json");
+		});
+	pimp->SetOnQuit([this]() {
+		TransitionToMenu();
+		});
+
+	crm = make_shared<CardManager>();
+	crm->Init(rsm);
+	globals->cardManager = crm;
+
 	shared_ptr<Slide> slides = make_shared<Slide>();
 	slides->Init(rsm, path);
+	error_code ec;
+	filesystem::remove(globals->GetExecDir() / "saves" / "save_0.json", ec);
 	QueueStreamNextLevel("testLevel");
 	slides->SetOnEndScene([this]() {
 		SetActiveScene(LoadScene("res/scenes/base.json"));
