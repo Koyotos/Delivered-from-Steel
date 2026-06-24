@@ -85,7 +85,7 @@ void PauseManager::PauseGame()
 		Globals::GetGlobals().isPaused = true;
 		Globals::GetGlobals().lockPlayerMovement = true;
 		ButtonsBackground->ClearAllTweens();
-		ButtonsBackground->MoveTo(vec2(660.0f, 310.0f), 0.5f, EaseType::InOutSine);
+		ButtonsBackground->MoveTo(vec2(660.0f, 311.0f), 0.5f, EaseType::InOutSine);
 		background->FadeIn(0.5f, EaseType::OutSine);
 		isPaused = true;
 	}

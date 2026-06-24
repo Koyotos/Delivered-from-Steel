@@ -548,6 +548,7 @@ void CardManager::SetMaxMana(int value)
 	manaCounter->UpdateMaxVal(value);
 	manaCounter->UpdateValue(value);
 	UpdateManaUI();
+	manaCounter->ReachCheckpoint();
 }
 
 void CardManager::AddMaxMana(int value)
