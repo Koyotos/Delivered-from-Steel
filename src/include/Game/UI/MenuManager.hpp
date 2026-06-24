@@ -23,6 +23,7 @@ private:
     bool init;
     bool toMainMenu;
     bool startPressed = false;
+    bool axisHeldY = false;
 
     int selectedButton = 0;
 

@@ -32,6 +32,7 @@ class Counter : public UIElement {
 	void UpdateValue(int newVal);
 	void UpdateMaxVal(int newVal);
 	void IsLearning(bool value);
+	void ReachCheckpoint();
 
 
 	void FinishAllTweens();

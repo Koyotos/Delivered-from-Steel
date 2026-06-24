@@ -90,6 +90,7 @@ void CardManager::ReachCheckpoint()
 
 	currentManaPoints = maxManaPoints;
 	UpdateManaUI();
+	manaCounter->ReachCheckpoint();
 
 }
 
@@ -161,14 +162,27 @@ bool CardManager::Input(InputEvent& event)
 			} break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_UP: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false;
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_GAMEPAD_BUTTON_DPAD_DOWN: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false; 
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
+
 				event.handled = true;
 			} break;
 			}
@@ -198,6 +212,12 @@ bool CardManager::Input(InputEvent& event)
 			{
 				if (event.valueX > 0.5f && !axisHeldY) {
 					rowDown = !rowDown;
+
+					if (rowDown && unlockedCardDisplays.empty())
+					{
+						rowDown = false;
+					}
+
 					selectedCard = 0;
 					UpdateCardSelection();
 					axisHeldY = true;
@@ -205,6 +225,12 @@ bool CardManager::Input(InputEvent& event)
 				}
 				else if (event.valueX < -0.5f && !axisHeldY) {
 					rowDown = !rowDown;
+
+					if (rowDown && unlockedCardDisplays.empty())
+					{
+						rowDown = false; 
+					}
+
 					selectedCard = 0;
 					UpdateCardSelection();
 					axisHeldY = true;
@@ -236,12 +262,24 @@ bool CardManager::Input(InputEvent& event)
 			} break;
 			case GLFW_KEY_W: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false; 
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
 			} break;
 			case GLFW_KEY_S: if (menuOpen) {
 				rowDown = !rowDown;
+
+				if (rowDown && unlockedCardDisplays.empty())
+				{
+					rowDown = false; 
+				}
+
 				selectedCard = 0;
 				UpdateCardSelection();
 				event.handled = true;
@@ -511,6 +549,7 @@ void CardManager::SetMaxMana(int value)
 	manaCounter->UpdateMaxVal(value);
 	manaCounter->UpdateValue(value);
 	UpdateManaUI();
+	manaCounter->ReachCheckpoint();
 }
 
 void CardManager::AddMaxMana(int value)
@@ -553,31 +592,48 @@ void CardManager::UpdateCardSelection()
 
 void CardManager::Select(int slot)
 {
-	if (!menuOpen) return;
-	if (rowDown && selectedCard >= 0)
+	if (!menuOpen)
+		return;
+
+	if (rowDown)
 	{
+		if (selectedCard < 0 ||
+			selectedCard >= (int)unlockedCardDisplays.size())
+			return;
+
 		shared_ptr<Card> found = nullptr;
-		for (auto& card : unlockedCards) {
-			if (card->GetCardType() == unlockedCardDisplays[selectedCard]->GetCardType()) {
+
+		CardType selectedType =
+			unlockedCardDisplays[selectedCard]->GetCardType();
+
+		for (auto& card : unlockedCards)
+		{
+			if (card->GetCardType() == selectedType)
+			{
 				found = card;
 				break;
 			}
 		}
+
+		if (!found)
+			return;
+
 		switch (slot)
 		{
 		case 0: AddCardToHand(0, found); break;
 		case 1: AddCardToHand(1, found); break;
 		case 2: AddCardToHand(2, found); break;
 		default: AddCardToHand(found); break;
-
 		}
 	}
-	else if (!rowDown && selectedCard >= 0)
+	else
 	{
-		RemoveCardFromHand(selectedCard);
-		
-	}
+		if (selectedCard < 0 ||
+			selectedCard >= (int)currentHand.size())
+			return;
 
+		RemoveCardFromHand(selectedCard);
+	}
 }
 void CardManager::AddCardToHand(shared_ptr<Card> card)
 {
@@ -635,14 +691,23 @@ void CardManager::RemoveCardFromHand(int slot)
 
 void CardManager::ChangeSelection(bool left)
 {
+	size_t count = rowDown
+		? unlockedCardDisplays.size()
+		: slots.size();
+
+	if (count == 0)
+		return;
+
 	if (!left)
 	{
-		selectedCard = (selectedCard + 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+		selectedCard = (selectedCard + 1) % count;
 	}
 	else
 	{
-		if (selectedCard == 0) selectedCard = (rowDown ? unlockedCardDisplays.size() : slots.size()) - 1;
-		else selectedCard = (selectedCard - 1) % (rowDown ? unlockedCardDisplays.size() : slots.size());
+		if (selectedCard == 0)
+			selectedCard = count - 1;
+		else
+			selectedCard = (selectedCard - 1) % count;
 	}
 }
 

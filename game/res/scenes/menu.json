@@ -154,14 +154,14 @@
     "5": {
         "parent": 1,
         "transform": [
-            766.0,
+            0.0,
             592.0,
             0.0,
             0.0,
             0.0,
             0.0,
-            1.0,
-            1.0,
+            7.5,
+            7.5,
             1.0
         ],
         "sprite": "logo_placeholder",
@@ -179,7 +179,7 @@
 		"alpha" : 0.0,
         "addCollider": false,
         "cull" : 0.0,
-        "zIndex" : 2,
+        "zIndex" : 5,
         "ResolveCollision": false,
         "animated" : false,
         "name": "logo"
@@ -220,8 +220,8 @@
     "7": {
         "parent": 1,
         "transform": [
-            879.0,
-            422.0,
+            875.0,
+            433.0,
             0.0,
             0.0,
             0.0,
@@ -253,8 +253,8 @@
     "8": {
         "parent": 1,
         "transform": [
-            842.0,
-            502.0,
+            838.0,
+            522.0,
             0.0,
             0.0,
             0.0,
@@ -286,8 +286,8 @@
     "9": {
         "parent": 1,
         "transform": [
-            898.0,
-            601.0,
+            895.0,
+            611.0,
             0.0,
             0.0,
             0.0,
@@ -392,7 +392,7 @@
         "parent": 1,
         "transform": [
             0.0,
-            -1080.0,
+            0.0,
             0.0,
             0.0,
             0.0,
@@ -418,13 +418,13 @@
         "cull" : 0.0,
         "zIndex" : 10,
         "ResolveCollision": false,
-        "beginState": true
+        "beginState": false
     },
     "16": {
         "parent": 1,
         "transform": [
-            660.0,
-            310.0,
+            688.0,
+            372.0,
             0.0,
             0.0,
             0.0,
