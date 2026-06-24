@@ -83,7 +83,7 @@ void PauseManager::Process()
 		if (transition->GetActiveTweens().empty())
 		{
 			PauseGame();
-			onRestart();
+			onQuit();
 			transitionToMenu = false;
 		}
 	}
