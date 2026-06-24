@@ -117,7 +117,7 @@ public:
 		isSuspended = false;
 	}
 	bool IsWallSliding() const { return isWallSliding; }
-
+	void ForceStop();
 	void ExecuteDash();
 	void ExecuteBounce();
 	void ExecuteFeatherFalling();
