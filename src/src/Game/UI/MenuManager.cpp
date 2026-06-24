@@ -105,7 +105,7 @@ bool MenuManager::Input(InputEvent& event)
 						// ToOptions();
 						break;
 					case 2:
-						// QuitGame();
+						exit(0);
 						break;
 					}
 				}
