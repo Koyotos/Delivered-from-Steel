@@ -24,6 +24,7 @@ void DisappearingPlatform::Physics(const float& deltaTime) {
     glm::vec3 playerPos = player->GetTransform().GetTranslation();
 
     if (std::abs(playerPos.x - (myPos.x + detectOffsetX)) > detectArea) return;
+    if (playerPos.y - myPos.y > 1.5f || playerPos.y - myPos.y < -0.5f) return;
 
     auto hit = player->Raycast(
         glm::vec2(0.0f, -0.44f),
@@ -32,13 +33,12 @@ void DisappearingPlatform::Physics(const float& deltaTime) {
         static_cast<uint32_t>(ObjectType::Wall)
     );
 
-
     if (hit.has_value() && hit->collider->GetOwner().get() == this) {
         std::string id = GetSaveID();
         if (!id.empty() && globals.worldStateManager) {
             globals.worldStateManager->MarkAsDestroyed(globals.activeLevelName, id);
         }
-        Globals::GetGlobals().lockPlayerMovement = true;
+        Globals::GetGlobals().lockPlayerMovement = true
         Disable();
     }
 }
