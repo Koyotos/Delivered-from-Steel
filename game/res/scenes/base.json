@@ -6,7 +6,7 @@
     "process": true,
     "input": true,
     "physics": true,
-	"sounds": ["explosion", "player_spotted", "cool_ass_dzwiek", "ui_1", "ui_2", "player_jump", "player_death", "player_dash", "boiler_engine", "charger_engine", "drone_engine", "feather_falling", "bounce", "Break_Wall", "Player_Land", "moving_platform", "wall_snap", "wall_slide", "pickable_loop", "tooltip", "Player_Footsteps", "shield_hit", "charger_wall", "cloth_pulled", "card_pickup", "mana_pickup", "checkpoint_loop"]
+	"sounds": ["explosion", "player_spotted", "cool_ass_dzwiek", "ui_1", "ui_2", "player_jump", "player_death", "player_dash", "boiler_engine", "charger_engine", "drone_engine", "feather_falling", "bounce", "Break_Wall", "Player_Land", "moving_platform", "wall_snap", "wall_slide", "pickable_loop", "tooltip", "Player_Footsteps", "shield_hit", "charger_wall", "cloth_pulled", "card_pickup", "mana_pickup", "checkpoint_loop", "turret_shot"]
   },
 
   "2": {
