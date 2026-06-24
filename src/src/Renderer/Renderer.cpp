@@ -280,7 +280,7 @@ void Renderer::DepthPass() {
         switch(light->type) {
             case LIGHT_DIRECTIONAL: {
                 vec3 dir = normalize(light->data1);
-                vec3 center = vec3(0.0f);
+                vec3 center = vec3(currentScene->sceneCam->GetPos(), 0);
                 vec3 pos = center - dir * dirDistance;
 
                 projection = ortho(-30.f, 30.f, -30.f, 30.f, 0.1f, 100.f);
