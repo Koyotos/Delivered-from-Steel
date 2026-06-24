@@ -37,8 +37,6 @@ void Drone::Spawn() {
 	spotLight->data2 = vec3(0.001f, -1.0f, 0.0f);
 	spotLight->colorDiffuse = colorDiffuseTarget;
 	spotLight->data3 = vec3(1.0f, -1.3f, 0.8f);
-
-	audio->PlayLooping("drone_engine", 0.3f, 1.5f, 5.5f, 0.5f);
 }
 
 void Drone::Respawn() {
@@ -65,7 +63,6 @@ void Drone::Init(shared_ptr<Scene> scene) {
 	startPos = GetTransform().GetTranslation();
 	targetPos = startPos + vec3(direction * patrolDistance, 0.0f, 0.0f);
 	endPos = targetPos;
-	audio->PlayLooping("drone_engine", 0.3f, 1.5f, 5.5f, 0.5f);
 }
 
 void Drone::Physics(const float& deltaTime) {
@@ -94,6 +91,7 @@ void Drone::Process() {
 
 	switch (state) {
 	case EnemyState::Patrol:
+		audio->PlayLooping("drone_engine", 0.22f, 1.4f, 8.0f, 0.1f);
 		if (GetCurrentAnimation() != "droneIdle") {
 			Play("droneIdle", 0.12f, true);
 		}
@@ -178,7 +176,7 @@ void Drone::ChangeState(shared_ptr<Player> p) {
 		vec3 currentPos = GetTransform().GetTranslation();
 		vec2 dir = vec2(diveTarget.x, diveTarget.y) - vec2(currentPos.x, currentPos.y);
 		currentDiveVelocity = glm::normalize(dir) * diveSpeed;
-		audio->PlayLooping("player_spotted", 0.5f, 1.0f);
+		audio->PlayLooping("player_spotted", 0.4f, 1.0f, 8.0f, 0.1f);
 	}
 	else if (state == EnemyState::Chase && player->isDead()) {
 		state = EnemyState::Patrol;
@@ -297,6 +295,7 @@ void Drone::Explode() {
 
 	isExploding = true;
 	Play("explosion", 0.1f, false);
+	SetPhysics(false);
 
 	if (player) {
 		float distToPlayer = glm::length(player->GetTransform().GetTranslation() - GetTransform().GetTranslation());
@@ -306,7 +305,7 @@ void Drone::Explode() {
 	}
 	audio->Stop();
 	if (auto aum = Globals::GetGlobals().audioManager) {
-		aum->PlaySound3D("explosion", GetTransform().GetTranslation(), 0.5f, 1.0f);
+		aum->PlaySound3D("explosion", GetTransform().GetTranslation(), 0.8f, 1.0f);
 	}
 	if (spotLight) spotLight->Disable();
 }
