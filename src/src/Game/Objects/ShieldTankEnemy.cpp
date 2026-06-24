@@ -26,10 +26,10 @@ ShieldTankEnemy::ShieldTankEnemy(const unordered_map<string, std::any>& data) : 
 	visiblityAngle = 1 / tan(radians(90.0f));
 	visiblityDistance = 2.0f;
 
-	shieldCooldown = 0.12f;
+	shieldCooldown = 0.24f;
 	attackDelay = 0.12f;
 
-	chaseTime = 2.0f;
+	chaseTime = 1.0f;
 }
 
 void ShieldTankEnemy::Chase(float dt) {
@@ -99,11 +99,12 @@ void ShieldTankEnemy::Chase(float dt) {
 
 	if (groundHit.has_value() && !wallHit.has_value()) {
 		SetVelocity(glm::vec2(direction * speed, GetVelocity().y));
-		audio->PlayLooping("ui_1", 0.5f, 1.0f);
+		if (audio) {
+			audio->PlayLooping("ui_1", 0.2f, 1.0f);
+		}
 	}
 	else {
  		SetVelocity(glm::vec2(0.0f, GetVelocity().y));
-		audio->PlayLooping("ui_2", 0.5f, 1.0f);
 	}
 }
 
@@ -122,7 +123,7 @@ void ShieldTankEnemy::AttackState(float dt) {
 		shieldOnCooldown = true;
 		attackStarted = true;
 		if (auto aum = Globals::GetGlobals().audioManager) {
-			aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.5f, 1.0f);
+			aum->PlaySound3D("shield_hit", GetTransform().GetTranslation(), 1.0f, 1.0f);
 		}
 	}
 }
@@ -133,6 +134,7 @@ void ShieldTankEnemy::Physics(const float& deltaTime) {
 		if (attackStarted && attackDelay < shieldCooldownTimer) {
 			player->takeDamage(damage);
 			player->SetVelocity(vec2(direction * 5.0f, player->GetVelocity().y));
+			attackStarted = false;
 		}
 		if (shieldCooldownTimer >= shieldCooldown) {
 			shieldOnCooldown = false;
@@ -152,7 +154,9 @@ void ShieldTankEnemy::Physics(const float& deltaTime) {
 void ShieldTankEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
-		audio->PlayLooping("cool_ass_dzwiek", 0.5f, 1.0f);
+		if (audio) {
+			audio->PlayLooping("boiler_engine", 0.08f, 1.0f, 7.5f, 0.8f);
+		}
 		if (seePlayer) {
 			state = EnemyState::Chase;
 			if (auto aum = Globals::GetGlobals().audioManager) {

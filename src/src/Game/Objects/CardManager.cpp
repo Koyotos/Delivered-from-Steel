@@ -444,6 +444,7 @@ void CardManager::ToggleMenu()
 		selectedCard = 0;
 		rowDown = true;
 		player->SetPhysics(false);
+		player->StopAllLoopingAudio();
 		UpdateCardSelection();	
 		checkpointBackground->ClearAllTweens();
 		checkpointBackground->MoveTo(vec2(0.0f, 0.0f), 0.5f, EaseType::OutQuad);

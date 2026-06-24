@@ -6,7 +6,9 @@
 #include "include/Game/Objects/Player.hpp"
 #include "include/Globals/Globals.hpp"
 #include "include/Core/Scene.hpp"
+#include "include/AudioManager/AudioSource.hpp"
 #include "GLFW/glfw3.h"
+#include <memory>
 
 class Checkpoint : public Object3D {
 private:
@@ -14,6 +16,8 @@ private:
     std::shared_ptr<Object3D> clothObject = nullptr;
     std::shared_ptr<Object2D> infoButtonObject = nullptr;
     std::shared_ptr<Light> pointLight = nullptr;
+
+	unique_ptr<AudioSource> audio = nullptr;
 
     glm::vec3 buttonNormalScale;
 
@@ -31,6 +35,7 @@ private:
 public:
     Checkpoint(const std::unordered_map<std::string, std::any>& data);
     virtual ~Checkpoint() = default;
+	void Disable() noexcept override;
 
     void Init(std::shared_ptr<Scene> scene) override;
     void Physics(const float& deltaTime) override;

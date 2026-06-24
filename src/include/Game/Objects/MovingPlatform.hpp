@@ -2,6 +2,8 @@
 #define FE_MOVING_PLATFORM
 
 #include "include/Game/Objects/Platform.hpp"
+#include "include/AudioManager/AudioSource.hpp"
+#include <memory>
 
 class Player;
 
@@ -26,6 +28,7 @@ private:
     vec3 endPosition;
 
     weak_ptr<Player> player;
+	unique_ptr<AudioSource> audio = nullptr;
 
     float timer;
 
@@ -33,6 +36,7 @@ public:
     vec3 velocityDelta;
     vec3 velocity;
     MovingPlatform(const unordered_map<string, std::any>&);
+	void Disable() noexcept override;
 
     void Physics(const float& deltaTime) override;
 

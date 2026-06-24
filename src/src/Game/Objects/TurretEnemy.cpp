@@ -53,7 +53,7 @@ void TurretEnemy::AttackState(float dt) {
 			isWaiting = true;
 			playerInSight = false;
 			if (auto aum = Globals::GetGlobals().audioManager) {
-				aum->PlaySound3D("ui_1", GetTransform().GetTranslation(), 0.5f, 1.0f);
+				aum->PlaySound3D("turret_shot", GetTransform().GetTranslation(), 0.2f, 1.0f);
 			}
 		}
 	}
@@ -72,6 +72,9 @@ void TurretEnemy::Physics(const float& dt) {
 			shotTimer = 0.0f;
 
 		}
+	}
+	if (audio) {
+		audio->PlayLooping("drone_engine", 0.4f, 1.0f, 5.5f, 0.8f);
 	}
 	if (barrelLocked) {
 		currentBarrelLock -= dt;
@@ -93,9 +96,6 @@ void TurretEnemy::ChangeState(shared_ptr<Player> player) {
 	case EnemyState::Patrol: {
 		if (seePlayer) {
 			state = EnemyState::Attack;
-			if (auto aum = Globals::GetGlobals().audioManager) {
-				aum->PlaySound3D("player_spotted", GetTransform().GetTranslation(), 0.3f, 1.0f);
-			}
 		}
 		break;
 	}
@@ -123,7 +123,7 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 	float bulletSpeed =
 		bullet->GetSpeed();
 
-	vec2 playerVelocity =player->GetVelocity();
+	vec2 playerVelocity = player->GetVelocity();
 	playerVelocity.y = 0.0f;
 
 	float travelTime = length(playerPos - barrelPos) / bulletSpeed;
@@ -132,7 +132,7 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 	travelTime = length(targetPos - barrelPos) / bulletSpeed;
 
-	targetPos =	playerPos + playerVelocity * travelTime;
+	targetPos = playerPos + playerVelocity * travelTime;
 
 	vec2 direction = normalize(targetPos - barrelPos);
 
@@ -181,12 +181,11 @@ void TurretEnemy::RotateBarrel(float deltaTime)
 
 void TurretEnemy::Init(shared_ptr<Scene> scene) {
 	Enemy::Init(scene);
-	audio->PlayLooping("cool_ass_dzwiek", 0.3f, 1.0f, 7.5f, 0.8f);
-	for(auto& child : GetChildren()) {
-		if(child->Type() == "Bullet") {
+	for (auto& child : GetChildren()) {
+		if (child->Type() == "Bullet") {
 			bullet = static_pointer_cast<Bullet>(child);
 		}
-		if(child->Type() == "Object2D") {
+		if (child->Type() == "Object2D") {
 			barrel = static_pointer_cast<Object2D>(child);
 		}
 	}

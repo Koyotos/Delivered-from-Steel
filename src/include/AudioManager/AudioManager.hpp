@@ -51,7 +51,7 @@ private:
 
 	unordered_map<string, ALuint> audioBuffers;
 	vector<ALuint> audioSources;
-	static constexpr int MAX_SOURCES = 64;
+	static constexpr int MAX_SOURCES = 128;
 
 	struct ActiveSound {
 		ALuint source;
@@ -72,6 +72,8 @@ private:
 	float sfxVolume = 1.0f;
 	float bgmVolume = 1.0f;
 	float ambientVolume = 1.0f;
+
+	vec3 currentListenerPosition = vec3(0.0f);
 
 	/**
 	 * @brief Loads a .wav file from disk to a buffer.
@@ -182,6 +184,7 @@ public:
 	 * @return void
 	 */
 	void SetListenerPosition(vec3 position);
+	vec3 GetListenerPosition() const { return currentListenerPosition; }
 	/**
 	 * @brief Stops all SFX sources.
 	 * @return void
@@ -205,6 +208,8 @@ public:
 
 	void FadeOutAllBGM(float duration = 1.5f);
 	void FadeOutAllAmbient(float duration = 1.5f);
+	bool IsSoundActive(AudioHandle handle) { return activeSounds.find(handle) != activeSounds.end(); }
+	void UpdateSoundParams(AudioHandle handle, float volume, float pitch);
 };
 
 #endif

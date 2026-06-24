@@ -1,4 +1,5 @@
 #include "include/Game/Objects/SpikePlatform.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 
 SpikePlatform::SpikePlatform(const unordered_map<string, std::any>& data)
     : Platform(data)
@@ -14,7 +15,15 @@ SpikePlatform::SpikePlatform(const unordered_map<string, std::any>& data)
     upDown = fromMap(bool,"upDown", data);
     retractedPos = fromMap(float, "retractedPos", data);
     extendedPos = fromMap(float, "extendedPos", data);
+	audio = make_unique<AudioSource>(this);
+}
 
+void SpikePlatform::Disable() noexcept
+{
+    if (audio) {
+        audio->Stop();
+    }
+    Platform::Disable();
 }
 
 float Lerp(float a, float b, float t)
@@ -58,6 +67,9 @@ void SpikePlatform::Physics(const float& dt)
                 state = (state == SpikeState::Extended) ? SpikeState::Retracting : SpikeState::Extending;
                 timer -= pauseDuration;
             }
+            if (audio) {
+                audio->Stop();
+            }
             break;
 
         case SpikeState::Extending:
@@ -88,7 +100,13 @@ void SpikePlatform::Physics(const float& dt)
                 state = (state == SpikeState::Retracting) ? SpikeState::Retracted : SpikeState::Extended;
                 timer -= moveDuration;
             }
+            if (audio) {
+                audio->PlayLooping("boiler_engine", 0.12f, 0.5f, 5.5f, 0.8f);
+            }
             break;
         }
+    }
+    if (audio) {
+        audio->Update();
     }
 }
