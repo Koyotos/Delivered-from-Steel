@@ -26,6 +26,25 @@ void PauseManager::FindNodes(shared_ptr<Node> node)
 {
 	if (!node) return;
 
+	if (node->Type() == "Icon")
+	{
+		shared_ptr<Icon> cast = static_pointer_cast<Icon>(node);
+		if (cast->GetName() == "buttonsBackground")
+		{
+			ButtonsBackground = cast;
+		}
+		if (cast->GetName() == "background")
+		{
+			background = cast;
+		}
+	}
+
+	if (node->Type() == "Transition")
+	{
+		shared_ptr<Transition> cast = static_pointer_cast<Transition>(node);
+		transition = cast;
+	}
+
 
 	for (auto& k : node->GetChildren()) {
 		FindNodes(k);
@@ -65,14 +84,18 @@ void PauseManager::PauseGame()
 	{
 		Globals::GetGlobals().isPaused = true;
 		Globals::GetGlobals().lockPlayerMovement = true;
-		// show menu
+		ButtonsBackground->ClearAllTweens();
+		ButtonsBackground->MoveTo(vec2(660.0f, 310.0f), 0.5f, EaseType::InOutSine);
+		background->FadeIn(0.5f, EaseType::OutSine);
 		isPaused = true;
 	}
 	else
 	{
 		Globals::GetGlobals().isPaused = false;
 		Globals::GetGlobals().lockPlayerMovement = false;
-
+		ButtonsBackground->ClearAllTweens();
+		ButtonsBackground->MoveTo(vec2(660.0, -600.0f), 0.5f, EaseType::InOutSine);
+		background->FadeOut(0.5f, EaseType::OutSine);
 		isPaused = false;
 	}
 }

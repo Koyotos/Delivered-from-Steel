@@ -15,6 +15,11 @@ class PauseManager : public Node
 
 	shared_ptr<Scene> pauseScene;
 
+	shared_ptr<Icon> ButtonsBackground;
+	shared_ptr<Icon> background;
+
+	shared_ptr<Transition> transition;
+
 	public:
 
 	PauseManager();
