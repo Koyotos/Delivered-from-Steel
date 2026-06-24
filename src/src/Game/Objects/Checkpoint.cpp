@@ -68,9 +68,9 @@ void Checkpoint::Physics(const float& deltaTime) {
 		Activate();
 	}
 
-	if (isActivated && audio) {
-		audio->PlayLooping("checkpoint_loop", 1.5f, 1.0f, 5.5f, 0.8f);
-	}
+	//if (isActivated && audio) {
+	//	audio->PlayLooping("checkpoint_loop", 1.5f, 1.0f, 5.5f, 0.8f);
+	//}
 
 	if (dist <= activationRadius) {
 		glm::vec2 normDir = glm::normalize(dirToPlayer);
@@ -177,7 +177,7 @@ void Checkpoint::Activate() {
 			}
 		}
 		if (auto aum = Globals::GetGlobals().audioManager) {
-			aum->PlaySound3D("cloth_pulled", GetTransform().GetTranslation(), 3.0f, 1.0f);
+			aum->PlaySound3D("cloth_pulled", GetTransform().GetTranslation(), 2.6f, 1.0f);
 		}
 		clothObject->Disable();
 	}
