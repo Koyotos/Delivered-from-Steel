@@ -8,6 +8,7 @@ PauseManager::PauseManager()
 	SetInput(true);
 
 	isPaused = false;
+
 }
 
 PauseManager::~PauseManager()
@@ -73,18 +74,18 @@ void PauseManager::Process()
 	{
 		if (transition->GetActiveTweens().empty())
 		{
+			transitionToRestart = false;
 			PauseGame();
 			onRestart();
-			transitionToRestart = false;
 		}
 	}
 	if (transitionToMenu)
 	{
 		if (transition->GetActiveTweens().empty())
 		{
+			transitionToMenu = false;
 			PauseGame();
 			onQuit();
-			transitionToMenu = false;
 		}
 	}
 }
