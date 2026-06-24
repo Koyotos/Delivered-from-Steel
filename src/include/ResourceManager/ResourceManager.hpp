@@ -38,6 +38,7 @@
 #include "include/AudioManager/AudioManager.hpp"
 #include "include/Game/UI/TextUI.hpp"
 #include "include/Game/UI/Tooltip.hpp"
+#include "include/Game/UI/Transition.hpp"
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <memory>
@@ -103,7 +104,8 @@ static const pair<string,function<shared_ptr<Node>(const unordered_map<string,st
     RegisterObjectType<ParticleEmitterNode>("ParticleEmitterNode"),
     RegisterObjectType<OrbitalParticleSystem>("OrbitalParticleSystem"),
     RegisterObjectType<TextUI>("TextUI"),
-    RegisterObjectType<Tooltip>("Tooltip")
+    RegisterObjectType<Tooltip>("Tooltip"),
+    RegisterObjectType<Transition>("Transition")
 };
 
 struct RefCountModel {

@@ -56,6 +56,9 @@ class Globals {
 
     bool wantsToSave = false;
     bool wantsToLoad = false;
+
+
+    bool isPaused;
     
     float gamepadDeadzone = 0.1f;
 
@@ -106,6 +109,8 @@ class Globals {
 
 	void SetKeyState(int key, bool isPressed);
 	bool GetKeyState(int key) const;
+
+    bool IsPaused() const;
 
 	void SetMouseState(int button, bool isPressed);
 	bool GetMouseState(int button) const;
