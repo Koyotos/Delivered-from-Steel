@@ -154,7 +154,7 @@ void ShieldTankEnemy::ChangeState(shared_ptr<Player> player) {
 	switch (state) {
 	case EnemyState::Patrol: {
 		if (audio) {
-			audio->PlayLooping("boiler_engine", 0.05f, 1.0f, 7.5f, 0.8f);
+			audio->PlayLooping("boiler_engine", 0.08f, 1.0f, 7.5f, 0.8f);
 		}
 		if (seePlayer) {
 			state = EnemyState::Chase;
