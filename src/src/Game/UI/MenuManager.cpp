@@ -50,6 +50,7 @@ void MenuManager::Process()
 	if (!startPressed) return;
 	if (!transition->GetCurrentState())
 	{
+		startPressed = false;
 		if (onStartGame) onStartGame();
 	}
 }
@@ -110,6 +111,37 @@ bool MenuManager::Input(InputEvent& event)
 				}
 				
 			}
+			
+			
+			return true;
+		}
+		if (event.type == InputType::GAMEPAD_AXIS && toMainMenu)
+		{
+			if (event.key == GLFW_GAMEPAD_AXIS_LEFT_Y)
+			{
+				if (event.valueX > 0.5f && !axisHeldY)
+				{
+					selectedButton = (selectedButton + 1) % buttonText.size();
+					UpdateText();
+
+					axisHeldY = true;
+					event.handled = true;
+					return true;
+				}
+				else if (event.valueX < -0.5f && !axisHeldY)
+				{
+					selectedButton = (selectedButton - 1 + buttonText.size()) % buttonText.size();
+					UpdateText();
+
+					axisHeldY = true;
+					event.handled = true;
+					return true;
+				}
+				else if (event.valueX > -0.5f && event.valueX < 0.5f)
+				{
+					axisHeldY = false;
+				}
+			}
 			return true;
 		}
 	}
@@ -167,9 +199,7 @@ void MenuManager::ToMainMenu()
 	}
 	if (!buttonIcons.empty())
 	{
-		for (auto& icon : buttonIcons) {
-			icon->FadeIn(0.5f, EaseType::OutSine, 2.0f);
-		}
+		buttonIcons[0]->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 	}
 	if (buttonsBackground) {
 		buttonsBackground->FadeIn(0.5f, EaseType::OutSine, 2.0f);
@@ -198,8 +228,7 @@ void MenuManager::UpdateText() {
 				float y = buttonText[i]->GetTransform().GetTranslation().y;
 				float iconOffset = 56.0f;  
 
-				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y+4.0f), 0.2f, EaseType::InOutSine);
-				buttonIcons[1]->MoveTo(vec2(right + 4.0f, y+4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y+20.0f), 0.2f, EaseType::InOutSine);
 			}
 			else {
 				buttonText[i]->Tint(baseButtonColor, 0.2f, EaseType::InOutSine);

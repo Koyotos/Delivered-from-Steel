@@ -87,8 +87,18 @@ void PauseManager::Process()
 			PauseGame();
 			onQuit();
 		}
+		return;
+	}
+	if (isPaused && Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A))
+	{
+		switch (selected) {
+		case 0: PauseGame();       break;  // Resume
+		case 1: transitionToRestart = true; transition->ChangeState(0.0f);  break;
+		case 2: transitionToMenu = true; transition->ChangeState(0.0f);  break;
+		}
 	}
 }
+
 
 bool PauseManager::Input(InputEvent& event)
 {
@@ -107,14 +117,14 @@ bool PauseManager::Input(InputEvent& event)
 			return true;
 		}
 
-		if (isPaused && (event.type == InputType::KEYBOARD || event.type == InputType::GAMEPAD_BUTTON) && event.action == GLFW_PRESS)
+		if (isPaused && (event.type == InputType::KEYBOARD || Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A)) && event.action == GLFW_PRESS)
 		{
 			bool up = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_UP) ||
 				(event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_UP);
 			bool down = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_DOWN) ||
 				(event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_DOWN);
 			bool confirm = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_ENTER) ||
-				(event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_A);
+				(Globals::GetGlobals().GetGamepadBtnState(GLFW_GAMEPAD_BUTTON_A));
 
 			if (up) {
 				selected = (selected - 1 + (int)buttonText.size()) % (int)buttonText.size();
@@ -136,6 +146,36 @@ bool PauseManager::Input(InputEvent& event)
 				}
 				event.handled = true;
 				return true;
+			}
+		}
+		if (isPaused && event.type == InputType::GAMEPAD_AXIS)
+		{
+			if (event.key == GLFW_GAMEPAD_AXIS_LEFT_Y)
+			{
+				if (event.valueX > 0.5f && !axisHeldY)
+				{
+					selected = (selected + 1) % (int)buttonText.size();
+
+					UpdateButtons();
+
+					axisHeldY = true;
+					event.handled = true;
+					return true;
+				}
+				else if (event.valueX < -0.5f && !axisHeldY)
+				{
+					selected = (selected - 1 + (int)buttonText.size()) % (int)buttonText.size();
+
+					UpdateButtons();
+
+					axisHeldY = true;
+					event.handled = true;
+					return true;
+				}
+				else if (event.valueX > -0.5f && event.valueX < 0.5f)
+				{
+					axisHeldY = false;
+				}
 			}
 		}
 	}

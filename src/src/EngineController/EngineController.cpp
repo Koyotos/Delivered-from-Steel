@@ -461,17 +461,15 @@ shared_ptr<MenuManager> EngineController::GetMenuManager() const {
 
 
 void EngineController::TransitionToMenu() {
-	if (!mm) {
-		mm = make_shared<MenuManager>();
-		mm->Init(rsm);
-		mm->SetOnStartGame([this]()
-			{
-				TransitionToCutscene("res/scenes/OpeningCutscene.json");
-			});
-		menuScene = mm->GetMenuScene();
-		menuScene->GetRoot()->AddChild(mm);
-		scm->AddScene(menuScene);
-	}
+
+	mm = make_shared<MenuManager>();
+	mm->Init(rsm);
+	mm->SetOnStartGame([this]()
+		{
+				TransitionToCutscene("res/scenes/OpeningCutscene.json");});
+	menuScene = mm->GetMenuScene();
+	menuScene->GetRoot()->AddChild(mm);
+	scm->AddScene(menuScene);
 
 	menuScene->GetRoot()->InitRecursive(menuScene);
 	scm->SetActive(menuScene);  
@@ -500,6 +498,9 @@ void EngineController::TransitionToCutscene(string path)
 	crm = make_shared<CardManager>();
 	crm->Init(rsm);
 	globals->cardManager = crm;
+
+	mm = make_shared<MenuManager>();
+	mm->Init(rsm);
 
 	shared_ptr<Slide> slides = make_shared<Slide>();
 	slides->Init(rsm, path);

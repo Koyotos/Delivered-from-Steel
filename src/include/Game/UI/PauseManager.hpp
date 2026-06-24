@@ -14,6 +14,7 @@ class PauseManager : public Node
 	bool isPaused;
 	bool transitionToRestart = false;
 	bool transitionToMenu = false;
+	bool axisHeldY = false;
 
 	void FindNodes(shared_ptr<Node>);
 
