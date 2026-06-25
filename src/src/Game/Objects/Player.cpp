@@ -96,7 +96,7 @@ Player::Player(const std::unordered_map<std::string, std::any>& data) : Object2D
 	camConfig.fastFallSmoothTime = GetSafe<float>(data, "fastFallSmoothTime", 0.1f);
 	camConfig.airSmoothTime = GetSafe<float>(data, "airSmoothTime", 0.2f);
 	camConfig.smoothTimeTransitionSpeed = GetSafe<float>(data, "smoothTimeTransitionSpeed", 2.0f);
-	camConfig.airThresholdYSmooth = GetSafe<float>(data, "airThresholdYSmooth", -10.0f);
+	camConfig.airThresholdYSmooth = GetSafe<float>(data, "airThresholdYSmooth", -5.0f);
 	camConfig.fallCameraShakeThreshold = GetSafe<float>(data, "fallCameraShakeThreshold", -15.0f);
 	camConfig.verticalOffset = GetSafe<float>(data, "verticalOffset", 0.2f);
 	camConfig.rightStickDistance = GetSafe<float>(data, "rightStickDistance", 5.0f);
