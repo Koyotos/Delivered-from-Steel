@@ -1371,7 +1371,7 @@
     "alpha": 0.0,
     "addCollider": true,
     "colliderPosX": 111.0,
-    "colliderPosY": 66.0,
+    "colliderPosY": 88.0,
     "colliderType": false,
     "height": 5.0,
     "width": 2.0,
@@ -1380,7 +1380,7 @@
     "ResolveCollision": false,
     "animated": false,
     "deactivated": false,
-    "activationTime": 0.25,
+    "activationTime": 1.0,
     "deactivationTime": 5.0,
     "name": "aaaa",
     "featherFallLearn": false
