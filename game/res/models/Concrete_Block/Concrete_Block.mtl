@@ -1,3 +1,4 @@
+# decal_mode flat
 # Blender 5.0.1 MTL File: 'grey-outs.blend'
 # www.blender.org
 
@@ -11,4 +12,4 @@ d 1.000000
 illum 2
 map_Kd Concrete_Block_diff.png
 map_Ks Concrete_Block_spec.png
-map_Bump -bm 1.000000 concrete-normals.png
+map_Bump -bm 1.000000 Concrete_Block_normals.png
