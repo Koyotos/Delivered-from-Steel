@@ -1362,7 +1362,7 @@
     "active": "EndingScreen",
     "process": true,
     "input": false,
-    "physics": false,
+    "physics": true,
     "draw": true,
     "ignoreParent": true,
     "reqPerspective": false,

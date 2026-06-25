@@ -129,6 +129,7 @@ void Counter::ReachCheckpoint()
 		{
             manaIcons[i]->ClearAllTweens();
             manaIcons[i]->FadeIn(0.01f);
+            manaIcons[i]->Tint(vec3(1.0f, 1.0f, 1.0f), 0.05f);
             manaIcons[i]->Stop();
             manaIcons[i]->Play("unspent", 0.25f);
 		}

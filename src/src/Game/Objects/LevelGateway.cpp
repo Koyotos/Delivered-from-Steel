@@ -14,6 +14,7 @@ LevelGateway::LevelGateway(const unordered_map<string, std::any>& data) : Physic
 	if (data.find("isVerticalAxis") != data.end()) {
 		isVerticalAxis = fromMap(bool, "isVerticalAxis", data);
 	}
+	objectType = ObjectType::Default;
 }
 
 string LevelGateway::Type() {

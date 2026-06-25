@@ -886,8 +886,8 @@ void Player::ExecuteWallJump() {
 bool Player::CheckWallSnap() {
 	glm::vec2 rayDir(facingDirection, 0.0f);
 
-	auto hitDown = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY - raycastConfig.wallRayLength), rayDir, stats.wallSnapDistance);
-	auto hitUp = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY), rayDir, stats.wallSnapDistance);
+	auto hitDown = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY - raycastConfig.wallRayLength), rayDir, stats.wallSnapDistance, obstacleMask);
+	auto hitUp = Raycast(glm::vec2(raycastConfig.wallOffsetX * facingDirection, raycastConfig.wallOffsetY), rayDir, stats.wallSnapDistance, obstacleMask);
 	float playerX = GetTransform().GetTranslation().x;
 
 	if (hitDown.has_value()) {
