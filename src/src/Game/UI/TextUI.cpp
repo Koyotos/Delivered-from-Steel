@@ -77,12 +77,12 @@ TextUI::TextUI(vec3 color, vec2 size, vec2 pos, float scale, float alpha, string
 }
 
 float TextUI::GetLeftBound() const {
-    auto& global = GetTransform().GetGlobal();
+    auto global = GetTransform().GetGlobal();
     return global[3].x;
 }
 
 float TextUI::GetRightBound() const {
-    auto& global = GetTransform().GetGlobal();
+    auto global = GetTransform().GetGlobal();
     float width = 0.0f;
 
     Charset charset = Globals::GetGlobals().GetGameFont().GetCharset(textNode.GetSize());

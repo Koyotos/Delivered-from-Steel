@@ -30,6 +30,7 @@ private:
     weak_ptr<Player> player;
 	unique_ptr<AudioSource> audio = nullptr;
 
+	bool playerOnPlatform = false;
     float timer;
 
 public:
