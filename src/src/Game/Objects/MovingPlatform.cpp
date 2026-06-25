@@ -4,6 +4,7 @@
 #include "include/Core/Scene.hpp"
 #include "include/Game/Objects/Player.hpp"
 #include "include/Game/Objects/Enemy.hpp"
+#include "include/AudioManager/AudioManager.hpp"
 
 MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Platform(data) {
 	state = MovingPlatformState::StopStart;
@@ -12,6 +13,14 @@ MovingPlatform::MovingPlatform(const unordered_map<string, std::any>& data) : Pl
 	startPosition = GetTransform().GetTranslation();
 	endPosition = startPosition + vec3( fromMap(float, "XendPosition", data), fromMap(float, "YendPosition",data), 0.0f) ;
 	timer = fromMap(float, "movingOffset", data);
+	audio = make_unique<AudioSource>(this);
+}
+
+void MovingPlatform::Disable() noexcept {
+    if (audio) {
+        audio->Stop();
+	}
+    Platform::Disable();
 }
 
 vec3 Lerp(const vec3& a, const vec3& b, float t) {
@@ -42,6 +51,9 @@ void MovingPlatform::Physics(const float& deltaTime) {
                 : MovingPlatformState::MovingToEnd;
             timer -= pauseDuration;
         }
+        if (audio) {
+            audio->Stop();
+        }
         break;
 
     case MovingPlatformState::MovingToEnd:
@@ -65,6 +77,9 @@ void MovingPlatform::Physics(const float& deltaTime) {
             }
             timer -= moveDuration;
         }
+        if (audio) {
+            audio->PlayLooping("boiler_engine", 0.1f, 0.2f, 6.5f, 2.0f);
+        }
         break;
     }
     }
@@ -76,6 +91,10 @@ void MovingPlatform::Physics(const float& deltaTime) {
     SetVelocity(vec2(velocity.x, 0));
 
     lastPosition = newPosition;
+
+    if (audio) {
+		audio->Update();
+    }
 }
 
 

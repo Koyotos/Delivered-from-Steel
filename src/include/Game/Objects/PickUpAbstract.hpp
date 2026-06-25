@@ -3,6 +3,8 @@
 
 #include "include/Game/Objects/Player.hpp"
 #include "include/Renderer/Light.hpp"
+#include "include/AudioManager/AudioSource.hpp"
+#include <memory>
 
 class PickUpAbstract : public Object2D {
 protected:
@@ -16,10 +18,13 @@ protected:
 
     glm::vec3 specular1 = glm::vec3(0.0f, 0.02f, 0.1f);
     glm::vec3 specular2 = glm::vec3(0.0f, 0.2f, 0.5f);
+	string loopSoundName = "";
+	unique_ptr<AudioSource> audio = nullptr;
 public:
     PickUpAbstract();
     PickUpAbstract(const unordered_map<string, std::any>& data);
     virtual ~PickUpAbstract();
+	void Disable() noexcept override;
 
     void Init(shared_ptr<Scene> scene) override;
 

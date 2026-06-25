@@ -38,6 +38,7 @@ void DisappearingPlatform::Physics(const float& deltaTime) {
         if (!id.empty() && globals.worldStateManager) {
             globals.worldStateManager->MarkAsDestroyed(globals.activeLevelName, id);
         }
+        player->ForceStop();
         Globals::GetGlobals().lockPlayerMovement = true;
         Disable();
     }

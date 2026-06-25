@@ -23,6 +23,7 @@ public:
 	void SetCamera(std::shared_ptr<Camera> cam) { camera = cam; }
 	void UpdateCamera(float deltaTime, const glm::vec2& playerPos, const glm::vec2& playerVel, float moveInput, const glm::vec2& rightStick);
 	void TriggerCameraShake(float duration, float intensity);
+	std::shared_ptr<Camera> GetCamera() const { return camera; }
 };
 
 #endif

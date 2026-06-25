@@ -22,7 +22,14 @@ bool AudioManager::Init() {
 	}
 
 	audioSources.resize(MAX_SOURCES);
+	alGetError();
 	alGenSources(MAX_SOURCES, audioSources.data());
+	ALenum error = alGetError();
+	if (error != AL_NO_ERROR) {
+		Globals::GetGlobals().Log("AUDIO WARNING: Could not allocate " + std::to_string(MAX_SOURCES) + " sources. Error code: " + std::to_string(error));
+		audioSources.resize(32);
+		alGenSources(32, audioSources.data());
+	}
 
 	alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 	Globals::GetGlobals().Log("Audio Manager initialized.");
@@ -72,7 +79,23 @@ void AudioManager::Update(float deltaTime) {
 	for (auto it = activeSounds.begin(); it != activeSounds.end(); ) {
 		ALint state;
 		alGetSourcei(it->second.source, AL_SOURCE_STATE, &state);
-		if (state != AL_PLAYING && state != AL_PAUSED) {
+		if (state == AL_PLAYING) {
+			ALint sourceRelative;
+			alGetSourcei(it->second.source, AL_SOURCE_RELATIVE, &sourceRelative);
+			if (sourceRelative == AL_FALSE) {
+				ALfloat pos[3];
+				alGetSource3f(it->second.source, AL_POSITION, &pos[0], &pos[1], &pos[2]);
+				float dist = glm::distance(glm::vec3(pos[0], pos[1], pos[2] - 3.0f), currentListenerPosition);
+
+				ALfloat maxDist;
+				alGetSourcef(it->second.source, AL_MAX_DISTANCE, &maxDist);
+				if (dist > maxDist + 2.0f) {
+					alSourceStop(it->second.source);
+					state = AL_STOPPED;
+				}
+			}
+		}
+		if (state == AL_STOPPED || state == AL_INITIAL) {
 			it = activeSounds.erase(it);
 		}
 		else {
@@ -284,6 +307,14 @@ ALuint AudioManager::GetAvailableSource() {
 		ALint state;
 		alGetSourcei(source, AL_SOURCE_STATE, &state);
 		if (state != AL_PLAYING && state != AL_PAUSED) {
+			for (auto it = activeSounds.begin(); it != activeSounds.end(); ) {
+				if (it->second.source == source) {
+					it = activeSounds.erase(it);
+				}
+				else {
+					++it;
+				}
+			}
 			return source;
 		}
 	}
@@ -444,6 +475,7 @@ void AudioManager::StopAllBGM() {
 
 void AudioManager::SetListenerPosition(vec3 position) {
 	if (!context) return;
+	currentListenerPosition = position;
 	alListener3f(AL_POSITION, position.x, position.y, position.z);
 }
 
@@ -596,4 +628,15 @@ void AudioManager::FadeOutAllAmbient(float duration) {
 			pair.second.fadeSpeed = speed;
 		}
 	}
+}
+
+void AudioManager::UpdateSoundParams(AudioHandle handle, float volume, float pitch) {
+	if (!context || handle == 0) return;
+
+	auto it = activeSounds.find(handle);
+	if (it == activeSounds.end()) return;
+
+	ALuint source = it->second.source;
+	alSourcef(source, AL_PITCH, pitch);
+	alSourcef(source, AL_GAIN, volume * sfxVolume);
 }

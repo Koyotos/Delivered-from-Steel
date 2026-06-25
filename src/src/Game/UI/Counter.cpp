@@ -120,3 +120,17 @@ void Counter::UpdateManaIconsValue()
 	}
     
 }
+
+void Counter::ReachCheckpoint()
+{
+	for (int i = 0; i < maxVal; i++)
+	{
+		if (i < maxVal)
+		{
+            manaIcons[i]->ClearAllTweens();
+            manaIcons[i]->FadeIn(0.01f);
+            manaIcons[i]->Stop();
+            manaIcons[i]->Play("unspent", 0.25f);
+		}
+	}
+}

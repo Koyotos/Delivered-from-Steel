@@ -44,6 +44,8 @@ private:
 	bool isSuspended = false;
 	bool isDoubleJumping = false;
 	bool isWallJumping = false;
+	bool wasWallSlinding = false;
+	bool wasGrounded = false;
 
 	float lastSpeedForBounceY;
 	float lastSpeedForBounceX;
@@ -56,6 +58,8 @@ private:
 	float beforeCardVelocityX = 0.0f;
 	float wallSnapPosX = 0.0f;
 	float respawnProtectionTimer = 0.0f;
+	float footstepDelayTimer = 0.0f;
+	float wallSlideAudioTimer = 0.0f;
 
 	float smoothedFallIntensity = 0.0f;
 
@@ -73,7 +77,9 @@ private:
 		static_cast<uint32_t>(ObjectType::Enemy) |
 		static_cast<uint32_t>(ObjectType::BreakableWall);
 
-	unique_ptr<AudioSource> audio;
+	unique_ptr<AudioSource> audio = nullptr;
+	unique_ptr<AudioSource> featherFallingAudio = nullptr;
+	std::unique_ptr<AudioSource> footstepAudio = nullptr;
 
 public:
 	bool CheckGrounded();
@@ -92,6 +98,7 @@ public:
 	void SetCardManager(std::shared_ptr<CardManager> mgr);
 
 	void SetCamera(std::shared_ptr<Camera> cam);
+	std::shared_ptr<Camera> GetCamera() const { return cameraController.GetCamera(); }
 	void TriggerCameraShake(float duration, float intensity);
 	void takeDamage(float damage);
 	void Shatter();
@@ -110,7 +117,7 @@ public:
 		isSuspended = false;
 	}
 	bool IsWallSliding() const { return isWallSliding; }
-
+	void ForceStop();
 	void ExecuteDash();
 	void ExecuteBounce();
 	void ExecuteFeatherFalling();
@@ -120,6 +127,8 @@ public:
 	bool CheckWallSnap();
 	bool CheckWallJump();
 	bool isDead() const { return health.IsDead(); }
+
+	void StopAllLoopingAudio();
 
 	std::string GetSerializeKey() const override;
 	nlohmann::json Serialize() const override;

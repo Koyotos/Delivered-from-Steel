@@ -2,6 +2,8 @@
 #define FE_SPIKE_PLATFORM
 
 #include "include/Game/Objects/Platform.hpp"
+#include "include/AudioManager/AudioSource.hpp"
+#include <memory>
 
 enum class SpikeState {
     Retracted,
@@ -30,9 +32,11 @@ class SpikePlatform :
 
         bool childrenDirty = true;
         vector<shared_ptr<Object3D>> children;
+		unique_ptr<AudioSource> audio = nullptr;
 
     public:
 		SpikePlatform(const unordered_map<string, std::any>&);
+		void Disable() noexcept override;
 
         void Physics(const float& deltaTime) override;
 };

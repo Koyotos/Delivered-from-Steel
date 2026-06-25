@@ -50,6 +50,7 @@ void MenuManager::Process()
 	if (!startPressed) return;
 	if (!transition->GetCurrentState())
 	{
+		startPressed = false;
 		if (onStartGame) onStartGame();
 	}
 }
@@ -70,7 +71,7 @@ bool MenuManager::Input(InputEvent& event)
 					logo->FinishAllTweens();
 					moon->FinishAllTweens();
 				}
-			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty() || !moon->GetActiveTweens().empty())) {
+			} else if (toMainMenu && (!logo->GetActiveTweens().empty() || !platform->GetActiveTweens().empty() || !buttonIcons[0]->GetActiveTweens().empty()  || !buttonText[0]->GetActiveTweens().empty() || !moon->GetActiveTweens().empty() || !buttonsBackground->GetActiveTweens().empty())) {
 
 				logo->FinishAllTweens();
 				platform->FinishAllTweens();
@@ -81,6 +82,7 @@ bool MenuManager::Input(InputEvent& event)
 					text->FinishAllTweens();
 				}
 				moon->FinishAllTweens();
+				buttonsBackground->FinishAllTweens();
 
 			} else if (toMainMenu) {
 				bool up = (event.type == InputType::KEYBOARD && event.key == GLFW_KEY_UP) || (event.type == InputType::GAMEPAD_BUTTON && event.key == GLFW_GAMEPAD_BUTTON_DPAD_UP);
@@ -103,11 +105,42 @@ bool MenuManager::Input(InputEvent& event)
 						// ToOptions();
 						break;
 					case 2:
-						// QuitGame();
+						exit(0);
 						break;
 					}
 				}
 				
+			}
+			
+			
+			return true;
+		}
+		if (event.type == InputType::GAMEPAD_AXIS && toMainMenu)
+		{
+			if (event.key == GLFW_GAMEPAD_AXIS_LEFT_Y)
+			{
+				if (event.valueX > 0.5f && !axisHeldY)
+				{
+					selectedButton = (selectedButton + 1) % buttonText.size();
+					UpdateText();
+
+					axisHeldY = true;
+					event.handled = true;
+					return true;
+				}
+				else if (event.valueX < -0.5f && !axisHeldY)
+				{
+					selectedButton = (selectedButton - 1 + buttonText.size()) % buttonText.size();
+					UpdateText();
+
+					axisHeldY = true;
+					event.handled = true;
+					return true;
+				}
+				else if (event.valueX > -0.5f && event.valueX < 0.5f)
+				{
+					axisHeldY = false;
+				}
 			}
 			return true;
 		}
@@ -166,9 +199,7 @@ void MenuManager::ToMainMenu()
 	}
 	if (!buttonIcons.empty())
 	{
-		for (auto& icon : buttonIcons) {
-			icon->FadeIn(0.5f, EaseType::OutSine, 2.0f);
-		}
+		buttonIcons[0]->FadeIn(0.5f, EaseType::OutSine, 2.0f);
 	}
 	if (buttonsBackground) {
 		buttonsBackground->FadeIn(0.5f, EaseType::OutSine, 2.0f);
@@ -197,8 +228,7 @@ void MenuManager::UpdateText() {
 				float y = buttonText[i]->GetTransform().GetTranslation().y;
 				float iconOffset = 56.0f;  
 
-				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y+4.0f), 0.2f, EaseType::InOutSine);
-				buttonIcons[1]->MoveTo(vec2(right + 4.0f, y+4.0f), 0.2f, EaseType::InOutSine);
+				buttonIcons[0]->MoveTo(vec2(left - iconOffset, y+20.0f), 0.2f, EaseType::InOutSine);
 			}
 			else {
 				buttonText[i]->Tint(baseButtonColor, 0.2f, EaseType::InOutSine);
