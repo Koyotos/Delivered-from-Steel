@@ -29,7 +29,7 @@ private:
 	std::shared_ptr<OrbitalParticleSystem> pointVisualizer;
 	std::shared_ptr<CardManager> cardManager;
 
-	std::string respawnLevelName = "testLevel";
+	std::string respawnLevelName = "level1";
 
 	bool isGrounded = false;
 	bool isWalled = false;
