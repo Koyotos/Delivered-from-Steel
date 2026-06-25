@@ -5,7 +5,9 @@
         "class": "Node",
         "process": true,
         "input": false,
-        "physics": false
+        "physics": false,
+		"bgms" : ["waves"],
+		"playlist" : ["waves"]
     },
     "2": {
     "class": "Camera",
