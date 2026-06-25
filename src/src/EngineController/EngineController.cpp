@@ -512,7 +512,7 @@ void EngineController::TransitionToCutscene(string path)
 	error_code ec;
 	filesystem::remove(globals->GetExecDir() / "saves" / "save_0.json", ec);
 	globals->worldStateManager->ClearGraveyard();
-	QueueStreamNextLevel("testLevel");
+	QueueStreamNextLevel("level1");
 	slides->SetOnEndScene([this]() {
 		SetActiveScene(LoadScene("res/scenes/base.json"));
 		LinkSceneObjects();
