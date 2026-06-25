@@ -8367,7 +8367,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Concrete_Block",
+        "model": "Breakable_Wall",
         "height": 0.5,
         "width": 0.5,
         "saveID": "level4_1"

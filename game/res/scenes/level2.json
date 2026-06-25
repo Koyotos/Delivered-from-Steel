@@ -37765,7 +37765,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Concrete_Block",
+        "model": "Breakable_Wall",
         "height": 0.5,
         "width": 0.5,
         "saveID": "level2_2"
@@ -37798,7 +37798,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Concrete_Block",
+        "model": "Breakable_Wall",
         "height": 0.5,
         "width": 0.5,
         "saveID": "level2_3"
@@ -37831,7 +37831,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Concrete_Block",
+        "model": "Breakable_Wall",
         "height": 0.5,
         "width": 0.5,
         "saveID": "level2_4"
@@ -37864,7 +37864,7 @@
         "cull": 0.5,
         "zIndex": 0,
         "shader": "standard",
-        "model": "Concrete_Block",
+        "model": "Breakable_Wall",
         "height": 0.5,
         "width": 0.5,
         "saveID": "level2_5"
