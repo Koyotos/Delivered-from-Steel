@@ -509,8 +509,8 @@ void EngineController::TransitionToCutscene(string path)
 
 	shared_ptr<Slide> slides = make_shared<Slide>();
 	slides->Init(rsm, path);
-	error_code ec;
-	filesystem::remove(globals->GetExecDir() / "saves" / "save_0.json", ec);
+	//error_code ec;
+	//filesystem::remove(globals->GetExecDir() / "saves" / "save_0.json", ec);
 	globals->worldStateManager->ClearGraveyard();
 	QueueStreamNextLevel("level1");
 	slides->SetOnEndScene([this]() {
