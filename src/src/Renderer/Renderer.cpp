@@ -330,7 +330,7 @@ void Renderer::DepthPass() {
         shared_ptr<Light> light = lightsPosPoint[i].first;
         mat4 projection, view;
         vec3 pos = light->data1;
-        projection = perspective(radians(90.f), 1.f, 0.1f, 10.f);
+        projection = perspective(radians(90.f), 1.f, 0.01f, 10.f);
         mat4 shadowMatrices[6];
         for(int f = 0; f < 6; f++) {
             view = lookAt(pos, pos + dirs[f], ups[f]);
@@ -454,14 +454,17 @@ void Renderer::PostProcessingPass() {
     postProcessingShader->SetInt("bloomBlur", 2);
     postProcessingShader->SetFloat("exposure", 0.6f);
     postProcessingShader->SetBool("bloom", true);
+    postProcessingShader->SetBool("godRays", true);
     postProcessingShader->SetBool("sunExists", sunExists);
     postProcessingShader->SetMat4("invProjection",inverse(frameP));
     postProcessingShader->SetMat4("invView",inverse(frameV));
+    postProcessingShader->SetMat4("projection", currentScene->sceneCam->GetP());
+    postProcessingShader->SetMat4("view", currentScene->sceneCam->GetV());
     postProcessingShader->SetVec3("lightDir", sunDir);
     postProcessingShader->SetMat4("sunMatrix", sunMatrix);
     postProcessingShader->SetVec3("lightColor", vec3(1.0f));
     postProcessingShader->SetInt("shadowMaps2D",TEXTURES_SLOT_SHADOWMAPS);
-    postProcessingShader->SetVec3("cameraPos",vec3(currentScene->sceneCam->GetPos(),0));
+    postProcessingShader->SetVec3("camPos",vec3(currentScene->sceneCam->GetPos(),0));
     glBindVertexArray(screenQuadVAO);
     glDrawElements(
         GL_TRIANGLES,
@@ -650,6 +653,7 @@ void Renderer::ConfigureShader2D(shared_ptr<VisualNode> node) {
     switch(node->RenderType()) {
         case NRT_OBJECT2D: {
             shared_ptr<Object2D> obj2d = static_pointer_cast<Object2D>(node);
+            shader->SetMat4("M", obj2d->GetTransform().GetGlobal());
             if(obj2d->GetReqPerspective()) {
                 shader->SetMat4("VP", frameVP);
             } else {
@@ -668,6 +672,8 @@ void Renderer::ConfigureShader2D(shared_ptr<VisualNode> node) {
         }
         default : break;
     }
+    shader->SetMat4("sunMatrix", sunMatrix);
+    shader->SetInt("shadowMaps2D", TEXTURES_SLOT_SHADOWMAPS);
     updatedShaders.insert(shader.get());
 }
 

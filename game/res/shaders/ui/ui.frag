@@ -7,6 +7,7 @@ uniform vec3 tint;
 uniform float alpha;
 
 out vec4 FragColor;
+out vec4 BrightColor;
 
 void main()
 {
@@ -19,4 +20,5 @@ void main()
         discard;
 
     FragColor = tex;
+    BrightColor = vec4(0.0);
 }

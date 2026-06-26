@@ -4,6 +4,7 @@ layout (location = 1) in vec2 aUV;
 
 uniform mat4 M;
 uniform mat4 VP;
+out vec3 FragPos;
 
 out vec2 TexCoords; 
 
@@ -15,4 +16,7 @@ void main() {
     pos.x = aPos.x-spriteSize.x/2;
     pos.y = aPos.y-spriteSize.y/2;
     gl_Position = VP * M * vec4(pos, 0.0, 1.0);
+
+    vec4 worldPos = M * vec4(pos, 0.0, 1.0);
+    FragPos = worldPos.xyz;
 }

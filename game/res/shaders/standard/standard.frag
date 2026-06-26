@@ -37,6 +37,8 @@ uniform int shadowMapIndexCube[20]; // map light -> cube layer
 uniform vec3 viewPos;
 uniform int dirSpotCount;
 
+vec3 pointLightBrightness = vec3(0.0f);
+
 vec3 matDiffuse  = vec3(0.0);
 vec3 matSpecular = vec3(0.0);
 
@@ -138,29 +140,56 @@ float ShadowCube(int i, vec3 normal) {
 vec3 DirectionalLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     vec3 lightDir = normalize(-light.data1);
 
-    float diff = dot(normal, lightDir);
-    if(diff <= 0.0)
-        return light.colorAmbient * matDiffuse;
-    diff = max(diff, 0.0);
-
-    float shadow = Shadow2D(i, normal, lightDir);
+    vec3 ambient  = light.colorAmbient  * matDiffuse;
 
     vec3 halfwayDir = normalize(lightDir + viewDirection);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 
-    vec3 ambient  = light.colorAmbient  * matDiffuse;
-    vec3 diffuse  = light.colorDiffuse  * diff * matDiffuse;
+    float diff = dot(normal, lightDir);
+    vec3 diffuse  = light.colorDiffuse  * abs(diff) * matDiffuse;
     vec3 specular = light.colorSpecular * spec * matSpecular;
+    
+    float frontBlockMul = 0.0f;
+    float backBlockMul = 0.0f;
+    float ambientFaddingStart = -4.75;
+    float ambientFaddingEnd = -6.25;
+    float faddingStrengh = 0.2f;
+    float lengthAmbient = ambientFaddingStart - ambientFaddingEnd;
+    if (FragPos.z > ambientFaddingEnd){
+        frontBlockMul = min((FragPos.z - ambientFaddingEnd) / lengthAmbient * faddingStrengh, faddingStrengh);
+    }
+    if (FragPos.z < ambientFaddingStart){
+        backBlockMul = min((ambientFaddingStart - FragPos.z) / lengthAmbient * faddingStrengh, faddingStrengh);
+    }
+    vec3 shadowAmbient = diffuse * frontBlockMul;
+    vec3 noShadowAmbient = diffuse * backBlockMul;
+
+    if(diff <= 0.0)
+        return ambient + shadowAmbient + diffuse * 0.2;
+
+    float shadow = Shadow2D(i, normal, lightDir);
+
 
     float shadowFactor = 1.0 - shadow;
     vec3 lighting = (diffuse + specular) * shadowFactor;
-    vec3 ambientShadowed = ambient * mix(0.2, 1.0, shadowFactor);
 
-    return ambientShadowed + lighting;
+    return ambient + lighting + (shadowAmbient + diffuse * 0.2) * shadow - noShadowAmbient * shadowFactor;
 }
 
 vec3 PointLight(int i, Light light, vec3 normal, vec3 viewDirection) {
     vec3 lightDir = normalize(light.data1 - FragPos);
+
+    vec2 lightPosXY = light.data1.xy;
+    vec2 fragPosXY = FragPos.xy;
+
+    float brightIntens = FragPos.z - light.data1.z + 1.0;
+    if (brightIntens < 1.0)
+        brightIntens = 1.0;
+    brightIntens = 1/(brightIntens*brightIntens);
+    float distXY = length(lightPosXY - fragPosXY);
+    float attenuationXY = 1.0 / (light.data2.x + light.data2.y * distXY + light.data2.z * distXY * distXY);
+
+    pointLightBrightness += light.colorDiffuse * attenuationXY * brightIntens /4.0f;
 
     float diff = dot(normal, lightDir);
     if(diff <= 0.0)
@@ -256,10 +285,5 @@ void main() {
 
     FragColor = vec4(result, 1.0);
 
-    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-
-    if (brightness > 0.8)
-        BrightColor = vec4(FragColor.rgb, 1.0);
-    else
-        BrightColor = vec4(0.0);
+    BrightColor = vec4(pointLightBrightness, 1.0);
 }
