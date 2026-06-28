@@ -33,7 +33,7 @@ void main() {
     }
     float shadow = 0.8 - ShadowCalculation(FragPos) * 0.3f;
     vec3 color = FragColor.rgb;
-    FragColor = vec4(color * shadow, 1.0);
+    FragColor = vec4(color * shadow, FragColor.a);
     
     BrightColor = vec4(0.0);
 }
