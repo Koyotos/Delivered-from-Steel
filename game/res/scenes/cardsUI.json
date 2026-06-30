@@ -1384,6 +1384,39 @@
     "deactivationTime": 5.0,
     "name": "aaaa",
     "featherFallLearn": false
+},
+"49": {
+    "parent": 1,
+    "transform": [
+        1500.0,
+        1000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "sprite": "exitIcon",
+    "class": "Icon",
+    "shader": "ui",
+    "active": "exitIcon",
+    "process": true,
+    "input": false,
+    "physics": false,
+    "draw": true,
+    "ignoreParent": true,
+    "reqPerspective": false,
+    "static": true,
+    "visible": true,
+    "alpha": 0.0,
+    "addCollider": false,
+    "cull": 0.0,
+    "zIndex": 23,
+    "ResolveCollision": false,
+    "animated": false,
+    "name": "exitIcon"
 }
 
 

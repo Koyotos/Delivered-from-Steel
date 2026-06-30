@@ -347,6 +347,7 @@ void CardManager::FindNodes(shared_ptr<Node> node)
 		else if (cast->GetName() == "button_x") slotIcons[0] = cast;
 		else if (cast->GetName() == "button_y") slotIcons[1] = cast;
 		else if (cast->GetName() == "button_b") slotIcons[2] = cast;
+		else if (cast->GetName() == "exitIcon") exitIcon = cast;
 	}
 	else if (node->Type() == "Tooltip")
 	{
@@ -492,6 +493,8 @@ void CardManager::ToggleMenu()
 		{
 			checkpointTooltip->Activate();
 		}
+		exitIcon->ClearAllTweens();
+		exitIcon->FadeIn(0.2f, EaseType::OutSine, 0.3f);
 	}
 	else
 	{
@@ -501,6 +504,8 @@ void CardManager::ToggleMenu()
 		MoveSlots();
 		player->SetPhysics(true);
 		checkpointTooltip->Deactivate();
+		exitIcon->ClearAllTweens();
+		exitIcon->FadeOut(0.2f, EaseType::InSine);
 	}
 }
 

@@ -33,6 +33,7 @@ private:
 	bool axisHeldY = false;
 
 	shared_ptr<Player> player;
+	shared_ptr<Icon> exitIcon;
 
 	/* it stores one copy of each type of a card that is currently unlocked */
 	std::vector<shared_ptr<Card>> unlockedCards;
